@@ -1,6 +1,6 @@
 # Safa - Technical Requirements Document
 
-## Version 0.1 (Draft)
+## Version 0.9 (Pre-Production)
 
 ---
 
@@ -9,6 +9,7 @@
 ### 1.1 Target Platform
 - **Platform**: iOS only (iPhone)
 - **Minimum iOS Version**: iOS 17.0 (for Live Activities, latest SwiftUI features)
+- **AI Companion Requirement**: iOS 18.4+ (for Apple Foundation Models)
 - **Devices**: iPhone (no iPad optimization initially)
 
 ### 1.2 Language & Frameworks
@@ -38,6 +39,9 @@
 | **CloudKit** | Cross-device sync |
 | **FamilyControls** | Family sharing features |
 | **AppIntents** | Siri Shortcuts |
+| **EventKit** | Calendar integration (Islamic events) |
+| **HealthKit** | Ramadan fasting tracking |
+| **CoreSpotlight** | iOS Spotlight search for Quran/Hadith/Duas |
 
 ---
 
@@ -134,8 +138,13 @@ Safa/
 │   │   ├── AppConstants.swift
 │   │   ├── AppDefaults.swift          # Single source of truth for defaults
 │   │   └── IslamicConstants.swift
-│   └── Services/
-│       └── LocationInferenceService.swift  # Location-based settings inference
+│   ├── Services/
+│   │   └── LocationInferenceService.swift  # Location-based settings inference
+│   └── DesignSystem/
+│       ├── Colors.swift              # Color palette with theme support
+│       ├── Typography.swift          # Font styles (FontConfig for centralized control)
+│       ├── Spacing.swift             # Layout constants
+│       └── Theme.swift               # Theme manager
 │
 ├── Domain/
 │   ├── Entities/                     # One file per entity
@@ -296,11 +305,6 @@ Safa/
 │   │   └── Feedback/
 │   │       ├── LoadingView.swift
 │   │       └── EmptyStateView.swift
-│   ├── Styles/
-│   │   ├── Colors.swift              # Color palette
-│   │   ├── Typography.swift          # Font styles
-│   │   ├── Spacing.swift             # Layout constants
-│   │   └── Theme.swift               # Theme manager
 │   └── Localization/
 │       └── Localizable.xcstrings
 │
@@ -701,18 +705,190 @@ BAD Task:  "Implement prayer feature"
 
 ### 3.2 Offline-First Strategy
 
-The app is designed for comprehensive offline functionality. Modern device storage makes bundling content practical.
+The app is designed for comprehensive offline functionality with aggressive size optimization.
 
-**Bundled at Install (Immediate Access):**
-- Full Quran text (Arabic + English translation)
-- All Hadith collections
-- All Duas and Adhkar
+**Bundled at Install (<100MB target):**
+- Quran text (Arabic + Sahih International translation) - compressed SQLite ~5MB
+- Hadith collections - compressed SQLite ~15MB
+- Duas and Adhkar - JSON ~1MB
 - Prayer calculation algorithms
-- LLM model for AI companion
+- UI assets ~10MB
+- *Note: AI uses Apple Foundation Models (ships with iOS, no bundle impact)*
 
-**Downloaded Asynchronously (WiFi-Only):**
+**Downloaded On-Demand (WiFi preferred):**
 - Audio recitations (Quran + Duas)
 - Additional translations (when localization added)
+
+**Audio Download Strategy:**
+- On-demand: Download when user first plays a surah
+- Predictive: Background download of next surah/juz based on reading pattern
+- Management: Settings → Storage → Downloaded Audio (delete/manage)
+- Smart Cleanup: Auto-remove audio not played within retention period
+
+**Smart Cleanup (Auto-Remove Unused Content):**
+```swift
+// MARK: - StorageCleanupService.swift
+
+enum RetentionPeriod: String, CaseIterable {
+    case oneMonth = "1 month"
+    case threeMonths = "3 months"
+    case sixMonths = "6 months"
+    case never = "Never"
+
+    var days: Int? {
+        switch self {
+        case .oneMonth: return 30
+        case .threeMonths: return 90
+        case .sixMonths: return 180
+        case .never: return nil  // Never auto-delete
+        }
+    }
+}
+
+class StorageCleanupService {
+    @AppStorage("retentionPeriod") var retentionPeriod: RetentionPeriod = .sixMonths
+
+    /// Identifies audio files that haven't been played within retention period
+    func getUnusedAudioFiles() async -> [AudioFile] {
+        guard let days = retentionPeriod.days else { return [] }
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
+
+        return await audioRepository.getFilesLastPlayedBefore(cutoffDate)
+    }
+
+    /// Removes unused files (runs on background task or manually)
+    func cleanupUnusedFiles() async -> StorageReclaimed {
+        let unusedFiles = await getUnusedAudioFiles()
+        var totalBytesReclaimed: Int64 = 0
+
+        for file in unusedFiles {
+            if await deleteFile(file) {
+                totalBytesReclaimed += file.size
+            }
+        }
+
+        return StorageReclaimed(bytes: totalBytesReclaimed, fileCount: unusedFiles.count)
+    }
+}
+```
+
+**Settings UI:**
+```
+Downloads & Storage
+├── Downloaded Audio ──────────── 1.2 GB
+│   ├── Quran (Al-Afasy) ──────── 800 MB
+│   └── Quran (Sudais) ─────────── 400 MB
+├── Smart Cleanup ─────────────── [Enabled]
+│   └── Retention Period ────────── 6 months ▼
+│                                    1 month
+│                                    3 months
+│                                    6 months (default)
+│                                    Never
+└── Clear All Downloads ─────────── [Clear]
+```
+
+**Predictive Audio Download Implementation:**
+
+```swift
+// MARK: - PredictiveDownloadService.swift
+
+class PredictiveDownloadService {
+    private let downloadManager: ContentDownloadManager
+    private let quranRepository: QuranRepositoryProtocol
+
+    /// Predict and queue next content based on user patterns
+    func predictAndQueueDownloads() async {
+        // Strategy 1: Next surah in sequence
+        if let currentSurah = await quranRepository.getCurrentReadingProgress() {
+            let nextSurah = currentSurah.surahNumber + 1
+            if nextSurah <= 114 {
+                await queueForBackgroundDownload(.surahAudio(number: nextSurah))
+            }
+        }
+
+        // Strategy 2: Sequential juz completion
+        if let currentJuz = await quranRepository.getCurrentJuz() {
+            // Download remaining surahs in current juz
+            let surahsInJuz = juzSurahMapping[currentJuz] ?? []
+            for surah in surahsInJuz {
+                await queueForBackgroundDownload(.surahAudio(number: surah))
+            }
+        }
+
+        // Strategy 3: Frequently accessed content
+        let frequentSurahs = await quranRepository.getMostReadSurahs(limit: 5)
+        for surah in frequentSurahs {
+            await queueForBackgroundDownload(.surahAudio(number: surah.number))
+        }
+    }
+
+    /// Queue download for when WiFi is available
+    func queueForBackgroundDownload(_ content: ContentType) async {
+        guard !isAlreadyDownloaded(content) else { return }
+        guard !isInDownloadQueue(content) else { return }
+
+        await downloadManager.scheduleForWiFi(content)
+    }
+}
+
+// Background task integration
+extension AppDelegate {
+    func scheduleBackgroundAudioDownload() {
+        let request = BGProcessingTaskRequest(identifier: "com.safa.audioDownload")
+        request.requiresNetworkConnectivity = true
+        request.requiresExternalPower = false // Can run on battery
+        try? BGTaskScheduler.shared.submit(request)
+    }
+}
+```
+
+**Download Triggers:**
+1. User finishes a surah → queue next surah
+2. User opens Quran for first time today → check predictions
+3. WiFi connected after being on cellular → process queue
+4. Background refresh task → predictive downloads
+
+**Disabled Feature Pattern:**
+Unimplemented features display greyed out with "Coming soon" message rather than being hidden. This shows users what's planned while preventing confusion.
+
+```swift
+// MARK: - DisabledFeatureModifier.swift
+
+struct DisabledFeatureModifier: ViewModifier {
+    let isEnabled: Bool
+    let featureName: String
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content
+        } else {
+            content
+                .opacity(0.5)
+                .disabled(true)
+                .overlay(alignment: .bottomTrailing) {
+                    Text("Coming soon")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(4)
+                }
+                .onTapGesture {
+                    // Show toast: "This feature is coming in a future update"
+                    ToastService.shared.show("\(featureName) coming in a future update")
+                }
+        }
+    }
+}
+
+extension View {
+    func disabledFeature(_ isEnabled: Bool, name: String) -> some View {
+        modifier(DisabledFeatureModifier(isEnabled: isEnabled, featureName: name))
+    }
+}
+
+// Usage:
+FeatureCard(title: "Audio Pronunciations")
+    .disabledFeature(FeatureFlags.audioPronunciations, name: "Audio Pronunciations")
+```
 
 ### 3.3 Async Download Manager
 
@@ -920,38 +1096,86 @@ func calculateQiblaDirection(from userLocation: CLLocationCoordinate2D) -> Doubl
 
 ## 5. AI Companion (On-Device LLM)
 
-### 5.1 Model Selection
+### 5.1 Model Selection (Resolved)
 
-**Candidates** (need to evaluate):
+**Decision: Apple Foundation Models + RAG**
 
-| Model | Size | Pros | Cons |
-|-------|------|------|------|
-| **Phi-3 Mini (Q4)** | ~2GB | Good quality, Microsoft backing | Larger size |
-| **Gemma 2B (Q4)** | ~1.5GB | Google backing, good performance | |
-| **TinyLlama 1.1B** | ~600MB | Small, fast | Lower quality |
-| **Llama 3.2 1B** | ~700MB | Meta, recent | Licensing check |
-| **Apple Intelligence** | System | Native, optimized | iOS 18.1+, limited control |
+| Aspect | Choice | Rationale |
+|--------|--------|-----------|
+| **Primary** | Apple Foundation Models | Zero bundle size, native optimization, iOS 18.4+ |
+| **Fallback** | Feature disabled | Avoid 500MB+ bundle penalty for older iOS |
+| **Knowledge** | RAG (Retrieval-Augmented Generation) | Accurate, cited responses from local Quran/Hadith DB |
 
-**[QUESTION]: What's the acceptable app size? 2GB+ for better model, or <1GB for faster downloads?**
+**Why Apple Foundation Models:**
+- Ships with iOS - no bundle size impact
+- Optimized for Apple Silicon - fast, efficient
+- Apple's privacy guarantees - users trust it
+- Native Swift API - easy integration
 
-### 5.2 Core ML Integration
+### 5.2 Integration Architecture
 
 ```swift
-// Model loading
-class LLMService {
-    private var model: MLModel?
+import FoundationModels
 
-    func loadModel() async throws {
-        let config = MLModelConfiguration()
-        config.computeUnits = .cpuAndNeuralEngine
-        model = try await SafaLLM.load(configuration: config)
+class LLMService {
+    private var session: LanguageModelSession?
+    private let quranRepository: QuranRepositoryProtocol
+    private let hadithRepository: HadithRepositoryProtocol
+
+    var isAvailable: Bool {
+        if #available(iOS 18.4, *) {
+            return LanguageModelSession.isAvailable
+        }
+        return false
     }
 
-    func generateResponse(prompt: String, systemPrompt: String) async -> String {
-        // Tokenize, inference, decode
+    @available(iOS 18.4, *)
+    func generateResponse(for question: String) async throws -> String {
+        // 1. RAG: Search local databases for relevant content
+        let relevantAyahs = try await quranRepository.searchAyahs(query: question)
+        let relevantHadith = try await hadithRepository.search(query: question)
+
+        // 2. Build context-enriched prompt
+        let context = buildContext(ayahs: relevantAyahs, hadith: relevantHadith)
+        let prompt = """
+        You are Safa Assistant, a knowledgeable Islamic companion.
+
+        CONTEXT (from authentic sources):
+        \(context)
+
+        USER QUESTION: \(question)
+
+        Respond using the context above. Always cite sources.
+        """
+
+        // 3. Generate response
+        let session = try LanguageModelSession()
+        return try await session.respond(to: prompt)
     }
 }
 ```
+
+### 5.3 RAG (Retrieval-Augmented Generation)
+
+RAG ensures accurate, cited responses without fine-tuning:
+
+```
+User asks: "What breaks wudu?"
+        ↓
+App searches local Hadith database for "wudu" + "invalidate" + "nullify"
+        ↓
+Relevant hadiths retrieved with sources
+        ↓
+Context injected into prompt with citations
+        ↓
+Apple Foundation Model generates response with source references
+```
+
+**Benefits:**
+- Accurate Islamic knowledge from authenticated sources
+- Proper citations (Quran chapter:verse, Hadith collection)
+- No fine-tuning required
+- Updates with database, not model
 
 ### 5.3 System Prompt Structure
 
@@ -980,14 +1204,23 @@ RESPONSE FORMAT:
 
 ### 6.1 Widgets (WidgetKit)
 
+**v1 Priority:**
+| Widget | Size | Priority |
+|--------|------|----------|
+| PrayerTimeWidget | Small | ✅ Must-have |
+| PrayerTimesWidget | Medium | ✅ Must-have |
+| DashboardWidget | Large | ✅ Must-have |
+| StreakWidget | Small | Nice-to-have |
+| DailyVerseWidget | Medium | v1.1 |
+
 ```swift
-// Widget families to support
+// Widget families to support (v1)
 struct SafaWidgets: WidgetBundle {
     var body: some Widget {
-        PrayerTimeWidget()      // Small, Medium
-        StreakWidget()          // Small
-        DailyVerseWidget()      // Medium
-        DashboardWidget()       // Large
+        PrayerTimeWidget()      // Small - next prayer countdown
+        PrayerTimesWidget()     // Medium - all 5 prayers
+        DashboardWidget()       // Large - prayer + streak + verse
+        StreakWidget()          // Small - if time permits
     }
 }
 
@@ -1086,6 +1319,425 @@ class PronunciationChecker {
 }
 ```
 
+### 6.6 Notifications (User-Respectful)
+
+**Philosophy:** Notifications should be useful, not annoying. Respect attention.
+
+```swift
+class NotificationService {
+    // MARK: - Prayer Notifications
+
+    /// Schedule single prayer notification
+    /// - Default: 15 min before, configurable per user
+    /// - Mosque mode adds extra time for travel
+    func schedulePrayerNotification(
+        for prayer: Prayer,
+        minutesBefore: Int = 15,
+        mosqueMode: Bool = false
+    ) {
+        let leadTime = mosqueMode ? minutesBefore + 15 : minutesBefore
+        let triggerDate = prayer.time.addingTimeInterval(-Double(leadTime * 60))
+
+        let content = UNMutableNotificationContent()
+        content.title = "\(prayer.name) Prayer"
+        content.body = mosqueMode
+            ? "Time to head to the mosque for \(prayer.name)"
+            : "\(prayer.name) in \(minutesBefore) minutes"
+        content.sound = .default // Vibration by default, athan configurable
+        content.categoryIdentifier = "PRAYER_REMINDER"
+
+        // Enable action to log prayer directly from notification
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.hour, .minute], from: triggerDate),
+            repeats: false
+        )
+
+        let request = UNNotificationRequest(identifier: "prayer-\(prayer.id)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    // MARK: - Event Notifications (Useful Only)
+
+    /// Only schedule genuinely useful event reminders
+    enum IslamicEvent {
+        case eidPrayer           // "Eid prayer tomorrow morning"
+        case zakatDue            // "Zakat due - Ramadan ending"
+        case qurbaniReminder     // "Qurbani - Eid al-Adha in 3 days"
+        case ashuraFasting       // "Ashura fasting tomorrow"
+        case suhoor              // Ramadan suhoor alarm
+        case iftar               // Ramadan iftar time
+        case jumuah              // Friday prayer (optional)
+    }
+
+    func scheduleEventNotification(_ event: IslamicEvent, date: Date) {
+        // Only meaningful, time-sensitive events
+        // Never daily verse, streak reminders, or "come back" messages
+    }
+
+    // MARK: - Notification Actions
+
+    /// Register actions - tapping "Done" logs the prayer
+    func registerCategories() {
+        let doneAction = UNNotificationAction(
+            identifier: "PRAYER_DONE",
+            title: "Done ✓",
+            options: .foreground
+        )
+
+        let category = UNNotificationCategory(
+            identifier: "PRAYER_REMINDER",
+            actions: [doneAction],
+            intentIdentifiers: []
+        )
+
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+    }
+}
+```
+
+**What we NEVER send:**
+- ❌ Daily verse/hadith push (opt-in only, off by default)
+- ❌ Streak reminders ("You're losing your streak!")
+- ❌ "Come back" re-engagement spam
+- ❌ Multiple reminders per prayer
+- ❌ Marketing or promotional content
+
+### 6.7 Accessibility Implementation
+
+**Priority:** Best effort for v1, full support in v1.1
+
+```swift
+// MARK: - VoiceOver Labels
+
+// Prayer time with full context
+PrayerTimeRow(prayer: prayer)
+    .accessibilityLabel("\(prayer.name) prayer at \(prayer.time.formatted()), in \(prayer.timeUntil)")
+    .accessibilityHint("Double tap to log this prayer")
+
+// Qibla compass with direction
+CompassView(heading: qiblaHeading)
+    .accessibilityLabel("Qibla direction: \(qiblaHeading) degrees \(cardinalDirection)")
+    .accessibilityValue(isAligned ? "Aligned with Qibla" : "Turn \(turnDirection)")
+
+// Tasbeeh counter
+CounterButton(count: count)
+    .accessibilityLabel("Tasbeeh count: \(count)")
+    .accessibilityHint("Tap to increment")
+
+// Arabic Quran text
+AyahView(ayah: ayah)
+    .accessibilityLabel("Surah \(surahName), Ayah \(ayahNumber)")
+    .accessibilityHint("Double tap to play recitation")
+```
+
+```swift
+// MARK: - Dynamic Type Support
+
+// All text uses system fonts or scaled custom fonts
+extension SafaTypography {
+    static let arabicLarge = Font.custom("System", size: 28, relativeTo: .title)
+    // relativeTo: enables Dynamic Type scaling
+}
+
+// Large content viewer for complex displays
+PrayerTimesView()
+    .accessibilityShowsLargeContentViewer()
+```
+
+```swift
+// MARK: - RTL Arabic Content
+
+// Arabic text always RTL, regardless of device language
+Text(arabicAyah)
+    .environment(\.layoutDirection, .rightToLeft)
+    .multilineTextAlignment(.trailing)
+
+// Mixed content handled automatically by SwiftUI
+VStack {
+    Text(arabicText)  // RTL
+    Text(englishTranslation)  // LTR
+}
+```
+
+```swift
+// MARK: - Reduce Motion
+
+@Environment(\.accessibilityReduceMotion) var reduceMotion
+
+var body: some View {
+    content
+        .animation(reduceMotion ? nil : .spring(), value: isExpanded)
+}
+```
+
+```swift
+// MARK: - Qibla Haptic Feedback
+
+class QiblaHapticService {
+    private let generator = UIImpactFeedbackGenerator(style: .medium)
+
+    /// Pulse haptics when approaching Qibla direction
+    func provideDirectionalFeedback(degreesOff: Double) {
+        if abs(degreesOff) < 5 {
+            // Strong pulse - aligned!
+            generator.impactOccurred(intensity: 1.0)
+        } else if abs(degreesOff) < 15 {
+            // Medium pulse - getting close
+            generator.impactOccurred(intensity: 0.6)
+        } else if abs(degreesOff) < 30 {
+            // Light pulse - on track
+            generator.impactOccurred(intensity: 0.3)
+        }
+    }
+}
+```
+
+**v1.1 Accessibility Roadmap:**
+- Full Arabic UI localization (RTL layout)
+- Audio directional feedback for Qibla
+- Voice Control optimization
+- Screen reader-optimized Quran reading mode
+
+### 6.8 Spotlight Search (CoreSpotlight)
+
+Index Quran, Hadith, and Duas for iOS Spotlight search.
+
+```swift
+// MARK: - SpotlightIndexService.swift
+
+import CoreSpotlight
+import MobileCoreServices
+
+class SpotlightIndexService {
+    private let searchableIndex = CSSearchableIndex.default()
+
+    /// Index all searchable content on first launch
+    func indexAllContent() async {
+        await indexSurahs()
+        await indexPopularAyahs()
+        await indexDuas()
+        await indexHadith()
+    }
+
+    /// Index Quran surahs
+    func indexSurahs() async {
+        var items: [CSSearchableItem] = []
+
+        for surah in allSurahs {
+            let attributes = CSSearchableItemAttributeSet(contentType: .text)
+            attributes.title = "Surah \(surah.englishName)"
+            attributes.contentDescription = "\(surah.arabicName) - \(surah.ayahCount) ayahs"
+            attributes.keywords = [surah.englishName, surah.arabicName, "quran", "surah"]
+
+            let item = CSSearchableItem(
+                uniqueIdentifier: "surah-\(surah.number)",
+                domainIdentifier: "com.safa.quran",
+                attributeSet: attributes
+            )
+            items.append(item)
+        }
+
+        try? await searchableIndex.indexSearchableItems(items)
+    }
+
+    /// Index popular ayahs (Ayatul Kursi, etc.)
+    func indexPopularAyahs() async {
+        let popularAyahs = [
+            (surah: 2, ayah: 255, name: "Ayatul Kursi"),
+            (surah: 1, ayah: 1, name: "Al-Fatiha"),
+            (surah: 112, ayah: 1, name: "Surah Al-Ikhlas"),
+            // ... more popular ayahs
+        ]
+
+        var items: [CSSearchableItem] = []
+        for ayah in popularAyahs {
+            let attributes = CSSearchableItemAttributeSet(contentType: .text)
+            attributes.title = ayah.name
+            attributes.contentDescription = "Quran \(ayah.surah):\(ayah.ayah)"
+            attributes.keywords = [ayah.name.lowercased(), "quran", "ayah"]
+
+            let item = CSSearchableItem(
+                uniqueIdentifier: "ayah-\(ayah.surah)-\(ayah.ayah)",
+                domainIdentifier: "com.safa.quran",
+                attributeSet: attributes
+            )
+            items.append(item)
+        }
+
+        try? await searchableIndex.indexSearchableItems(items)
+    }
+
+    /// Index duas by category
+    func indexDuas() async {
+        // Index all duas with titles and keywords
+    }
+}
+```
+
+**Deep link handling:**
+```swift
+// In AppDelegate or SceneDelegate
+func application(_ application: UIApplication,
+                 continue userActivity: NSUserActivity,
+                 restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    if userActivity.activityType == CSSearchableItemActionType,
+       let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String {
+        // Parse identifier and navigate
+        // "surah-2" → open Surah Al-Baqarah
+        // "ayah-2-255" → open Ayatul Kursi
+        // "dua-eating" → open dua for eating
+        router.handleSpotlightResult(identifier)
+        return true
+    }
+    return false
+}
+```
+
+### 6.9 Interactive Widgets (App Intents)
+
+Widgets with tap actions using App Intents (iOS 17+).
+
+```swift
+// MARK: - LogPrayerIntent.swift
+
+import AppIntents
+import WidgetKit
+
+struct LogPrayerIntent: AppIntent {
+    static var title: LocalizedStringResource = "Log Prayer"
+    static var description = IntentDescription("Mark a prayer as completed")
+
+    @Parameter(title: "Prayer")
+    var prayer: PrayerType
+
+    func perform() async throws -> some IntentResult {
+        // Log the prayer
+        let repository = PrayerRepository.shared
+        try await repository.logPrayer(prayer, at: Date())
+
+        // Reload widget timeline
+        WidgetCenter.shared.reloadTimelines(ofKind: "PrayerWidget")
+
+        return .result()
+    }
+}
+
+// MARK: - Interactive Prayer Widget
+
+struct InteractivePrayerWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "InteractivePrayerWidget", provider: PrayerTimelineProvider()) { entry in
+            InteractivePrayerWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Prayer Times")
+        .description("Log prayers with a tap")
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct InteractivePrayerWidgetView: View {
+    var entry: PrayerEntry
+
+    var body: some View {
+        HStack {
+            ForEach(entry.prayers) { prayer in
+                Button(intent: LogPrayerIntent(prayer: prayer.type)) {
+                    VStack {
+                        Text(prayer.name)
+                            .font(.caption)
+                        Image(systemName: prayer.isLogged ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(prayer.isLogged ? .green : .secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+```
+
+```swift
+// MARK: - TasbeehIntent.swift
+
+struct IncrementTasbeehIntent: AppIntent {
+    static var title: LocalizedStringResource = "Increment Tasbeeh"
+
+    func perform() async throws -> some IntentResult {
+        // Increment counter in shared UserDefaults
+        let defaults = UserDefaults(suiteName: "group.com.safa.app")!
+        let current = defaults.integer(forKey: "tasbeehCount")
+        defaults.set(current + 1, forKey: "tasbeehCount")
+
+        // Reload widget
+        WidgetCenter.shared.reloadTimelines(ofKind: "TasbeehWidget")
+
+        return .result()
+    }
+}
+```
+
+### 6.10 StandBy Mode
+
+StandBy uses WidgetKit - configure widgets for the StandBy display.
+
+```swift
+// MARK: - StandBy Widget Configuration
+
+struct PrayerStandByWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "PrayerStandByWidget", provider: PrayerTimelineProvider()) { entry in
+            PrayerStandByView(entry: entry)
+        }
+        .configurationDisplayName("Prayer Times")
+        .description("See prayer times in StandBy mode")
+        .supportedFamilies([.systemSmall, .systemMedium])
+        // StandBy uses existing widget families
+    }
+}
+
+struct PrayerStandByView: View {
+    var entry: PrayerEntry
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Next prayer - large and prominent
+            Text(entry.nextPrayer.name.uppercased())
+                .font(.system(size: family == .systemMedium ? 32 : 24, weight: .bold))
+
+            Text(entry.nextPrayer.time, style: .time)
+                .font(.system(size: family == .systemMedium ? 48 : 36, weight: .light, design: .rounded))
+
+            Text("in \(entry.nextPrayer.timeUntil)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            // Prayer status row
+            if family == .systemMedium {
+                HStack(spacing: 16) {
+                    ForEach(entry.prayers) { prayer in
+                        VStack {
+                            Text(prayer.shortName)
+                                .font(.caption2)
+                            Image(systemName: prayer.isLogged ? "checkmark" : "circle")
+                                .font(.caption)
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+        .containerBackground(.fill.tertiary, for: .widget)
+    }
+}
+```
+
+**StandBy considerations:**
+- High contrast for bedside visibility
+- Large, readable time display
+- Minimal information density
+- Works in both light and dark environments
+
 ---
 
 ## 7. Networking
@@ -1145,24 +1797,317 @@ storeDescription.setOption(
 )
 ```
 
+### 8.3 Legal Pages (Static In-App)
+
+Privacy Policy and Terms of Service are rendered as static in-app views, not web links:
+
+```swift
+struct PrivacyPolicyView: View {
+    var body: some View {
+        ScrollView {
+            // Render bundled markdown content
+            Text(LocalizedStringKey(privacyPolicyContent))
+                .padding()
+        }
+        .navigationTitle("Privacy Policy")
+    }
+
+    private var privacyPolicyContent: String {
+        // Load from bundled file or hardcoded string
+        Bundle.main.loadMarkdownFile("PRIVACY_POLICY")
+    }
+}
+```
+
+**Benefits:**
+- Works fully offline
+- No external hosting dependency
+- Consistent with privacy-first design
+- Faster loading (no network)
+
+**Implementation:**
+- Bundle `PRIVACY_POLICY.md` and `TERMS_OF_SERVICE.md` in app resources
+- Use `AttributedString` or simple Text rendering for markdown
+- Accessible via Settings → Privacy Policy / Terms of Service
+
+### 8.4 Invite Friends (App Store Link Sharing)
+
+Organic growth through easy app sharing with native iOS Share Sheet.
+
+```swift
+// MARK: - AppConstants.swift
+
+struct AppConstants {
+    /// App Store URL - update with actual ID after app submission
+    static let appStoreURL = URL(string: "https://apps.apple.com/app/safa/id[APP_ID]")!
+
+    /// TestFlight URL for pre-release
+    static let testFlightURL = URL(string: "https://testflight.apple.com/join/[CODE]")!
+
+    /// Returns appropriate URL based on app distribution
+    static var shareURL: URL {
+        #if DEBUG
+        return testFlightURL
+        #else
+        return appStoreURL
+        #endif
+    }
+}
+```
+
+```swift
+// MARK: - InviteFriendsService.swift
+
+class InviteFriendsService {
+    /// Share message template with App Store link
+    var shareMessage: String {
+        """
+        Assalamu Alaikum! 🌙
+
+        I've been using Safa - a beautiful Islamic companion app for prayer times, Quran, and learning. No ads, no clutter.
+
+        Download free: \(AppConstants.shareURL.absoluteString)
+
+        May it benefit you! 🤲
+        """
+    }
+
+    /// Items to share via ShareLink
+    var shareItems: [Any] {
+        [shareMessage, AppConstants.shareURL]
+    }
+}
+```
+
+```swift
+// MARK: - InviteFriendsView.swift
+
+struct InviteFriendsView: View {
+    @State private var isShareSheetPresented = false
+    private let inviteService = InviteFriendsService()
+
+    var body: some View {
+        Button {
+            isShareSheetPresented = true
+        } label: {
+            Label("Invite Friends", systemImage: "person.badge.plus")
+        }
+        .sheet(isPresented: $isShareSheetPresented) {
+            ShareSheet(items: inviteService.shareItems)
+        }
+    }
+}
+
+// UIKit ShareSheet wrapper for full control
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+```
+
+**Integration Points:**
+- `FamilyCircleView`: Prominent "Invite Friends" button
+- `SettingsView` → About: "Share Safa" row
+- Achievement unlock: Include app link in share card
+- `OnboardingView` Page 3: Optional "I was invited" toggle (honor system for Hasanat)
+
+**Hasanat Award (Honor System):**
+- No tracking of referrals (privacy-first)
+- New users can tap "I was invited" in onboarding
+- This triggers +25 Hasanat for the inviter (via honor system, not enforced)
+- Simple, respectful approach that aligns with Islamic values of trust
+
+### 8.5 Calendar Integration (EventKit + .ics Export)
+
+Export Islamic events to device calendar or .ics file.
+
+```swift
+// MARK: - CalendarExportService.swift
+
+import EventKit
+
+class CalendarExportService {
+    private let eventStore = EKEventStore()
+
+    // MARK: - EventKit Integration
+
+    /// Request calendar access
+    func requestAccess() async -> Bool {
+        do {
+            return try await eventStore.requestFullAccessToEvents()
+        } catch {
+            return false
+        }
+    }
+
+    /// Add Islamic events to Apple Calendar
+    func exportToCalendar(
+        events: [IslamicCalendarEvent],
+        calendarName: String = "Safa - Islamic Events"
+    ) async throws {
+        // Create or find Safa calendar
+        let calendar = findOrCreateCalendar(named: calendarName)
+
+        for event in events {
+            let ekEvent = EKEvent(eventStore: eventStore)
+            ekEvent.title = event.title
+            ekEvent.startDate = event.date
+            ekEvent.endDate = event.endDate ?? event.date.addingTimeInterval(3600)
+            ekEvent.notes = event.notes
+            ekEvent.calendar = calendar
+
+            // Add alarm for day before
+            ekEvent.addAlarm(EKAlarm(relativeOffset: -86400))
+
+            try eventStore.save(ekEvent, span: .thisEvent)
+        }
+    }
+
+    // MARK: - .ics Export
+
+    /// Generate .ics file content
+    func generateICSFile(events: [IslamicCalendarEvent]) -> String {
+        var ics = """
+        BEGIN:VCALENDAR
+        VERSION:2.0
+        PRODID:-//Safa//Islamic Calendar//EN
+        CALSCALE:GREGORIAN
+        METHOD:PUBLISH
+        X-WR-CALNAME:Safa Islamic Events
+
+        """
+
+        for event in events {
+            ics += """
+            BEGIN:VEVENT
+            UID:\(event.id)@safa.app
+            DTSTART:\(formatDate(event.date))
+            DTEND:\(formatDate(event.endDate ?? event.date.addingTimeInterval(3600)))
+            SUMMARY:\(event.title)
+            DESCRIPTION:\(event.notes ?? "")
+            END:VEVENT
+
+            """
+        }
+
+        ics += "END:VCALENDAR"
+        return ics
+    }
+
+    /// Share .ics file
+    func shareICSFile(events: [IslamicCalendarEvent]) -> URL {
+        let icsContent = generateICSFile(events: events)
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("safa-islamic-calendar.ics")
+        try? icsContent.write(to: tempURL, atomically: true, encoding: .utf8)
+        return tempURL
+    }
+}
+```
+
+**Events to export:**
+- Eid al-Fitr & Eid al-Adha (with prayer times)
+- Ramadan start/end
+- Islamic New Year (1st Muharram)
+- Ashura (10th Muharram)
+- Mawlid an-Nabi (12th Rabi al-Awwal)
+- Isra wal Mi'raj (27th Rajab)
+- Laylatul Qadr (estimated odd nights)
+- Day of Arafah
+
+### 8.6 Apple Health Integration (Fasting)
+
+Track Ramadan fasting hours in Apple Health.
+
+```swift
+// MARK: - HealthKitService.swift
+
+import HealthKit
+
+class HealthKitService {
+    private let healthStore = HKHealthStore()
+
+    /// Check if HealthKit is available
+    var isAvailable: Bool {
+        HKHealthStore.isHealthDataAvailable()
+    }
+
+    /// Request authorization to write fasting data
+    func requestFastingAuthorization() async -> Bool {
+        guard isAvailable else { return false }
+
+        let fastingType = HKCategoryType(.intermittentFasting)
+        let typesToWrite: Set<HKSampleType> = [fastingType]
+
+        do {
+            try await healthStore.requestAuthorization(toShare: typesToWrite, read: [])
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Log a completed fast to Health
+    func logFast(start: Date, end: Date) async throws {
+        let fastingType = HKCategoryType(.intermittentFasting)
+
+        let sample = HKCategorySample(
+            type: fastingType,
+            value: HKCategoryValue.notApplicable.rawValue,
+            start: start,
+            end: end
+        )
+
+        try await healthStore.save(sample)
+    }
+}
+```
+
+**User flow:**
+1. User logs first Ramadan fast in Safa
+2. Prompt: "Sync fasting to Apple Health?"
+3. If accepted, request HealthKit permission
+4. Each logged fast writes to Health automatically
+5. Toggle in Settings → Ramadan → Sync to Health
+
+**Privacy notes:**
+- Write-only (never reads other Health data)
+- Opt-in (not enabled by default)
+- Can be disabled anytime in Settings
+
 ---
 
 ## 9. Performance Considerations
 
 ### 9.1 App Size Budget
 
-| Component | Estimated Size | Notes |
-|-----------|----------------|-------|
-| App binary | ~20 MB | |
-| Quran data (Arabic + English) | ~50 MB | Bundled |
-| Hadith collections | ~100 MB | Bundled |
-| Dua/Adhkar data | ~5 MB | Bundled |
-| LLM model | ~500MB - 2GB | Bundled (size TBD) |
-| UI assets | ~10 MB | |
-| **Initial Download** | **~700 MB - 2.2 GB** | Acceptable given modern storage |
-| **Audio (async download)** | ~2-5 GB | Downloaded over WiFi |
+**Target: <100MB initial download** (aggressive optimization)
 
-**Decision**: App size is acceptable. Modern devices have ample storage, and comprehensive offline support is a feature, not a drawback.
+| Component | Target Size | Optimization |
+|-----------|-------------|--------------|
+| App binary | ~15 MB | Dead code stripping |
+| Quran data | ~5 MB | Compressed SQLite (zstd) |
+| Hadith collections | ~15 MB | Compressed SQLite (zstd) |
+| Dua/Adhkar data | ~1 MB | JSON |
+| UI assets | ~10 MB | Asset catalog optimization |
+| LLM model | **0 MB** | Uses Apple Foundation Models (ships with iOS) |
+| **Initial Download** | **<80 MB** | Target for App Store |
+| **Audio (on-demand)** | ~2-5 GB | Downloaded per-surah as needed |
+
+**Size Optimization Techniques:**
+- **App Thinning**: Automatic device-specific asset delivery (~30% savings)
+- **On-Demand Resources**: Audio as ODR, not in bundle
+- **SQLite compression**: zstd/lz4 compression (~60% savings)
+- **Asset catalogs**: Let Xcode optimize images
+- **Swift package trimming**: Minimal dependencies
+- **Dead code stripping**: Aggressive linker settings
+
+**Decision**: Small app size is critical for downloads. Apple Foundation Models eliminate the biggest size concern (LLM). Audio downloads on-demand, not bundled.
 
 ### 9.2 Memory Management
 
@@ -1222,20 +2167,31 @@ storeDescription.setOption(
 
 | Decision | Resolution |
 |----------|------------|
-| App size | Acceptable (700MB-2GB) - modern storage is ample |
+| App size | **<100MB target** - aggressive optimization, Apple FM eliminates LLM bundle |
 | Offline capabilities | Comprehensive - all core features work offline |
-| Audio downloads | Async over WiFi only |
+| Audio strategy | **On-demand download** with predictive background fetch |
 | CloudKit sync | Included in v1 |
 | iPad support | iPhone only for v1 |
-| Content licensing | Assume available (translations, hadith, audio) |
+| Content sources | **Zero-cost**: Tanzil.net, Sahih Intl, Sunnah.com, Everyayah.com |
+| LLM model | **Apple Foundation Models** (iOS 18.4+) with RAG |
+| LLM fallback | Feature disabled on older iOS (no bundled model) |
+| Knowledge grounding | **RAG** - retrieve from local Quran/Hadith DB, inject into context |
+| Authentication | **None** - frictionless, iCloud handles sync |
+| Disabled features | **Greyed out** with "Coming soon" message |
+| Invite friends | **App Store link via Share Sheet** - privacy-first, honor system |
+| Calendar integration | **EventKit + .ics export** - native + universal compatibility |
+| Health integration | **HealthKit** - Ramadan fasting hours (write-only, opt-in) |
+| Spotlight Search | **CoreSpotlight** - index Quran, Hadith, Duas for iOS search |
+| Interactive Widgets | **App Intents** - tap to log prayer or increment tasbeeh |
+| StandBy Mode | **WidgetKit** - prayer times visible when charging |
+| Future integrations | Planned for v1.1+ based on user feedback |
+| Predictive downloads | **Background fetch** of next surah/juz based on reading patterns |
 
 ## 13. Open Questions
 
-1. **LLM model selection**: Which model? (Phi-3, Gemma, TinyLlama, etc.) - Deferred
-2. **LLM fine-tuning**: Fine-tune on Islamic Q&A dataset vs extensive system prompt only?
-3. **CDN provider**: Where to host audio files for download?
-4. **Beta distribution**: TestFlight strategy and beta tester recruitment?
-5. **App Store category**: Which primary category? (Lifestyle, Education, Reference?)
+1. **CDN provider**: Where to host audio files for download? (Consider Everyayah.com direct links)
+2. **Beta distribution**: TestFlight strategy and beta tester recruitment?
+3. **App Store category**: Which primary category? (Lifestyle, Education, Reference?)
 
 ---
 
@@ -1256,6 +2212,6 @@ storeDescription.setOption(
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 0.9*
 *Last Updated: February 2026*
-*Status: Final*
+*Status: Pre-Production*

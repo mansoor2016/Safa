@@ -1,6 +1,6 @@
 # Safa - Islamic Companion App
 
-## Design Document v0.2
+## Design Document v0.9
 
 ---
 
@@ -68,11 +68,22 @@ Safa is an all-in-one Islamic companion app for iPhone that prioritizes clean, i
 - **Accent Colors**: User-configurable theme system
   - Default: Elegant gold
   - Alternatives: Teal, Deep blue, Emerald green, Rose
-- **Typography**: Modern, highly legible fonts; beautiful Arabic calligraphy for Quranic text
+- **Typography**: See FontConfig in `Typography.swift` - single source of truth for all fonts
+  - Quranic text: System Arabic (serif) - can swap to KFGQPC Uthmanic Script
+  - General Arabic: System SF Arabic - clean, native
+  - English UI: System SF Pro - native iOS feel
+  - English reading: System SF Pro Text - optimized for readability
 - **Spacing**: Generous whitespace, breathing room between elements
 - **Iconography**: Minimal line icons, consistent stroke weight
 
-### 2.2 Theme Configuration
+### 2.2 Branding
+- **App Name**: "Safa" (صفا - meaning purity/clarity)
+- **Logo/Icon**: Arabic calligraphy "صفا" - clean, iconic
+- **Splash Screen**: Arabic "صفا" prominent, English "Safa" subtle below
+- **In-App Usage**: English "Safa" for navigation, headers, and accessibility
+- **Share Cards**: Arabic "صفا" for visual branding
+
+### 2.3 Theme Configuration
 ```
 Settings → Appearance → Theme Color
 ┌─────────────────────────────────┐
@@ -91,13 +102,62 @@ Settings → Appearance → Theme Color
 └─────────────────────────────────┘
 ```
 
-### 2.3 UX Principles
+### 2.4 UX Principles
 - Maximum 2-3 taps to reach any feature
 - No advertisements disrupting the experience
 - Intelligent contextual features (modes activate automatically)
 - Gentle, non-intrusive notifications
 - Seamless transitions and micro-animations
 - Proactive in-app guidance and reminders
+- **Disabled features**: Greyed out with "Coming soon" label (never hidden)
+
+### 2.4.1 Disabled Feature Pattern
+
+Features that are included in the codebase but not yet implemented follow a consistent pattern:
+
+```
+┌─────────────────────────────────┐
+│  🎧 Audio Pronunciations        │
+│  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+│  Coming soon                    │
+│                                 │
+│  [ ] (greyed, non-tappable)    │
+└─────────────────────────────────┘
+```
+
+**Pattern:**
+- Feature card/row is **visible but greyed out** (50% opacity)
+- "Coming soon" label displayed
+- Tapping shows brief toast: "This feature is coming in a future update"
+- Never completely hidden (users should know it's planned)
+
+**Rationale:**
+- Builds anticipation for upcoming features
+- Shows the app's ambition and roadmap
+- Avoids confusion ("where did that feature go?")
+- Provides consistent UX across all incomplete features
+
+### 2.5 Accessibility
+
+**Priority:** Best effort for v1, full support in v1.1
+
+| Feature | v1 Support | Notes |
+|---------|------------|-------|
+| VoiceOver | ✅ Labels on all controls | Critical screens fully labeled |
+| Dynamic Type | ✅ Full support | All text scales with system settings |
+| RTL Arabic | ✅ Content only | Arabic text displays RTL, UI remains English |
+| Color Contrast | ✅ WCAG AA | 4.5:1 minimum ratio |
+| Reduce Motion | ✅ Respected | Animations disabled when preference set |
+| Qibla Feedback | ✅ Haptics | Vibration pulses indicate direction |
+
+**Not in v1 (planned for v1.1):**
+- Full Arabic UI localization (RTL layout flip)
+- Audio directional feedback for Qibla
+- Voice Control optimization
+
+**Marketing:** Accessibility features will be highlighted in App Store description and screenshots. Safa should be welcoming to all Muslims regardless of ability.
+
+**Feature Requests:** Settings includes "Request a Feature" option for users to suggest accessibility improvements and other features.
 
 ---
 
@@ -127,11 +187,33 @@ When the user grants location permission, the app automatically infers optimal s
 | North/West Africa | MWL | Shafi'i | Arabic/French |
 | Europe | MWL | Hanafi | English |
 
-**Onboarding Flow:**
-- After location permission granted, show detected city/country
-- Display recommended settings with "Use Recommended" toggle
-- User can override any recommendation
-- High latitude warning for polar regions (>48°)
+**Onboarding Flow (3 pages - streamlined):**
+
+```
+Page 1: Welcome + Location     Page 2: Quick Setup         Page 3: Ready
+┌────────────────────────┐    ┌────────────────────────┐   ┌────────────────────────┐
+│         صفا            │    │     Quick Setup        │   │         ✓              │
+│        Safa            │    │                        │   │                        │
+│                        │    │ ┌────────────────────┐ │   │    You're all set!     │
+│  Your Islamic          │    │ │ 🔔 Notifications   │ │   │                        │
+│  Companion             │    │ │    [OFF] → enable  │ │   │  London, UK            │
+│                        │    │ └────────────────────┘ │   │  MWL · Hanafi          │
+│  📍 London, UK         │    │                        │   │                        │
+│     MWL · Hanafi       │    │ ┌────────────────────┐ │   │  [Customize Settings]  │
+│     (Recommended)      │    │ │ 🕌 I pray at mosque│ │   │                        │
+│                        │    │ │    [ ] Yes         │ │   │  بسم الله الرحمن الرحيم│
+│  [Enable Location]     │    │ └────────────────────┘ │   │                        │
+│  [Skip → Home]         │    │                        │   │  [Get Started]         │
+└────────────────────────┘    └────────────────────────┘   └────────────────────────┘
+```
+
+**Key principles:**
+- Trust smart location-based defaults (no manual method/madhab selection)
+- Notifications **OFF by default** (user opts in, respects attention)
+- Only essential choices: notifications toggle + mosque mode
+- "Skip → Home" on page 1 applies smart defaults and goes straight to home
+- "Customize Settings" link for power users (goes to Settings)
+- High latitude warning shown if applicable (>48°)
 
 ### 3.2 In-App Reminders (On Open)
 
@@ -152,14 +234,75 @@ When the user opens the app, Safa displays contextual reminders as a dismissible
 The app automatically adapts its interface and features based on the Islamic calendar:
 
 #### Ramadan Mode (Auto-activates 1st Ramadan)
-- Home screen transforms to show Iftar/Suhoor countdown
+
+**Ramadan Home Banner** (dismissible with swipe, reappears next day):
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🌙 Ramadan Mubarak                              Day 15 of 30  │
+├─────────────────────────────────────────────────────────────────┤
+│     ┌─────────────┐              ┌─────────────┐               │
+│     │   SUHOOR    │              │   IFTAR     │               │
+│     │   4:32 AM   │              │   7:48 PM   │               │
+│     │  ends in    │              │  in 2h 15m  │               │
+│     │   45 min    │              │             │               │
+│     └─────────────┘              └─────────────┘               │
+│                                                                 │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │ 🤲 Duas  │ │ 📖 Quran │ │ 🔔 Adhan │ │ ⏰ Alarm │          │
+│  │          │ │ Progress │ │  Player  │ │  Suhoor  │          │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │
+│                                                                 │
+│  ░░░░░░░░░░░░░░░░████████░░░░░░░░░░░░░░  Quran: 45% complete   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Banner Timing:**
+- Pre-Ramadan: Appears 1 week before ("Ramadan begins in X days")
+- During Ramadan: Full banner with all features
+- Eid: Transforms to Eid Mubarak banner with Eid prayer time
+
+**Banner Features:**
+- Day counter with progress bar (Day X of 30)
+- Suhoor/Iftar times with live countdown
+- Quick action grid: Duas, Quran Progress, Adhan Player, Suhoor Alarm
+- Quran khatm progress bar
+- Dismissible with swipe (reappears next day)
+
+**Iftar Adhan + Dua Flow:**
+1. At Maghrib: Notification "It's Iftar time!"
+2. Tap banner "Play Iftar Adhan"
+3. Bundled high-quality Maghrib adhan plays
+4. After adhan: Iftar dua prompt with audio
+   - "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ"
+
+**Last 10 Nights Enhancement:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ✨ Last 10 Nights - Seek Laylatul Qadr                        │
+│  Night: 21⭐ 22· 23⭐ 24· 25⭐ 26· 27⭐ 28· 29⭐ 30·            │
+│  Tonight is the 25th - an odd night                            │
+│  [Laylatul Qadr Duas]  [Extended Worship Guide]                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Eid Banner (after Ramadan):**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎉 Eid Mubarak!                                               │
+│  Eid Prayer: 7:30 AM at your local mosque                      │
+│  [Eid Takbeer]  [Eid Duas]  [Zakat al-Fitr Reminder]          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Additional Ramadan Features:**
 - Fasting tracker prominently displayed
-- Quran khatm progress tracker
-- Taraweeh prayer tracking
-- Special Ramadan duas surfaced
-- Laylatul Qadr alerts (last 10 nights, odd nights highlighted)
-- Zakat calculator accessible from home
-- Suhoor alarm feature enabled
+- Quran khatm progress tracker with daily goals
+- Taraweeh prayer tracking (8 or 20 rakat)
+- Special Ramadan duas collection
+- Laylatul Qadr alerts (odd nights highlighted)
+- Zakat calculator (prominent in last 10 days)
+- Suhoor alarm with gradual wake option
 
 #### Dhul Hijjah Mode (First 10 days)
 - Emphasis on extra worship during blessed days
@@ -188,15 +331,40 @@ The app automatically adapts its interface and features based on the Islamic cal
 | Maghrib to Isha | Evening adhkar prominent |
 | After Isha | Wind-down, sleep duas accessible |
 
-### 3.5 Smart Notifications (Push)
+### 3.5 Notification Philosophy
 
-In addition to in-app reminders, push notifications for:
-- Prayer times (configurable: at time, 5/10/15/30 min before)
-- Suhoor alarm (Ramadan)
-- Iftar time (Ramadan)
-- Daily verse/hadith (optional)
-- Streak maintenance ("Keep your 7-day Quran streak!")
-- Islamic events (day before and day of)
+**Guiding principle:** Notifications should be useful, not annoying. Respect the user's attention.
+
+#### Prayer Notifications (Primary)
+- **Single notification** per prayer (not multiple)
+- **Default timing:** 15 minutes before prayer time
+- **Configurable:** User can set 5/10/15/30/60 min or at prayer time
+- **Mosque mode:** If user selects "I pray at mosque", suggest earlier reminder (+15 min for travel)
+- **Sound:** Vibration only by default, Athan sound OFF by default (configurable)
+- **Smart acknowledgment:** Tapping notification = prayer logged (counts toward streaks/achievements)
+
+#### Streak Reminders (In-App Only)
+- **Never push notifications** for streaks
+- Show streak status on home screen
+- Gentle in-app reminders only (non-obstructive banner)
+- No guilt-tripping or "you're falling behind" messaging
+
+#### Event Notifications (Useful Hints Only)
+Notifications only for genuinely useful, time-sensitive Islamic events:
+- "Eid prayer is tomorrow morning" (day before)
+- "Zakat is due - Ramadan ending soon" (last 10 days)
+- "Qurbani reminder - Eid al-Adha in 3 days"
+- "Ashura fasting tomorrow" (day before)
+- "Jumu'ah in 1 hour" (Fridays, optional)
+- Ramadan: Suhoor alarm, Iftar time
+
+#### What We DON'T Send
+- ❌ Daily verse/hadith (off by default, opt-in only)
+- ❌ "You haven't opened Safa today"
+- ❌ "Come back and continue your streak"
+- ❌ Marketing or promotional content
+- ❌ Multiple reminders for same prayer
+- ❌ Generic motivational messages
 
 ---
 
@@ -223,14 +391,15 @@ In addition to in-app reminders, push notifications for:
 - Night mode for comfortable reading
 
 ### 4.3 AI Companion (Chat)
-- **Local embedded lightweight LLM** (runs on-device)
-- Fine-tuned on curated Islamic knowledge base
+- **Apple Foundation Models** (iOS 18.4+) - native, optimized, zero bundle size
+- **Fallback**: Feature disabled on older iOS with "Requires iOS 18.4" message
+- **RAG-powered**: Retrieves relevant Quran/Hadith from local database, injects into context
 - Extensive system prompt for guidance and tone
 - Answer questions about fiqh, history, practice
 - Respectful of different schools of thought (madhabs)
 - Clear disclaimers for complex rulings (consult a scholar)
 - Conversational, warm tone
-- Cites Quran and Hadith references
+- Cites Quran and Hadith references with source retrieval
 - No internet required for responses
 
 ### 4.4 Ramadan Mode
@@ -244,6 +413,28 @@ In addition to in-app reminders, push notifications for:
 - Sadaqah tracker
 - I'tikaf mode for last 10 nights
 - Eid preparation checklist
+
+#### Apple Health Integration (Fasting)
+Sync Ramadan fasting data to Apple Health:
+
+- **What's tracked:** Fasting hours (Suhoor → Iftar)
+- **Permission:** Opt-in, requested when user first logs a fast
+- **Data written:** `HKCategoryTypeIdentifier.intermittentFasting`
+- **Benefits:** Users see fasting in Health app alongside other wellness data
+- **Privacy:** Only writes data, never reads other Health data
+
+```
+Ramadan → Fasting Tracker
+┌─────────────────────────────────────────┐
+│  Today's Fast                           │
+│  Suhoor: 4:32 AM  →  Iftar: 7:48 PM    │
+│  Duration: 15h 16m                      │
+│                                         │
+│  ☑ Sync to Apple Health                │
+│    Your fasting hours appear in the    │
+│    Health app                           │
+└─────────────────────────────────────────┘
+```
 
 ### 4.5 Dhikr & Duas
 - Tasbeeh counter (digital beads with haptic feedback)
@@ -287,7 +478,35 @@ In addition to in-app reminders, push notifications for:
   - Mawlid an-Nabi (optional, configurable)
   - Isra and Mi'raj
   - Shab-e-Barat (optional, configurable)
-- Sync with device calendar (optional)
+
+#### Calendar Integration (v1)
+Export Islamic events to external calendars:
+
+**EventKit (Apple Calendar):**
+- One-tap sync to device calendar
+- Creates events for: Eid, Ramadan, Islamic holidays
+- Optional: Daily prayer times (off by default - too many events)
+- Optional: Suhoor/Iftar times during Ramadan
+- Events include: title, time, notes with relevant duas
+
+**Export .ics File:**
+- Generate downloadable .ics calendar file
+- Works with any calendar app (Google, Outlook, etc.)
+- Options: Full year / Ramadan only / Custom date range
+- Share via standard iOS Share Sheet
+
+```
+Calendar → Export
+├── Add to Apple Calendar ──────── [Add All Events]
+│   ├── ☑ Eid al-Fitr & Eid al-Adha
+│   ├── ☑ Ramadan (start/end)
+│   ├── ☑ Islamic Holidays
+│   ├── ☐ Daily Prayer Times
+│   └── ☐ Suhoor/Iftar (Ramadan)
+│
+└── Export .ics File ──────────── [Export]
+    └── Share to Google Calendar, Outlook, etc.
+```
 
 ### 4.8 Sleep & Wind-Down Mode
 
@@ -344,8 +563,43 @@ Connect with family members to encourage each other in worship and learning.
 - Share daily verse/hadith to Messages, WhatsApp, etc.
 - Share achievements when unlocked
 - Share Quran reading progress
-- Invite friends to join Safa (earns Hasanat)
 - Beautiful, branded share cards
+
+#### Invite Friends
+Encourage organic growth through easy app sharing:
+
+**Invite Flow:**
+1. User taps "Invite Friends" (in Family section or Settings)
+2. Native iOS Share Sheet opens with pre-composed message
+3. Message includes: brief description + App Store link
+4. If friend downloads and opens app, inviter gets +25 Hasanat
+
+**Share Message Template:**
+```
+Assalamu Alaikum! 🌙
+
+I've been using Safa - a beautiful Islamic companion app for
+prayer times, Quran, and learning. No ads, no clutter.
+
+Download free: [App Store Link]
+
+May it benefit you! 🤲
+```
+
+**App Store Link:**
+- Production: `https://apps.apple.com/app/safa/id[APP_ID]`
+- Pre-launch: TestFlight link for beta testers
+- Stored in `AppConstants.appStoreURL` for easy updates
+
+**Tracking:**
+- Invite attribution not tracked (privacy-first)
+- Manual "I was invited by someone" toggle in onboarding
+- Inviter Hasanat awarded on honor system (trust the user)
+
+**UI Locations:**
+- Family Circle screen: prominent "Invite Friends" button
+- Settings → About: "Share Safa" option
+- Achievement unlock: "Share this achievement" includes app link
 
 #### Family Dashboard
 ```
@@ -373,6 +627,40 @@ Connect with family members to encourage each other in worship and learning.
 - Choose what to share: Streaks / Prayer / Quran progress / Nothing
 - Mute notifications from family
 - Leave circle anytime
+
+### 4.10 Learn (Unified Learning Hub)
+
+The Learn section consolidates all educational features into a Duolingo-style gamified experience with points, streaks, and progression.
+
+#### Learning Tracks
+
+**Track 1: Arabic Foundations**
+- Arabic alphabet recognition
+- Letter forms (initial, medial, final, isolated)
+- Basic pronunciation with speech recognition feedback
+- Short vowels (harakat)
+- Common Islamic vocabulary
+
+**Track 2: Tajweed (Recitation Rules)**
+- Noon Sakinah & Tanween rules
+- Meem Sakinah rules
+- Madd (elongation) rules
+- Qalqalah
+- Proper pronunciation of heavy/light letters
+- Practice with example ayaat
+
+**Track 3: Quran Recitation**
+- Listen & repeat exercises
+- Speech recognition scoring
+- Start with short surahs (Juz Amma)
+- Progress to longer passages
+- Memorization mode with spaced repetition
+
+**Track 4: Dhikr & Dua Mastery**
+- Learn proper pronunciation of common adhkar
+- Morning/evening adhkar completion challenges
+- Tasbeeh sessions with goals
+- Dua memorization with audio
 
 ---
 
@@ -443,6 +731,61 @@ Widgets allow users to see key information without opening the app.
 │   of Allah do hearts find rest" │
 └─────────────────────────────────┘
 ```
+
+#### Interactive Widgets (iOS 17+)
+Widgets with tap actions - no need to open the app:
+
+**Prayer Widget with Log Action:**
+```
+┌─────────────────────────────────┐
+│  Safa · Today's Prayers         │
+│                                 │
+│  Fajr    Dhuhr   Asr   Mgrb  Isha
+│  [✓]    [✓]    [Log]  [ ]   [ ] │
+│                                 │
+│  Tap a prayer to log it         │
+└─────────────────────────────────┘
+```
+
+**Tasbeeh Widget (tap to increment):**
+```
+┌───────────────┐
+│      33       │
+│   ───────     │
+│  SubhanAllah  │
+│               │
+│    [Tap]      │
+└───────────────┘
+```
+
+**Interactions:**
+- Tap prayer → logs as complete (checkmark appears)
+- Tap tasbeeh → increments counter
+- Uses App Intents for widget actions
+
+#### StandBy Mode (iOS 17+)
+Clock-style display when iPhone is charging on its side:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│                     ASR                             │
+│                   3:45 PM                           │
+│                  in 2h 34m                          │
+│                                                     │
+│     F ✓    D ✓    A ·    M ·    I ·                │
+│                                                     │
+│                 🔥 23 day streak                    │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+**Use cases:**
+- Nightstand clock showing Fajr time
+- Desk display during work hours
+- Kitchen counter during Ramadan (Iftar countdown)
+
+**Implementation:** StandBy uses WidgetKit - same widgets, different presentation.
 
 ### 5.2 Live Activities & Dynamic Island
 
@@ -540,41 +883,32 @@ Voice-activated features for hands-free use.
 - Log prayer
 - Get streak count
 
----
+### 5.5 Spotlight Search (CoreSpotlight)
 
-### 4.10 Learn (Unified Learning Hub)
+Search Quran, Hadith, and Duas directly from iOS Spotlight without opening Safa.
 
-The Learn section consolidates all educational features into a Duolingo-style gamified experience with points, streaks, and progression.
+**Searchable content:**
+- Quran ayahs (by text, surah name, or reference like "2:255")
+- Hadith (by text or narrator)
+- Duas (by title or category like "dua for traveling")
+- Surahs (by name)
 
-#### Learning Tracks
+**Examples:**
+```
+iOS Spotlight: "ayatul kursi"
+→ Result: Al-Baqarah 2:255 - Tap to open in Safa
 
-**Track 1: Arabic Foundations**
-- Arabic alphabet recognition
-- Letter forms (initial, medial, final, isolated)
-- Basic pronunciation with speech recognition feedback
-- Short vowels (harakat)
-- Common Islamic vocabulary
+iOS Spotlight: "dua before eating"
+→ Result: Bismillah - Tap to view full dua
 
-**Track 2: Tajweed (Recitation Rules)**
-- Noon Sakinah & Tanween rules
-- Meem Sakinah rules
-- Madd (elongation) rules
-- Qalqalah
-- Proper pronunciation of heavy/light letters
-- Practice with example ayaat
+iOS Spotlight: "surah yasin"
+→ Result: Surah Ya-Sin (36) - Tap to start reading
+```
 
-**Track 3: Quran Recitation**
-- Listen & repeat exercises
-- Speech recognition scoring
-- Start with short surahs (Juz Amma)
-- Progress to longer passages
-- Memorization mode with spaced repetition
-
-**Track 4: Dhikr & Dua Mastery**
-- Learn proper pronunciation of common adhkar
-- Morning/evening adhkar completion challenges
-- Tasbeeh sessions with goals
-- Dua memorization with audio
+**Benefits:**
+- Find content without launching app
+- Quick reference during conversations
+- Deep links directly to specific content
 
 ---
 
@@ -582,7 +916,7 @@ The Learn section consolidates all educational features into a Duolingo-style ga
 
 The gamification system is designed to encourage consistent worship and learning through positive reinforcement, inspired by Duolingo's proven engagement model.
 
-### 5.1 Points System: Hasanat (حسنات)
+### 6.1 Points System: Hasanat (حسنات)
 
 "Hasanat" (good deeds) serves as the in-app currency/points system - a meaningful Islamic concept.
 
@@ -621,7 +955,7 @@ The gamification system is designed to encourage consistent worship and learning
 | Complete Taraweeh | +25 |
 | Quran reading during Ramadan | 2x multiplier |
 
-### 5.2 Streaks
+### 6.2 Streaks
 
 Streaks encourage daily consistency:
 
@@ -638,7 +972,7 @@ Streaks encourage daily consistency:
 - Can store up to 3 freezes
 - Freezes auto-apply if a day is missed
 
-### 5.3 Levels & Progression
+### 6.3 Levels & Progression
 
 Users progress through levels based on total Hasanat earned:
 
@@ -659,7 +993,7 @@ Each level unlocks:
 - New profile badge/frame
 - Congratulatory message with relevant hadith about consistency
 
-### 5.4 Achievements (Badges)
+### 6.4 Achievements (Badges)
 
 Achievements recognize specific milestones:
 
@@ -695,7 +1029,7 @@ Achievements recognize specific milestones:
 - 📖 Khatm in Ramadan - Complete Quran during Ramadan
 - 🌟 Night Worshipper - Complete Taraweeh for 10 nights
 
-### 5.5 Daily Goals
+### 6.5 Daily Goals
 
 Users can set personalized daily goals:
 
@@ -727,7 +1061,7 @@ Users can set personalized daily goals:
 - Dedicated (1 hr/day): 10 pages, adhkar, 3 lessons, extended dhikr
 - Custom: User sets own targets
 
-### 5.6 Weekly Challenges
+### 6.6 Weekly Challenges
 
 Optional weekly challenges for extra engagement:
 
@@ -737,7 +1071,7 @@ Optional weekly challenges for extra engagement:
 - "Learn 5 new Tajweed rules"
 - "Reach 500 Hasanat this week"
 
-### 5.7 Progress Dashboard
+### 6.7 Progress Dashboard
 
 ```
 ┌─────────────────────────────────┐
@@ -765,7 +1099,7 @@ Optional weekly challenges for extra engagement:
 └─────────────────────────────────┘
 ```
 
-### 5.8 Design Principles for Gamification
+### 6.8 Design Principles for Gamification
 
 - **Positive reinforcement only** - Never punish, only encourage
 - **Islamic framing** - Hasanat concept connects to real reward
@@ -778,7 +1112,7 @@ Optional weekly challenges for extra engagement:
 
 ## 7. User Experience Flows
 
-### 6.1 Home Screen (Default) - Minimal Design
+### 7.1 Home Screen (Default) - Minimal Design
 
 The home screen prioritizes simplicity and calm. Clean, uncluttered, focused on the essentials.
 
@@ -818,7 +1152,7 @@ The home screen prioritizes simplicity and calm. Clean, uncluttered, focused on 
 - Additional features accessed via tab bar
 - Contextual reminder appears only when relevant (subtle banner at top)
 
-### 6.2 Home Screen with Contextual Alert
+### 7.2 Home Screen with Contextual Alert
 
 ```
 ┌─────────────────────────────────┐
@@ -848,7 +1182,7 @@ The home screen prioritizes simplicity and calm. Clean, uncluttered, focused on 
 └─────────────────────────────────┘
 ```
 
-### 6.3 Home Screen (Ramadan Mode)
+### 7.3 Home Screen (Ramadan Mode)
 
 Ramadan mode maintains minimalism while surfacing essential fasting information.
 
@@ -886,7 +1220,7 @@ Ramadan mode maintains minimalism while surfacing essential fasting information.
 - Day progress bar
 - Quick access to Ramadan features in More tab
 
-### 5.3 Contextual Reminder Examples
+### 7.4 Contextual Reminder Examples
 ```
 ┌─────────────────────────────────┐
 │ 🕐 Asr begins in 10 minutes    │
@@ -1013,14 +1347,19 @@ Safa
     ├── Prayer Settings
     │   ├── Calculation Method
     │   ├── Adjustments
+    │   ├── Mosque Mode (adds travel time)
     │   └── Notifications
     ├── Appearance
     │   ├── Theme Color
     │   └── Arabic Font Style
     ├── Notifications
     │   ├── Prayer Alerts
-    │   ├── Daily Content
+    │   ├── Sound (vibration/athan)
     │   └── Event Reminders
+    ├── Accessibility
+    │   ├── VoiceOver Hints
+    │   ├── Haptic Feedback
+    │   └── Reduce Motion
     ├── Widgets & Live Activities
     │   ├── Configure Widgets
     │   └── Live Activity Settings
@@ -1030,12 +1369,18 @@ Safa
     ├── Intelligent Features
     │   ├── Contextual Reminders (on/off)
     │   ├── Auto Ramadan Mode
-    │   ├── Friday Reminders
-    │   └── Streak Notifications
+    │   └── Friday Reminders
+    ├── Downloads & Storage
+    │   ├── Downloaded Audio
+    │   ├── Smart Cleanup (auto-remove unused audio)
+    │   │   └── Retention Period: 1 month / 3 months / 6 months / Never
+    │   └── Clear Cache
     ├── Family & Sharing
     │   ├── Manage Circle
     │   └── Privacy Controls
-    ├── Language
+    ├── Request a Feature ← (opens email composer)
+    ├── Privacy Policy ← (static in-app view, works offline)
+    ├── Terms of Service ← (static in-app view, works offline)
     └── About
 ```
 
@@ -1210,7 +1555,7 @@ Once user base is established:
 - [x] App name: **Safa** (confirmed)
 - [x] Accent colors: **User-configurable** (gold default)
 - [x] Scope: **Full feature set in v1** (no MVP split)
-- [x] LLM strategy: **Local/embedded lightweight model**
+- [x] LLM strategy: **Apple Foundation Models (iOS 18.4+) with RAG for Islamic knowledge**
 - [x] Initial language: **English only**
 - [x] Contextual intelligence: **Core differentiator**
 - [x] Gamification: **Duolingo-style with Hasanat points, streaks, levels**
@@ -1222,6 +1567,34 @@ Once user base is established:
 - [x] Home screen: **Minimal, clean design with prayer focus**
 - [x] Monetization: **Free app + optional donations + ethical sponsorships**
 - [x] Growth strategy: **Explosive growth first, monetization later**
+- [x] Authentication: **None required - frictionless, iCloud handles sync**
+- [x] Offline-first: **Comprehensive - all core features work offline**
+- [x] Audio strategy: **On-demand download with predictive background fetch**
+- [x] App size: **<100MB base target** (aggressive optimization)
+- [x] Content sources: **Zero-cost launch** (Tanzil, Sunnah.com, Everyayah)
+- [x] Disabled features: **Greyed out with "Coming soon" message**
+- [x] Notifications: **Respectful, useful only** - single prayer reminder, no streak spam
+- [x] Prayer notification: **15 min before (default)**, vibration only, athan off by default
+- [x] Notification acknowledgment: **Logs prayer automatically** toward achievements
+- [x] Accessibility: **Best effort v1**, full support v1.1 (VoiceOver, Dynamic Type, haptics)
+- [x] Arabic localization: **Content only** for v1, full UI RTL in v1.1
+- [x] Feature requests: **In Settings** - users can suggest features
+- [x] Widgets v1: **Prayer (S), Prayer Times (M), Dashboard (L)** - Streak (S) if time permits
+- [x] Onboarding: **3 pages** (Welcome+Location, Quick Setup, Done) - trust smart defaults
+- [x] Notifications default: **OFF** (user opts in, respects attention)
+- [x] Skip onboarding: **Goes straight to home** with smart defaults applied
+- [x] Ramadan banner: **Dismissible with swipe**, reappears next day, includes Iftar adhan
+- [x] Iftar adhan: **Bundled recording** (configurable Qari in v1.1)
+- [x] Eid banner: **Included** after Ramadan with Eid prayer time
+- [x] Legal pages: **Static in-app views** (not web links) - works offline
+- [x] Invite friends: **App Store link via Share Sheet** - privacy-first (no tracking)
+- [x] Disabled features: **Greyed out with "Coming soon"** - consistent pattern across app
+- [x] Calendar integration: **EventKit + .ics export** for v1
+- [x] Health integration: **Apple Health** for Ramadan fasting hours
+- [x] Spotlight Search: **CoreSpotlight** - search Quran/Hadith/Duas from iOS
+- [x] Interactive Widgets: **App Intents** - tap to log prayer or increment tasbeeh
+- [x] StandBy Mode: **WidgetKit** - prayer times on charging display
+- [x] Future integrations: Planned for v1.1+ (details TBD based on user feedback)
 
 ---
 
@@ -1249,18 +1622,32 @@ The Islamic concept of "ongoing charity" - when you share beneficial knowledge, 
 
 ---
 
-## 15. Open Questions
+## 15. Content Sources (Resolved)
 
-- [ ] Specific lightweight LLM model selection
-- [ ] Content licensing (Quran translations, Hadith databases)
-- [ ] Audio recitation licensing
+All content sourced from free, high-quality sources for zero-cost launch:
+
+| Content | Source | License |
+|---------|--------|---------|
+| Quran Arabic | Tanzil.net (Uthmani script) | Free |
+| Translation | Sahih International | Free (widely used) |
+| Hadith | Sunnah.com | Free (non-commercial) |
+| Audio Recitation | Everyayah.com + King Fahd Complex | Free for Islamic apps |
+| Tafsir | Ibn Kathir (English abridged) | Free |
+| Duas/Adhkar | Hisnul Muslim (Fortress of Muslim) | Public domain |
+
+**Upgrade path**: License premium translations (The Clear Quran) and additional Qaris post-launch if donations support it.
+
+---
+
+## 16. Open Questions
+
 - [ ] Beta testing community/approach
 - [ ] Content partnerships (scholars, institutions)
-- [ ] App Store pricing decision
+- [ ] App Store category selection
 - [ ] Speech recognition API for pronunciation feedback
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
-*Status: Final*
+*Document Version: 0.9*
+*Last Updated: February 5, 2026*
+*Status: Pre-Production*

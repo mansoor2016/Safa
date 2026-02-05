@@ -277,7 +277,7 @@ struct QuranShareCard: View {
             HStack {
                 Image(systemName: "sparkles")
                     .font(.caption)
-                Text("Shared via Safa")
+                Text("Shared via صفا")
                     .font(.caption)
             }
             .foregroundStyle(ShareCardStyle.quran.accentColor.opacity(0.7))
@@ -330,7 +330,7 @@ struct AchievementShareCard: View {
             HStack {
                 Image(systemName: "sparkles")
                     .font(.caption)
-                Text("Achieved with Safa")
+                Text("Achieved with صفا")
                     .font(.caption)
             }
             .foregroundStyle(ShareCardStyle.achievement.accentColor)
@@ -403,7 +403,7 @@ struct ProgressShareCard: View {
             HStack {
                 Image(systemName: "sparkles")
                     .font(.caption)
-                Text("Track your journey with Safa")
+                Text("Track your journey with صفا")
                     .font(.caption)
             }
             .foregroundStyle(ShareCardStyle.progress.accentColor.opacity(0.7))

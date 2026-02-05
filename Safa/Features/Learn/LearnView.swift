@@ -242,7 +242,7 @@ private struct TrackDetailView: View {
 
                 if let arabic = track.titleArabic {
                     Text(arabic)
-                        .font(SafaTypography.arabicMediumFallback)
+                        .font(SafaTypography.arabicMedium)
                 }
 
                 Text(track.description)

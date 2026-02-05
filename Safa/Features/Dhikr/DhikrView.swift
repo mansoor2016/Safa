@@ -118,7 +118,7 @@ private struct DhikrQuickButton: View {
         }) {
             VStack(spacing: SafaSpacing.xs) {
                 Text(dhikr.arabic)
-                    .font(SafaTypography.arabicSmallFallback)
+                    .font(SafaTypography.arabicSmall)
                     .foregroundColor(SafaColors.Fallback.text)
 
                 Text(dhikr.rawValue)
@@ -154,7 +154,7 @@ private struct AfterPrayerRow: View {
                         .foregroundColor(SafaColors.Fallback.text)
 
                     Text(arabic)
-                        .font(SafaTypography.arabicSmallFallback)
+                        .font(SafaTypography.arabicSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
 
@@ -311,7 +311,7 @@ private struct AdhkarRow: View {
 
                 // Arabic text
                 Text(dua.textArabic)
-                    .font(SafaTypography.arabicMediumFallback)
+                    .font(SafaTypography.arabicMedium)
                     .foregroundColor(SafaColors.Fallback.text)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)

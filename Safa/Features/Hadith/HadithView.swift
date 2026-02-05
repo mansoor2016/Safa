@@ -146,7 +146,7 @@ private struct HadithContentView: View {
                 }
 
                 Text(hadith.textArabic)
-                    .font(SafaTypography.arabicSmallFallback)
+                    .font(SafaTypography.arabicSmall)
                     .foregroundColor(SafaColors.Fallback.text)
                     .lineLimit(3)
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -316,7 +316,7 @@ private struct CollectionRow: View {
                         .foregroundColor(SafaColors.Fallback.text)
 
                     Text(collection.nameArabic)
-                        .font(SafaTypography.arabicSmallFallback)
+                        .font(SafaTypography.arabicSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
 
@@ -613,7 +613,7 @@ private struct HadithDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Text(hadith.textArabic)
-                        .font(SafaTypography.arabicMediumFallback)
+                        .font(SafaTypography.arabicMedium)
                         .foregroundColor(SafaColors.Fallback.text)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .environment(\.layoutDirection, .rightToLeft)

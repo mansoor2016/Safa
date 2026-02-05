@@ -76,7 +76,7 @@ struct RamadanView: View {
                 .foregroundColor(SafaColors.Fallback.text)
 
             Text("رمضان مبارك")
-                .font(SafaTypography.arabicMediumFallback)
+                .font(SafaTypography.arabicMedium)
                 .foregroundColor(.accentColor)
 
             Text("Day \(currentDay) of \(totalDays)")

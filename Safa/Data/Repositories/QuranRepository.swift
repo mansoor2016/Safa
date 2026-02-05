@@ -1,6 +1,6 @@
 // MARK: - QuranRepository.swift
 // PURPOSE: Implementation of Quran data access and progress tracking
-// DEPENDENCIES: CoreData, QuranRepositoryProtocol
+// DEPENDENCIES: CoreData, SQLiteService, QuranRepositoryProtocol
 
 import Foundation
 import CoreData
@@ -8,10 +8,15 @@ import CoreData
 final class QuranRepository: QuranRepositoryProtocol {
     // MARK: - Dependencies
     private let coreData: CoreDataStack
+    private let sqlite = SQLiteService.shared
 
     // MARK: - Storage Keys
     private let bookmarksKey = "com.safa.quran.bookmarks"
     private let progressKey = "com.safa.quran.progress"
+
+    // MARK: - Cache
+    private var cachedSurahs: [Surah]?
+    private var cachedJuz: [Juz]?
 
     // MARK: - Init
     init(coreData: CoreDataStack) {
@@ -21,8 +26,23 @@ final class QuranRepository: QuranRepositoryProtocol {
     // MARK: - Surahs
 
     func getAllSurahs() async throws -> [Surah] {
-        // TODO: Load from bundled SQLite database
-        // For now, return placeholder data
+        // Return cached if available
+        if let cached = cachedSurahs {
+            return cached
+        }
+
+        // Try loading from SQLite database
+        do {
+            let surahs = try sqlite.loadAllSurahs()
+            if !surahs.isEmpty {
+                cachedSurahs = surahs
+                return surahs
+            }
+        } catch {
+            print("QuranRepository: SQLite load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         return Surah.allSurahs
     }
 
@@ -34,8 +54,17 @@ final class QuranRepository: QuranRepositoryProtocol {
     // MARK: - Ayahs
 
     func getAyahs(forSurah surahNumber: Int) async throws -> [Ayah] {
-        // TODO: Load from bundled SQLite database
-        // For now, return placeholder data
+        // Try loading from SQLite database
+        do {
+            let ayahs = try sqlite.loadAyahs(forSurah: surahNumber)
+            if !ayahs.isEmpty {
+                return ayahs
+            }
+        } catch {
+            print("QuranRepository: SQLite ayah load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         guard let surah = try await getSurah(number: surahNumber) else {
             return []
         }
@@ -64,8 +93,17 @@ final class QuranRepository: QuranRepositoryProtocol {
     }
 
     func searchAyahs(query: String) async throws -> [Ayah] {
-        // TODO: Implement full-text search on SQLite database
-        // For now, search within Al-Fatiha
+        // Try full-text search on SQLite database
+        do {
+            let results = try sqlite.searchAyahs(query: query)
+            if !results.isEmpty {
+                return results
+            }
+        } catch {
+            print("QuranRepository: SQLite search failed, using fallback: \(error)")
+        }
+
+        // Fallback to searching static data
         let fatiha = Ayah.alFatiha
         return fatiha.filter { ayah in
             ayah.textTranslation.localizedCaseInsensitiveContains(query) ||
@@ -145,7 +183,23 @@ final class QuranRepository: QuranRepositoryProtocol {
     }
 
     func getAllJuz() async throws -> [Juz] {
-        // TODO: Load accurate Juz boundaries from database
+        // Return cached if available
+        if let cached = cachedJuz {
+            return cached
+        }
+
+        // Try loading from SQLite database
+        do {
+            let juz = try sqlite.loadAllJuz()
+            if !juz.isEmpty {
+                cachedJuz = juz
+                return juz
+            }
+        } catch {
+            print("QuranRepository: SQLite juz load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         return Juz.allJuz
     }
 }

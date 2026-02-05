@@ -17,17 +17,17 @@ This document tracks all development tasks for the Safa iOS app. Each phase incl
 **Verification Commands:**
 ```bash
 # Build project
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 15' build
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' build
 
 # Run all tests
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 15' test
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' test
 
 # Run specific test class
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 15' \
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
   -only-testing:SafaTests/{TestClassName} test
 
 # Launch app in simulator
-xcrun simctl boot "iPhone 15" && xcrun simctl launch booted com.safa.app
+xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ```
 
 ---
@@ -42,8 +42,7 @@ xcrun simctl boot "iPhone 15" && xcrun simctl launch booted com.safa.app
 - [x] Configure Git LFS for large files (audio, ML models)
 
 ### 0.2 Agent Guidance Documentation
-- [x] Create `AGENT.md` with development conventions
-- [x] Create `CLAUDE.md` with project-specific instructions
+- [x] Create `CLAUDE.md` with development conventions (consolidated from AGENT.md)
 - [x] Document file naming conventions
 - [x] Document code patterns (ViewModel, View, Repository)
 - [x] Document testing conventions
@@ -150,6 +149,15 @@ find Safa -type d -name "*.swift" | head -20
 - [x] Create `LoadingView.swift` component
 - [x] Create `EmptyStateView.swift` component
 
+### 1.5.1 Disabled Feature Pattern
+- [ ] Create `DisabledFeatureModifier.swift` view modifier
+- [ ] Implement greyed-out appearance (50% opacity)
+- [ ] Add "Coming soon" label overlay
+- [ ] Create `ToastService.swift` for tap feedback messages
+- [ ] Create `FeatureFlags.swift` for feature toggle management
+- [ ] Add `.disabledFeature(_:name:)` View extension
+- [ ] Document disabled feature usage pattern in CLAUDE.md
+
 ### 1.6 Shared Utilities
 - [x] Create `Date+Extensions.swift`
 - [x] Create `String+Extensions.swift`
@@ -177,6 +185,8 @@ find Safa -type d -name "*.swift" | head -20
 - [ ] **AC-1.4**: All domain entities have Codable conformance
 - [ ] **AC-1.5**: Design system colors render correctly in light/dark mode
 - [ ] **AC-1.6**: Hijri date converter matches Islamic calendar for 10 test dates
+- [ ] **AC-1.7**: Disabled features show greyed-out with "Coming soon" label
+- [ ] **AC-1.8**: Tapping disabled feature shows toast message
 
 ### Phase 1 Integration Tests
 - [ ] **IT-1.1**: App launches → Dependencies available in first view
@@ -254,8 +264,12 @@ xcodebuild test -only-testing:SafaTests/DomainTests
 - [x] Create `NotificationService.swift`
 - [x] Implement notification permission request
 - [x] Schedule prayer time notifications
-- [x] Implement configurable notification timing
+- [x] Implement configurable notification timing (5/10/15/30/60 min)
 - [x] Handle notification tap to open app
+- [ ] Implement "Mosque mode" (adds +15 min for travel)
+- [ ] Implement notification action "Done ✓" to log prayer
+- [ ] Vibration-only by default (athan sound off by default)
+- [ ] Implement event notifications (Eid, Zakat, Qurbani, Ashura)
 - [x] Write unit tests for notification scheduling
 
 ### Phase 2 Acceptance Criteria
@@ -267,8 +281,11 @@ xcodebuild test -only-testing:SafaTests/DomainTests
 - [ ] **AC-2.6**: Qibla direction for New York matches Google Qibla within ±2°
 - [ ] **AC-2.7**: Qibla direction for Tokyo matches Google Qibla within ±2°
 - [ ] **AC-2.8**: Countdown timer updates every second without UI lag
-- [ ] **AC-2.9**: Prayer notification fires within 5 seconds of scheduled time
+- [ ] **AC-2.9**: Prayer notification fires 15 minutes before prayer time (default)
 - [ ] **AC-2.10**: Logged prayer persists after app restart
+- [ ] **AC-2.11**: Tapping "Done" on notification logs the prayer
+- [ ] **AC-2.12**: Mosque mode notification fires 30 min before (15 + 15 travel)
+- [ ] **AC-2.13**: Notification uses vibration only (no sound by default)
 
 ### Phase 2 Integration Tests
 - [ ] **IT-2.1**: Grant location → Prayer times display for current location
@@ -305,20 +322,21 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 ## Phase 3: Quran Reader
 
 ### 3.1 Quran Data
-- [ ] Source and bundle `quran.sqlite` database
-- [ ] Create database schema documentation
-- [ ] Verify Arabic text encoding (UTF-8)
+- [x] Source and bundle `quran.sqlite` database
+- [x] Create database schema documentation
+- [x] Verify Arabic text encoding (UTF-8)
 - [ ] Verify translation accuracy (spot check 10 ayahs)
+- [ ] Populate full Quran data (currently sample data only)
 
 ### 3.2 Quran Repository
 - [x] Create `QuranRepositoryProtocol.swift`
 - [x] Create `QuranRepository.swift` implementation
-- [ ] Implement `getAllSurahs()` method
-- [ ] Implement `getAyahs(forSurah:)` method
-- [ ] Implement `searchAyahs(query:)` method
-- [ ] Implement `getBookmarks()` method
-- [ ] Implement `addBookmark(_:)` method
-- [ ] Implement `updateProgress(_:)` method
+- [x] Implement `getAllSurahs()` method
+- [x] Implement `getAyahs(forSurah:)` method
+- [x] Implement `searchAyahs(query:)` method
+- [x] Implement `getBookmarks()` method
+- [x] Implement `addBookmark(_:)` method
+- [x] Implement `updateProgress(_:)` method
 - [ ] Write unit tests
 
 ### 3.3 Quran UI
@@ -344,6 +362,27 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 - [x] Implement download manager for audio files
 - [x] Implement WiFi-only download setting
 
+### 3.5 Predictive Audio Download
+- [ ] Create `PredictiveDownloadService.swift`
+- [ ] Implement next-surah prediction (queue next surah after user finishes one)
+- [ ] Implement juz-based prediction (download remaining surahs in current juz)
+- [ ] Implement frequently-read detection (queue user's most-read surahs)
+- [ ] Register background processing task (`BGProcessingTaskRequest`)
+- [ ] Implement WiFi-only queue for predictions
+- [ ] Add download queue management (avoid duplicates)
+- [ ] Write unit tests for prediction logic
+
+### 3.6 Smart Cleanup (Auto-Remove Unused Audio)
+- [ ] Create `StorageCleanupService.swift`
+- [ ] Create `RetentionPeriod` enum (1 month, 3 months, 6 months, Never)
+- [ ] Track `lastPlayedDate` for each downloaded audio file
+- [ ] Implement `getUnusedAudioFiles()` method
+- [ ] Implement `cleanupUnusedFiles()` method
+- [ ] Add retention period setting to `DownloadsView.swift`
+- [ ] Register background cleanup task (weekly)
+- [ ] Show storage reclaimed after cleanup
+- [ ] Write unit tests for retention period calculations
+
 ### Phase 3 Acceptance Criteria
 - [ ] **AC-3.1**: All 114 surahs display with correct names (Arabic & English)
 - [ ] **AC-3.2**: Surah Al-Fatiha displays exactly 7 ayahs
@@ -355,6 +394,10 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 - [ ] **AC-3.8**: Audio continues in background when app minimized
 - [ ] **AC-3.9**: Progress saves when leaving mid-surah and resuming
 - [ ] **AC-3.10**: Audio downloads only on WiFi when setting enabled
+- [ ] **AC-3.11**: Next surah audio queues after completing current surah playback
+- [ ] **AC-3.12**: Predictive downloads happen in background when WiFi connected
+- [ ] **AC-3.13**: Smart Cleanup removes audio unused beyond retention period
+- [ ] **AC-3.14**: Retention period is configurable (1/3/6 months or Never)
 
 ### Phase 3 Integration Tests
 - [ ] **IT-3.1**: Browse surahs → Select surah → Ayahs display correctly
@@ -561,26 +604,32 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 ## Phase 6: AI Companion
 
-### 6.1 LLM Integration
-- [ ] Select and obtain final LLM model
-- [ ] Convert model to Core ML format
+### 6.1 Apple Foundation Models Integration
 - [x] Create `LLMService.swift`
-- [ ] Implement model loading with progress
-- [ ] Implement tokenization
-- [ ] Implement inference
-- [ ] Implement response streaming
-- [ ] Optimize for memory usage
-- [ ] Write performance tests
+- [ ] Implement iOS version check (iOS 18.4+ required)
+- [ ] Implement `LanguageModelSession` integration
+- [ ] Create fallback UI for older iOS ("Requires iOS 18.4")
+- [ ] Implement response streaming with Apple FM API
+- [ ] Write availability tests
 
-### 6.2 System Prompt
+### 6.2 RAG (Retrieval-Augmented Generation)
+- [ ] Create `RAGService.swift`
+- [ ] Implement Quran search for relevant ayahs
+- [ ] Implement Hadith search for relevant narrations
+- [ ] Implement context builder (format sources for prompt)
+- [ ] Implement citation extraction from context
+- [ ] Write unit tests for RAG retrieval
+
+### 6.3 System Prompt
 - [x] Create `SystemPrompts.swift`
 - [x] Write comprehensive Islamic knowledge prompt
 - [x] Include citation format requirements
 - [x] Include madhab neutrality guidelines
 - [x] Include boundary definitions
+- [ ] Update prompt to work with RAG context injection
 - [ ] Test with 20 diverse queries
 
-### 6.3 Chat Repository
+### 6.4 Chat Repository
 - [x] Create `ChatRepositoryProtocol.swift`
 - [x] Create `ChatRepository.swift`
 - [x] Implement conversation history storage
@@ -588,7 +637,7 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [x] Implement `getConversations()` method
 - [x] Write unit tests
 
-### 6.4 Chat UI
+### 6.5 Chat UI
 - [x] Create `ChatView.swift` (feature entry)
 - [x] Create `ChatViewModel.swift`
 - [x] Create `MessageBubble.swift` component
@@ -599,16 +648,16 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [x] Add copy message functionality
 
 ### Phase 6 Acceptance Criteria
-- [ ] **AC-6.1**: LLM loads in under 10 seconds on iPhone 15
-- [ ] **AC-6.2**: Response generates in under 5 seconds for simple query
-- [ ] **AC-6.3**: "What is the dua before eating?" returns Bismillah with source
-- [ ] **AC-6.4**: "What breaks the fast?" returns accurate fiqh information
+- [ ] **AC-6.1**: AI feature shows "Requires iOS 18.4" on older devices
+- [ ] **AC-6.2**: Response generates in under 5 seconds for simple query (iOS 18.4+)
+- [ ] **AC-6.3**: "What is the dua before eating?" returns Bismillah with source citation
+- [ ] **AC-6.4**: "What breaks the fast?" returns accurate fiqh information with Hadith reference
 - [ ] **AC-6.5**: Political question is politely declined
 - [ ] **AC-6.6**: Complex fiqh question recommends consulting a scholar
-- [ ] **AC-6.7**: Response includes Quran/Hadith citations where applicable
+- [ ] **AC-6.7**: RAG retrieves relevant Quran/Hadith and includes in response
 - [ ] **AC-6.8**: Conversation history persists after app restart
-- [ ] **AC-6.9**: Chat works fully offline (no network required)
-- [ ] **AC-6.10**: Memory usage stays under 500MB during inference
+- [ ] **AC-6.9**: Chat works fully offline (Apple FM + local RAG)
+- [ ] **AC-6.10**: Response includes proper citations from retrieved context
 
 ### Phase 6 Integration Tests
 - [ ] **IT-6.1**: Open chat → Type question → See response stream in
@@ -644,16 +693,52 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 ## Phase 7: Platform Features
 
-### 7.1 Widgets
-- [x] Create `PrayerTimeWidget.swift`
+### 7.1 Widgets (Prioritized)
+**v1 Must-have:**
+- [x] Create `PrayerTimeWidget.swift` (Small - next prayer)
 - [x] Create `PrayerTimeWidgetView.swift`
 - [x] Implement prayer timeline provider
-- [x] Create `StreakWidget.swift`
-- [x] Create `StreakWidgetView.swift`
-- [x] Create `DailyVerseWidget.swift`
-- [x] Create `DashboardWidget.swift` (large)
-- [x] Create `WidgetDataProvider.swift` (shared)
+- [x] Create `PrayerTimesWidget.swift` (Medium - all 5 prayers)
+- [x] Create `DashboardWidget.swift` (Large - prayer + streak + verse)
+- [x] Create `WidgetDataProvider.swift` (shared via App Group)
 - [x] Test widget refresh behavior
+- [ ] Enable Lock Screen widgets (iOS 16+)
+
+**v1 Nice-to-have:**
+- [x] Create `StreakWidget.swift` (Small)
+- [x] Create `StreakWidgetView.swift`
+
+**v1.1:**
+- [x] Create `DailyVerseWidget.swift` (Medium)
+
+### 7.1.1 Interactive Widgets (iOS 17+)
+- [ ] Create `LogPrayerIntent.swift` (App Intent)
+- [ ] Create `IncrementTasbeehIntent.swift` (App Intent)
+- [ ] Create `InteractivePrayerWidget.swift` with tap-to-log
+- [ ] Create `InteractivePrayerWidgetView.swift`
+- [ ] Create `TasbeehWidget.swift` with tap-to-increment
+- [ ] Create `TasbeehWidgetView.swift`
+- [ ] Configure widget reload after intent actions
+- [ ] Test interactive widgets on device
+
+### 7.1.2 StandBy Mode (iOS 17+)
+- [ ] Create `PrayerStandByWidget.swift`
+- [ ] Create `PrayerStandByView.swift` (high contrast, large text)
+- [ ] Optimize for bedside visibility (Fajr alarm use case)
+- [ ] Support both small and medium families for StandBy
+- [ ] Test in StandBy simulator
+
+### 7.1.3 Spotlight Search (CoreSpotlight)
+- [ ] Create `SpotlightIndexService.swift`
+- [ ] Index all 114 surahs with names and keywords
+- [ ] Index popular ayahs (Ayatul Kursi, Al-Fatiha, etc.)
+- [ ] Index all duas with titles and categories
+- [ ] Index hadith collections
+- [ ] Implement deep link handling for Spotlight results
+- [ ] Add `router.handleSpotlightResult()` for navigation
+- [ ] Index content on first launch
+- [ ] Re-index when content is bookmarked
+- [ ] Write unit tests for indexing
 
 ### 7.2 Live Activities
 - [x] Create `PrayerActivityAttributes.swift`
@@ -688,6 +773,11 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [ ] **AC-7.7**: "Hey Siri, what's the next prayer?" returns correct answer
 - [ ] **AC-7.8**: "Hey Siri, open Qibla" opens Qibla compass screen
 - [ ] **AC-7.9**: Focus Mode silences non-prayer notifications
+- [ ] **AC-7.10**: Tap prayer in interactive widget → logs prayer without opening app
+- [ ] **AC-7.11**: Tap tasbeeh widget → counter increments
+- [ ] **AC-7.12**: StandBy mode shows prayer times in large, readable format
+- [ ] **AC-7.13**: Search "Ayatul Kursi" in iOS Spotlight → shows result from Safa
+- [ ] **AC-7.14**: Tap Spotlight result → opens correct content in Safa
 
 ### Phase 7 Integration Tests
 - [ ] **IT-7.1**: Add widget to home screen → Shows correct prayer time
@@ -744,8 +834,18 @@ xcodebuild -scheme SafaWidgets build
 - [x] Implement verse sharing (ShareLink)
 - [x] Implement achievement sharing
 - [x] Create share card templates
-- [x] Implement invite friend flow
 - [x] Award Hasanat for sharing actions
+
+### 8.3.1 Invite Friends (App Store Link)
+- [ ] Add `appStoreURL` and `testFlightURL` to `AppConstants.swift`
+- [ ] Create `InviteFriendsService.swift` with share message template
+- [ ] Create `InviteFriendsView.swift` with ShareSheet integration
+- [ ] Add "Invite Friends" button to `FamilyCircleView.swift`
+- [ ] Add "Share Safa" row to Settings → About
+- [ ] Include app link in achievement share cards
+- [ ] Add "I was invited" toggle in onboarding (honor system for Hasanat)
+- [ ] Implement +25 Hasanat award for inviter (honor system)
+- [ ] Update `appStoreURL` placeholder with real App ID after submission
 
 ### 8.4 CloudKit Sync
 - [x] Configure CloudKit container
@@ -761,9 +861,11 @@ xcodebuild -scheme SafaWidgets build
 - [ ] **AC-8.4**: Privacy setting hides specific data from family
 - [ ] **AC-8.5**: Sharing verse generates beautiful card with attribution
 - [ ] **AC-8.6**: Sharing awards 5 Hasanat
-- [ ] **AC-8.7**: Friend accepting invite awards 25 Hasanat
+- [ ] **AC-8.7**: "I was invited" toggle awards +25 Hasanat (honor system)
 - [ ] **AC-8.8**: Data syncs between iPhone and iPad within 30 seconds
 - [ ] **AC-8.9**: Offline changes sync when connection restored
+- [ ] **AC-8.10**: "Invite Friends" opens native Share Sheet with App Store link
+- [ ] **AC-8.11**: Share message includes friendly text + App Store URL
 
 ### Phase 8 Integration Tests
 - [ ] **IT-8.1**: Create circle → Generate link → Share → Other device joins
@@ -800,7 +902,8 @@ xcodebuild -scheme SafaWidgets build
 ## Phase 9: Content & Polish
 
 ### 9.1 Hadith Feature
-- [ ] Source and bundle `hadith.sqlite` database
+- [x] Source and bundle `hadith.sqlite` database
+- [ ] Populate full Hadith data (currently sample data only)
 - [x] Create `HadithRepositoryProtocol.swift`
 - [x] Create `HadithRepository.swift`
 - [x] Create `HadithView.swift`
@@ -831,6 +934,18 @@ xcodebuild -scheme SafaWidgets build
 - [x] Highlight important Islamic dates
 - [x] Implement event reminders
 
+### 9.3.1 Calendar Integration (EventKit + .ics)
+- [ ] Create `CalendarExportService.swift`
+- [ ] Implement EventKit calendar access request
+- [ ] Create/find "Safa - Islamic Events" calendar
+- [ ] Implement `exportToCalendar()` for Apple Calendar
+- [ ] Define `IslamicCalendarEvent` model
+- [ ] Implement .ics file generation (`generateICSFile()`)
+- [ ] Implement .ics file sharing via Share Sheet
+- [ ] Create export UI in CalendarView (checkboxes for event types)
+- [ ] Add event types: Eid, Ramadan, holidays, prayer times (optional)
+- [ ] Write unit tests for .ics format generation
+
 ### 9.4 Ramadan Mode
 - [x] Create `RamadanView.swift`
 - [x] Create `RamadanViewModel.swift`
@@ -840,6 +955,31 @@ xcodebuild -scheme SafaWidgets build
 - [x] Implement auto-activation logic
 - [x] Implement Suhoor/Iftar notifications
 - [x] Create Ramadan home screen variant
+
+### 9.4.0 Apple Health Integration (Fasting)
+- [ ] Create `HealthKitService.swift`
+- [ ] Implement HealthKit availability check
+- [ ] Implement fasting write authorization request
+- [ ] Implement `logFast(start:end:)` method
+- [ ] Add "Sync to Apple Health" toggle in Ramadan settings
+- [ ] Prompt user on first fast logged (opt-in)
+- [ ] Auto-log fasts when user marks day as complete
+- [ ] Write unit tests for HealthKit service
+
+### 9.4.1 Ramadan Home Banner
+- [ ] Create `RamadanBannerView.swift`
+- [ ] Implement swipe-to-dismiss (reappears next day)
+- [ ] Suhoor/Iftar countdown display
+- [ ] Day counter with progress bar (Day X of 30)
+- [ ] Quick action grid (Duas, Quran, Adhan, Alarm)
+- [ ] Quran khatm progress bar
+- [ ] Bundle Maghrib adhan audio file
+- [ ] Implement Iftar adhan player
+- [ ] Implement after-adhan dua prompt with audio
+- [ ] Create pre-Ramadan banner (week before)
+- [ ] Create Last 10 Nights variant (odd nights highlighted)
+- [ ] Create Eid banner (Eid Mubarak + prayer time)
+- [ ] Create `RamadanDuasView.swift` (Iftar, Suhoor, Taraweeh, Laylatul Qadr)
 
 ### 9.5 Wind Down Mode
 - [x] Create `WindDownView.swift`
@@ -859,14 +999,21 @@ xcodebuild -scheme SafaWidgets build
 - [x] Implement theme switching
 - [x] Implement calculation method selection
 - [x] Implement notification preferences
+- [ ] Create `PrivacyPolicyView.swift` (static in-app, renders PRIVACY_POLICY.md)
+- [ ] Create `TermsOfServiceView.swift` (static in-app, renders TERMS_OF_SERVICE.md)
+- [ ] Create `AboutView.swift` (app version, credits, contact)
+- [ ] Create `RequestFeatureView.swift` (opens email composer)
 
-### 9.7 Onboarding
+### 9.7 Onboarding (Streamlined 3-page flow)
 - [x] Create `OnboardingView.swift`
 - [x] Create `OnboardingViewModel.swift`
-- [x] Create `WelcomeView.swift`
-- [x] Create `LocationPermissionView.swift`
-- [x] Create `NotificationPermissionView.swift`
-- [x] Create calculation method selection step
+- [ ] **Refactor to 3 pages** (from current 5 pages)
+- [ ] Page 1: Welcome + Location combined (show detected region + recommended settings)
+- [ ] Page 2: Quick Setup (notifications OFF by default + mosque mode toggle)
+- [ ] Page 3: Ready (summary + "Customize Settings" link + Get Started)
+- [ ] Remove manual calculation method/madhab selection (trust smart defaults)
+- [ ] Add "Skip → Home" on page 1 (applies smart defaults, skips to home immediately)
+- [ ] Notifications default to OFF (respect user attention)
 - [x] Implement first-launch detection
 
 ### 9.8 Home Screen
@@ -889,6 +1036,10 @@ xcodebuild -scheme SafaWidgets build
 - [ ] **AC-9.8**: Wind down mode plays calming recitation
 - [ ] **AC-9.9**: Onboarding completes and doesn't show again
 - [ ] **AC-9.10**: Home screen shows contextual reminder based on time
+- [ ] **AC-9.11**: Export to Apple Calendar creates events for Eid and Ramadan
+- [ ] **AC-9.12**: Export .ics file opens Share Sheet with valid calendar file
+- [ ] **AC-9.13**: Logged Ramadan fast writes to Apple Health (if opted in)
+- [ ] **AC-9.14**: Health sync toggle works in Ramadan settings
 
 ### Phase 9 Integration Tests
 - [ ] **IT-9.1**: Browse hadith → Search → Find specific hadith
@@ -916,17 +1067,31 @@ xcodebuild -scheme SafaWidgets build
 
 ## Phase 10: Launch Preparation
 
-### 10.1 Testing
+### 10.1 Accessibility (Best Effort v1)
+- [ ] Add VoiceOver labels to all Prayer screens
+- [ ] Add VoiceOver labels to Quran reader
+- [ ] Add VoiceOver labels to Qibla compass with direction
+- [ ] Add VoiceOver labels to Tasbeeh counter
+- [ ] Verify Dynamic Type scaling on all screens
+- [ ] Implement Reduce Motion support
+- [ ] Implement Qibla haptic feedback (directional pulses)
+- [ ] Ensure RTL display for all Arabic content
+- [ ] Verify color contrast meets WCAG AA (4.5:1)
+- [ ] Add "Request a Feature" in Settings
+- [ ] Add Accessibility section in Settings
+
+### 10.2 Testing
 - [ ] Achieve 90%+ unit test coverage for Domain layer
 - [ ] Achieve 80%+ unit test coverage for Repositories
 - [x] Write UI tests for critical user flows
 - [ ] Perform manual QA on all features
 - [ ] Test on iPhone 15, 15 Pro, SE (3rd gen)
-- [ ] Test accessibility (VoiceOver)
+- [ ] Test VoiceOver on critical flows
+- [ ] Test Dynamic Type at largest setting
 - [ ] Test with Low Power Mode
 - [ ] Test localization readiness
 
-### 10.2 Performance Optimization
+### 10.3 Performance Optimization
 - [ ] Profile app launch time (target <2s)
 - [ ] Profile memory usage (target <200MB baseline)
 - [ ] Optimize Core Data fetch requests
@@ -934,7 +1099,7 @@ xcodebuild -scheme SafaWidgets build
 - [ ] Test battery impact over 1 hour usage
 - [ ] Optimize image assets
 
-### 10.3 Beta Testing
+### 10.4 Beta Testing
 - [ ] Set up TestFlight
 - [ ] Recruit 50+ beta testers
 - [ ] Create feedback form
@@ -942,7 +1107,7 @@ xcodebuild -scheme SafaWidgets build
 - [ ] Triage and fix critical bugs
 - [ ] Incorporate top feedback items
 
-### 10.4 App Store Submission
+### 10.5 App Store Submission
 - [ ] Create App Store screenshots (6.7", 6.1", 5.5")
 - [ ] Write App Store description
 - [ ] Create 30-second app preview video
@@ -991,17 +1156,17 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 | Phase | Tasks | Completed | ACs | ACs Passed | Progress |
 |-------|-------|-----------|-----|------------|----------|
 | 0: Foundation | 20 | 14 | 5 | 0 | 70% |
-| 1: Infrastructure | 45 | 45 | 6 | 0 | 100% |
-| 2: Prayer | 28 | 28 | 10 | 0 | 100% |
-| 3: Quran | 24 | 20 | 10 | 0 | 83% |
+| 1: Infrastructure | 52 | 45 | 8 | 0 | 87% |
+| 2: Prayer | 28 | 28 | 13 | 0 | 100% |
+| 3: Quran | 41 | 20 | 14 | 0 | 49% |
 | 4: Gamification | 22 | 18 | 10 | 0 | 82% |
 | 5: Learning | 20 | 18 | 9 | 0 | 90% |
 | 6: AI Companion | 20 | 12 | 10 | 0 | 60% |
-| 7: Platform | 20 | 18 | 9 | 0 | 90% |
-| 8: Social | 16 | 14 | 9 | 0 | 88% |
-| 9: Content | 50 | 45 | 10 | 0 | 90% |
+| 7: Platform | 43 | 18 | 14 | 0 | 42% |
+| 8: Social | 25 | 14 | 11 | 0 | 56% |
+| 9: Content | 68 | 45 | 14 | 0 | 66% |
 | 10: Launch | 24 | 2 | 7 | 0 | 8% |
-| **Total** | **289** | **234** | **95** | **0** | **81%** |
+| **Total** | **363** | **234** | **115** | **0** | **64%** |
 
 ### File Statistics
 - **Swift Files:** 138 (103 main + 35 tests)
@@ -1009,9 +1174,20 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 - **Unit Test Files:** 35
 
 ### Critical Gaps
-- **Data files not bundled**: quran.sqlite, hadith.sqlite, pronunciation audio
-- **LLM not integrated**: Model selection and Core ML conversion pending
+- **SQLite database schemas created**: `scripts/create_quran_database.py` and `scripts/create_hadith_database.py` generate databases with sample data. **Full data population needed** (6,236 ayahs from tanzil.net, ~30,000 hadiths from sunnah.com)
+- **Pronunciation audio**: Audio files not yet bundled
+- **AI Companion**: Apple Foundation Models integration pending (requires iOS 18.4+, RAG system needed)
 - **Acceptance Criteria**: 0/95 verified - need validation pass
+
+### Content Sources (Resolved)
+| Content | Source | Status |
+|---------|--------|--------|
+| Quran Arabic | Tanzil.net (Uthmani) | Schema ready, needs full data |
+| Translation | Sahih International | Schema ready, needs full data |
+| Hadith | Sunnah.com | Schema ready, needs full data |
+| Audio | Everyayah.com + King Fahd | Not integrated |
+| Tafsir | Ibn Kathir (English) | Not integrated |
+| Duas/Adhkar | Hisnul Muslim | Sample data only |
 
 ---
 
@@ -1033,4 +1209,4 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ---
 
-*Last Updated: February 5, 2026 (Session Update - 81% Complete, added location intelligence)*
+*Last Updated: February 5, 2026 (Added: Invite Friends, Predictive Audio Download, Smart Cleanup, Disabled Feature Pattern, Calendar Integration, Apple Health, Spotlight Search, Interactive Widgets, StandBy Mode)*

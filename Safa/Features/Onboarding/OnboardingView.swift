@@ -92,9 +92,15 @@ struct OnboardingView: View {
             }
 
             VStack(spacing: SafaSpacing.sm) {
-                Text("Welcome to Safa")
-                    .font(SafaTypography.headlineLarge)
+                // Arabic app name - prominent
+                Text("صفا")
+                    .font(SafaTypography.arabicLarge)
                     .foregroundColor(SafaColors.Fallback.text)
+
+                // English subtitle
+                Text("Safa")
+                    .font(SafaTypography.titleMedium)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
 
                 Text("Your comprehensive Islamic companion")
                     .font(SafaTypography.bodyLarge)
@@ -578,7 +584,7 @@ struct OnboardingView: View {
             }
 
             Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
-                .font(SafaTypography.arabicMediumFallback)
+                .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
                 .padding()
 

@@ -274,7 +274,7 @@ private struct LessonStepView: View {
 
             if let arabic = step.arabicText {
                 Text(arabic)
-                    .font(SafaTypography.arabicLargeFallback)
+                    .font(SafaTypography.arabicLarge)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)
                     .padding()
@@ -308,7 +308,7 @@ private struct LessonStepView: View {
 
             if let arabic = step.arabicText {
                 Text(arabic)
-                    .font(SafaTypography.arabicLargeFallback)
+                    .font(SafaTypography.arabicLarge)
                     .padding()
             }
 
@@ -334,7 +334,7 @@ private struct LessonStepView: View {
 
             if let arabic = step.arabicText {
                 Text(arabic)
-                    .font(SafaTypography.arabicLargeFallback)
+                    .font(SafaTypography.arabicLarge)
                     .padding()
             }
 

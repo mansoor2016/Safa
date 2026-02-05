@@ -37,7 +37,7 @@ struct TasbeehCounterView: View {
                     // Dhikr text
                     VStack(spacing: SafaSpacing.sm) {
                         Text(dhikr.arabic)
-                            .font(SafaTypography.arabicLargeFallback)
+                            .font(SafaTypography.arabicLarge)
                             .foregroundColor(SafaColors.Fallback.text)
 
                         Text(dhikr.translation)

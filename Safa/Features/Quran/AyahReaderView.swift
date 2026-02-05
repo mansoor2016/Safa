@@ -118,12 +118,12 @@ struct AyahReaderView: View {
         VStack(spacing: SafaSpacing.lg) {
             // Surah name in Arabic
             Text(surah.nameArabic)
-                .font(SafaTypography.arabicLargeFallback)
+                .font(SafaTypography.arabicLarge)
                 .foregroundColor(SafaColors.Fallback.text)
 
             // Bismillah
             Text(IslamicConstants.Phrases.bismillah)
-                .font(SafaTypography.arabicMediumFallback)
+                .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
                 .padding(.vertical, SafaSpacing.md)
 
@@ -253,7 +253,7 @@ private struct AyahRow: View {
 
             // Arabic text
             Text(ayah.textArabic)
-                .font(SafaTypography.arabicLargeFallback)
+                .font(SafaTypography.arabicLarge)
                 .foregroundColor(SafaColors.Fallback.text)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)

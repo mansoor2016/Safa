@@ -487,7 +487,7 @@ private struct EventDetailSheet: View {
                             .foregroundColor(SafaColors.Fallback.text)
 
                         Text(event.arabicName)
-                            .font(SafaTypography.arabicMediumFallback)
+                            .font(SafaTypography.arabicMedium)
                             .foregroundColor(SafaColors.Fallback.secondaryText)
                     }
 

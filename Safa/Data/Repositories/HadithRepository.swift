@@ -1,6 +1,6 @@
 // MARK: - HadithRepository.swift
 // PURPOSE: Implementation of Hadith data access
-// DEPENDENCIES: CoreData, HadithRepositoryProtocol
+// DEPENDENCIES: CoreData, SQLiteService, HadithRepositoryProtocol
 
 import Foundation
 import CoreData
@@ -8,9 +8,13 @@ import CoreData
 final class HadithRepository: HadithRepositoryProtocol {
     // MARK: - Dependencies
     private let coreData: CoreDataStack
+    private let sqlite = SQLiteService.shared
 
     // MARK: - Storage Keys
     private let bookmarksKey = "com.safa.hadith.bookmarks"
+
+    // MARK: - Cache
+    private var cachedCollections: [HadithCollection]?
 
     // MARK: - Init
     init(coreData: CoreDataStack) {
@@ -20,13 +24,38 @@ final class HadithRepository: HadithRepositoryProtocol {
     // MARK: - Collections
 
     func getCollections() async throws -> [HadithCollection] {
-        // TODO: Load from bundled SQLite database
+        // Return cached if available
+        if let cached = cachedCollections {
+            return cached
+        }
+
+        // Try loading from SQLite database
+        do {
+            let collections = try sqlite.loadAllCollections()
+            if !collections.isEmpty {
+                cachedCollections = collections
+                return collections
+            }
+        } catch {
+            print("HadithRepository: SQLite load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         return HadithCollection.allCollections
     }
 
     func getBooks(forCollection collectionId: String) async throws -> [HadithBook] {
-        // TODO: Load from bundled SQLite database
-        // For now, return placeholder data for Bukhari
+        // Try loading from SQLite database
+        do {
+            let books = try sqlite.loadBooks(forCollection: collectionId)
+            if !books.isEmpty {
+                return books
+            }
+        } catch {
+            print("HadithRepository: SQLite books load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data for Bukhari
         if collectionId == "bukhari" {
             return HadithBook.bukhariBooks
         }
@@ -34,20 +63,39 @@ final class HadithRepository: HadithRepositoryProtocol {
     }
 
     func getHadiths(collection collectionId: String, book bookId: String) async throws -> [Hadith] {
-        // TODO: Load from bundled SQLite database
-        // For now, return placeholder data
+        // Try loading from SQLite database
+        do {
+            let hadiths = try sqlite.loadHadiths(forBook: bookId)
+            if !hadiths.isEmpty {
+                return hadiths
+            }
+        } catch {
+            print("HadithRepository: SQLite hadiths load failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         return Hadith.sampleHadiths.filter { $0.collectionId == collectionId && $0.bookId == bookId }
     }
 
     func getHadith(collection collectionId: String, number hadithNumber: Int) async throws -> Hadith? {
-        // TODO: Load from bundled SQLite database
+        // For now, use static data (would need specific query for single hadith)
         return Hadith.sampleHadiths.first { $0.collectionId == collectionId && $0.hadithNumber == hadithNumber }
     }
 
     // MARK: - Search
 
     func searchHadiths(query: String) async throws -> [Hadith] {
-        // TODO: Implement full-text search on SQLite database
+        // Try full-text search on SQLite database
+        do {
+            let results = try sqlite.searchHadiths(query: query)
+            if !results.isEmpty {
+                return results
+            }
+        } catch {
+            print("HadithRepository: SQLite search failed, using fallback: \(error)")
+        }
+
+        // Fallback to searching static data
         return Hadith.sampleHadiths.filter { hadith in
             hadith.textEnglish.localizedCaseInsensitiveContains(query) ||
             hadith.textArabic.contains(query)
@@ -57,9 +105,19 @@ final class HadithRepository: HadithRepositoryProtocol {
     // MARK: - Daily Hadith
 
     func getDailyHadith(for date: Date) async throws -> Hadith {
-        // Use the day of year to pick a hadith
         let calendar = Calendar.current
         let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
+
+        // Try loading from SQLite database
+        do {
+            if let hadith = try sqlite.getRandomHadith(seed: dayOfYear) {
+                return hadith
+            }
+        } catch {
+            print("HadithRepository: SQLite daily hadith failed, using fallback: \(error)")
+        }
+
+        // Fallback to static data
         let index = (dayOfYear - 1) % Hadith.sampleHadiths.count
         return Hadith.sampleHadiths[index]
     }

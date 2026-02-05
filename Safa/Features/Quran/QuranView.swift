@@ -231,7 +231,7 @@ private struct SurahRow: View {
 
                 // Arabic name
                 Text(surah.nameArabic)
-                    .font(SafaTypography.arabicMediumFallback)
+                    .font(SafaTypography.arabicMedium)
                     .foregroundColor(SafaColors.Fallback.text)
             }
             .padding(.horizontal, SafaSpacing.md)

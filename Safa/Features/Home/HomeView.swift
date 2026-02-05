@@ -162,7 +162,7 @@ struct HomeView: View {
         TitledCard(title: "Daily Verse", subtitle: "Surah \(verse.surahNumber):\(verse.ayahNumber)") {
             VStack(alignment: .trailing, spacing: SafaSpacing.sm) {
                 Text(verse.textArabic)
-                    .font(SafaTypography.arabicMediumFallback)
+                    .font(SafaTypography.arabicMedium)
                     .foregroundColor(SafaColors.Fallback.text)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)
