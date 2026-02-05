@@ -164,10 +164,34 @@ enum SystemPrompts {
     Adapt your explanations to be educational and encouraging. Break down complex topics.
     """
 
+    // MARK: - RAG Context Injection
+
+    static let ragInstructions = """
+    ## Using Retrieved Context
+
+    You have been provided with relevant Quran ayahs and/or Hadith from our knowledge base.
+    When using this context in your response:
+
+    1. **Cite sources accurately** - Use the exact surah:ayah or collection reference provided
+    2. **Prioritize retrieved context** - If the context directly answers the question, use it
+    3. **Cross-reference** - When multiple sources are provided, show how they relate
+    4. **Be transparent** - If the retrieved context doesn't fully answer the question, say so
+    5. **Don't fabricate** - Only cite sources that were actually provided in the context
+
+    Format citations like: (Quran 2:255) or (Sahih Bukhari 1234)
+    """
+
     // MARK: - Helper Methods
 
-    static func buildPrompt(context: ChatContext?) -> String {
+    static func buildPrompt(context: ChatContext?, ragContext: String? = nil) -> String {
         var prompt = islamicCompanion
+
+        // Add RAG instructions if context is provided
+        if let ragContext = ragContext, !ragContext.isEmpty {
+            prompt += "\n\n" + ragInstructions
+            prompt += "\n\n## Retrieved Knowledge Base Content\n"
+            prompt += ragContext
+        }
 
         if let context = context {
             prompt += "\n\n## Current Context\n"
@@ -221,15 +245,17 @@ struct PromptBuilder {
     let basePrompt: String
     let context: ChatContext?
     let userHistory: [String]
+    let ragContext: String?
 
-    init(context: ChatContext? = nil, userHistory: [String] = []) {
+    init(context: ChatContext? = nil, userHistory: [String] = [], ragContext: String? = nil) {
         self.basePrompt = SystemPrompts.islamicCompanion
         self.context = context
         self.userHistory = userHistory
+        self.ragContext = ragContext
     }
 
     func build() -> String {
-        var prompt = SystemPrompts.buildPrompt(context: context)
+        var prompt = SystemPrompts.buildPrompt(context: context, ragContext: ragContext)
 
         // Add conversation context if available
         if !userHistory.isEmpty {

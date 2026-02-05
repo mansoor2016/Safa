@@ -67,6 +67,8 @@ final class DownloadsViewModel {
     var isLoading = false
     var wifiOnlyEnabled = true
     var autoUpdateEnabled = false
+    var retentionPeriod: RetentionPeriod = .threeMonths
+    var smartCleanupEnabled = true
 
     var totalDownloadedSize: Int64 {
         downloads.filter { $0.status == .downloaded }.reduce(0) { $0 + $1.size }
@@ -249,6 +251,9 @@ struct DownloadsView: View {
             // Settings section
             settingsSection
 
+            // Smart cleanup section
+            smartCleanupSection
+
             // Downloads by category
             ForEach(DownloadCategory.allCases, id: \.self) { category in
                 if let items = viewModel.downloadsByCategory[category], !items.isEmpty {
@@ -379,6 +384,42 @@ struct DownloadsView: View {
             Text("Settings")
         } footer: {
             Text("Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi.")
+        }
+    }
+
+    // MARK: - Smart Cleanup Section
+
+    private var smartCleanupSection: some View {
+        Section {
+            Toggle(isOn: $viewModel.smartCleanupEnabled) {
+                HStack {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(.purple)
+                    Text("Smart Cleanup")
+                }
+            }
+
+            if viewModel.smartCleanupEnabled {
+                Picker(selection: $viewModel.retentionPeriod) {
+                    ForEach(RetentionPeriod.allCases) { period in
+                        Text(period.displayName).tag(period)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .foregroundStyle(.orange)
+                        Text("Retention Period")
+                    }
+                }
+            }
+        } header: {
+            Text("Smart Cleanup")
+        } footer: {
+            if viewModel.smartCleanupEnabled {
+                Text(viewModel.retentionPeriod.description)
+            } else {
+                Text("Enable Smart Cleanup to automatically remove audio files you haven't listened to in a while.")
+            }
         }
     }
 }

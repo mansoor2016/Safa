@@ -1,8 +1,9 @@
 // MARK: - AppRouter.swift
 // PURPOSE: Centralized navigation coordinator with deep link support
-// DEPENDENCIES: SwiftUI
+// DEPENDENCIES: SwiftUI, CoreSpotlight
 
 import SwiftUI
+import CoreSpotlight
 
 @Observable
 final class AppRouter {
@@ -189,6 +190,66 @@ final class AppRouter {
 
         case "family":
             navigate(to: .family)
+            return true
+
+        default:
+            return false
+        }
+    }
+
+    // MARK: - Spotlight Result Handling
+
+    /// Handles Spotlight search result selection
+    /// - Parameter userActivity: The user activity from Spotlight
+    /// - Returns: True if the result was handled successfully
+    @discardableResult
+    func handleSpotlightResult(_ userActivity: NSUserActivity) -> Bool {
+        guard userActivity.activityType == CSSearchableItemActionType,
+              let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String else {
+            return false
+        }
+
+        return handleSpotlightIdentifier(identifier)
+    }
+
+    /// Handles a Spotlight item identifier
+    /// - Parameter identifier: The unique identifier from CoreSpotlight
+    /// - Returns: True if the identifier was handled successfully
+    @discardableResult
+    func handleSpotlightIdentifier(_ identifier: String) -> Bool {
+        let components = identifier.split(separator: "_")
+        guard components.count >= 2 else { return false }
+
+        let type = String(components[0])
+
+        switch type {
+        case "surah":
+            guard let number = Int(components[1]) else { return false }
+            navigate(to: .surah(number: number))
+            return true
+
+        case "ayah":
+            guard components.count >= 3,
+                  let surah = Int(components[1]),
+                  let ayah = Int(components[2]) else { return false }
+            navigate(to: .ayah(surah: surah, ayah: ayah))
+            return true
+
+        case "hadith":
+            let collection = String(components[1])
+            let hadithId = components.count > 2 ? String(components[2]) : nil
+            navigate(to: .hadith(collection: collection, hadithId: hadithId))
+            return true
+
+        case "dua":
+            // Navigate to dhikr view for duas
+            navigate(to: .dhikr)
+            return true
+
+        case "name":
+            // Navigate to a names of Allah destination (could be added later)
+            // For now, navigate to dhikr which contains related content
+            navigate(to: .dhikr)
             return true
 
         default:

@@ -275,6 +275,11 @@ struct UserPreferences: Codable, Hashable {
     var savedCountryCode: String?
     var useLocationBasedDefaults: Bool
 
+    // Accessibility preferences
+    var reduceMotionEnabled: Bool
+    var largerArabicTextEnabled: Bool
+    var highContrastEnabled: Bool
+
     init(
         calculationMethod: CalculationMethod = AppDefaults.calculationMethod,
         madhab: Madhab = AppDefaults.madhab,
@@ -289,7 +294,10 @@ struct UserPreferences: Codable, Hashable {
         savedLatitude: Double? = nil,
         savedLongitude: Double? = nil,
         savedCountryCode: String? = nil,
-        useLocationBasedDefaults: Bool = AppDefaults.useLocationBasedDefaults
+        useLocationBasedDefaults: Bool = AppDefaults.useLocationBasedDefaults,
+        reduceMotionEnabled: Bool = false,
+        largerArabicTextEnabled: Bool = false,
+        highContrastEnabled: Bool = false
     ) {
         self.calculationMethod = calculationMethod
         self.madhab = madhab
@@ -305,6 +313,9 @@ struct UserPreferences: Codable, Hashable {
         self.savedLongitude = savedLongitude
         self.savedCountryCode = savedCountryCode
         self.useLocationBasedDefaults = useLocationBasedDefaults
+        self.reduceMotionEnabled = reduceMotionEnabled
+        self.largerArabicTextEnabled = largerArabicTextEnabled
+        self.highContrastEnabled = highContrastEnabled
     }
 
     /// Apply location context to preferences

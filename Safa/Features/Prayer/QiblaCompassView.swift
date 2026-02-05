@@ -15,6 +15,28 @@ struct QiblaCompassView: View {
     @State private var isLoading = true
     @State private var error: Error?
 
+    // Haptic feedback state
+    @State private var previousAlignmentZone: AlignmentZone = .far
+    @State private var hapticFeedbackEnabled = true
+
+    // Alignment zones for directional haptic feedback
+    private enum AlignmentZone {
+        case perfect    // Within 5 degrees
+        case close      // Within 15 degrees
+        case near       // Within 30 degrees
+        case far        // More than 30 degrees
+
+        static func from(angle: Double) -> AlignmentZone {
+            let normalizedAngle = min(angle, 360 - angle)
+            switch normalizedAngle {
+            case 0..<5: return .perfect
+            case 5..<15: return .close
+            case 15..<30: return .near
+            default: return .far
+            }
+        }
+    }
+
     var body: some View {
         VStack(spacing: SafaSpacing.xl) {
             if isLoading {
@@ -57,17 +79,28 @@ struct QiblaCompassView: View {
                 Image(systemName: "building.columns.fill")
                     .font(.system(size: 40))
                     .foregroundColor(.accentColor)
+                    .accessibilityHidden(true)
 
                 Text("Kaaba")
                     .font(SafaTypography.labelMedium)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Direction to Kaaba in Makkah")
 
             // Compass
             CompassView(
                 qiblaDirection: qiblaDirection,
                 deviceHeading: deviceHeading
             )
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(compassAccessibilityLabel)
+            .accessibilityHint("Rotate your device to align with the Qibla direction")
+            .onChange(of: deviceHeading) { _, newHeading in
+                if hapticFeedbackEnabled {
+                    provideDirectionalHapticFeedback(heading: newHeading)
+                }
+            }
 
             // Direction info
             VStack(spacing: SafaSpacing.xs) {
@@ -79,6 +112,11 @@ struct QiblaCompassView: View {
                     .font(SafaTypography.headlineSmall)
                     .foregroundColor(SafaColors.Fallback.text)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Qibla direction is \(Int(qiblaDirection)) degrees from North")
+
+            // Alignment indicator
+            alignmentIndicator
 
             // Instructions
             Text("Point the top of your phone towards the arrow to face the Qibla")
@@ -86,6 +124,50 @@ struct QiblaCompassView: View {
                 .foregroundColor(SafaColors.Fallback.tertiaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Alignment Indicator
+
+    private var alignmentIndicator: some View {
+        let relativeAngle = (qiblaDirection - deviceHeading + 360).truncatingRemainder(dividingBy: 360)
+        let zone = AlignmentZone.from(angle: relativeAngle)
+
+        return HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: zone == .perfect ? "checkmark.circle.fill" : "arrow.up")
+                .foregroundColor(zone == .perfect ? .green : .accentColor)
+
+            Text(alignmentStatusText(for: zone))
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(zone == .perfect ? .green : SafaColors.Fallback.secondaryText)
+        }
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm)
+                .fill(zone == .perfect ? Color.green.opacity(0.15) : Color.gray.opacity(0.1))
+        )
+        .accessibilityLabel(alignmentStatusText(for: zone))
+    }
+
+    private func alignmentStatusText(for zone: AlignmentZone) -> String {
+        switch zone {
+        case .perfect: return "Facing Qibla"
+        case .close: return "Almost there"
+        case .near: return "Getting closer"
+        case .far: return "Keep turning"
+        }
+    }
+
+    private var compassAccessibilityLabel: String {
+        let relativeAngle = (qiblaDirection - deviceHeading + 360).truncatingRemainder(dividingBy: 360)
+
+        if relativeAngle < 10 || relativeAngle > 350 {
+            return "You are facing the Qibla direction"
+        } else if relativeAngle <= 180 {
+            return "Turn \(Int(relativeAngle)) degrees to your right to face the Qibla"
+        } else {
+            return "Turn \(Int(360 - relativeAngle)) degrees to your left to face the Qibla"
         }
     }
 
@@ -117,6 +199,36 @@ struct QiblaCompassView: View {
 
     private func stopHeadingUpdates() {
         dependencies.locationService.stopUpdatingHeading()
+    }
+
+    // MARK: - Haptic Feedback
+
+    private func provideDirectionalHapticFeedback(heading: Double) {
+        let relativeAngle = (qiblaDirection - heading + 360).truncatingRemainder(dividingBy: 360)
+        let currentZone = AlignmentZone.from(angle: relativeAngle)
+
+        // Only provide feedback when entering a new zone
+        guard currentZone != previousAlignmentZone else { return }
+
+        switch currentZone {
+        case .perfect:
+            // Strong success haptic when perfectly aligned
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        case .close:
+            // Medium haptic when getting close
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+        case .near:
+            // Light haptic when moderately close
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        case .far:
+            // No haptic when far away
+            break
+        }
+
+        previousAlignmentZone = currentZone
     }
 }
 

@@ -1,6 +1,6 @@
 // MARK: - SettingsView.swift
 // PURPOSE: App settings and preferences
-// DEPENDENCIES: SwiftUI
+// DEPENDENCIES: SwiftUI, PreferencesManager
 
 import SwiftUI
 
@@ -20,33 +20,29 @@ struct SettingsView: View {
     @State private var selectedAccentColor: AccentColorOption = .teal
     @State private var showDeleteConfirmation = false
 
+    // Accessibility state
+    @State private var reduceMotionEnabled = false
+    @State private var largerTextEnabled = false
+    @State private var highContrastEnabled = false
+
     // Location state
     @State private var savedLocationName: String?
     @State private var locationContext: LocationContext?
     @State private var isUpdatingLocation = false
     @State private var showLocationRecommendations = false
+    @State private var showInviteFriendsSheet = false
+
+    private let prefsManager = PreferencesManager.shared
 
     var body: some View {
         List {
-            // Location Section
             locationSection
-
-            // Prayer Settings
             prayerSettingsSection
-
-            // Notifications
             notificationSettingsSection
-
-            // Quran Settings
             quranSettingsSection
-
-            // Appearance
             appearanceSection
-
-            // Data & Privacy
+            accessibilitySection
             dataPrivacySection
-
-            // About
             aboutSection
         }
         .navigationTitle("Settings")
@@ -70,7 +66,7 @@ struct SettingsView: View {
                         selectedCalculationMethod = method
                         selectedMadhab = madhab
                         selectedTranslation = language
-                        await saveAllLocationSettings(method: method, madhab: madhab, language: language)
+                        await prefsManager.saveLocationSettings(method: method, madhab: madhab, language: language)
                     }
                 }
             )
@@ -84,7 +80,6 @@ struct SettingsView: View {
 
     private var locationSection: some View {
         Section {
-            // Current location display
             HStack {
                 Image(systemName: "mappin.circle.fill")
                     .foregroundColor(.accentColor)
@@ -107,7 +102,6 @@ struct SettingsView: View {
                 }
             }
 
-            // Update location button
             Button {
                 Task { await updateLocation() }
             } label: {
@@ -118,7 +112,6 @@ struct SettingsView: View {
             }
             .disabled(isUpdatingLocation)
 
-            // Show recommendations if available
             if locationContext != nil {
                 Button {
                     showLocationRecommendations = true
@@ -171,7 +164,7 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: selectedCalculationMethod) { _, newValue in
-                Task { await saveCalculationMethod(newValue) }
+                Task { await prefsManager.saveCalculationMethod(newValue) }
             }
 
             HStack {
@@ -188,7 +181,7 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: selectedMadhab) { _, newValue in
-                Task { await saveMadhab(newValue) }
+                Task { await prefsManager.saveMadhab(newValue) }
             }
 
             NavigationLink {
@@ -218,14 +211,11 @@ struct SettingsView: View {
         Section {
             Toggle("Prayer Notifications", isOn: $notificationsEnabled)
                 .onChange(of: notificationsEnabled) { _, newValue in
-                    Task { await saveNotificationSetting(newValue) }
+                    Task { await prefsManager.saveNotificationsEnabled(newValue) }
                 }
 
             if notificationsEnabled {
                 Toggle("Adhan Sound", isOn: $adhanEnabled)
-                    .onChange(of: adhanEnabled) { _, newValue in
-                        Task { await saveAdhanSetting(newValue) }
-                    }
 
                 if adhanEnabled {
                     Picker("Adhan Style", selection: $selectedAdhanSound) {
@@ -253,12 +243,12 @@ struct SettingsView: View {
         Section {
             Toggle("Show Arabic Text", isOn: $showArabicText)
                 .onChange(of: showArabicText) { _, newValue in
-                    Task { await saveQuranSetting("showArabic", value: newValue) }
+                    Task { await prefsManager.saveQuranSettings(showArabic: newValue) }
                 }
 
             Toggle("Show Transliteration", isOn: $showTransliteration)
                 .onChange(of: showTransliteration) { _, newValue in
-                    Task { await saveQuranSetting("showTransliteration", value: newValue) }
+                    Task { await prefsManager.saveQuranSettings(showTransliteration: newValue) }
                 }
 
             HStack {
@@ -272,11 +262,7 @@ struct SettingsView: View {
                     Text("Bengali").tag("Bengali")
                 }
                 .onChange(of: selectedTranslation) { _, newValue in
-                    Task {
-                        var prefs = await dependencies.userRepository.getPreferences()
-                        prefs.selectedTranslation = newValue
-                        try? await dependencies.userRepository.updatePreferences(prefs)
-                    }
+                    Task { await prefsManager.saveTranslation(newValue) }
                 }
 
                 if let context = locationContext, selectedTranslation == context.recommendedLanguage {
@@ -306,7 +292,7 @@ struct SettingsView: View {
         Section {
             Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
                 .onChange(of: hapticFeedbackEnabled) { _, newValue in
-                    Task { await saveHapticSetting(newValue) }
+                    Task { await prefsManager.saveHapticFeedback(newValue) }
                 }
 
             Picker("Accent Color", selection: $selectedAccentColor) {
@@ -320,11 +306,39 @@ struct SettingsView: View {
                     .tag(option)
                 }
             }
-            .onChange(of: selectedAccentColor) { _, newValue in
-                Task { await saveAccentColor(newValue) }
-            }
         } header: {
             Text("Appearance")
+        }
+    }
+
+    // MARK: - Accessibility Section
+
+    private var accessibilitySection: some View {
+        Section {
+            Toggle("Reduce Motion", isOn: $reduceMotionEnabled)
+                .onChange(of: reduceMotionEnabled) { _, newValue in
+                    Task { await prefsManager.saveAccessibility(reduceMotion: newValue) }
+                }
+
+            Toggle("Larger Arabic Text", isOn: $largerTextEnabled)
+                .onChange(of: largerTextEnabled) { _, newValue in
+                    Task { await prefsManager.saveAccessibility(largerText: newValue) }
+                }
+
+            Toggle("High Contrast", isOn: $highContrastEnabled)
+                .onChange(of: highContrastEnabled) { _, newValue in
+                    Task { await prefsManager.saveAccessibility(highContrast: newValue) }
+                }
+
+            NavigationLink {
+                AccessibilityInfoView()
+            } label: {
+                Text("VoiceOver Tips")
+            }
+        } header: {
+            Text("Accessibility")
+        } footer: {
+            Text("Safa supports Dynamic Type, VoiceOver, and other iOS accessibility features. These settings provide additional customization.")
         }
     }
 
@@ -362,30 +376,43 @@ struct SettingsView: View {
                     .foregroundColor(SafaColors.Fallback.secondaryText)
             }
 
+            Button {
+                showInviteFriendsSheet = true
+            } label: {
+                HStack {
+                    Label("Share Safa", systemImage: "square.and.arrow.up")
+                    Spacer()
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+            }
+            .sheet(isPresented: $showInviteFriendsSheet) {
+                InviteFriendsView()
+            }
+
             NavigationLink {
                 AcknowledgementsView()
             } label: {
                 Text("Acknowledgements")
             }
 
-            Link(destination: URL(string: "https://safa.app/privacy")!) {
-                HStack {
-                    Text("Privacy Policy")
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
+            NavigationLink {
+                PrivacyPolicyView()
+            } label: {
+                Text("Privacy Policy")
             }
 
-            Link(destination: URL(string: "https://safa.app/terms")!) {
-                HStack {
-                    Text("Terms of Service")
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
+            NavigationLink {
+                TermsOfServiceView()
+            } label: {
+                Text("Terms of Service")
+            }
+
+            NavigationLink {
+                RequestFeatureView()
+            } label: {
+                Text("Request a Feature")
             }
 
             NavigationLink {
@@ -401,13 +428,18 @@ struct SettingsView: View {
     // MARK: - Load/Save Methods
 
     private func loadSettings() async {
-        let prefs = await dependencies.userRepository.getPreferences()
+        let prefs = await prefsManager.getPreferences()
         selectedCalculationMethod = prefs.calculationMethod
         selectedMadhab = prefs.madhab
         selectedTranslation = prefs.selectedTranslation
         notificationsEnabled = prefs.notificationsEnabled
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
         savedLocationName = prefs.savedLocationName
+
+        // Load accessibility settings
+        reduceMotionEnabled = prefs.reduceMotionEnabled
+        largerTextEnabled = prefs.largerArabicTextEnabled
+        highContrastEnabled = prefs.highContrastEnabled
 
         // Load location context if we have saved coordinates
         if let coords = prefs.savedCoordinates {
@@ -425,13 +457,13 @@ struct SettingsView: View {
                 self.isUpdatingLocation = false
             }
 
-            // Save location to preferences
-            var prefs = await dependencies.userRepository.getPreferences()
-            prefs.savedLocationName = context.regionName
-            prefs.savedLatitude = context.coordinates.latitude
-            prefs.savedLongitude = context.coordinates.longitude
-            prefs.savedCountryCode = context.countryCode
-            try? await dependencies.userRepository.updatePreferences(prefs)
+            // Save location using PreferencesManager
+            await prefsManager.saveLocation(
+                name: context.regionName,
+                latitude: context.coordinates.latitude,
+                longitude: context.coordinates.longitude,
+                countryCode: context.countryCode
+            )
         } catch {
             await MainActor.run {
                 self.isUpdatingLocation = false
@@ -439,307 +471,9 @@ struct SettingsView: View {
         }
     }
 
-    private func saveCalculationMethod(_ method: CalculationMethod) async {
-        var prefs = await dependencies.userRepository.getPreferences()
-        prefs.calculationMethod = method
-        try? await dependencies.userRepository.updatePreferences(prefs)
-    }
-
-    private func saveMadhab(_ madhab: Madhab) async {
-        var prefs = await dependencies.userRepository.getPreferences()
-        prefs.madhab = madhab
-        try? await dependencies.userRepository.updatePreferences(prefs)
-    }
-
-    private func saveAllLocationSettings(method: CalculationMethod, madhab: Madhab, language: String) async {
-        var prefs = await dependencies.userRepository.getPreferences()
-        prefs.calculationMethod = method
-        prefs.madhab = madhab
-        prefs.selectedTranslation = language
-        try? await dependencies.userRepository.updatePreferences(prefs)
-    }
-
-    private func saveNotificationSetting(_ enabled: Bool) async {
-        var prefs = await dependencies.userRepository.getPreferences()
-        prefs.notificationsEnabled = enabled
-        try? await dependencies.userRepository.updatePreferences(prefs)
-    }
-
-    private func saveAdhanSetting(_ enabled: Bool) async {
-        // Save to preferences
-    }
-
-    private func saveQuranSetting(_ key: String, value: Bool) async {
-        // Save to preferences
-    }
-
-    private func saveHapticSetting(_ enabled: Bool) async {
-        var prefs = await dependencies.userRepository.getPreferences()
-        prefs.hapticFeedbackEnabled = enabled
-        try? await dependencies.userRepository.updatePreferences(prefs)
-    }
-
-    private func saveAccentColor(_ color: AccentColorOption) async {
-        // Save to preferences
-    }
-
     private func deleteAllData() async {
-        // Clear all user data
         try? await dependencies.chatRepository.clearHistory()
         // Reset other data...
-    }
-}
-
-// MARK: - Location Recommendations Sheet
-
-private struct LocationRecommendationsSheet: View {
-    let context: LocationContext?
-    let currentMethod: CalculationMethod
-    let currentMadhab: Madhab
-    let currentLanguage: String
-    let onApply: (CalculationMethod, Madhab, String) -> Void
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if let context = context {
-                    Section {
-                        HStack {
-                            Image(systemName: "mappin.circle.fill")
-                                .foregroundColor(.accentColor)
-                            Text(context.regionName)
-                                .font(SafaTypography.titleMedium)
-                        }
-                    }
-
-                    Section("Recommended Settings") {
-                        recommendationRow(
-                            title: "Calculation Method",
-                            current: currentMethod.displayName,
-                            recommended: context.recommendedMethod.displayName,
-                            isMatching: currentMethod == context.recommendedMethod
-                        )
-
-                        recommendationRow(
-                            title: "Madhab",
-                            current: currentMadhab.displayName,
-                            recommended: context.recommendedMadhab.displayName,
-                            isMatching: currentMadhab == context.recommendedMadhab
-                        )
-
-                        recommendationRow(
-                            title: "Translation",
-                            current: currentLanguage,
-                            recommended: context.recommendedLanguage,
-                            isMatching: currentLanguage == context.recommendedLanguage
-                        )
-                    }
-
-                    Section {
-                        Button {
-                            onApply(context.recommendedMethod, context.recommendedMadhab, context.recommendedLanguage)
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Spacer()
-                                Text("Apply All Recommendations")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                        }
-                        .disabled(
-                            currentMethod == context.recommendedMethod &&
-                            currentMadhab == context.recommendedMadhab &&
-                            currentLanguage == context.recommendedLanguage
-                        )
-                    }
-
-                    Section {
-                        Text("These recommendations are based on common practices in your region. You can always customize these settings to match your preference or local mosque.")
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                    }
-                }
-            }
-            .navigationTitle("Recommendations")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-    }
-
-    private func recommendationRow(title: String, current: String, recommended: String, isMatching: Bool) -> some View {
-        VStack(alignment: .leading, spacing: SafaSpacing.xs) {
-            Text(title)
-                .font(SafaTypography.labelMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Current: \(current)")
-                        .font(SafaTypography.bodyMedium)
-                    Text("Recommended: \(recommended)")
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.accentColor)
-                }
-
-                Spacer()
-
-                if isMatching {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                } else {
-                    Image(systemName: "arrow.right.circle")
-                        .foregroundColor(.orange)
-                }
-            }
-        }
-        .padding(.vertical, SafaSpacing.xxs)
-    }
-}
-
-// MARK: - Placeholder Views
-
-private struct PrayerAdjustmentsView: View {
-    var body: some View {
-        List {
-            ForEach(PrayerType.allCases) { prayer in
-                if prayer.isObligatory {
-                    Stepper("\(prayer.displayName): 0 min", value: .constant(0), in: -30...30)
-                }
-            }
-        }
-        .navigationTitle("Adjustments")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct NotificationScheduleView: View {
-    var body: some View {
-        List {
-            ForEach(PrayerType.allCases) { prayer in
-                if prayer.isObligatory {
-                    Toggle(prayer.displayName, isOn: .constant(true))
-                }
-            }
-        }
-        .navigationTitle("Schedule")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct FontSettingsView: View {
-    @State private var arabicFontSize: Double = 28
-    @State private var translationFontSize: Double = 16
-
-    var body: some View {
-        List {
-            Section("Arabic") {
-                VStack {
-                    Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
-                        .font(.system(size: arabicFontSize))
-                    Slider(value: $arabicFontSize, in: 20...40, step: 2)
-                }
-            }
-
-            Section("Translation") {
-                VStack {
-                    Text("In the name of Allah, the Most Gracious, the Most Merciful")
-                        .font(.system(size: translationFontSize))
-                    Slider(value: $translationFontSize, in: 12...24, step: 1)
-                }
-            }
-        }
-        .navigationTitle("Font Settings")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct DataExportView: View {
-    var body: some View {
-        VStack(spacing: SafaSpacing.lg) {
-            Image(systemName: "square.and.arrow.up")
-                .font(.system(size: 48))
-                .foregroundColor(.accentColor)
-
-            Text("Export Your Data")
-                .font(SafaTypography.headlineMedium)
-
-            Text("Download a copy of your Safa data including bookmarks, progress, and settings.")
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-                .multilineTextAlignment(.center)
-
-            Button("Export as JSON") {
-                // Export functionality
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
-        .navigationTitle("Export Data")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct AcknowledgementsView: View {
-    var body: some View {
-        List {
-            Section("Data Sources") {
-                Text("Quran text from Tanzil.net")
-                Text("Prayer time calculations from PrayTimes.org")
-                Text("Hadith from Sunnah.com")
-            }
-
-            Section("Open Source") {
-                Text("SwiftUI")
-                Text("Core ML")
-                Text("Core Location")
-            }
-
-            Section("Special Thanks") {
-                Text("The Muslim developer community")
-                Text("Beta testers and early users")
-            }
-        }
-        .navigationTitle("Acknowledgements")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct FeedbackView: View {
-    @State private var feedbackType = "Bug Report"
-    @State private var feedbackText = ""
-
-    var body: some View {
-        Form {
-            Picker("Type", selection: $feedbackType) {
-                Text("Bug Report").tag("Bug Report")
-                Text("Feature Request").tag("Feature Request")
-                Text("General Feedback").tag("General Feedback")
-            }
-
-            Section("Description") {
-                TextEditor(text: $feedbackText)
-                    .frame(minHeight: 150)
-            }
-
-            Section {
-                Button("Send Feedback") {
-                    // Send feedback
-                }
-                .disabled(feedbackText.isEmpty)
-            }
-        }
-        .navigationTitle("Feedback")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

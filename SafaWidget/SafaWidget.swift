@@ -358,8 +358,7 @@ struct AccessoryInlineView: View {
 
 // MARK: - Widget Definition
 
-@main
-struct SafaWidget: Widget {
+struct PrayerTimesWidget: Widget {
     let kind: String = "SafaWidget"
 
     var body: some WidgetConfiguration {
@@ -377,6 +376,18 @@ struct SafaWidget: Widget {
             .accessoryRectangular,
             .accessoryInline
         ])
+    }
+}
+
+// MARK: - Widget Bundle
+
+@main
+struct SafaWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        PrayerTimesWidget()
+        InteractivePrayerWidget()
+        TasbeehWidget()
+        StandByPrayerWidget()
     }
 }
 

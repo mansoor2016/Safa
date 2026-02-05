@@ -10,19 +10,82 @@ struct ChatView: View {
 
     var body: some View {
         Group {
-            if let viewModel = viewModel {
+            let availability = dependencies.llmService.availability
+            if !availability.isAvailable {
+                // Show fallback for older iOS versions
+                AIUnavailableView(message: availability.userMessage)
+            } else if let viewModel = viewModel {
                 ChatContentView(viewModel: viewModel)
             } else {
                 LoadingView(message: "Loading chat...")
             }
         }
         .task {
-            if viewModel == nil {
+            if viewModel == nil && dependencies.llmService.availability.isAvailable {
                 viewModel = ChatViewModel(
                     chatRepository: dependencies.chatRepository
                 )
             }
         }
+    }
+}
+
+// MARK: - AI Unavailable View
+
+private struct AIUnavailableView: View {
+    let message: String
+
+    var body: some View {
+        VStack(spacing: SafaSpacing.lg) {
+            Spacer()
+
+            Image(systemName: "sparkles")
+                .font(.system(size: 64))
+                .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+            Text("AI Companion")
+                .font(SafaTypography.headlineMedium)
+                .foregroundColor(SafaColors.Fallback.text)
+
+            Text(message)
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, SafaSpacing.xl)
+
+            // Alternative actions
+            VStack(spacing: SafaSpacing.sm) {
+                Text("In the meantime, explore:")
+                    .font(SafaTypography.labelMedium)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+                HStack(spacing: SafaSpacing.md) {
+                    alternativeButton(icon: "book.fill", label: "Quran")
+                    alternativeButton(icon: "quote.bubble.fill", label: "Hadith")
+                    alternativeButton(icon: "hands.sparkles.fill", label: "Duas")
+                }
+            }
+            .padding(.top, SafaSpacing.lg)
+
+            Spacer()
+        }
+        .navigationTitle("Ask Safa")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func alternativeButton(icon: String, label: String) -> some View {
+        VStack(spacing: SafaSpacing.xs) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.accentColor)
+
+            Text(label)
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+        }
+        .frame(width: 80, height: 80)
+        .background(Color(UIColor.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
     }
 }
 

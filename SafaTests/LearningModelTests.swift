@@ -1,267 +1,334 @@
 // MARK: - LearningModelTests.swift
-// PURPOSE: Unit tests for Learning domain models
-// DEPENDENCIES: XCTest
+// PURPOSE: Unit tests for Learning domain entities
 
 import XCTest
 @testable import Safa
 
 final class LearningModelTests: XCTestCase {
 
-    // MARK: - Learning Track Tests
+    // MARK: - LearningTrack Tests
 
-    func testLearningTrackInitialization() {
+    func testLearningTrackCreation() {
         let track = LearningTrack(
-            id: "arabic_alphabet",
-            name: "Arabic Alphabet",
-            arabicName: "الحروف العربية",
-            description: "Learn Arabic letters",
-            iconName: "textformat.abc",
-            difficulty: .beginner,
-            estimatedHours: 10,
-            lessons: []
+            id: "test_track",
+            titleEnglish: "Test Track",
+            titleArabic: "مسار اختبار",
+            description: "A test learning track",
+            iconName: "star",
+            lessonCount: 10,
+            estimatedMinutes: 60
         )
 
-        XCTAssertEqual(track.id, "arabic_alphabet")
-        XCTAssertEqual(track.name, "Arabic Alphabet")
-        XCTAssertEqual(track.difficulty, .beginner)
-        XCTAssertEqual(track.estimatedHours, 10)
+        XCTAssertEqual(track.id, "test_track")
+        XCTAssertEqual(track.titleEnglish, "Test Track")
+        XCTAssertEqual(track.titleArabic, "مسار اختبار")
+        XCTAssertEqual(track.description, "A test learning track")
+        XCTAssertEqual(track.iconName, "star")
+        XCTAssertEqual(track.lessonCount, 10)
+        XCTAssertEqual(track.estimatedMinutes, 60)
     }
 
-    func testLearningTrackDifficultyLevels() {
-        XCTAssertEqual(LearningDifficulty.beginner.rawValue, "beginner")
-        XCTAssertEqual(LearningDifficulty.intermediate.rawValue, "intermediate")
-        XCTAssertEqual(LearningDifficulty.advanced.rawValue, "advanced")
+    func testStaticArabicFoundationsTrack() {
+        let track = LearningTrack.arabicFoundations
+
+        XCTAssertEqual(track.id, "arabic_foundations")
+        XCTAssertEqual(track.titleEnglish, "Arabic Foundations")
+        XCTAssertEqual(track.lessonCount, 28) // 28 Arabic letters
+        XCTAssertEqual(track.estimatedMinutes, 120)
     }
 
-    func testLearningTrackDifficultyDisplayNames() {
-        XCTAssertEqual(LearningDifficulty.beginner.displayName, "Beginner")
-        XCTAssertEqual(LearningDifficulty.intermediate.displayName, "Intermediate")
-        XCTAssertEqual(LearningDifficulty.advanced.displayName, "Advanced")
+    func testStaticTajweedTrack() {
+        let track = LearningTrack.tajweed
+
+        XCTAssertEqual(track.id, "tajweed")
+        XCTAssertEqual(track.titleEnglish, "Tajweed Rules")
+        XCTAssertEqual(track.lessonCount, 20)
+    }
+
+    func testStaticQuranRecitationTrack() {
+        let track = LearningTrack.quranRecitation
+
+        XCTAssertEqual(track.id, "quran_recitation")
+        XCTAssertEqual(track.lessonCount, 30)
+    }
+
+    func testStaticDhikrMasteryTrack() {
+        let track = LearningTrack.dhikrMastery
+
+        XCTAssertEqual(track.id, "dhikr_mastery")
+        XCTAssertEqual(track.lessonCount, 15)
+    }
+
+    func testAllTracksContainsFourTracks() {
+        XCTAssertEqual(LearningTrack.allTracks.count, 4)
+        XCTAssertTrue(LearningTrack.allTracks.contains { $0.id == "arabic_foundations" })
+        XCTAssertTrue(LearningTrack.allTracks.contains { $0.id == "tajweed" })
+        XCTAssertTrue(LearningTrack.allTracks.contains { $0.id == "quran_recitation" })
+        XCTAssertTrue(LearningTrack.allTracks.contains { $0.id == "dhikr_mastery" })
     }
 
     // MARK: - Lesson Tests
 
-    func testLessonInitialization() {
+    func testLessonCreation() {
         let lesson = Lesson(
-            id: "alif",
-            trackId: "arabic_alphabet",
-            title: "Alif (ا)",
-            description: "The first letter",
-            orderIndex: 1,
-            content: [],
-            isLocked: false,
-            isCompleted: false
+            id: "lesson1",
+            trackId: "arabic_foundations",
+            order: 1,
+            titleEnglish: "Letter Alif",
+            durationMinutes: 5,
+            type: .reading
         )
 
-        XCTAssertEqual(lesson.id, "alif")
-        XCTAssertEqual(lesson.trackId, "arabic_alphabet")
-        XCTAssertEqual(lesson.orderIndex, 1)
-        XCTAssertFalse(lesson.isLocked)
+        XCTAssertEqual(lesson.id, "lesson1")
+        XCTAssertEqual(lesson.trackId, "arabic_foundations")
+        XCTAssertEqual(lesson.order, 1)
+        XCTAssertEqual(lesson.titleEnglish, "Letter Alif")
+        XCTAssertEqual(lesson.durationMinutes, 5)
+        XCTAssertEqual(lesson.type, .reading)
         XCTAssertFalse(lesson.isCompleted)
+        XCTAssertNil(lesson.bestScore)
+        XCTAssertTrue(lesson.content.isEmpty)
     }
 
-    func testLessonLockStatus() {
-        let unlockedLesson = Lesson(
-            id: "1",
-            trackId: "test",
-            title: "Test",
-            description: "Test",
-            orderIndex: 1,
-            content: [],
-            isLocked: false,
-            isCompleted: false
+    func testLessonWithAllParameters() {
+        let steps = [
+            LessonStep(type: .reading, title: "Step 1"),
+            LessonStep(type: .pronunciation, arabicText: "أ")
+        ]
+
+        let lesson = Lesson(
+            id: "lesson2",
+            trackId: "arabic_foundations",
+            order: 2,
+            titleEnglish: "Letter Ba",
+            titleArabic: "حرف الباء",
+            description: "Learn the letter Ba",
+            durationMinutes: 10,
+            type: .pronunciation,
+            isCompleted: true,
+            bestScore: 95,
+            content: steps
         )
 
-        let lockedLesson = Lesson(
-            id: "2",
-            trackId: "test",
-            title: "Test 2",
-            description: "Test 2",
-            orderIndex: 2,
-            content: [],
-            isLocked: true,
-            isCompleted: false
-        )
-
-        XCTAssertFalse(unlockedLesson.isLocked)
-        XCTAssertTrue(lockedLesson.isLocked)
+        XCTAssertEqual(lesson.titleArabic, "حرف الباء")
+        XCTAssertEqual(lesson.description, "Learn the letter Ba")
+        XCTAssertTrue(lesson.isCompleted)
+        XCTAssertEqual(lesson.bestScore, 95)
+        XCTAssertEqual(lesson.content.count, 2)
     }
 
-    // MARK: - Lesson Step Tests
+    func testLessonTypes() {
+        XCTAssertEqual(Lesson.LessonType.reading.rawValue, "reading")
+        XCTAssertEqual(Lesson.LessonType.listening.rawValue, "listening")
+        XCTAssertEqual(Lesson.LessonType.pronunciation.rawValue, "pronunciation")
+        XCTAssertEqual(Lesson.LessonType.quiz.rawValue, "quiz")
+        XCTAssertEqual(Lesson.LessonType.practice.rawValue, "practice")
+    }
 
-    func testLessonStepReading() {
+    // MARK: - LessonStep Tests
+
+    func testLessonStepCreation() {
         let step = LessonStep(
-            id: "step1",
             type: .reading,
             title: "Introduction",
-            body: "Learn about this topic",
-            arabicText: "عربي",
-            transliteration: "transliteration",
-            audioFileName: nil,
-            imageName: nil,
-            options: nil,
-            correctAnswer: nil,
-            explanation: nil
+            body: "Learn the basics"
         )
 
         XCTAssertEqual(step.type, .reading)
         XCTAssertEqual(step.title, "Introduction")
-        XCTAssertNotNil(step.arabicText)
+        XCTAssertEqual(step.body, "Learn the basics")
     }
 
-    func testLessonStepListening() {
+    func testLessonStepWithArabicContent() {
         let step = LessonStep(
-            id: "step2",
-            type: .listening,
-            title: "Listen",
-            body: "Listen to the sound",
-            arabicText: "ا",
-            transliteration: nil,
-            audioFileName: "alif.mp3",
-            imageName: nil,
-            options: nil,
-            correctAnswer: nil,
-            explanation: nil
+            type: .pronunciation,
+            arabicText: "بِسْمِ اللَّهِ",
+            transliteration: "Bismillah",
+            audioFileName: "bismillah.mp3"
         )
 
-        XCTAssertEqual(step.type, .listening)
-        XCTAssertNotNil(step.audioFileName)
+        XCTAssertEqual(step.arabicText, "بِسْمِ اللَّهِ")
+        XCTAssertEqual(step.transliteration, "Bismillah")
+        XCTAssertEqual(step.audioFileName, "bismillah.mp3")
     }
 
     func testLessonStepQuiz() {
         let step = LessonStep(
-            id: "step3",
             type: .quiz,
-            title: "Quiz",
-            body: "Select the correct answer",
-            arabicText: nil,
-            transliteration: nil,
-            audioFileName: nil,
-            imageName: nil,
-            options: ["A", "B", "C", "D"],
-            correctAnswer: "A",
-            explanation: "A is correct because..."
+            options: ["A", "B", "C"],
+            correctAnswer: "B",
+            explanation: "B is correct because..."
         )
 
         XCTAssertEqual(step.type, .quiz)
-        XCTAssertEqual(step.options?.count, 4)
-        XCTAssertEqual(step.correctAnswer, "A")
-        XCTAssertNotNil(step.explanation)
+        XCTAssertEqual(step.options, ["A", "B", "C"])
+        XCTAssertEqual(step.correctAnswer, "B")
+        XCTAssertEqual(step.explanation, "B is correct because...")
     }
 
     func testLessonStepTypes() {
-        XCTAssertEqual(LessonStepType.reading.rawValue, "reading")
-        XCTAssertEqual(LessonStepType.listening.rawValue, "listening")
-        XCTAssertEqual(LessonStepType.pronunciation.rawValue, "pronunciation")
-        XCTAssertEqual(LessonStepType.quiz.rawValue, "quiz")
-        XCTAssertEqual(LessonStepType.exercise.rawValue, "exercise")
+        XCTAssertEqual(LessonStep.StepType.reading.rawValue, "reading")
+        XCTAssertEqual(LessonStep.StepType.listening.rawValue, "listening")
+        XCTAssertEqual(LessonStep.StepType.pronunciation.rawValue, "pronunciation")
+        XCTAssertEqual(LessonStep.StepType.quiz.rawValue, "quiz")
+        XCTAssertEqual(LessonStep.StepType.exercise.rawValue, "exercise")
     }
 
-    // MARK: - Learning Progress Tests
+    // MARK: - TrackProgress Tests
 
-    func testLearningProgressInitialization() {
+    func testTrackProgressCreation() {
+        let progress = TrackProgress(
+            trackId: "arabic_foundations",
+            completedLessons: 5,
+            totalLessons: 28
+        )
+
+        XCTAssertEqual(progress.trackId, "arabic_foundations")
+        XCTAssertEqual(progress.completedLessons, 5)
+        XCTAssertEqual(progress.totalLessons, 28)
+        XCTAssertNil(progress.averageScore)
+        XCTAssertNil(progress.lastLessonId)
+        XCTAssertNil(progress.lastActivityDate)
+    }
+
+    func testTrackProgressCompletionPercentage() {
+        let progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 10,
+            totalLessons: 20
+        )
+
+        XCTAssertEqual(progress.completionPercentage, 50.0, accuracy: 0.001)
+    }
+
+    func testTrackProgressCompletionPercentageZero() {
+        let progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 0,
+            totalLessons: 10
+        )
+
+        XCTAssertEqual(progress.completionPercentage, 0.0, accuracy: 0.001)
+    }
+
+    func testTrackProgressCompletionPercentageFull() {
+        let progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 10,
+            totalLessons: 10
+        )
+
+        XCTAssertEqual(progress.completionPercentage, 100.0, accuracy: 0.001)
+    }
+
+    func testTrackProgressCompletionPercentageNoLessons() {
+        let progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 0,
+            totalLessons: 0
+        )
+
+        XCTAssertEqual(progress.completionPercentage, 0.0, accuracy: 0.001)
+    }
+
+    func testTrackProgressIsComplete() {
+        var progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 9,
+            totalLessons: 10
+        )
+
+        XCTAssertFalse(progress.isComplete)
+
+        progress.completedLessons = 10
+        XCTAssertTrue(progress.isComplete)
+
+        progress.completedLessons = 15 // More than total
+        XCTAssertTrue(progress.isComplete)
+    }
+
+    // MARK: - LearningProgress Tests
+
+    func testLearningProgressCreation() {
         let progress = LearningProgress(
-            lessonId: "alif",
-            isCompleted: true,
-            score: 85,
-            completedAt: Date()
+            totalLessonsCompleted: 50,
+            totalTracksCompleted: 2,
+            totalMinutesLearned: 300,
+            currentStreak: 7,
+            pronunciationAttempts: 100
         )
 
-        XCTAssertEqual(progress.lessonId, "alif")
-        XCTAssertTrue(progress.isCompleted)
-        XCTAssertEqual(progress.score, 85)
+        XCTAssertEqual(progress.totalLessonsCompleted, 50)
+        XCTAssertEqual(progress.totalTracksCompleted, 2)
+        XCTAssertEqual(progress.totalMinutesLearned, 300)
+        XCTAssertEqual(progress.currentStreak, 7)
+        XCTAssertEqual(progress.pronunciationAttempts, 100)
+        XCTAssertNil(progress.averagePronunciationScore)
     }
 
-    func testLearningProgressScore() {
-        let perfectScore = LearningProgress(
-            lessonId: "test",
-            isCompleted: true,
-            score: 100,
-            completedAt: Date()
+    func testLearningProgressWithAverageScore() {
+        let progress = LearningProgress(
+            totalLessonsCompleted: 20,
+            totalTracksCompleted: 1,
+            totalMinutesLearned: 120,
+            currentStreak: 3,
+            pronunciationAttempts: 50,
+            averagePronunciationScore: 85.5
         )
 
-        let passingScore = LearningProgress(
-            lessonId: "test2",
-            isCompleted: true,
-            score: 70,
-            completedAt: Date()
-        )
-
-        XCTAssertEqual(perfectScore.score, 100)
-        XCTAssertEqual(passingScore.score, 70)
+        XCTAssertEqual(progress.averagePronunciationScore ?? 0, 85.5, accuracy: 0.001)
     }
 
-    // MARK: - Track Progress Tests
-
-    func testTrackProgressCalculation() {
-        let track = LearningTrack(
-            id: "test",
-            name: "Test Track",
-            arabicName: "اختبار",
-            description: "Test",
-            iconName: "book",
-            difficulty: .beginner,
-            estimatedHours: 5,
-            lessons: [
-                Lesson(id: "1", trackId: "test", title: "L1", description: "", orderIndex: 1, content: [], isLocked: false, isCompleted: true),
-                Lesson(id: "2", trackId: "test", title: "L2", description: "", orderIndex: 2, content: [], isLocked: false, isCompleted: true),
-                Lesson(id: "3", trackId: "test", title: "L3", description: "", orderIndex: 3, content: [], isLocked: false, isCompleted: false),
-                Lesson(id: "4", trackId: "test", title: "L4", description: "", orderIndex: 4, content: [], isLocked: true, isCompleted: false)
-            ]
-        )
-
-        let completedCount = track.lessons.filter { $0.isCompleted }.count
-        let totalCount = track.lessons.count
-        let progress = Double(completedCount) / Double(totalCount)
-
-        XCTAssertEqual(completedCount, 2)
-        XCTAssertEqual(totalCount, 4)
-        XCTAssertEqual(progress, 0.5, accuracy: 0.01)
-    }
-
-    // MARK: - Encoding/Decoding Tests
-
-    func testLessonCodable() throws {
-        let original = Lesson(
-            id: "test",
-            trackId: "test_track",
-            title: "Test Lesson",
-            description: "Description",
-            orderIndex: 1,
-            content: [],
-            isLocked: false,
-            isCompleted: false
-        )
-
-        let encoder = JSONEncoder()
-        let data = try encoder.encode(original)
-
-        let decoder = JSONDecoder()
-        let decoded = try decoder.decode(Lesson.self, from: data)
-
-        XCTAssertEqual(original.id, decoded.id)
-        XCTAssertEqual(original.title, decoded.title)
-    }
+    // MARK: - Codable Tests
 
     func testLearningTrackCodable() throws {
-        let original = LearningTrack(
-            id: "test",
-            name: "Test",
-            arabicName: "اختبار",
-            description: "Test",
-            iconName: "book",
-            difficulty: .intermediate,
-            estimatedHours: 10,
-            lessons: []
-        )
+        let track = LearningTrack.arabicFoundations
 
         let encoder = JSONEncoder()
-        let data = try encoder.encode(original)
+        let data = try encoder.encode(track)
 
         let decoder = JSONDecoder()
         let decoded = try decoder.decode(LearningTrack.self, from: data)
 
-        XCTAssertEqual(original.id, decoded.id)
-        XCTAssertEqual(original.difficulty, decoded.difficulty)
+        XCTAssertEqual(decoded.id, track.id)
+        XCTAssertEqual(decoded.titleEnglish, track.titleEnglish)
+        XCTAssertEqual(decoded.lessonCount, track.lessonCount)
+    }
+
+    func testLessonCodable() throws {
+        let lesson = Lesson(
+            id: "test",
+            trackId: "arabic",
+            order: 1,
+            titleEnglish: "Test Lesson",
+            durationMinutes: 5,
+            type: .reading
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(lesson)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Lesson.self, from: data)
+
+        XCTAssertEqual(decoded.id, lesson.id)
+        XCTAssertEqual(decoded.type, lesson.type)
+    }
+
+    func testTrackProgressCodable() throws {
+        let progress = TrackProgress(
+            trackId: "test",
+            completedLessons: 5,
+            totalLessons: 10
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(progress)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(TrackProgress.self, from: data)
+
+        XCTAssertEqual(decoded.trackId, progress.trackId)
+        XCTAssertEqual(decoded.completedLessons, progress.completedLessons)
     }
 }

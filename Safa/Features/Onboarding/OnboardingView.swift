@@ -1,5 +1,5 @@
 // MARK: - OnboardingView.swift
-// PURPOSE: First-time user onboarding flow with location-based recommendations
+// PURPOSE: Streamlined 3-page onboarding flow with location-based recommendations
 // DEPENDENCIES: SwiftUI, CoreLocation
 
 import SwiftUI
@@ -13,7 +13,7 @@ struct OnboardingView: View {
     @State private var selectedMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
-    @State private var notificationsEnabled = true
+    @State private var notificationsEnabled = false // Default OFF per spec
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
     // Location inference
@@ -21,9 +21,10 @@ struct OnboardingView: View {
     @State private var isLoadingLocation = false
     @State private var locationError: String?
     @State private var highLatitudeWarning: String?
-    @State private var useRecommendedSettings = true
+    @State private var wasInvitedByFriend = false
+    @State private var showCustomizeSettings = false
 
-    private let totalPages = 5
+    private let totalPages = 3
 
     var body: some View {
         ZStack {
@@ -42,11 +43,9 @@ struct OnboardingView: View {
 
                 // Page content
                 TabView(selection: $currentPage) {
-                    welcomePage.tag(0)
-                    locationPage.tag(1)
-                    prayerSettingsPage.tag(2)
-                    notificationPage.tag(3)
-                    completionPage.tag(4)
+                    welcomeLocationPage.tag(0)
+                    quickSetupPage.tag(1)
+                    readyPage.tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut, value: currentPage)
@@ -74,394 +73,94 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Welcome Page
+    // MARK: - Page 1: Welcome + Location
 
-    private var welcomePage: some View {
-        VStack(spacing: SafaSpacing.xl) {
-            Spacer()
-
-            // App icon placeholder
-            ZStack {
-                Circle()
-                    .fill(Color.accentColor.opacity(0.1))
-                    .frame(width: 120, height: 120)
-
-                Image(systemName: "moon.stars.fill")
-                    .font(.system(size: 56))
-                    .foregroundColor(.accentColor)
-            }
-
-            VStack(spacing: SafaSpacing.sm) {
-                // Arabic app name - prominent
-                Text("صفا")
-                    .font(SafaTypography.arabicLarge)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                // English subtitle
-                Text("Safa")
-                    .font(SafaTypography.titleMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                Text("Your comprehensive Islamic companion")
-                    .font(SafaTypography.bodyLarge)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            // Features preview
-            VStack(alignment: .leading, spacing: SafaSpacing.md) {
-                featureRow(icon: "clock", title: "Prayer Times", description: "Accurate times with notifications")
-                featureRow(icon: "book", title: "Quran", description: "Read, listen, and learn")
-                featureRow(icon: "sparkles", title: "AI Companion", description: "Get answers to Islamic questions")
-                featureRow(icon: "chart.line.uptrend.xyaxis", title: "Progress", description: "Track your spiritual growth")
-            }
-            .padding(.horizontal, SafaSpacing.lg)
-
-            Spacer()
-        }
-        .padding()
-    }
-
-    private func featureRow(icon: String, title: String, description: String) -> some View {
-        HStack(spacing: SafaSpacing.md) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.accentColor)
-                .frame(width: 40, height: 40)
-                .background(Color.accentColor.opacity(0.1))
-                .clipShape(Circle())
-
-            VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                Text(title)
-                    .font(SafaTypography.bodyLarge)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                Text(description)
-                    .font(SafaTypography.bodySmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            Spacer()
-        }
-    }
-
-    // MARK: - Location Page
-
-    private var locationPage: some View {
-        VStack(spacing: SafaSpacing.xl) {
-            Spacer()
-
-            Image(systemName: "location.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.accentColor)
-
-            VStack(spacing: SafaSpacing.sm) {
-                Text("Location Access")
-                    .font(SafaTypography.headlineMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                Text("We need your location to calculate accurate prayer times and recommend the best settings for your region.")
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-
-            // Location status and detected location
-            VStack(spacing: SafaSpacing.md) {
-                locationStatusView
-
-                // Show detected location if available
-                if let context = locationContext {
-                    detectedLocationView(context)
-                }
-
-                // High latitude warning
-                if let warning = highLatitudeWarning {
-                    highLatitudeWarningView(warning)
-                }
-
-                // Error message
-                if let error = locationError {
-                    Text(error)
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                }
-            }
-
-            Spacer()
-
-            // Location button
-            Button {
-                requestLocationPermission()
-            } label: {
-                HStack {
-                    if isLoadingLocation {
-                        ProgressView()
-                            .tint(.white)
-                            .padding(.trailing, 4)
-                    }
-                    Text(locationButtonText)
-                }
-                .font(SafaTypography.bodyLarge)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(locationButtonColor)
-                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
-            }
-            .disabled(isLoadingLocation || locationContext != nil)
-        }
-        .padding()
-    }
-
-    private var locationButtonText: String {
-        if isLoadingLocation {
-            return "Detecting Location..."
-        } else if locationContext != nil {
-            return "Location Detected"
-        } else if locationStatus == .authorizedWhenInUse || locationStatus == .authorizedAlways {
-            return "Detect My Location"
-        } else {
-            return "Enable Location"
-        }
-    }
-
-    private var locationButtonColor: Color {
-        if locationContext != nil {
-            return .green
-        } else {
-            return .accentColor
-        }
-    }
-
-    private var locationStatusView: some View {
-        HStack {
-            Image(systemName: locationStatusIcon)
-                .foregroundColor(locationStatusColor)
-
-            Text(locationStatusText)
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-        }
-        .padding()
-        .background(Color(UIColor.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-    }
-
-    private func detectedLocationView(_ context: LocationContext) -> some View {
-        VStack(spacing: SafaSpacing.sm) {
-            HStack {
-                Image(systemName: "mappin.circle.fill")
-                    .foregroundColor(.green)
-                Text("Prayer times for")
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            Text(context.regionName)
-                .font(SafaTypography.titleMedium)
-                .foregroundColor(SafaColors.Fallback.text)
-
-            // Show recommended settings preview
-            HStack(spacing: SafaSpacing.lg) {
-                VStack {
-                    Text(context.recommendedMethod.shortName)
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(.accentColor)
-                    Text("Method")
-                        .font(SafaTypography.labelSmall)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
-
-                VStack {
-                    Text(context.recommendedMadhab.displayName)
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(.accentColor)
-                    Text("Madhab")
-                        .font(SafaTypography.labelSmall)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
-
-                VStack {
-                    Text(context.recommendedLanguage)
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(.accentColor)
-                    Text("Language")
-                        .font(SafaTypography.labelSmall)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
-            }
-        }
-        .padding()
-        .background(Color.green.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-    }
-
-    private func highLatitudeWarningView(_ warning: String) -> some View {
-        HStack(alignment: .top, spacing: SafaSpacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
-
-            Text(warning)
-                .font(SafaTypography.bodySmall)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-        }
-        .padding()
-        .background(Color.orange.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-    }
-
-    private var locationStatusIcon: String {
-        switch locationStatus {
-        case .authorizedWhenInUse, .authorizedAlways: return "checkmark.circle.fill"
-        case .denied, .restricted: return "xmark.circle.fill"
-        default: return "questionmark.circle.fill"
-        }
-    }
-
-    private var locationStatusColor: Color {
-        switch locationStatus {
-        case .authorizedWhenInUse, .authorizedAlways: return .green
-        case .denied, .restricted: return .red
-        default: return .orange
-        }
-    }
-
-    private var locationStatusText: String {
-        switch locationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            return locationContext != nil ? "Location detected" : "Tap to detect location"
-        case .denied: return "Location access denied"
-        case .restricted: return "Location access restricted"
-        default: return "Location permission required"
-        }
-    }
-
-    // MARK: - Prayer Settings Page
-
-    private var prayerSettingsPage: some View {
+    private var welcomeLocationPage: some View {
         ScrollView {
-            VStack(spacing: SafaSpacing.xl) {
-                Image(systemName: "clock.badge.checkmark")
-                    .font(.system(size: 60))
-                    .foregroundColor(.accentColor)
-                    .padding(.top, SafaSpacing.xl)
+            VStack(spacing: SafaSpacing.lg) {
+                Spacer(minLength: SafaSpacing.xl)
 
-                VStack(spacing: SafaSpacing.sm) {
-                    Text("Prayer Settings")
-                        .font(SafaTypography.headlineMedium)
+                // App branding
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.1))
+                        .frame(width: 100, height: 100)
+
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(.accentColor)
+                }
+
+                VStack(spacing: SafaSpacing.xs) {
+                    Text("صفا")
+                        .font(SafaTypography.arabicLarge)
                         .foregroundColor(SafaColors.Fallback.text)
 
-                    if locationContext != nil {
-                        Text("We've recommended settings based on your location. You can adjust them below.")
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("Choose your preferred calculation method and madhab for accurate prayer times.")
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                            .multilineTextAlignment(.center)
-                    }
+                    Text("Your Islamic Companion")
+                        .font(SafaTypography.bodyLarge)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
 
-                // Use recommended toggle (if location context available)
-                if locationContext != nil {
-                    Toggle(isOn: $useRecommendedSettings) {
-                        VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                            Text("Use Recommended Settings")
-                                .font(SafaTypography.bodyLarge)
-                                .foregroundColor(SafaColors.Fallback.text)
-
-                            Text("Based on \(locationContext?.regionName ?? "your location")")
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
-                        }
-                    }
-                    .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    .onChange(of: useRecommendedSettings) { _, newValue in
-                        if newValue, let context = locationContext {
-                            selectedMethod = context.recommendedMethod
-                            selectedMadhab = context.recommendedMadhab
-                            selectedLanguage = context.recommendedLanguage
-                        }
-                    }
+                // Quick features list
+                VStack(alignment: .leading, spacing: SafaSpacing.sm) {
+                    featureItem(icon: "clock", text: "Accurate prayer times")
+                    featureItem(icon: "book", text: "Quran with audio")
+                    featureItem(icon: "sparkles", text: "AI Islamic assistant")
                 }
+                .padding(.vertical, SafaSpacing.md)
 
+                Divider()
+                    .padding(.horizontal, SafaSpacing.xl)
+
+                // Location section
                 VStack(spacing: SafaSpacing.md) {
-                    // Calculation Method
-                    VStack(alignment: .leading, spacing: SafaSpacing.xs) {
-                        HStack {
-                            Text("Calculation Method")
-                                .font(SafaTypography.labelMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                    Image(systemName: "location.circle.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.accentColor)
 
-                            if let context = locationContext, selectedMethod == context.recommendedMethod {
-                                recommendedBadge
-                            }
-                        }
+                    Text("Enable location for accurate prayer times")
+                        .font(SafaTypography.bodyMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                        .multilineTextAlignment(.center)
 
-                        Picker("Method", selection: $selectedMethod) {
-                            ForEach(CalculationMethod.allCases, id: \.self) { method in
-                                Text(method.displayName).tag(method)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                        .disabled(useRecommendedSettings && locationContext != nil)
+                    // Location status
+                    if let context = locationContext {
+                        detectedLocationBadge(context)
+                    } else if let error = locationError {
+                        Text(error)
+                            .font(SafaTypography.bodySmall)
+                            .foregroundColor(.orange)
                     }
 
-                    // Madhab
-                    VStack(alignment: .leading, spacing: SafaSpacing.xs) {
-                        HStack {
-                            Text("Madhab (for Asr time)")
-                                .font(SafaTypography.labelMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                            if let context = locationContext, selectedMadhab == context.recommendedMadhab {
-                                recommendedBadge
-                            }
-                        }
-
-                        Picker("Madhab", selection: $selectedMadhab) {
-                            ForEach(Madhab.allCases, id: \.self) { madhab in
-                                Text(madhab.displayName).tag(madhab)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .disabled(useRecommendedSettings && locationContext != nil)
+                    // High latitude warning
+                    if let warning = highLatitudeWarning {
+                        Text(warning)
+                            .font(SafaTypography.bodySmall)
+                            .foregroundColor(.orange)
+                            .multilineTextAlignment(.center)
                     }
 
-                    // Translation Language
-                    VStack(alignment: .leading, spacing: SafaSpacing.xs) {
+                    // Location button
+                    Button {
+                        requestLocationPermission()
+                    } label: {
                         HStack {
-                            Text("Translation Language")
-                                .font(SafaTypography.labelMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                            if let context = locationContext, selectedLanguage == context.recommendedLanguage {
-                                recommendedBadge
+                            if isLoadingLocation {
+                                ProgressView()
+                                    .tint(.white)
+                                    .padding(.trailing, 4)
                             }
+                            Text(locationButtonText)
                         }
-
-                        Picker("Language", selection: $selectedLanguage) {
-                            ForEach(availableLanguages, id: \.self) { language in
-                                Text(language).tag(language)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                        .disabled(useRecommendedSettings && locationContext != nil)
+                        .font(SafaTypography.bodyMedium)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, SafaSpacing.xl)
+                        .padding(.vertical, SafaSpacing.sm)
+                        .background(locationContext != nil ? Color.green : Color.accentColor)
+                        .clipShape(Capsule())
                     }
+                    .disabled(isLoadingLocation || locationContext != nil)
                 }
                 .padding()
 
@@ -471,81 +170,178 @@ struct OnboardingView: View {
         }
     }
 
-    private var recommendedBadge: some View {
-        Text("Recommended")
-            .font(SafaTypography.labelSmall)
-            .foregroundColor(.white)
-            .padding(.horizontal, SafaSpacing.xs)
-            .padding(.vertical, 2)
-            .background(Color.green)
-            .clipShape(Capsule())
-    }
-
-    private var availableLanguages: [String] {
-        ["English", "Arabic", "Urdu", "Turkish", "French", "Indonesian", "Bengali"]
-    }
-
-    // MARK: - Notification Page
-
-    private var notificationPage: some View {
-        VStack(spacing: SafaSpacing.xl) {
-            Spacer()
-
-            Image(systemName: "bell.badge.fill")
-                .font(.system(size: 80))
+    private func featureItem(icon: String, text: String) -> some View {
+        HStack(spacing: SafaSpacing.sm) {
+            Image(systemName: icon)
                 .foregroundColor(.accentColor)
+                .frame(width: 24)
 
-            VStack(spacing: SafaSpacing.sm) {
-                Text("Prayer Reminders")
-                    .font(SafaTypography.headlineMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                Text("Get notified when it's time to pray. You can customize which prayers you want to be reminded about.")
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-
-            Toggle(isOn: $notificationsEnabled) {
-                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                    Text("Enable Notifications")
-                        .font(SafaTypography.bodyLarge)
-                        .foregroundColor(SafaColors.Fallback.text)
-
-                    Text("Receive prayer time reminders")
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
-            }
-            .padding()
-            .background(Color(UIColor.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-            .padding(.horizontal)
-
-            if notificationsEnabled {
-                VStack(alignment: .leading, spacing: SafaSpacing.sm) {
-                    ForEach(PrayerType.allCases) { prayer in
-                        if prayer.isObligatory {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text(prayer.displayName)
-                                    .font(SafaTypography.bodyMedium)
-                            }
-                        }
-                    }
-                }
-                .padding()
-            }
+            Text(text)
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.text)
 
             Spacer()
         }
-        .padding()
+        .padding(.horizontal, SafaSpacing.lg)
     }
 
-    // MARK: - Completion Page
+    private func detectedLocationBadge(_ context: LocationContext) -> some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green)
 
-    private var completionPage: some View {
+            Text(context.regionName)
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.text)
+        }
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.xs)
+        .background(Color.green.opacity(0.1))
+        .clipShape(Capsule())
+    }
+
+    private var locationButtonText: String {
+        if isLoadingLocation {
+            return "Detecting..."
+        } else if locationContext != nil {
+            return "Location Set"
+        } else {
+            return "Enable Location"
+        }
+    }
+
+    // MARK: - Page 2: Quick Setup (Simplified - trust smart defaults)
+
+    private var quickSetupPage: some View {
+        ScrollView {
+            VStack(spacing: SafaSpacing.lg) {
+                Spacer(minLength: SafaSpacing.lg)
+
+                Image(systemName: "bell.badge")
+                    .font(.system(size: 48))
+                    .foregroundColor(.accentColor)
+
+                VStack(spacing: SafaSpacing.xs) {
+                    Text("Notifications")
+                        .font(SafaTypography.headlineMedium)
+                        .foregroundColor(SafaColors.Fallback.text)
+
+                    Text("Stay connected to your prayers")
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                }
+
+                VStack(spacing: SafaSpacing.md) {
+                    // Show detected settings (read-only summary)
+                    if locationContext != nil {
+                        detectedSettingsSummary
+                    }
+
+                    // Notifications toggle (OFF by default per spec)
+                    Toggle(isOn: $notificationsEnabled) {
+                        HStack {
+                            Image(systemName: "bell")
+                                .foregroundColor(.accentColor)
+                                .frame(width: 24)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Prayer Reminders")
+                                    .font(SafaTypography.bodyMedium)
+                                    .foregroundColor(SafaColors.Fallback.text)
+
+                                Text("Get notified at prayer times")
+                                    .font(SafaTypography.bodySmall)
+                                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+
+                    // Mosque mode info (future feature)
+                    HStack {
+                        Image(systemName: "building.columns")
+                            .foregroundColor(.accentColor)
+                            .frame(width: 24)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Mosque Mode")
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.text)
+
+                            Text("Auto-silence during prayer times")
+                                .font(SafaTypography.bodySmall)
+                                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                        }
+
+                        Spacer()
+
+                        Text("Coming Soon")
+                            .font(SafaTypography.bodySmall)
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            .padding(.horizontal, SafaSpacing.sm)
+                            .padding(.vertical, SafaSpacing.xxs)
+                            .background(Color.gray.opacity(0.2))
+                            .clipShape(Capsule())
+                    }
+                    .padding()
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                    .opacity(0.6)
+                }
+                .padding(.horizontal)
+
+                // Tip about customization
+                Text("You can customize calculation methods and more in Settings anytime")
+                    .font(SafaTypography.bodySmall)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, SafaSpacing.xl)
+
+                Spacer(minLength: SafaSpacing.xl)
+            }
+            .padding()
+        }
+    }
+
+    // Shows detected settings from location (read-only)
+    private var detectedSettingsSummary: some View {
+        VStack(alignment: .leading, spacing: SafaSpacing.sm) {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+
+                Text("Smart settings applied")
+                    .font(SafaTypography.labelMedium)
+                    .foregroundColor(SafaColors.Fallback.text)
+            }
+
+            HStack(spacing: SafaSpacing.lg) {
+                settingSummaryItem(label: "Method", value: selectedMethod.shortName)
+                settingSummaryItem(label: "Madhab", value: selectedMadhab.displayName)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.green.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+    }
+
+    private func settingSummaryItem(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(SafaTypography.bodySmall)
+                .foregroundColor(SafaColors.Fallback.tertiaryText)
+            Text(value)
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.text)
+        }
+    }
+
+    // MARK: - Page 3: Ready
+
+    private var readyPage: some View {
         VStack(spacing: SafaSpacing.xl) {
             Spacer()
 
@@ -560,33 +356,70 @@ struct OnboardingView: View {
             }
 
             VStack(spacing: SafaSpacing.sm) {
-                Text("You're All Set!")
+                Text("Ready to Begin")
                     .font(SafaTypography.headlineMedium)
                     .foregroundColor(SafaColors.Fallback.text)
 
-                Text("Begin your journey with Safa. May your prayers be answered and your knowledge increase.")
+                Text("May your journey with Safa be blessed")
                     .font(SafaTypography.bodyMedium)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .multilineTextAlignment(.center)
             }
 
-            // Summary
-            if let context = locationContext {
-                VStack(spacing: SafaSpacing.sm) {
-                    summaryRow(icon: "mappin", title: "Location", value: context.regionName)
-                    summaryRow(icon: "clock", title: "Method", value: selectedMethod.displayName)
-                    summaryRow(icon: "book", title: "Madhab", value: selectedMadhab.displayName)
-                    summaryRow(icon: "globe", title: "Language", value: selectedLanguage)
+            // Brief summary
+            VStack(spacing: SafaSpacing.xs) {
+                if let context = locationContext {
+                    summaryItem(icon: "mappin", value: context.regionName)
                 }
-                .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                summaryItem(icon: "clock", value: selectedMethod.displayName)
+                summaryItem(icon: "person", value: selectedMadhab.displayName)
+                if notificationsEnabled {
+                    summaryItem(icon: "bell", value: "Notifications On")
+                }
             }
+            .padding()
+            .background(Color(UIColor.tertiarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+            .padding(.horizontal, SafaSpacing.xl)
+
+            // Customize Settings link
+            Button {
+                showCustomizeSettings = true
+            } label: {
+                HStack {
+                    Image(systemName: "slider.horizontal.3")
+                    Text("Customize Settings")
+                }
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(.accentColor)
+            }
+
+            // "I was invited" toggle (honor system for Hasanat)
+            Toggle(isOn: $wasInvitedByFriend) {
+                HStack(spacing: SafaSpacing.sm) {
+                    Image(systemName: "person.badge.plus")
+                        .foregroundColor(.accentColor)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("I was invited by a friend")
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.text)
+
+                        Text("+\(InviteFriendsService.hasanatPerInvite) Hasanat bonus")
+                            .font(SafaTypography.bodySmall)
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(UIColor.tertiarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+            .padding(.horizontal, SafaSpacing.xl)
 
             Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
-                .padding()
+                .environment(\.layoutDirection, .rightToLeft)
+                .padding(.top)
 
             Spacer()
 
@@ -602,25 +435,74 @@ struct OnboardingView: View {
                     .background(Color.accentColor)
                     .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
             }
+            .padding(.horizontal)
         }
         .padding()
+        .sheet(isPresented: $showCustomizeSettings) {
+            customizeSettingsSheet
+        }
     }
 
-    private func summaryRow(icon: String, title: String, value: String) -> some View {
+    // MARK: - Customize Settings Sheet
+
+    private var customizeSettingsSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Prayer Calculation") {
+                    Picker("Calculation Method", selection: $selectedMethod) {
+                        ForEach(CalculationMethod.allCases, id: \.self) { method in
+                            Text(method.displayName).tag(method)
+                        }
+                    }
+
+                    Picker("Madhab (Asr Time)", selection: $selectedMadhab) {
+                        ForEach(Madhab.allCases, id: \.self) { madhab in
+                            Text(madhab.displayName).tag(madhab)
+                        }
+                    }
+                }
+
+                Section("Quran") {
+                    Picker("Translation Language", selection: $selectedLanguage) {
+                        ForEach(availableLanguages, id: \.self) { language in
+                            Text(language).tag(language)
+                        }
+                    }
+                }
+
+                Section {
+                    Toggle("Prayer Notifications", isOn: $notificationsEnabled)
+                } footer: {
+                    Text("You can further customize notifications in Settings after setup.")
+                }
+            }
+            .navigationTitle("Customize")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        showCustomizeSettings = false
+                    }
+                }
+            }
+        }
+    }
+
+    private var availableLanguages: [String] {
+        ["English", "Arabic", "Urdu", "Turkish", "French", "Indonesian", "Bengali"]
+    }
+
+    private func summaryItem(icon: String, value: String) -> some View {
         HStack {
             Image(systemName: icon)
                 .foregroundColor(.accentColor)
-                .frame(width: 24)
-
-            Text(title)
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-            Spacer()
+                .frame(width: 20)
 
             Text(value)
                 .font(SafaTypography.bodyMedium)
                 .foregroundColor(SafaColors.Fallback.text)
+
+            Spacer()
         }
     }
 
@@ -638,7 +520,7 @@ struct OnboardingView: View {
                 .foregroundColor(SafaColors.Fallback.secondaryText)
             } else if currentPage == 0 {
                 Button("Skip") {
-                    completeOnboarding()
+                    skipOnboarding()
                 }
                 .foregroundColor(SafaColors.Fallback.secondaryText)
             } else {
@@ -667,12 +549,10 @@ struct OnboardingView: View {
     // MARK: - Methods
 
     private func requestLocationPermission() {
-        // First request permission if needed
         if locationStatus == .notDetermined {
             dependencies.locationService.requestPermission()
         }
 
-        // Then try to get location and infer context
         isLoadingLocation = true
         locationError = nil
 
@@ -696,7 +576,7 @@ struct OnboardingView: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.locationError = "Unable to detect location. You can set your preferences manually."
+                    self.locationError = "Could not detect location"
                     self.locationStatus = dependencies.locationService.authorizationStatus
                     self.isLoadingLocation = false
                 }
@@ -704,9 +584,28 @@ struct OnboardingView: View {
         }
     }
 
+    private func skipOnboarding() {
+        // Per spec: skip goes straight to home with smart defaults applied
+        Task {
+            var prefs = await dependencies.userRepository.getPreferences()
+            prefs.calculationMethod = AppDefaults.calculationMethod
+            prefs.madhab = AppDefaults.madhab
+            prefs.selectedTranslation = AppDefaults.translationLanguage
+            prefs.notificationsEnabled = false
+            prefs.hasCompletedOnboarding = true
+
+            try? await dependencies.userRepository.updatePreferences(prefs)
+
+            await MainActor.run {
+                withAnimation {
+                    isOnboardingComplete = true
+                }
+            }
+        }
+    }
+
     private func completeOnboarding() {
         Task {
-            // Save preferences
             var prefs = await dependencies.userRepository.getPreferences()
             prefs.calculationMethod = selectedMethod
             prefs.madhab = selectedMadhab
@@ -720,7 +619,7 @@ struct OnboardingView: View {
                 prefs.savedLatitude = context.coordinates.latitude
                 prefs.savedLongitude = context.coordinates.longitude
                 prefs.savedCountryCode = context.countryCode
-                prefs.useLocationBasedDefaults = useRecommendedSettings
+                prefs.useLocationBasedDefaults = true
             }
 
             try? await dependencies.userRepository.updatePreferences(prefs)
@@ -728,6 +627,11 @@ struct OnboardingView: View {
             // Request notification permission if enabled
             if notificationsEnabled {
                 try? await dependencies.notificationService.requestAuthorization()
+            }
+
+            // Record if user was invited (honor system)
+            if wasInvitedByFriend {
+                InviteFriendsService.shared.wasInvited = true
             }
 
             await MainActor.run {

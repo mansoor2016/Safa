@@ -1,8 +1,10 @@
 // MARK: - SpeechRecognitionTests.swift
 // PURPOSE: Unit tests for speech recognition functionality
-// DEPENDENCIES: XCTest
+// DEPENDENCIES: XCTest, Speech, AVFoundation
 
 import XCTest
+import Speech
+import AVFoundation
 @testable import Safa
 
 final class SpeechRecognitionServiceTests: XCTestCase {
@@ -196,5 +198,3 @@ final class MicrophonePermissionServiceTests: XCTestCase {
         _ = AVAudioSession.RecordPermission.granted
     }
 }
-
-import AVFoundation

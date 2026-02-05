@@ -169,11 +169,24 @@ private struct NextPrayerCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, SafaSpacing.md)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(nextPrayerAccessibilityLabel)
+        .accessibilityHint("Shows time until next prayer")
         .onReceive(timer) { _ in
             updateCountdown()
         }
         .onAppear {
             updateCountdown()
+        }
+    }
+
+    private var nextPrayerAccessibilityLabel: String {
+        let (hours, minutes, _) = prayer.time.countdown()
+        let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
+        if hours > 0 {
+            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(hours) hours and \(minutes) minutes remaining"
+        } else {
+            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(minutes) minutes remaining"
         }
     }
 
@@ -223,6 +236,7 @@ private struct PrayerTimeRow: View {
             Circle()
                 .fill(prayer.type.color)
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
 
             // Prayer name
             Text(prayer.type.displayName)
@@ -249,11 +263,22 @@ private struct PrayerTimeRow: View {
                         .font(.title2)
                 }
                 .disabled(isLogged)
+                .accessibilityLabel(isLogged ? "\(prayer.type.displayName) logged" : "Log \(prayer.type.displayName)")
+                .accessibilityHint(isLogged ? "Prayer has been logged" : "Double tap to mark this prayer as completed")
             }
         }
         .padding(.horizontal, SafaSpacing.md)
         .padding(.vertical, SafaSpacing.sm)
         .background(prayer.isNext ? Color.accentColor.opacity(0.1) : Color.clear)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(prayerRowAccessibilityLabel)
+    }
+
+    private var prayerRowAccessibilityLabel: String {
+        let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
+        let status = isLogged ? "completed" : (prayer.isNext ? "upcoming" : "")
+        let statusSuffix = status.isEmpty ? "" : ", \(status)"
+        return "\(prayer.type.displayName) at \(timeString)\(statusSuffix)"
     }
 }
 
@@ -284,6 +309,8 @@ private struct QuickActionButton: View {
             .background(Color(UIColor.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
         }
+        .accessibilityLabel(title)
+        .accessibilityHint("Double tap to open \(title)")
     }
 }
 

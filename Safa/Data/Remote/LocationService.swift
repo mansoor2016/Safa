@@ -6,7 +6,7 @@ import Foundation
 import CoreLocation
 import Combine
 
-final class LocationService: NSObject, ObservableObject {
+final class LocationService: NSObject, ObservableObject, LocationServiceProtocol {
     // MARK: - Published State
     @Published private(set) var currentLocation: CLLocation?
     @Published private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined

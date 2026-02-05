@@ -117,6 +117,90 @@ struct StartTasbeehIntent: AppIntent {
     }
 }
 
+// MARK: - Increment Tasbeeh Intent (Interactive Widget)
+
+struct IncrementTasbeehIntent: AppIntent {
+    static var title: LocalizedStringResource = "Increment Tasbeeh"
+    static var description = IntentDescription("Add one to the tasbeeh counter")
+
+    static var openAppWhenRun: Bool = false
+
+    @Parameter(title: "Dhikr Type")
+    var dhikrType: String?
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        // Get current count from shared storage
+        let currentCount = TasbeehWidgetStorage.shared.currentCount
+        let newCount = currentCount + 1
+        TasbeehWidgetStorage.shared.currentCount = newCount
+
+        // Award Hasanat at milestones (33, 66, 99)
+        var message = "Count: \(newCount)"
+        if newCount == 33 || newCount == 66 || newCount == 99 {
+            message = "Count: \(newCount) - Milestone! +5 Hasanat"
+            NotificationCenter.default.post(
+                name: .tasbeehMilestoneReached,
+                object: nil,
+                userInfo: ["count": newCount]
+            )
+        }
+
+        return .result(dialog: "\(message)")
+    }
+}
+
+// MARK: - Reset Tasbeeh Intent (Interactive Widget)
+
+struct ResetTasbeehIntent: AppIntent {
+    static var title: LocalizedStringResource = "Reset Tasbeeh"
+    static var description = IntentDescription("Reset the tasbeeh counter to zero")
+
+    static var openAppWhenRun: Bool = false
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        TasbeehWidgetStorage.shared.currentCount = 0
+        return .result(dialog: "Tasbeeh counter reset")
+    }
+}
+
+// MARK: - Tasbeeh Widget Storage
+
+@Observable
+final class TasbeehWidgetStorage {
+    static let shared = TasbeehWidgetStorage()
+
+    private let userDefaults: UserDefaults
+    private let countKey = "com.safa.tasbeeh.widgetCount"
+    private let dhikrKey = "com.safa.tasbeeh.dhikrType"
+
+    var currentCount: Int {
+        get { userDefaults.integer(forKey: countKey) }
+        set { userDefaults.set(newValue, forKey: countKey) }
+    }
+
+    var currentDhikr: String {
+        get { userDefaults.string(forKey: dhikrKey) ?? "SubhanAllah" }
+        set { userDefaults.set(newValue, forKey: dhikrKey) }
+    }
+
+    private init() {
+        // Use App Group for widget access
+        if let appGroupDefaults = UserDefaults(suiteName: AppConstants.appGroupId) {
+            self.userDefaults = appGroupDefaults
+        } else {
+            self.userDefaults = .standard
+        }
+    }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let tasbeehMilestoneReached = Notification.Name("com.safa.tasbeehMilestoneReached")
+}
+
 // MARK: - Dhikr Entity
 
 struct DhikrEntity: AppEntity {

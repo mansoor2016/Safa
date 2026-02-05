@@ -84,6 +84,7 @@ struct DuaCategoriesView: View {
         VStack(spacing: 8) {
             Text("أدعية وأذكار")
                 .font(.system(size: 28, weight: .bold, design: .serif))
+                .environment(\.layoutDirection, .rightToLeft)
 
             Text("Supplications & Remembrances")
                 .font(.subheadline)
@@ -205,6 +206,7 @@ struct QuickAccessButton: View {
             Text(arabicTitle)
                 .font(.caption2)
                 .foregroundColor(.secondary)
+                .environment(\.layoutDirection, .rightToLeft)
         }
         .frame(width: 80)
     }
@@ -234,6 +236,7 @@ struct CategoryRow: View {
                 Text(category.arabicName)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .environment(\.layoutDirection, .rightToLeft)
             }
 
             Spacer()
@@ -302,6 +305,7 @@ struct DuaCard: View {
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .lineSpacing(12)
+                .environment(\.layoutDirection, .rightToLeft)
 
             // Transliteration
             if !dua.textTransliteration.isEmpty {

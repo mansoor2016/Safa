@@ -27,7 +27,9 @@ final class Dependencies {
     let notificationService: NotificationService
     let audioPlayerService: AudioPlayerService
     let llmService: LLMService
+    let ragService: RAGService
     let pronunciationService: PronunciationService
+    let ramadanService: RamadanService
 
     // MARK: - Global State
     let userState: UserStateManager
@@ -52,6 +54,16 @@ final class Dependencies {
         self.audioPlayerService = AudioPlayerService()
         self.llmService = LLMService()
         self.pronunciationService = PronunciationService()
+        self.ramadanService = RamadanService()
+
+        // Initialize RAG service (depends on repositories)
+        self.ragService = RAGService(
+            quranRepository: quranRepository,
+            hadithRepository: hadithRepository
+        )
+
+        // Configure LLM with RAG service
+        self.llmService.configure(ragService: ragService)
 
         // Initialize chat repository (depends on LLM service)
         self.chatRepository = ChatRepository(llmService: llmService)

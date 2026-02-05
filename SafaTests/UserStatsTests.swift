@@ -143,22 +143,23 @@ final class UserStatsTests: XCTestCase {
     func testUserPreferencesDefault() {
         let prefs = UserPreferences()
 
-        XCTAssertEqual(prefs.calculationMethod, .isna)
-        XCTAssertEqual(prefs.madhab, .shafi)
-        XCTAssertTrue(prefs.notificationsEnabled)
-        XCTAssertTrue(prefs.hapticFeedbackEnabled)
+        // Defaults are now set via AppDefaults
+        XCTAssertEqual(prefs.calculationMethod, AppDefaults.calculationMethod)
+        XCTAssertEqual(prefs.madhab, AppDefaults.madhab)
+        XCTAssertEqual(prefs.notificationsEnabled, AppDefaults.notificationsEnabled)
+        XCTAssertEqual(prefs.hapticFeedbackEnabled, AppDefaults.hapticFeedbackEnabled)
         XCTAssertFalse(prefs.hasCompletedOnboarding)
     }
 
     func testUserPreferencesCustom() {
         let prefs = UserPreferences(
-            calculationMethod: .mwl,
+            calculationMethod: .muslimWorldLeague,
             madhab: .hanafi,
             notificationsEnabled: false,
             hasCompletedOnboarding: true
         )
 
-        XCTAssertEqual(prefs.calculationMethod, .mwl)
+        XCTAssertEqual(prefs.calculationMethod, .muslimWorldLeague)
         XCTAssertEqual(prefs.madhab, .hanafi)
         XCTAssertFalse(prefs.notificationsEnabled)
         XCTAssertTrue(prefs.hasCompletedOnboarding)

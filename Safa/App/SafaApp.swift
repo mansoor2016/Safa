@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI, Dependencies, AppRouter
 
 import SwiftUI
+import CoreSpotlight
 
 @main
 struct SafaApp: App {
@@ -10,6 +11,14 @@ struct SafaApp: App {
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
     @State private var hasCompletedOnboarding = false
+
+    // Spotlight service
+    private let spotlightService = SpotlightIndexService.shared
+
+    // Check if running UI tests (skip onboarding)
+    private var isUITesting: Bool {
+        ProcessInfo.processInfo.arguments.contains("UI_TESTING")
+    }
 
     // MARK: - Body
     var body: some Scene {
@@ -27,9 +36,24 @@ struct SafaApp: App {
                 router.handleDeepLink(url)
             }
             .task {
+                // Skip onboarding in UI tests
+                if isUITesting {
+                    hasCompletedOnboarding = true
+                    return
+                }
+
                 // Check if onboarding is complete
                 let prefs = await dependencies.userRepository.getPreferences()
                 hasCompletedOnboarding = prefs.hasCompletedOnboarding
+
+                // Index Spotlight content on first launch (after onboarding)
+                if prefs.hasCompletedOnboarding && spotlightService.lastIndexDate == nil {
+                    await spotlightService.indexAllContent()
+                }
+            }
+            .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
+                // Handle Spotlight search result tap
+                router.handleSpotlightResult(userActivity)
             }
         }
     }

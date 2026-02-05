@@ -1,191 +1,116 @@
 // MARK: - DuaModelTests.swift
-// PURPOSE: Unit tests for Dua domain models
-// DEPENDENCIES: XCTest
+// PURPOSE: Unit tests for Dua domain entities
 
 import XCTest
 @testable import Safa
 
 final class DuaModelTests: XCTestCase {
 
-    // MARK: - Simple Dua Tests
+    // MARK: - DuaCategory Tests
 
-    func testSimpleDuaInitialization() {
-        let dua = SimpleDua(
-            id: "morning_1",
-            category: .morning,
-            arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
-            transliteration: "Asbahna wa asbahal-mulku lillah",
-            translation: "We have reached the morning and the kingdom belongs to Allah",
-            reference: "Abu Dawud 4:317",
-            repeatCount: 1,
-            benefit: "Morning remembrance"
-        )
-
-        XCTAssertEqual(dua.id, "morning_1")
-        XCTAssertEqual(dua.category, .morning)
-        XCTAssertEqual(dua.repeatCount, 1)
-        XCTAssertFalse(dua.arabic.isEmpty)
-    }
-
-    func testDuaCategoryEnumRawValues() {
-        XCTAssertEqual(DuaCategoryEnum.morning.rawValue, "morning")
-        XCTAssertEqual(DuaCategoryEnum.evening.rawValue, "evening")
-        XCTAssertEqual(DuaCategoryEnum.prayer.rawValue, "prayer")
-        XCTAssertEqual(DuaCategoryEnum.sleep.rawValue, "sleep")
-        XCTAssertEqual(DuaCategoryEnum.food.rawValue, "food")
-        XCTAssertEqual(DuaCategoryEnum.travel.rawValue, "travel")
-    }
-
-    func testDuaCategoryEnumDisplayNames() {
-        XCTAssertEqual(DuaCategoryEnum.morning.displayName, "Morning")
-        XCTAssertEqual(DuaCategoryEnum.evening.displayName, "Evening")
-        XCTAssertEqual(DuaCategoryEnum.prayer.displayName, "Prayer")
-    }
-
-    func testSimpleDuaHasRequiredFields() {
-        let dua = SimpleDua(
-            id: "test",
-            category: .general,
-            arabic: "عربي",
-            transliteration: "transliteration",
-            translation: "translation",
-            reference: "reference",
-            repeatCount: 3,
-            benefit: nil
-        )
-
-        XCTAssertFalse(dua.arabic.isEmpty)
-        XCTAssertFalse(dua.transliteration.isEmpty)
-        XCTAssertFalse(dua.translation.isEmpty)
-        XCTAssertGreaterThan(dua.repeatCount, 0)
-    }
-
-    func testSimpleDuaOptionalBenefit() {
-        let duaWithBenefit = SimpleDua(
-            id: "test1",
-            category: .morning,
-            arabic: "Arabic",
-            transliteration: "Trans",
-            translation: "Trans",
-            reference: "Ref",
-            repeatCount: 1,
-            benefit: "Some benefit"
-        )
-
-        let duaWithoutBenefit = SimpleDua(
-            id: "test2",
-            category: .morning,
-            arabic: "Arabic",
-            transliteration: "Trans",
-            translation: "Trans",
-            reference: "Ref",
-            repeatCount: 1,
-            benefit: nil
-        )
-
-        XCTAssertNotNil(duaWithBenefit.benefit)
-        XCTAssertNil(duaWithoutBenefit.benefit)
-    }
-
-    // MARK: - Dua Category Struct Tests
-
-    func testDuaCategoryStructInitialization() {
+    func testDuaCategoryCreation() {
         let category = DuaCategory(
-            id: "morning_evening",
-            nameEnglish: "Morning & Evening",
-            nameArabic: "أذكار الصباح والمساء",
-            iconName: "sunrise",
-            duaCount: 15
+            id: "test",
+            nameEnglish: "Test Category",
+            nameArabic: "فئة الاختبار",
+            iconName: "star",
+            duaCount: 5
         )
 
-        XCTAssertEqual(category.id, "morning_evening")
-        XCTAssertEqual(category.nameEnglish, "Morning & Evening")
-        XCTAssertEqual(category.duaCount, 15)
+        XCTAssertEqual(category.id, "test")
+        XCTAssertEqual(category.nameEnglish, "Test Category")
+        XCTAssertEqual(category.nameArabic, "فئة الاختبار")
+        XCTAssertEqual(category.iconName, "star")
+        XCTAssertEqual(category.duaCount, 5)
     }
 
-    // MARK: - Adhkar Type Tests
-
-    func testAdhkarTypeRawValues() {
-        XCTAssertEqual(AdhkarType.morning.rawValue, "morning")
-        XCTAssertEqual(AdhkarType.evening.rawValue, "evening")
-        XCTAssertEqual(AdhkarType.sleep.rawValue, "sleep")
+    func testStaticDuaCategories() {
+        XCTAssertEqual(DuaCategory.dailyLife.id, "daily")
+        XCTAssertEqual(DuaCategory.salah.id, "salah")
+        XCTAssertEqual(DuaCategory.protection.id, "protection")
+        XCTAssertEqual(DuaCategory.forgiveness.id, "forgiveness")
+        XCTAssertEqual(DuaCategory.hardship.id, "hardship")
     }
 
-    func testAdhkarTypeDisplayNames() {
-        XCTAssertEqual(AdhkarType.morning.displayName, "Morning Adhkar")
-        XCTAssertEqual(AdhkarType.evening.displayName, "Evening Adhkar")
-        XCTAssertEqual(AdhkarType.sleep.displayName, "Sleep Adhkar")
+    func testDuaCategoryHashable() {
+        let category1 = DuaCategory.dailyLife
+        let category2 = DuaCategory.dailyLife
+
+        XCTAssertEqual(category1, category2)
     }
 
-    // MARK: - Encoding/Decoding Tests
+    // MARK: - Dua Tests
 
-    func testSimpleDuaCodable() throws {
-        let original = SimpleDua(
+    func testDuaCreation() {
+        let dua = Dua(
+            id: "dua1",
+            categoryId: "morning",
+            titleEnglish: "Morning Dua",
+            textArabic: "بِسْمِ اللَّهِ",
+            textTransliteration: "Bismillah",
+            textTranslation: "In the name of Allah"
+        )
+
+        XCTAssertEqual(dua.id, "dua1")
+        XCTAssertEqual(dua.categoryId, "morning")
+        XCTAssertEqual(dua.titleEnglish, "Morning Dua")
+        XCTAssertEqual(dua.textArabic, "بِسْمِ اللَّهِ")
+        XCTAssertEqual(dua.textTransliteration, "Bismillah")
+        XCTAssertEqual(dua.textTranslation, "In the name of Allah")
+        XCTAssertNil(dua.source)
+        XCTAssertNil(dua.occasion)
+        XCTAssertEqual(dua.repetitions, 1)
+        XCTAssertNil(dua.audioFileName)
+        XCTAssertFalse(dua.isFavorite)
+    }
+
+    func testDuaWithAllParameters() {
+        let dua = Dua(
+            id: "dua2",
+            categoryId: "protection",
+            titleEnglish: "Protection Dua",
+            titleArabic: "دعاء الحماية",
+            textArabic: "أعوذ بالله",
+            textTransliteration: "A'udhu billah",
+            textTranslation: "I seek refuge in Allah",
+            source: "Sahih Bukhari 123",
+            occasion: "Before sleeping",
+            repetitions: 3,
+            audioFileName: "protection.mp3",
+            isFavorite: true
+        )
+
+        XCTAssertEqual(dua.titleArabic, "دعاء الحماية")
+        XCTAssertEqual(dua.source, "Sahih Bukhari 123")
+        XCTAssertEqual(dua.occasion, "Before sleeping")
+        XCTAssertEqual(dua.repetitions, 3)
+        XCTAssertEqual(dua.audioFileName, "protection.mp3")
+        XCTAssertTrue(dua.isFavorite)
+    }
+
+    func testDuaCodable() throws {
+        let dua = Dua(
             id: "test",
-            category: .morning,
-            arabic: "عربي",
-            transliteration: "test",
-            translation: "test",
-            reference: "test ref",
-            repeatCount: 3,
-            benefit: "test benefit"
+            categoryId: "daily",
+            titleEnglish: "Test",
+            textArabic: "اختبار",
+            textTransliteration: "Test",
+            textTranslation: "Test"
         )
 
         let encoder = JSONEncoder()
-        let data = try encoder.encode(original)
+        let data = try encoder.encode(dua)
 
         let decoder = JSONDecoder()
-        let decoded = try decoder.decode(SimpleDua.self, from: data)
+        let decoded = try decoder.decode(Dua.self, from: data)
 
-        XCTAssertEqual(original.id, decoded.id)
-        XCTAssertEqual(original.category, decoded.category)
-        XCTAssertEqual(original.repeatCount, decoded.repeatCount)
+        XCTAssertEqual(decoded.id, dua.id)
+        XCTAssertEqual(decoded.textArabic, dua.textArabic)
     }
 
-    // MARK: - Repeat Count Tests
+    // MARK: - TasbeehSession Tests
 
-    func testDuaRepeatCountVariations() {
-        let singleRepeat = SimpleDua(
-            id: "1",
-            category: .morning,
-            arabic: "Arabic",
-            transliteration: "Trans",
-            translation: "Trans",
-            reference: "Ref",
-            repeatCount: 1,
-            benefit: nil
-        )
-
-        let tripleRepeat = SimpleDua(
-            id: "2",
-            category: .morning,
-            arabic: "Arabic",
-            transliteration: "Trans",
-            translation: "Trans",
-            reference: "Ref",
-            repeatCount: 3,
-            benefit: nil
-        )
-
-        let hundredRepeat = SimpleDua(
-            id: "3",
-            category: .morning,
-            arabic: "SubhanAllah",
-            transliteration: "SubhanAllah",
-            translation: "Glory to Allah",
-            reference: "Ref",
-            repeatCount: 100,
-            benefit: nil
-        )
-
-        XCTAssertEqual(singleRepeat.repeatCount, 1)
-        XCTAssertEqual(tripleRepeat.repeatCount, 3)
-        XCTAssertEqual(hundredRepeat.repeatCount, 100)
-    }
-
-    // MARK: - Tasbeeh Session Tests
-
-    func testTasbeehSessionInitialization() {
+    func testTasbeehSessionCreation() {
         let session = TasbeehSession(
             dhikrText: "SubhanAllah",
             targetCount: 33
@@ -194,28 +119,146 @@ final class DuaModelTests: XCTestCase {
         XCTAssertEqual(session.dhikrText, "SubhanAllah")
         XCTAssertEqual(session.targetCount, 33)
         XCTAssertEqual(session.currentCount, 0)
+        XCTAssertNil(session.completedAt)
+    }
+
+    func testTasbeehSessionIsComplete() {
+        var session = TasbeehSession(
+            dhikrText: "SubhanAllah",
+            targetCount: 33,
+            currentCount: 32
+        )
+
         XCTAssertFalse(session.isComplete)
+
+        session.currentCount = 33
+        XCTAssertTrue(session.isComplete)
+
+        session.currentCount = 50
+        XCTAssertTrue(session.isComplete)
     }
 
     func testTasbeehSessionProgress() {
-        var session = TasbeehSession(
+        let session = TasbeehSession(
             dhikrText: "SubhanAllah",
             targetCount: 100,
-            currentCount: 50
+            currentCount: 25
         )
 
-        XCTAssertEqual(session.progress, 0.5, accuracy: 0.01)
-
-        session.currentCount = 100
-        XCTAssertTrue(session.isComplete)
-        XCTAssertEqual(session.progress, 1.0, accuracy: 0.01)
+        XCTAssertEqual(session.progress, 0.25, accuracy: 0.001)
     }
 
-    // MARK: - Common Dhikr Tests
+    func testTasbeehSessionProgressAtZero() {
+        let session = TasbeehSession(
+            dhikrText: "Test",
+            targetCount: 33,
+            currentCount: 0
+        )
 
-    func testCommonDhikrValues() {
+        XCTAssertEqual(session.progress, 0.0, accuracy: 0.001)
+    }
+
+    func testTasbeehSessionProgressAtComplete() {
+        let session = TasbeehSession(
+            dhikrText: "Test",
+            targetCount: 33,
+            currentCount: 33
+        )
+
+        XCTAssertEqual(session.progress, 1.0, accuracy: 0.001)
+    }
+
+    // MARK: - AdhkarType Tests
+
+    func testAdhkarTypeAllCases() {
+        XCTAssertEqual(AdhkarType.allCases.count, 3)
+        XCTAssertTrue(AdhkarType.allCases.contains(.morning))
+        XCTAssertTrue(AdhkarType.allCases.contains(.evening))
+        XCTAssertTrue(AdhkarType.allCases.contains(.sleep))
+    }
+
+    func testAdhkarTypeDisplayNames() {
+        XCTAssertEqual(AdhkarType.morning.displayName, "Morning Adhkar")
+        XCTAssertEqual(AdhkarType.evening.displayName, "Evening Adhkar")
+        XCTAssertEqual(AdhkarType.sleep.displayName, "Sleep Adhkar")
+    }
+
+    func testAdhkarTypeRawValues() {
+        XCTAssertEqual(AdhkarType.morning.rawValue, "morning")
+        XCTAssertEqual(AdhkarType.evening.rawValue, "evening")
+        XCTAssertEqual(AdhkarType.sleep.rawValue, "sleep")
+    }
+
+    // MARK: - DuaCategoryEnum Tests
+
+    func testDuaCategoryEnumAllCases() {
+        XCTAssertEqual(DuaCategoryEnum.allCases.count, 7)
+    }
+
+    func testDuaCategoryEnumDisplayNames() {
+        XCTAssertEqual(DuaCategoryEnum.morning.displayName, "Morning")
+        XCTAssertEqual(DuaCategoryEnum.evening.displayName, "Evening")
+        XCTAssertEqual(DuaCategoryEnum.prayer.displayName, "Prayer")
+        XCTAssertEqual(DuaCategoryEnum.sleep.displayName, "Sleep")
+        XCTAssertEqual(DuaCategoryEnum.food.displayName, "Food")
+        XCTAssertEqual(DuaCategoryEnum.travel.displayName, "Travel")
+        XCTAssertEqual(DuaCategoryEnum.general.displayName, "General")
+    }
+
+    // MARK: - CommonDhikr Tests
+
+    func testCommonDhikrAllCases() {
+        XCTAssertEqual(CommonDhikr.allCases.count, 5)
+    }
+
+    func testCommonDhikrArabicText() {
         XCTAssertEqual(CommonDhikr.subhanAllah.arabic, "سُبْحَانَ اللهِ")
+        XCTAssertEqual(CommonDhikr.alhamdulillah.arabic, "الْحَمْدُ للهِ")
+        XCTAssertEqual(CommonDhikr.allahuAkbar.arabic, "اللهُ أَكْبَرُ")
+        XCTAssertEqual(CommonDhikr.laIlahaIllallah.arabic, "لَا إِلَٰهَ إِلَّا اللهُ")
+        XCTAssertEqual(CommonDhikr.astaghfirullah.arabic, "أَسْتَغْفِرُ اللهَ")
+    }
+
+    func testCommonDhikrTranslations() {
+        XCTAssertEqual(CommonDhikr.subhanAllah.translation, "Glory be to Allah")
         XCTAssertEqual(CommonDhikr.alhamdulillah.translation, "All praise is due to Allah")
+        XCTAssertEqual(CommonDhikr.allahuAkbar.translation, "Allah is the Greatest")
+        XCTAssertEqual(CommonDhikr.laIlahaIllallah.translation, "There is no god but Allah")
+        XCTAssertEqual(CommonDhikr.astaghfirullah.translation, "I seek forgiveness from Allah")
+    }
+
+    func testCommonDhikrDefaultCounts() {
         XCTAssertEqual(CommonDhikr.subhanAllah.defaultCount, 33)
+        XCTAssertEqual(CommonDhikr.alhamdulillah.defaultCount, 33)
+        XCTAssertEqual(CommonDhikr.allahuAkbar.defaultCount, 33)
+        XCTAssertEqual(CommonDhikr.laIlahaIllallah.defaultCount, 100)
+        XCTAssertEqual(CommonDhikr.astaghfirullah.defaultCount, 100)
+    }
+
+    func testCommonDhikrRawValues() {
+        XCTAssertEqual(CommonDhikr.subhanAllah.rawValue, "SubhanAllah")
+        XCTAssertEqual(CommonDhikr.alhamdulillah.rawValue, "Alhamdulillah")
+        XCTAssertEqual(CommonDhikr.allahuAkbar.rawValue, "Allahu Akbar")
+    }
+
+    // MARK: - SimpleDua Tests
+
+    func testSimpleDuaCreation() {
+        let dua = SimpleDua(
+            id: "simple1",
+            category: .morning,
+            arabic: "بِسْمِ اللَّهِ",
+            transliteration: "Bismillah",
+            translation: "In the name of Allah",
+            reference: "Sahih Bukhari",
+            repeatCount: 1,
+            benefit: "Protection"
+        )
+
+        XCTAssertEqual(dua.id, "simple1")
+        XCTAssertEqual(dua.category, .morning)
+        XCTAssertEqual(dua.arabic, "بِسْمِ اللَّهِ")
+        XCTAssertEqual(dua.repeatCount, 1)
+        XCTAssertEqual(dua.benefit, "Protection")
     }
 }

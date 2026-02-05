@@ -120,6 +120,7 @@ private struct DhikrQuickButton: View {
                 Text(dhikr.arabic)
                     .font(SafaTypography.arabicSmall)
                     .foregroundColor(SafaColors.Fallback.text)
+                    .environment(\.layoutDirection, .rightToLeft)
 
                 Text(dhikr.rawValue)
                     .font(SafaTypography.labelSmall)
@@ -156,6 +157,7 @@ private struct AfterPrayerRow: View {
                     Text(arabic)
                         .font(SafaTypography.arabicSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
+                        .environment(\.layoutDirection, .rightToLeft)
                 }
 
                 Spacer()

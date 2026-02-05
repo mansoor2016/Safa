@@ -522,6 +522,16 @@ After **every** code change:
      -only-testing:SafaTests/{TestClassName} test
    ```
 
+### Simulator Resource Management
+
+**IMPORTANT: Run simulator tests in SERIES, not parallel.**
+
+- This machine has limited resources - spawning multiple simulators can cause failures
+- Do NOT run multiple `xcodebuild test` commands in parallel
+- When running tests, wait for one test run to complete before starting another
+- Prefer running unit tests only (`-only-testing:SafaTests`) over full test suites when possible
+- UI tests (`SafaUITests`) are resource-intensive and may fail due to simulator launch issues
+
 ### Complete Workflow
 
 ```
@@ -598,6 +608,32 @@ Revert your changes if:
 - `LocationInferenceService` infers user preferences from location
 - Maps countries to calculation methods, madhabs, languages
 - Used in Onboarding and Settings for smart recommendations
+
+### Disabled Feature Pattern
+For features not yet ready, use the disabled feature pattern:
+
+```swift
+// Using FeatureFlags enum (preferred)
+Button("AI Chat") { ... }
+    .disabledFeature(.aiCompanion)
+
+// Using custom flag
+SomeView()
+    .disabledFeature(isDisabled: !isReady, name: "Feature Name")
+
+// Disabled row component for lists
+DisabledFeatureRow(
+    title: "Spotlight Search",
+    icon: "magnifyingglass",
+    feature: .spotlightSearch
+)
+```
+
+Key components:
+- `FeatureFlags.swift` - Toggle management with persistence
+- `DisabledFeatureModifier.swift` - View modifier for disabled state
+- `ToastView.swift` - Contains `ToastService` for "Coming soon" messages
+- Apply `.toastContainer()` to root view to enable toasts
 
 ---
 

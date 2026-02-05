@@ -190,8 +190,12 @@ private struct ResumeReadingCard: View {
                 Image(systemName: "play.circle.fill")
                     .font(.system(size: 40))
                     .foregroundColor(.accentColor)
+                    .accessibilityHidden(true)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Continue reading \(surahName) from ayah \(ayahNumber)")
+        .accessibilityHint("Double tap to resume reading")
     }
 }
 
@@ -239,6 +243,9 @@ private struct SurahRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Surah \(surah.number), \(surah.nameEnglish), \(surah.revelationType.rawValue), \(surah.ayahCount) verses")
+        .accessibilityHint("Double tap to read this surah")
     }
 }
 
@@ -265,8 +272,12 @@ private struct JuzRow: View {
 
                 Image(systemName: "chevron.right")
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    .accessibilityHidden(true)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Juz \(juz.number), from Surah \(juz.startSurah) ayah \(juz.startAyah) to Surah \(juz.endSurah) ayah \(juz.endAyah)")
+        .accessibilityHint("Double tap to read this juz")
     }
 }
 
@@ -303,8 +314,22 @@ private struct BookmarkRow: View {
                     Image(systemName: "trash")
                         .foregroundColor(SafaColors.Fallback.error)
                 }
+                .accessibilityLabel("Delete bookmark")
+                .accessibilityHint("Double tap to remove this bookmark")
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(bookmarkAccessibilityLabel)
+        .accessibilityHint("Double tap to go to this ayah")
+    }
+
+    private var bookmarkAccessibilityLabel: String {
+        var label = "Bookmark at \(bookmark.reference)"
+        if let note = bookmark.note {
+            label += ", note: \(note)"
+        }
+        label += ", bookmarked \(bookmark.createdAt.relativeString)"
+        return label
     }
 }
 

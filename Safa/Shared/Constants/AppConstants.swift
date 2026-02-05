@@ -16,8 +16,12 @@ enum AppConstants {
         static let privacyPolicy = URL(string: "https://safaapp.com/privacy")!
         static let termsOfService = URL(string: "https://safaapp.com/terms")!
         static let support = URL(string: "https://safaapp.com/support")!
-        static let appStore = URL(string: "https://apps.apple.com/app/safa")
         static let feedback = URL(string: "mailto:feedback@safaapp.com")!
+
+        // App Store URLs - Update with real App ID after submission
+        static let appStoreId = "id123456789" // TODO: Replace with real App Store ID
+        static let appStore = URL(string: "https://apps.apple.com/app/safa/\(appStoreId)")!
+        static let testFlight = URL(string: "https://testflight.apple.com/join/XXXXXX")! // TODO: Replace with TestFlight link
     }
 
     // MARK: - Deep Links

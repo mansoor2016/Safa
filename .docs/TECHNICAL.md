@@ -8,9 +8,50 @@
 
 ### 1.1 Target Platform
 - **Platform**: iOS only (iPhone)
-- **Minimum iOS Version**: iOS 17.0 (for Live Activities, latest SwiftUI features)
+- **Minimum iOS Version**: iOS 17.0 (for @Observable, NavigationPath, modern SwiftUI)
 - **AI Companion Requirement**: iOS 18.4+ (for Apple Foundation Models)
 - **Devices**: iPhone (no iPad optimization initially)
+
+### 1.1.1 Supported Device Matrix
+
+**Philosophy**: Optimize for latest generation first, ensure quality experience on older supported devices.
+
+| Device | Year | Chip | iOS 17 | Screen | Support Tier |
+|--------|------|------|--------|--------|--------------|
+| iPhone 16 Pro Max | 2024 | A18 Pro | ✅ | 6.9" | Tier 1 - Primary |
+| iPhone 16 Pro | 2024 | A18 Pro | ✅ | 6.3" | Tier 1 - Primary |
+| iPhone 16 / Plus | 2024 | A18 | ✅ | 6.1"/6.7" | Tier 1 - Primary |
+| iPhone 15 Pro Max | 2023 | A17 Pro | ✅ | 6.7" | Tier 2 - High |
+| iPhone 15 Pro | 2023 | A17 Pro | ✅ | 6.1" | Tier 2 - High |
+| iPhone 15 / Plus | 2023 | A16 | ✅ | 6.1"/6.7" | Tier 2 - High |
+| iPhone 14 Pro Max | 2022 | A16 | ✅ | 6.7" | Tier 3 - Medium |
+| iPhone 14 Pro | 2022 | A16 | ✅ | 6.1" | Tier 3 - Medium |
+| iPhone 14 / Plus | 2022 | A15 | ✅ | 6.1"/6.7" | Tier 3 - Medium |
+| iPhone 13 series | 2021 | A15 | ✅ | 5.4"-6.7" | Tier 3 - Medium |
+| iPhone 12 series | 2020 | A14 | ✅ | 5.4"-6.7" | Tier 3 - Medium |
+| iPhone SE (3rd) | 2022 | A15 | ✅ | 4.7" | Tier 4 - Compact |
+| iPhone 11 series | 2019 | A13 | ✅ | 6.1"-6.5" | Tier 5 - Legacy |
+| iPhone XS / Max | 2018 | A12 | ✅ | 5.8"/6.5" | Tier 5 - Legacy |
+| iPhone XR | 2018 | A12 | ✅ | 6.1" | Tier 5 - Legacy |
+
+**Feature Availability by iOS Version:**
+
+| Feature | iOS 17.0+ | iOS 18.0+ | iOS 18.4+ |
+|---------|-----------|-----------|-----------|
+| Core app (Prayer, Quran, Learn) | ✅ | ✅ | ✅ |
+| Gamification (Hasanat, Streaks) | ✅ | ✅ | ✅ |
+| Widgets (Home, Lock Screen) | ✅ | ✅ | ✅ |
+| Live Activities | ✅ | ✅ | ✅ |
+| Dynamic Island | ✅ | ✅ | ✅ |
+| Siri Shortcuts | ✅ | ✅ | ✅ |
+| CloudKit Sync | ✅ | ✅ | ✅ |
+| AI Companion | ❌ (shows fallback) | ❌ (shows fallback) | ✅ |
+
+**Graceful Degradation Strategy:**
+- AI Companion: Shows "Requires iOS 18.4" message with explanation
+- Dynamic Island: Hidden on devices without Dynamic Island (not an error)
+- ProMotion: Falls back to 60Hz on non-Pro devices (SwiftUI handles automatically)
+- Screen sizes: Flexible layouts adapt from 4.7" to 6.9"
 
 ### 1.2 Language & Frameworks
 | Layer | Technology |

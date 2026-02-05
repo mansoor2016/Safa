@@ -111,6 +111,7 @@ final class ShareService {
             \(description)
 
             Join me on Safa - Your Islamic Companion
+            \(AppConstants.URLs.appStore.absoluteString)
             """
 
         case .dailyProgress(let hasanat, let streak):
@@ -326,17 +327,23 @@ struct AchievementShareCard: View {
 
             Spacer()
 
-            // Footer
-            HStack {
-                Image(systemName: "sparkles")
-                    .font(.caption)
-                Text("Achieved with صفا")
-                    .font(.caption)
+            // Footer with app link
+            VStack(spacing: 4) {
+                HStack {
+                    Image(systemName: "sparkles")
+                        .font(.caption)
+                    Text("Achieved with صفا")
+                        .font(.caption)
+                }
+
+                Text("safaapp.com")
+                    .font(.caption2)
+                    .opacity(0.7)
             }
             .foregroundStyle(ShareCardStyle.achievement.accentColor)
         }
         .padding(24)
-        .frame(width: 300, height: 400)
+        .frame(width: 300, height: 420)
         .background(ShareCardStyle.achievement.backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }

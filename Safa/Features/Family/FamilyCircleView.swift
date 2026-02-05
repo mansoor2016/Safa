@@ -32,6 +32,7 @@ private struct FamilyContentView: View {
     @Bindable var viewModel: FamilyViewModel
     @State private var showInviteSheet = false
     @State private var showCreateSheet = false
+    @State private var showInviteFriendsSheet = false
 
     var body: some View {
         Group {
@@ -54,6 +55,14 @@ private struct FamilyContentView: View {
                         }
 
                         Button {
+                            showInviteFriendsSheet = true
+                        } label: {
+                            Label("Invite Friends to Safa", systemImage: "square.and.arrow.up")
+                        }
+
+                        Divider()
+
+                        Button {
                             // Settings
                         } label: {
                             Label("Circle Settings", systemImage: "gearshape")
@@ -69,6 +78,9 @@ private struct FamilyContentView: View {
         }
         .sheet(isPresented: $showCreateSheet) {
             CreateCircleSheet(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showInviteFriendsSheet) {
+            InviteFriendsView()
         }
         .task {
             await viewModel.loadFamilyCircle()
@@ -105,6 +117,23 @@ private struct FamilyContentView: View {
                 }
             }
             .padding(.top)
+
+            // Invite Friends section
+            Divider()
+                .padding(.vertical)
+
+            VStack(spacing: SafaSpacing.sm) {
+                Text("Know someone who'd love Safa?")
+                    .font(SafaTypography.bodySmall)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                Button {
+                    showInviteFriendsSheet = true
+                } label: {
+                    Label("Invite Friends to Download", systemImage: "square.and.arrow.up")
+                        .font(SafaTypography.bodyMedium)
+                }
+            }
 
             Spacer()
         }

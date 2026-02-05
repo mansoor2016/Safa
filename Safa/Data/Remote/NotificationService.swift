@@ -6,16 +6,37 @@ import Foundation
 import UserNotifications
 import Combine
 
-final class NotificationService: ObservableObject {
+final class NotificationService: ObservableObject, NotificationServiceProtocol {
     // MARK: - Published State
     @Published private(set) var isAuthorized = false
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+
+    // MARK: - Settings
+    @Published var mosqueModeEnabled: Bool {
+        didSet { UserDefaults.standard.set(mosqueModeEnabled, forKey: mosqueModeKey) }
+    }
+    @Published var vibrationOnly: Bool {
+        didSet { UserDefaults.standard.set(vibrationOnly, forKey: vibrationOnlyKey) }
+    }
+    @Published var travelTimeMinutes: Int {
+        didSet { UserDefaults.standard.set(travelTimeMinutes, forKey: travelTimeKey) }
+    }
+
+    // Storage Keys
+    private let mosqueModeKey = "com.safa.notifications.mosqueMode"
+    private let vibrationOnlyKey = "com.safa.notifications.vibrationOnly"
+    private let travelTimeKey = "com.safa.notifications.travelTime"
 
     // MARK: - Private Properties
     private let notificationCenter = UNUserNotificationCenter.current()
 
     // MARK: - Init
     init() {
+        // Load saved settings
+        self.mosqueModeEnabled = UserDefaults.standard.bool(forKey: mosqueModeKey)
+        self.vibrationOnly = UserDefaults.standard.object(forKey: vibrationOnlyKey) as? Bool ?? true // Default: vibration only
+        self.travelTimeMinutes = UserDefaults.standard.object(forKey: travelTimeKey) as? Int ?? 15 // Default: 15 minutes
+
         Task {
             await checkAuthorizationStatus()
         }
@@ -49,15 +70,40 @@ final class NotificationService: ObservableObject {
     ) async throws {
         let content = UNMutableNotificationContent()
         content.title = "Prayer Time"
-        content.body = offsetMinutes > 0
-            ? "\(prayer.displayName) in \(offsetMinutes) minutes"
-            : "It's time for \(prayer.displayName)"
-        content.sound = .default
+
+        // Calculate effective offset including mosque mode travel time
+        let effectiveOffset = mosqueModeEnabled ? offsetMinutes + travelTimeMinutes : offsetMinutes
+
+        if effectiveOffset > 0 {
+            if mosqueModeEnabled {
+                content.body = "\(prayer.displayName) in \(effectiveOffset) minutes. Time to head to the mosque!"
+            } else {
+                content.body = "\(prayer.displayName) in \(effectiveOffset) minutes"
+            }
+        } else {
+            content.body = "It's time for \(prayer.displayName)"
+        }
+
+        // Use vibration only (no sound) by default
+        if vibrationOnly {
+            content.sound = nil
+            // On iOS, setting sound to nil still allows the system default behavior
+            // To ensure vibration, we use a silent sound or the default critical alert
+        } else {
+            content.sound = .default
+        }
+
         content.categoryIdentifier = "PRAYER_REMINDER"
+
+        // Add prayer type to userInfo for action handling
+        content.userInfo = [
+            "prayerType": prayer.rawValue,
+            "prayerTime": time.timeIntervalSince1970
+        ]
 
         let triggerDate = Calendar.current.date(
             byAdding: .minute,
-            value: -offsetMinutes,
+            value: -effectiveOffset,
             to: time
         ) ?? time
 
@@ -195,6 +241,80 @@ final class NotificationService: ObservableObject {
         try await notificationCenter.add(request)
     }
 
+    // MARK: - Islamic Event Notifications
+
+    /// Schedule notifications for Islamic events (Eid, Ramadan, etc.)
+    func scheduleIslamicEventNotification(
+        eventType: IslamicCalendarEvent.IslamicEventType,
+        eventDate: Date,
+        daysBefore: Int = 1
+    ) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = eventType.notificationTitle
+        content.body = eventType.notificationBody(daysBefore: daysBefore)
+        content.sound = vibrationOnly ? nil : .default
+        content.categoryIdentifier = "ISLAMIC_EVENT"
+        content.userInfo = ["eventType": eventType.rawValue]
+
+        // Schedule for day before the event (or on the day)
+        let triggerDate = Calendar.current.date(
+            byAdding: .day,
+            value: -daysBefore,
+            to: eventDate
+        ) ?? eventDate
+
+        // Set notification for 9 AM on that day
+        var components = Calendar.current.dateComponents(
+            [.year, .month, .day],
+            from: triggerDate
+        )
+        components.hour = 9
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: components,
+            repeats: false
+        )
+
+        let identifier = "event_\(eventType.rawValue)_\(eventDate.timeIntervalSince1970)"
+        let request = UNNotificationRequest(
+            identifier: identifier,
+            content: content,
+            trigger: trigger
+        )
+
+        try await notificationCenter.add(request)
+    }
+
+    /// Schedule notifications for all upcoming Islamic events
+    func scheduleAllIslamicEventNotifications(events: [IslamicCalendarEvent]) async throws {
+        // Remove existing event notifications
+        let requests = await notificationCenter.pendingNotificationRequests()
+        let eventIdentifiers = requests
+            .filter { $0.identifier.hasPrefix("event_") }
+            .map { $0.identifier }
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: eventIdentifiers)
+
+        // Schedule new ones
+        for event in events {
+            // Notify 1 day before
+            try await scheduleIslamicEventNotification(
+                eventType: event.eventType,
+                eventDate: event.startDate,
+                daysBefore: 1
+            )
+
+            // Also notify on the day for major events
+            if event.eventType == .eidAlFitr || event.eventType == .eidAlAdha || event.eventType == .ramadan {
+                try await scheduleIslamicEventNotification(
+                    eventType: event.eventType,
+                    eventDate: event.startDate,
+                    daysBefore: 0
+                )
+            }
+        }
+    }
+
     // MARK: - Notification Categories
 
     func registerNotificationCategories() {
@@ -202,18 +322,23 @@ final class NotificationService: ObservableObject {
             identifier: "PRAYER_REMINDER",
             actions: [
                 UNNotificationAction(
-                    identifier: "LOG_PRAYER",
-                    title: "Log Prayer",
-                    options: [.foreground]
+                    identifier: "DONE_PRAYER",
+                    title: "Done \u{2713}",
+                    options: [] // Does not open app - logs prayer silently
                 ),
                 UNNotificationAction(
                     identifier: "SNOOZE",
                     title: "Remind in 10 min",
                     options: []
+                ),
+                UNNotificationAction(
+                    identifier: "VIEW_TIMES",
+                    title: "View Times",
+                    options: [.foreground]
                 )
             ],
             intentIdentifiers: [],
-            options: []
+            options: [.customDismissAction]
         )
 
         let achievementCategory = UNNotificationCategory(
@@ -242,10 +367,130 @@ final class NotificationService: ObservableObject {
             options: []
         )
 
+        let islamicEventCategory = UNNotificationCategory(
+            identifier: "ISLAMIC_EVENT",
+            actions: [
+                UNNotificationAction(
+                    identifier: "VIEW_CALENDAR",
+                    title: "View Calendar",
+                    options: [.foreground]
+                ),
+                UNNotificationAction(
+                    identifier: "DISMISS",
+                    title: "Dismiss",
+                    options: []
+                )
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+
         notificationCenter.setNotificationCategories([
             prayerCategory,
             achievementCategory,
-            ramadanCategory
+            ramadanCategory,
+            islamicEventCategory
         ])
     }
+
+    // MARK: - Notification Action Handling
+
+    /// Handle notification action (called from AppDelegate/SceneDelegate)
+    func handleNotificationAction(
+        identifier: String,
+        userInfo: [AnyHashable: Any],
+        completion: @escaping () -> Void
+    ) {
+        switch identifier {
+        case "DONE_PRAYER":
+            // Log the prayer from the notification
+            if let prayerTypeRaw = userInfo["prayerType"] as? String,
+               let prayerType = PrayerType(rawValue: prayerTypeRaw) {
+                // Post notification for the app to handle logging
+                NotificationCenter.default.post(
+                    name: .prayerLoggedFromNotification,
+                    object: nil,
+                    userInfo: ["prayerType": prayerType]
+                )
+            }
+
+        case "SNOOZE":
+            // Reschedule notification for 10 minutes later
+            if let prayerTypeRaw = userInfo["prayerType"] as? String,
+               let prayerType = PrayerType(rawValue: prayerTypeRaw) {
+                Task {
+                    try? await schedulePrayerNotification(
+                        prayer: prayerType,
+                        time: Date().addingTimeInterval(10 * 60),
+                        offsetMinutes: 0
+                    )
+                }
+            }
+
+        case "LOG_FAST":
+            // Post notification for Ramadan fasting log
+            NotificationCenter.default.post(
+                name: .fastLoggedFromNotification,
+                object: nil
+            )
+
+        default:
+            break
+        }
+
+        completion()
+    }
+}
+
+// MARK: - Islamic Event Type Extension
+
+extension IslamicCalendarEvent.IslamicEventType {
+    var notificationTitle: String {
+        switch self {
+        case .eidAlFitr: return "Eid al-Fitr"
+        case .eidAlAdha: return "Eid al-Adha"
+        case .ramadan: return "Ramadan"
+        case .islamicNewYear: return "Islamic New Year"
+        case .ashura: return "Day of Ashura"
+        case .mawlidAlNabi: return "Mawlid al-Nabi"
+        case .isra: return "Isra and Mi'raj"
+        case .shaban: return "Mid-Sha'ban"
+        case .prayerTime: return "Prayer Time"
+        }
+    }
+
+    func notificationBody(daysBefore: Int) -> String {
+        if daysBefore == 0 {
+            switch self {
+            case .eidAlFitr: return "Eid Mubarak! May Allah accept your worship."
+            case .eidAlAdha: return "Eid Mubarak! May Allah accept your sacrifice."
+            case .ramadan: return "Ramadan Mubarak! The blessed month begins today."
+            case .islamicNewYear: return "Happy Islamic New Year! May this year bring blessings."
+            case .ashura: return "Today is the Day of Ashura. Fasting is recommended."
+            case .mawlidAlNabi: return "Today we celebrate the birth of Prophet Muhammad (PBUH)."
+            case .isra: return "Tonight is the Night Journey and Ascension."
+            case .shaban: return "Tonight is the Night of Mid-Sha'ban."
+            case .prayerTime: return "It's prayer time."
+            }
+        } else {
+            switch self {
+            case .eidAlFitr: return "Eid al-Fitr is tomorrow! Prepare your Eid prayers."
+            case .eidAlAdha: return "Eid al-Adha is tomorrow! Prepare for the celebration."
+            case .ramadan: return "Ramadan begins tomorrow! Prepare for the blessed month."
+            case .islamicNewYear: return "Islamic New Year is tomorrow."
+            case .ashura: return "The Day of Ashura is tomorrow. Consider fasting."
+            case .mawlidAlNabi: return "Mawlid al-Nabi is tomorrow."
+            case .isra: return "Isra and Mi'raj is tomorrow night."
+            case .shaban: return "Mid-Sha'ban is tomorrow night."
+            case .prayerTime: return "Prayer reminder."
+            }
+        }
+    }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let prayerLoggedFromNotification = Notification.Name("com.safa.prayerLoggedFromNotification")
+    static let fastLoggedFromNotification = Notification.Name("com.safa.fastLoggedFromNotification")
 }

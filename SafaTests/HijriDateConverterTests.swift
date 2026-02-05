@@ -5,7 +5,7 @@
 import XCTest
 @testable import Safa
 
-final class HijriDateConverterTests: XCTestCase {
+final class HijriDateConverterBasicTests: XCTestCase {
     var converter: HijriDateConverter!
 
     override func setUpWithError() throws {
@@ -53,18 +53,42 @@ final class HijriDateConverterTests: XCTestCase {
         XCTAssertTrue(result.contains("14") || result.contains("15"))
     }
 
+    func testHijriDateStringArabic() {
+        let date = Date()
+        let result = converter.hijriDateString(from: date, style: .arabic)
+
+        XCTAssertFalse(result.isEmpty)
+        // Should contain Arabic characters
+        let arabicRange = 0x0600...0x06FF
+        let hasArabic = result.unicodeScalars.contains { arabicRange.contains(Int($0.value)) }
+        XCTAssertTrue(hasArabic)
+    }
+
     // MARK: - Month Name Tests
 
     func testMonthNames() {
         let monthNames = [
             "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
             "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-            "Ramadan", "Shawwal", "Dhul Qi'dah", "Dhul Hijjah"
+            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
         ]
 
-        // Test that each month name exists
-        for month in monthNames {
-            XCTAssertFalse(month.isEmpty)
+        for (index, expectedName) in monthNames.enumerated() {
+            let name = converter.hijriMonthName(index + 1)
+            XCTAssertEqual(name, expectedName, "Month \(index + 1) should be \(expectedName)")
+        }
+    }
+
+    func testArabicMonthNames() {
+        let arabicNames = [
+            "محرم", "صفر", "ربيع الأول", "ربيع الثاني",
+            "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+            "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+        ]
+
+        for (index, expectedName) in arabicNames.enumerated() {
+            let name = converter.hijriMonthNameArabic(index + 1)
+            XCTAssertEqual(name, expectedName, "Arabic month \(index + 1) should be \(expectedName)")
         }
     }
 
@@ -79,9 +103,8 @@ final class HijriDateConverterTests: XCTestCase {
         components.day = 15
 
         if let ramadanDate = hijriCalendar.date(from: components) {
-            // We need to mock this or test with the actual date
-            // For now, just verify the method doesn't crash
-            _ = converter.isRamadan(on: ramadanDate)
+            let result = converter.isRamadan(on: ramadanDate)
+            XCTAssertTrue(result)
         }
     }
 
@@ -99,14 +122,31 @@ final class HijriDateConverterTests: XCTestCase {
         }
     }
 
-    // MARK: - Days in Month Tests
+    // MARK: - Eid Detection Tests
 
-    func testDaysInHijriMonth() {
-        // Hijri months alternate between 29 and 30 days
-        for month in 1...12 {
-            let days = converter.daysInHijriMonth(month, year: 1445)
-            XCTAssertGreaterThanOrEqual(days, 29)
-            XCTAssertLessThanOrEqual(days, 30)
+    func testIsEidAlFitr() {
+        let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
+        var components = DateComponents()
+        components.year = 1445
+        components.month = 10 // Shawwal
+        components.day = 1
+
+        if let eidDate = hijriCalendar.date(from: components) {
+            let result = converter.isEid(on: eidDate)
+            XCTAssertTrue(result)
+        }
+    }
+
+    func testIsEidAlAdha() {
+        let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
+        var components = DateComponents()
+        components.year = 1445
+        components.month = 12 // Dhu al-Hijjah
+        components.day = 10
+
+        if let eidDate = hijriCalendar.date(from: components) {
+            let result = converter.isEid(on: eidDate)
+            XCTAssertTrue(result)
         }
     }
 

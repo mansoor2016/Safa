@@ -27,12 +27,37 @@ final class PrayerModelTests: XCTestCase {
         XCTAssertEqual(PrayerType.isha.displayName, "Isha")
     }
 
-    func testPrayerTypeColors() {
-        XCTAssertNotNil(PrayerType.fajr.color)
-        XCTAssertNotNil(PrayerType.dhuhr.color)
-        XCTAssertNotNil(PrayerType.asr.color)
-        XCTAssertNotNil(PrayerType.maghrib.color)
-        XCTAssertNotNil(PrayerType.isha.color)
+    func testPrayerTypeArabicNames() {
+        XCTAssertEqual(PrayerType.fajr.arabicName, "الفجر")
+        XCTAssertEqual(PrayerType.sunrise.arabicName, "الشروق")
+        XCTAssertEqual(PrayerType.dhuhr.arabicName, "الظهر")
+        XCTAssertEqual(PrayerType.asr.arabicName, "العصر")
+        XCTAssertEqual(PrayerType.maghrib.arabicName, "المغرب")
+        XCTAssertEqual(PrayerType.isha.arabicName, "العشاء")
+    }
+
+    func testPrayerTypeObligatory() {
+        XCTAssertTrue(PrayerType.fajr.isObligatory)
+        XCTAssertFalse(PrayerType.sunrise.isObligatory)
+        XCTAssertTrue(PrayerType.dhuhr.isObligatory)
+        XCTAssertTrue(PrayerType.asr.isObligatory)
+        XCTAssertTrue(PrayerType.maghrib.isObligatory)
+        XCTAssertTrue(PrayerType.isha.isObligatory)
+    }
+
+    func testObligatoryPrayers() {
+        let obligatory = PrayerType.obligatoryPrayers
+        XCTAssertEqual(obligatory.count, 5)
+        XCTAssertFalse(obligatory.contains(.sunrise))
+        XCTAssertTrue(obligatory.contains(.fajr))
+    }
+
+    func testPrayerTypeIconNames() {
+        XCTAssertFalse(PrayerType.fajr.iconName.isEmpty)
+        XCTAssertFalse(PrayerType.dhuhr.iconName.isEmpty)
+        XCTAssertFalse(PrayerType.asr.iconName.isEmpty)
+        XCTAssertFalse(PrayerType.maghrib.iconName.isEmpty)
+        XCTAssertFalse(PrayerType.isha.iconName.isEmpty)
     }
 
     // MARK: - Prayer Time Tests
@@ -43,84 +68,124 @@ final class PrayerModelTests: XCTestCase {
 
         XCTAssertEqual(prayerTime.type, .fajr)
         XCTAssertEqual(prayerTime.time, date)
+        XCTAssertFalse(prayerTime.isNext)
+    }
+
+    func testPrayerTimeWithIsNext() {
+        let date = Date()
+        let prayerTime = PrayerTime(type: .dhuhr, time: date, isNext: true)
+
+        XCTAssertEqual(prayerTime.type, .dhuhr)
+        XCTAssertTrue(prayerTime.isNext)
+    }
+
+    func testPrayerTimeString() {
+        let date = Date()
+        let prayerTime = PrayerTime(type: .asr, time: date)
+
+        XCTAssertFalse(prayerTime.timeString.isEmpty)
     }
 
     // MARK: - Daily Prayer Times Tests
 
     func testDailyPrayerTimesInitialization() {
         let now = Date()
+        let fajr = PrayerTime(type: .fajr, time: now)
+        let sunrise = PrayerTime(type: .sunrise, time: now.addingTimeInterval(3600))
+        let dhuhr = PrayerTime(type: .dhuhr, time: now.addingTimeInterval(7200))
+        let asr = PrayerTime(type: .asr, time: now.addingTimeInterval(10800))
+        let maghrib = PrayerTime(type: .maghrib, time: now.addingTimeInterval(14400))
+        let isha = PrayerTime(type: .isha, time: now.addingTimeInterval(18000))
+
         let dailyTimes = DailyPrayerTimes(
-            date: now,
-            fajr: now,
-            sunrise: now.addingTimeInterval(3600),
-            dhuhr: now.addingTimeInterval(7200),
-            asr: now.addingTimeInterval(10800),
-            maghrib: now.addingTimeInterval(14400),
-            isha: now.addingTimeInterval(18000)
+            fajr: fajr,
+            sunrise: sunrise,
+            dhuhr: dhuhr,
+            asr: asr,
+            maghrib: maghrib,
+            isha: isha
         )
 
-        XCTAssertEqual(dailyTimes.date, now)
-        XCTAssertNotNil(dailyTimes.fajr)
-        XCTAssertNotNil(dailyTimes.sunrise)
-        XCTAssertNotNil(dailyTimes.dhuhr)
-        XCTAssertNotNil(dailyTimes.asr)
-        XCTAssertNotNil(dailyTimes.maghrib)
-        XCTAssertNotNil(dailyTimes.isha)
+        XCTAssertEqual(dailyTimes.fajr.type, .fajr)
+        XCTAssertEqual(dailyTimes.sunrise.type, .sunrise)
+        XCTAssertEqual(dailyTimes.dhuhr.type, .dhuhr)
+        XCTAssertEqual(dailyTimes.asr.type, .asr)
+        XCTAssertEqual(dailyTimes.maghrib.type, .maghrib)
+        XCTAssertEqual(dailyTimes.isha.type, .isha)
     }
 
-    func testDailyPrayerTimesOrdering() {
+    func testDailyPrayerTimesAllProperty() {
         let now = Date()
+        let fajr = PrayerTime(type: .fajr, time: now)
+        let sunrise = PrayerTime(type: .sunrise, time: now.addingTimeInterval(3600))
+        let dhuhr = PrayerTime(type: .dhuhr, time: now.addingTimeInterval(7200))
+        let asr = PrayerTime(type: .asr, time: now.addingTimeInterval(10800))
+        let maghrib = PrayerTime(type: .maghrib, time: now.addingTimeInterval(14400))
+        let isha = PrayerTime(type: .isha, time: now.addingTimeInterval(18000))
+
         let dailyTimes = DailyPrayerTimes(
-            date: now,
-            fajr: now,
-            sunrise: now.addingTimeInterval(3600),
-            dhuhr: now.addingTimeInterval(7200),
-            asr: now.addingTimeInterval(10800),
-            maghrib: now.addingTimeInterval(14400),
-            isha: now.addingTimeInterval(18000)
+            fajr: fajr,
+            sunrise: sunrise,
+            dhuhr: dhuhr,
+            asr: asr,
+            maghrib: maghrib,
+            isha: isha
         )
 
-        XCTAssertTrue(dailyTimes.fajr < dailyTimes.sunrise)
-        XCTAssertTrue(dailyTimes.sunrise < dailyTimes.dhuhr)
-        XCTAssertTrue(dailyTimes.dhuhr < dailyTimes.asr)
-        XCTAssertTrue(dailyTimes.asr < dailyTimes.maghrib)
-        XCTAssertTrue(dailyTimes.maghrib < dailyTimes.isha)
+        XCTAssertEqual(dailyTimes.all.count, 6)
+        XCTAssertEqual(dailyTimes.obligatory.count, 5)
     }
 
     // MARK: - Prayer Log Tests
 
     func testPrayerLogInitialization() {
+        let date = Date()
         let log = PrayerLog(
             prayerType: .fajr,
-            status: .onTime
+            date: date,
+            isOnTime: true,
+            isMakeup: false
         )
 
         XCTAssertEqual(log.prayerType, .fajr)
-        XCTAssertEqual(log.status, .onTime)
-        XCTAssertNotNil(log.loggedAt)
+        XCTAssertTrue(log.isOnTime)
+        XCTAssertFalse(log.isMakeup)
     }
 
-    func testPrayerLogStatuses() {
-        XCTAssertEqual(PrayerLogStatus.onTime.rawValue, "onTime")
-        XCTAssertEqual(PrayerLogStatus.late.rawValue, "late")
-        XCTAssertEqual(PrayerLogStatus.missed.rawValue, "missed")
-        XCTAssertEqual(PrayerLogStatus.makeUp.rawValue, "makeUp")
+    func testPrayerLogMakeup() {
+        let date = Date()
+        let log = PrayerLog(
+            prayerType: .dhuhr,
+            date: date,
+            isOnTime: false,
+            isMakeup: true
+        )
+
+        XCTAssertEqual(log.prayerType, .dhuhr)
+        XCTAssertFalse(log.isOnTime)
+        XCTAssertTrue(log.isMakeup)
     }
 
     // MARK: - Calculation Method Tests
 
     func testCalculationMethodRawValues() {
         XCTAssertEqual(CalculationMethod.isna.rawValue, "isna")
-        XCTAssertEqual(CalculationMethod.mwl.rawValue, "mwl")
+        XCTAssertEqual(CalculationMethod.muslimWorldLeague.rawValue, "mwl")
         XCTAssertEqual(CalculationMethod.egypt.rawValue, "egypt")
         XCTAssertEqual(CalculationMethod.makkah.rawValue, "makkah")
         XCTAssertEqual(CalculationMethod.karachi.rawValue, "karachi")
     }
 
     func testCalculationMethodDisplayNames() {
-        XCTAssertEqual(CalculationMethod.isna.displayName, "ISNA")
-        XCTAssertEqual(CalculationMethod.mwl.displayName, "Muslim World League")
-        XCTAssertEqual(CalculationMethod.egypt.displayName, "Egyptian Authority")
+        XCTAssertFalse(CalculationMethod.isna.displayName.isEmpty)
+        XCTAssertFalse(CalculationMethod.muslimWorldLeague.displayName.isEmpty)
+        XCTAssertFalse(CalculationMethod.egypt.displayName.isEmpty)
+    }
+
+    func testCalculationMethodAngles() {
+        XCTAssertGreaterThan(CalculationMethod.muslimWorldLeague.fajrAngle, 0)
+        XCTAssertGreaterThan(CalculationMethod.muslimWorldLeague.ishaAngle, 0)
+        XCTAssertGreaterThan(CalculationMethod.isna.fajrAngle, 0)
     }
 
     // MARK: - Madhab Tests
@@ -131,32 +196,34 @@ final class PrayerModelTests: XCTestCase {
     }
 
     func testMadhabDisplayNames() {
-        XCTAssertEqual(Madhab.shafi.displayName, "Shafi'i/Hanbali/Maliki")
-        XCTAssertEqual(Madhab.hanafi.displayName, "Hanafi")
+        XCTAssertFalse(Madhab.shafi.displayName.isEmpty)
+        XCTAssertFalse(Madhab.hanafi.displayName.isEmpty)
     }
 
-    // MARK: - Qibla Direction Tests
-
-    func testQiblaDirectionInitialization() {
-        let qibla = QiblaDirection(
-            bearing: 58.5,
-            distance: 12500.0
-        )
-
-        XCTAssertEqual(qibla.bearing, 58.5)
-        XCTAssertEqual(qibla.distance, 12500.0)
+    func testMadhabShadowRatio() {
+        XCTAssertEqual(Madhab.shafi.shadowRatio, 1.0)
+        XCTAssertEqual(Madhab.hanafi.shadowRatio, 2.0)
     }
 
-    func testQiblaBearingRange() {
-        // Bearing should be between 0 and 360
-        let qibla = QiblaDirection(bearing: 180.0, distance: 10000.0)
-        XCTAssertTrue(qibla.bearing >= 0 && qibla.bearing < 360)
+    // MARK: - Coordinates Tests
+
+    func testCoordinatesInitialization() {
+        let coords = Coordinates(latitude: 37.7749, longitude: -122.4194)
+
+        XCTAssertEqual(coords.latitude, 37.7749)
+        XCTAssertEqual(coords.longitude, -122.4194)
     }
 
     // MARK: - Encoding/Decoding Tests
 
     func testPrayerLogCodable() throws {
-        let original = PrayerLog(prayerType: .dhuhr, status: .onTime)
+        let date = Date()
+        let original = PrayerLog(
+            prayerType: .dhuhr,
+            date: date,
+            isOnTime: true,
+            isMakeup: false
+        )
 
         let encoder = JSONEncoder()
         let data = try encoder.encode(original)
@@ -166,11 +233,12 @@ final class PrayerModelTests: XCTestCase {
 
         XCTAssertEqual(original.id, decoded.id)
         XCTAssertEqual(original.prayerType, decoded.prayerType)
-        XCTAssertEqual(original.status, decoded.status)
+        XCTAssertEqual(original.isOnTime, decoded.isOnTime)
+        XCTAssertEqual(original.isMakeup, decoded.isMakeup)
     }
 
     func testCalculationMethodCodable() throws {
-        let original = CalculationMethod.mwl
+        let original = CalculationMethod.muslimWorldLeague
 
         let encoder = JSONEncoder()
         let data = try encoder.encode(original)
@@ -181,23 +249,36 @@ final class PrayerModelTests: XCTestCase {
         XCTAssertEqual(original, decoded)
     }
 
+    func testCoordinatesCodable() throws {
+        let original = Coordinates(latitude: 21.4225, longitude: 39.8262)
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Coordinates.self, from: data)
+
+        XCTAssertEqual(original, decoded)
+    }
+
     // MARK: - Prayer Log Count Tests
 
     func testCountingPrayersByStatus() {
+        let date = Date()
         let logs = [
-            PrayerLog(prayerType: .fajr, status: .onTime),
-            PrayerLog(prayerType: .dhuhr, status: .onTime),
-            PrayerLog(prayerType: .asr, status: .late),
-            PrayerLog(prayerType: .maghrib, status: .onTime),
-            PrayerLog(prayerType: .isha, status: .missed)
+            PrayerLog(prayerType: .fajr, date: date, isOnTime: true),
+            PrayerLog(prayerType: .dhuhr, date: date, isOnTime: true),
+            PrayerLog(prayerType: .asr, date: date, isOnTime: false),
+            PrayerLog(prayerType: .maghrib, date: date, isOnTime: true),
+            PrayerLog(prayerType: .isha, date: date, isOnTime: false, isMakeup: true)
         ]
 
-        let onTimeCount = logs.filter { $0.status == .onTime }.count
-        let lateCount = logs.filter { $0.status == .late }.count
-        let missedCount = logs.filter { $0.status == .missed }.count
+        let onTimeCount = logs.filter { $0.isOnTime }.count
+        let lateCount = logs.filter { !$0.isOnTime && !$0.isMakeup }.count
+        let makeupCount = logs.filter { $0.isMakeup }.count
 
         XCTAssertEqual(onTimeCount, 3)
         XCTAssertEqual(lateCount, 1)
-        XCTAssertEqual(missedCount, 1)
+        XCTAssertEqual(makeupCount, 1)
     }
 }

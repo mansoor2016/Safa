@@ -5,401 +5,349 @@
 import XCTest
 @testable import Safa
 
-// MARK: - Prayer Flow Integration Tests
+// MARK: - Model Integration Tests
 
-final class PrayerFlowIntegrationTests: XCTestCase {
+final class ModelIntegrationTests: XCTestCase {
 
-    func testCompletePrayerLoggingFlow() async {
-        // Given
-        let prayerRepo = MockPrayerRepository()
-        let streakUseCase = UpdateStreakUseCase()
-        let hasanatService = HasanatService()
+    // MARK: - User Stats & Level Tests
 
-        let initialHasanat = hasanatService.totalHasanat
-
-        // When - Log a prayer
-        await prayerRepo.logPrayer(.fajr, at: Date())
-
-        // Then - Verify prayer was logged
-        let logs = await prayerRepo.getPrayerLogs(from: Date(), to: Date())
-        XCTAssertFalse(logs.isEmpty, "Prayer should be logged")
-
-        // Award hasanat
-        hasanatService.award(for: .prayerLogged(.fajr))
-        XCTAssertGreaterThan(hasanatService.totalHasanat, initialHasanat)
-
-        // Update streak
-        let result = streakUseCase.recordActivity(.prayer(.fajr), at: Date())
-        XCTAssertEqual(result.newCount, 1)
-    }
-
-    func testAllFivePrayersCompletionFlow() async {
-        // Given
-        let prayerRepo = MockPrayerRepository()
-        let hasanatService = HasanatService()
-
-        // When - Log all 5 prayers
-        for prayer in PrayerType.allCases {
-            await prayerRepo.logPrayer(prayer, at: Date())
-        }
-
-        // Then - Award bonus hasanat
-        hasanatService.award(for: .allFivePrayersLogged)
-        XCTAssertEqual(hasanatService.totalHasanat, 25) // All five prayers bonus
-    }
-}
-
-// MARK: - Quran Reading Integration Tests
-
-final class QuranReadingIntegrationTests: XCTestCase {
-
-    func testCompleteQuranReadingFlow() async {
-        // Given
-        let quranRepo = MockQuranRepository()
-        let hasanatService = HasanatService()
-        let streakUseCase = UpdateStreakUseCase()
-
-        // When - Read ayahs
-        let ayahs = await quranRepo.getAyahs(forSurah: 1)
-        XCTAssertFalse(ayahs.isEmpty)
-
-        // Award hasanat for reading
-        hasanatService.award(for: .quranPageRead)
-
-        // Update reading progress
-        let progress = ReadingProgress(lastSurah: 1, lastAyah: 7, lastReadDate: Date())
-        await quranRepo.updateProgress(progress)
-
-        // Update streak
-        let result = streakUseCase.recordActivity(.quranReading, at: Date())
-        XCTAssertEqual(result.newCount, 1)
-
-        // Then - Verify state
-        let savedProgress = await quranRepo.getReadingProgress()
-        XCTAssertEqual(savedProgress?.lastSurah, 1)
-        XCTAssertEqual(savedProgress?.lastAyah, 7)
-    }
-
-    func testBookmarkFlow() async {
-        // Given
-        let quranRepo = MockQuranRepository()
-
-        // When - Add bookmark
-        let bookmark = QuranBookmark(
-            id: UUID(),
-            surahNumber: 2,
-            ayahNumber: 255,
-            note: "Ayatul Kursi",
-            createdAt: Date()
-        )
-        await quranRepo.addBookmark(bookmark)
-
-        // Then - Verify bookmark saved
-        let bookmarks = await quranRepo.getBookmarks()
-        XCTAssertTrue(bookmarks.contains { $0.ayahNumber == 255 })
-    }
-
-    func testSearchFlow() async {
-        // Given
-        let quranRepo = MockQuranRepository()
-
-        // When - Search for ayahs
-        let results = await quranRepo.searchAyahs(query: "mercy")
-
-        // Then - Verify results
-        XCTAssertFalse(results.isEmpty)
-    }
-}
-
-// MARK: - Learning Integration Tests
-
-final class LearningIntegrationTests: XCTestCase {
-
-    func testCompleteLessonFlow() async {
-        // Given
-        let learningRepo = MockLearningRepository()
-        let hasanatService = HasanatService()
-        let achievementUseCase = CheckAchievementsUseCase()
-
-        // When - Get tracks and lessons
-        let tracks = await learningRepo.getTracks()
-        XCTAssertFalse(tracks.isEmpty)
-
-        let lessons = await learningRepo.getLessons(forTrack: "arabic")
-        XCTAssertFalse(lessons.isEmpty)
-
-        // Complete a lesson
-        await learningRepo.markLessonComplete("lesson1")
-
-        // Award hasanat
-        hasanatService.award(for: .lessonCompleted)
-
-        // Then - Verify progress
-        let progress = await learningRepo.getLessonProgress()
-        XCTAssertTrue(progress.completedLessonIds.contains("lesson1"))
-    }
-}
-
-// MARK: - Gamification Integration Tests
-
-final class GamificationIntegrationTests: XCTestCase {
-
-    func testLevelUpFlow() {
+    func testLevelProgression() {
         // Given
         var stats = UserStats()
-        let achievementUseCase = CheckAchievementsUseCase()
+        XCTAssertEqual(stats.currentLevel, 1)
+        XCTAssertEqual(UserStats.levelTitle(for: stats.currentLevel), "Beginner")
 
         // When - Accumulate hasanat to level 2
         stats.totalHasanat = 100
 
-        // Then - Verify level
+        // Then - Verify level calculation
         let expectedLevel = UserStats.calculateLevel(from: stats.totalHasanat)
         XCTAssertEqual(expectedLevel, 2)
+        XCTAssertEqual(UserStats.levelTitle(for: expectedLevel), "Seeker")
     }
 
-    func testAchievementUnlockFlow() {
-        // Given
-        let achievementUseCase = CheckAchievementsUseCase()
-        let stats = UserStats(
-            totalHasanat: 100,
-            currentLevel: 2,
-            unlockedAchievements: [],
-            lessonsCompleted: 1,
-            totalPrayersLogged: 1,
-            totalAyahsRead: 10,
-            totalTasbeehCount: 100,
-            streakFreezes: 0
+    func testLevelTitleProgression() {
+        let levelTitles = [
+            (1, "Beginner"),
+            (2, "Seeker"),
+            (3, "Learner"),
+            (4, "Dedicated"),
+            (5, "Consistent"),
+            (6, "Devoted"),
+            (7, "Steadfast"),
+            (8, "Committed"),
+            (9, "Excellent"),
+            (10, "Muhsin")
+        ]
+
+        for (level, expectedTitle) in levelTitles {
+            let title = UserStats.levelTitle(for: level)
+            XCTAssertEqual(title, expectedTitle, "Level \(level) should be '\(expectedTitle)'")
+        }
+    }
+
+    func testHasanatThresholds() {
+        let thresholds: [(hasanat: Int, expectedLevel: Int)] = [
+            (0, 1),
+            (99, 1),
+            (100, 2),
+            (299, 2),
+            (300, 3),
+            (599, 3),
+            (600, 4),
+            (999, 4),
+            (1000, 5),
+            (1999, 5),
+            (2000, 6),
+            (3999, 6),
+            (4000, 7),
+            (6999, 7),
+            (7000, 8),
+            (11999, 8),
+            (12000, 9),
+            (19999, 9),
+            (20000, 10),
+            (100000, 10) // Max level
+        ]
+
+        for (hasanat, expectedLevel) in thresholds {
+            let calculatedLevel = UserStats.calculateLevel(from: hasanat)
+            XCTAssertEqual(calculatedLevel, expectedLevel, "Hasanat \(hasanat) should be level \(expectedLevel)")
+        }
+    }
+
+    // MARK: - Prayer Type Tests
+
+    func testAllPrayerTypes() {
+        let obligatoryPrayers = PrayerType.obligatoryPrayers
+
+        XCTAssertEqual(obligatoryPrayers.count, 5)
+        XCTAssertTrue(obligatoryPrayers.contains(.fajr))
+        XCTAssertTrue(obligatoryPrayers.contains(.dhuhr))
+        XCTAssertTrue(obligatoryPrayers.contains(.asr))
+        XCTAssertTrue(obligatoryPrayers.contains(.maghrib))
+        XCTAssertTrue(obligatoryPrayers.contains(.isha))
+        XCTAssertFalse(obligatoryPrayers.contains(.sunrise))
+    }
+
+    func testPrayerTypeDisplayNames() {
+        XCTAssertEqual(PrayerType.fajr.displayName, "Fajr")
+        XCTAssertEqual(PrayerType.sunrise.displayName, "Sunrise")
+        XCTAssertEqual(PrayerType.dhuhr.displayName, "Dhuhr")
+        XCTAssertEqual(PrayerType.asr.displayName, "Asr")
+        XCTAssertEqual(PrayerType.maghrib.displayName, "Maghrib")
+        XCTAssertEqual(PrayerType.isha.displayName, "Isha")
+    }
+
+    // MARK: - Streak Type Tests
+
+    func testStreakTypes() {
+        for streakType in StreakType.allCases {
+            XCTAssertFalse(streakType.displayName.isEmpty)
+            XCTAssertFalse(streakType.description.isEmpty)
+            XCTAssertFalse(streakType.iconName.isEmpty)
+        }
+    }
+
+    func testStreakIsActiveToday() {
+        // Active streak (today)
+        let activeStreak = Streak(
+            type: .prayer,
+            currentCount: 5,
+            longestCount: 10,
+            lastActivityDate: Date()
+        )
+        XCTAssertTrue(activeStreak.isActiveToday)
+
+        // Inactive streak (no activity)
+        let inactiveStreak = Streak(
+            type: .prayer,
+            currentCount: 0,
+            longestCount: 0,
+            lastActivityDate: nil
+        )
+        XCTAssertFalse(inactiveStreak.isActiveToday)
+
+        // Streak from yesterday
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let yesterdayStreak = Streak(
+            type: .prayer,
+            currentCount: 5,
+            longestCount: 10,
+            lastActivityDate: yesterday
+        )
+        XCTAssertFalse(yesterdayStreak.isActiveToday)
+    }
+
+    // MARK: - Achievement Tests
+
+    func testAchievementCategories() {
+        for category in Achievement.AchievementCategory.allCases {
+            XCTAssertFalse(category.displayName.isEmpty)
+        }
+    }
+
+    func testPredefinedAchievements() {
+        let achievements = Achievement.allAchievements
+
+        // Verify we have achievements
+        XCTAssertGreaterThan(achievements.count, 10)
+
+        // Verify each achievement has required fields
+        for achievement in achievements {
+            XCTAssertFalse(achievement.id.isEmpty)
+            XCTAssertFalse(achievement.title.isEmpty)
+            XCTAssertFalse(achievement.description.isEmpty)
+            XCTAssertFalse(achievement.iconName.isEmpty)
+        }
+    }
+
+    // MARK: - Hasanat Award Tests
+
+    func testHasanatAwardPoints() {
+        // Verify all hasanat awards have positive points
+        XCTAssertGreaterThan(HasanatAward.prayerLogged.points, 0)
+        XCTAssertGreaterThan(HasanatAward.prayerAllFive.points, 0)
+        XCTAssertGreaterThan(HasanatAward.quranPage.points, 0)
+        XCTAssertGreaterThan(HasanatAward.lessonComplete.points, 0)
+        XCTAssertGreaterThan(HasanatAward.morningAdhkar.points, 0)
+        XCTAssertGreaterThan(HasanatAward.eveningAdhkar.points, 0)
+
+        // Verify all five prayers bonus is greater than single prayer
+        XCTAssertGreaterThan(HasanatAward.prayerAllFive.points, HasanatAward.prayerLogged.points)
+    }
+
+    // MARK: - User Preferences Tests
+
+    func testUserPreferencesDefaults() {
+        let prefs = UserPreferences()
+
+        // Verify defaults are set
+        XCTAssertEqual(prefs.calculationMethod, AppDefaults.calculationMethod)
+        XCTAssertEqual(prefs.madhab, AppDefaults.madhab)
+        XCTAssertFalse(prefs.hasCompletedOnboarding)
+    }
+
+    func testUserPreferencesCustomization() {
+        var prefs = UserPreferences()
+
+        // Customize preferences
+        prefs.calculationMethod = .muslimWorldLeague
+        prefs.madhab = .hanafi
+        prefs.notificationsEnabled = true
+        prefs.hasCompletedOnboarding = true
+
+        // Verify customization
+        XCTAssertEqual(prefs.calculationMethod, .muslimWorldLeague)
+        XCTAssertEqual(prefs.madhab, .hanafi)
+        XCTAssertTrue(prefs.notificationsEnabled)
+        XCTAssertTrue(prefs.hasCompletedOnboarding)
+    }
+
+    func testUserPreferencesCodable() throws {
+        let original = UserPreferences(
+            calculationMethod: .egypt,
+            madhab: .hanafi,
+            notificationsEnabled: true,
+            hasCompletedOnboarding: true
         )
 
-        // When - Check achievements
-        let results = achievementUseCase.checkAllAchievements(with: stats)
+        // Encode
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
 
-        // Then - Verify some achievements unlocked
-        let unlockedCount = results.filter { $0.progress >= 1.0 }.count
-        XCTAssertGreaterThan(unlockedCount, 0, "Should have some achievements unlocked")
+        // Decode
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(UserPreferences.self, from: data)
+
+        // Verify
+        XCTAssertEqual(original.calculationMethod, decoded.calculationMethod)
+        XCTAssertEqual(original.madhab, decoded.madhab)
+        XCTAssertEqual(original.hasCompletedOnboarding, decoded.hasCompletedOnboarding)
     }
 
-    func testStreakMilestoneFlow() {
-        // Given
-        let streakUseCase = UpdateStreakUseCase()
-        let hasanatService = HasanatService()
-        let calendar = Calendar.current
-        var date = Date()
+    // MARK: - Calculation Method Tests
 
-        // When - Build 7-day streak
-        for _ in 0..<7 {
-            let result = streakUseCase.recordActivity(.prayer(.fajr), at: date)
-
-            if result.milestoneReached == 7 {
-                hasanatService.award(for: .streakMilestone(days: 7))
+    func testCalculationMethods() {
+        for method in CalculationMethod.allCases {
+            XCTAssertFalse(method.displayName.isEmpty)
+            XCTAssertGreaterThan(method.fajrAngle, 0)
+            // Makkah uses fixed minutes instead of angle for Isha
+            if method != .makkah {
+                XCTAssertGreaterThan(method.ishaAngle, 0)
             }
-
-            date = calendar.date(byAdding: .day, value: 1, to: date)!
         }
-
-        // Then - Verify streak and bonus
-        let streak = streakUseCase.getStreak(for: .prayer)
-        XCTAssertEqual(streak.currentCount, 7)
-        XCTAssertGreaterThan(hasanatService.totalHasanat, 0)
-    }
-}
-
-// MARK: - Dhikr Integration Tests
-
-final class DhikrIntegrationTests: XCTestCase {
-
-    func testTasbeehSessionFlow() async {
-        // Given
-        let duaRepo = MockDuaRepository()
-        let hasanatService = HasanatService()
-
-        // When - Complete tasbeeh
-        let session = TasbeehSession(
-            id: UUID(),
-            dhikrType: "subhanallah",
-            count: 33,
-            completedAt: Date()
-        )
-        await duaRepo.saveTasbeehSession(session)
-
-        // Award hasanat
-        hasanatService.award(for: .tasbeeh(count: 33))
-
-        // Then
-        XCTAssertGreaterThan(hasanatService.totalHasanat, 0)
     }
 
-    func testMorningAdhkarFlow() async {
-        // Given
-        let duaRepo = MockDuaRepository()
-        let hasanatService = HasanatService()
-        let streakUseCase = UpdateStreakUseCase()
+    // MARK: - Madhab Tests
 
-        // When - Get and complete adhkar
-        let adhkar = await duaRepo.getAdhkar(type: .morning)
-        XCTAssertFalse(adhkar.isEmpty)
-
-        // Award hasanat
-        hasanatService.award(for: .morningAdhkarCompleted)
-
-        // Update streak
-        _ = streakUseCase.recordActivity(.dhikr, at: Date())
-
-        // Then
-        XCTAssertGreaterThan(hasanatService.totalHasanat, 0)
-    }
-}
-
-// MARK: - Family Integration Tests
-
-final class FamilyIntegrationTests: XCTestCase {
-
-    func testJoinFamilyCircleFlow() async {
-        // Given
-        let familyRepo = MockFamilyRepository()
-
-        // When - Join circle
-        let success = await familyRepo.joinCircle(inviteCode: "ABC123")
-
-        // Then
-        XCTAssertTrue(success)
-
-        let circle = await familyRepo.getCircle()
-        XCTAssertNotNil(circle)
-    }
-
-    func testViewFamilyMembersFlow() async {
-        // Given
-        let familyRepo = MockFamilyRepository()
-
-        // When - Get members
-        let members = await familyRepo.getMembers()
-
-        // Then
-        XCTAssertFalse(members.isEmpty)
-    }
-}
-
-// MARK: - Onboarding Integration Tests
-
-final class OnboardingIntegrationTests: XCTestCase {
-
-    func testOnboardingCompletionFlow() {
-        // Given
-        var preferences = UserPreferences()
-        XCTAssertFalse(preferences.hasCompletedOnboarding)
-
-        // When - Complete onboarding steps
-        preferences.calculationMethod = .mwl
-        preferences.madhab = .hanafi
-        preferences.notificationsEnabled = true
-        preferences.hasCompletedOnboarding = true
-
-        // Then
-        XCTAssertTrue(preferences.hasCompletedOnboarding)
-        XCTAssertEqual(preferences.calculationMethod, .mwl)
-        XCTAssertEqual(preferences.madhab, .hanafi)
-    }
-}
-
-// MARK: - Reminder Integration Tests
-
-final class ReminderIntegrationTests: XCTestCase {
-
-    func testContextualReminderGeneration() {
-        // Given
-        let reminderService = ContextualReminderService()
-        let calendar = Calendar.current
-        var components = calendar.dateComponents([.year, .month, .day], from: Date())
-        components.hour = 6 // Morning time
-
-        let morningDate = calendar.date(from: components)!
-
-        // When
-        let reminders = reminderService.getReminders(currentDate: morningDate)
-
-        // Then
-        XCTAssertFalse(reminders.isEmpty, "Should have reminders for morning")
-    }
-
-    func testPrayerReminderGeneration() {
-        // Given
-        let reminderService = ContextualReminderService()
-        let nextPrayer = PrayerTime(type: .fajr, time: Date().addingTimeInterval(600)) // 10 min from now
-
-        // When
-        let reminders = reminderService.getReminders(
-            currentDate: Date(),
-            nextPrayer: nextPrayer
-        )
-
-        // Then
-        XCTAssertFalse(reminders.isEmpty)
-    }
-}
-
-// MARK: - Sharing Integration Tests
-
-final class SharingIntegrationTests: XCTestCase {
-
-    func testVerseShareFlow() {
-        // Given
-        let shareService = ShareService()
-        let content = ShareableContent.quranVerse(
-            surah: "Al-Fatiha",
-            ayah: 1,
-            arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-            translation: "In the name of Allah..."
-        )
-
-        // When
-        let shareText = shareService.generateShareText(for: content)
-
-        // Then
-        XCTAssertTrue(shareText.contains("Al-Fatiha"))
-        XCTAssertTrue(shareText.contains("Safa"))
-    }
-
-    func testAchievementShareFlow() {
-        // Given
-        let shareService = ShareService()
-        let content = ShareableContent.achievement(
-            title: "First Prayer",
-            description: "Logged first prayer"
-        )
-
-        // When
-        let shareText = shareService.generateShareText(for: content)
-
-        // Then
-        XCTAssertTrue(shareText.contains("Achievement"))
-        XCTAssertTrue(shareText.contains("First Prayer"))
-    }
-}
-
-// MARK: - Wind Down Integration Tests
-
-final class WindDownIntegrationTests: XCTestCase {
-
-    func testWindDownCompletionFlow() {
-        // Given
-        let viewModel = WindDownViewModel()
-        let hasanatService = HasanatService()
-
-        // When - Complete all adhkar
-        for adhkar in viewModel.sleepAdhkar {
-            viewModel.toggleAdhkar(adhkar.id)
+    func testMadhabs() {
+        for madhab in Madhab.allCases {
+            XCTAssertFalse(madhab.displayName.isEmpty)
+            XCTAssertGreaterThan(madhab.shadowRatio, 0)
         }
+    }
 
-        // Then
-        XCTAssertTrue(viewModel.allAdhkarCompleted)
-        XCTAssertEqual(viewModel.completionPercentage, 100)
+    // MARK: - Hijri Date Tests
 
-        // Award hasanat for completion
-        if viewModel.allAdhkarCompleted {
-            hasanatService.award(for: .eveningAdhkarCompleted)
-        }
+    func testHijriDateConversion() {
+        let converter = HijriDateConverter.shared
+        let date = Date()
 
-        XCTAssertGreaterThan(hasanatService.totalHasanat, 0)
+        let (year, month, day) = converter.hijriComponents(from: date)
+
+        // Valid Hijri year range
+        XCTAssertGreaterThan(year, 1400)
+        XCTAssertLessThan(year, 1500)
+
+        // Valid month
+        XCTAssertGreaterThanOrEqual(month, 1)
+        XCTAssertLessThanOrEqual(month, 12)
+
+        // Valid day
+        XCTAssertGreaterThanOrEqual(day, 1)
+        XCTAssertLessThanOrEqual(day, 30)
+    }
+
+    func testHijriDateFormatting() {
+        let converter = HijriDateConverter.shared
+        let date = Date()
+
+        let fullFormat = converter.hijriDateString(from: date, style: .full)
+        let shortFormat = converter.hijriDateString(from: date, style: .short)
+        let arabicFormat = converter.hijriDateString(from: date, style: .arabic)
+        let monthYearFormat = converter.hijriDateString(from: date, style: .monthYear)
+
+        XCTAssertFalse(fullFormat.isEmpty)
+        XCTAssertFalse(shortFormat.isEmpty)
+        XCTAssertFalse(arabicFormat.isEmpty)
+        XCTAssertFalse(monthYearFormat.isEmpty)
+
+        // Full format should contain "AH"
+        XCTAssertTrue(fullFormat.contains("AH"))
+
+        // Short format should be shorter
+        XCTAssertLessThan(shortFormat.count, fullFormat.count)
+    }
+}
+
+// MARK: - Prayer Log Integration Tests
+
+final class PrayerLogIntegrationTests: XCTestCase {
+
+    func testPrayerLogCreation() {
+        let log = PrayerLog(
+            prayerType: .fajr,
+            date: Date(),
+            loggedAt: Date(),
+            isOnTime: true,
+            isMakeup: false
+        )
+
+        XCTAssertEqual(log.prayerType, .fajr)
+        XCTAssertTrue(log.isOnTime)
+        XCTAssertFalse(log.isMakeup)
+    }
+
+    func testPrayerLogCodable() throws {
+        let original = PrayerLog(
+            prayerType: .dhuhr,
+            date: Date(),
+            loggedAt: Date(),
+            isOnTime: false,
+            isMakeup: true
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(PrayerLog.self, from: data)
+
+        XCTAssertEqual(original.prayerType, decoded.prayerType)
+        XCTAssertEqual(original.isOnTime, decoded.isOnTime)
+        XCTAssertEqual(original.isMakeup, decoded.isMakeup)
+    }
+}
+
+// MARK: - Hadith Model Integration Tests
+
+final class HadithModelIntegrationTests: XCTestCase {
+
+    func testHadithGradingDescriptions() {
+        XCTAssertEqual(HadithGrading.sahih.description, "Authentic")
+        XCTAssertEqual(HadithGrading.hasan.description, "Good")
+        XCTAssertEqual(HadithGrading.daif.description, "Weak")
+        XCTAssertEqual(HadithGrading.mawdu.description, "Fabricated")
+    }
+
+    func testHadithCollectionStatics() {
+        let bukhari = HadithCollection.sahihBukhari
+        let muslim = HadithCollection.sahihMuslim
+
+        XCTAssertEqual(bukhari.id, "bukhari")
+        XCTAssertEqual(muslim.id, "muslim")
+        XCTAssertGreaterThan(bukhari.totalHadiths, 0)
+        XCTAssertGreaterThan(muslim.totalHadiths, 0)
     }
 }

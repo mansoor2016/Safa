@@ -1,6 +1,5 @@
 // MARK: - QuranModelTests.swift
-// PURPOSE: Unit tests for Quran domain models
-// DEPENDENCIES: XCTest
+// PURPOSE: Unit tests for Quran domain entities
 
 import XCTest
 @testable import Safa
@@ -9,181 +8,365 @@ final class QuranModelTests: XCTestCase {
 
     // MARK: - Surah Tests
 
-    func testSurahAllSurahsCount() {
-        let surahs = Surah.allSurahs
-        XCTAssertEqual(surahs.count, 114, "Quran should have exactly 114 surahs")
+    func testSurahCreation() {
+        let surah = Surah(
+            id: 1,
+            nameArabic: "الفاتحة",
+            nameEnglish: "Al-Fatiha",
+            nameTransliteration: "Al-Fatihah",
+            revelationType: .meccan,
+            ayahCount: 7,
+            juzStart: 1
+        )
+
+        XCTAssertEqual(surah.id, 1)
+        XCTAssertEqual(surah.number, 1)
+        XCTAssertEqual(surah.nameArabic, "الفاتحة")
+        XCTAssertEqual(surah.nameEnglish, "Al-Fatiha")
+        XCTAssertEqual(surah.nameTransliteration, "Al-Fatihah")
+        XCTAssertEqual(surah.revelationType, .meccan)
+        XCTAssertEqual(surah.ayahCount, 7)
+        XCTAssertEqual(surah.juzStart, 1)
     }
 
-    func testSurahFirstSurah() {
-        let surahs = Surah.allSurahs
-        guard let first = surahs.first else {
-            XCTFail("Should have at least one surah")
-            return
-        }
-
-        XCTAssertEqual(first.number, 1)
-        XCTAssertEqual(first.nameEnglish, "Al-Fatihah")
-        XCTAssertEqual(first.ayahCount, 7)
-        XCTAssertEqual(first.revelationType, .meccan)
+    func testSurahRevelationTypes() {
+        XCTAssertEqual(Surah.RevelationType.meccan.rawValue, "Meccan")
+        XCTAssertEqual(Surah.RevelationType.medinan.rawValue, "Medinan")
     }
 
-    func testSurahLastSurah() {
-        let surahs = Surah.allSurahs
-        guard let last = surahs.last else {
-            XCTFail("Should have at least one surah")
-            return
-        }
+    func testSurahCodable() throws {
+        let original = Surah(
+            id: 2,
+            nameArabic: "البقرة",
+            nameEnglish: "Al-Baqarah",
+            nameTransliteration: "Al-Baqara",
+            revelationType: .medinan,
+            ayahCount: 286,
+            juzStart: 1
+        )
 
-        XCTAssertEqual(last.number, 114)
-        XCTAssertEqual(last.nameEnglish, "An-Nas")
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Surah.self, from: data)
+
+        XCTAssertEqual(decoded.id, original.id)
+        XCTAssertEqual(decoded.nameEnglish, original.nameEnglish)
+        XCTAssertEqual(decoded.revelationType, original.revelationType)
+        XCTAssertEqual(decoded.ayahCount, original.ayahCount)
     }
 
-    func testSurahNumbersAreSequential() {
-        let surahs = Surah.allSurahs
+    func testSurahHashable() {
+        let surah1 = Surah(
+            id: 1,
+            nameArabic: "الفاتحة",
+            nameEnglish: "Al-Fatiha",
+            nameTransliteration: "Al-Fatihah",
+            revelationType: .meccan,
+            ayahCount: 7,
+            juzStart: 1
+        )
 
-        for (index, surah) in surahs.enumerated() {
-            XCTAssertEqual(surah.number, index + 1, "Surah number should be sequential")
-        }
-    }
+        let surah2 = Surah(
+            id: 1,
+            nameArabic: "الفاتحة",
+            nameEnglish: "Al-Fatiha",
+            nameTransliteration: "Al-Fatihah",
+            revelationType: .meccan,
+            ayahCount: 7,
+            juzStart: 1
+        )
 
-    func testSurahAyahCountsArePositive() {
-        for surah in Surah.allSurahs {
-            XCTAssertGreaterThan(surah.ayahCount, 0, "Surah \(surah.number) should have positive ayah count")
-        }
-    }
-
-    func testSurahHasArabicName() {
-        for surah in Surah.allSurahs {
-            XCTAssertFalse(surah.nameArabic.isEmpty, "Surah \(surah.number) should have Arabic name")
-        }
-    }
-
-    func testSurahHasEnglishName() {
-        for surah in Surah.allSurahs {
-            XCTAssertFalse(surah.nameEnglish.isEmpty, "Surah \(surah.number) should have English name")
-        }
-    }
-
-    // MARK: - Revelation Type Tests
-
-    func testRevelationTypeDisplayNames() {
-        XCTAssertEqual(RevelationType.meccan.rawValue, "Meccan")
-        XCTAssertEqual(RevelationType.medinan.rawValue, "Medinan")
-    }
-
-    func testMeccanSurahsExist() {
-        let meccanSurahs = Surah.allSurahs.filter { $0.revelationType == .meccan }
-        XCTAssertGreaterThan(meccanSurahs.count, 0)
-    }
-
-    func testMedinanSurahsExist() {
-        let medinanSurahs = Surah.allSurahs.filter { $0.revelationType == .medinan }
-        XCTAssertGreaterThan(medinanSurahs.count, 0)
-    }
-
-    // MARK: - Juz Tests
-
-    func testJuzAllJuzCount() {
-        let juzList = Juz.allJuz
-        XCTAssertEqual(juzList.count, 30, "Quran should have exactly 30 juz")
-    }
-
-    func testJuzNumbersAreSequential() {
-        let juzList = Juz.allJuz
-
-        for (index, juz) in juzList.enumerated() {
-            XCTAssertEqual(juz.number, index + 1, "Juz number should be sequential")
-        }
-    }
-
-    func testJuzStartAndEndValid() {
-        for juz in Juz.allJuz {
-            XCTAssertGreaterThan(juz.startSurah, 0)
-            XCTAssertLessThanOrEqual(juz.startSurah, 114)
-            XCTAssertGreaterThan(juz.startAyah, 0)
-
-            XCTAssertGreaterThan(juz.endSurah, 0)
-            XCTAssertLessThanOrEqual(juz.endSurah, 114)
-            XCTAssertGreaterThan(juz.endAyah, 0)
-        }
-    }
-
-    func testFirstJuzStartsAtBeginning() {
-        guard let firstJuz = Juz.allJuz.first else {
-            XCTFail("Should have at least one juz")
-            return
-        }
-
-        XCTAssertEqual(firstJuz.startSurah, 1)
-        XCTAssertEqual(firstJuz.startAyah, 1)
+        XCTAssertEqual(surah1, surah2)
     }
 
     // MARK: - Ayah Tests
 
-    func testAyahAlFatihaExists() {
-        let fatiha = Ayah.alFatiha
-        XCTAssertEqual(fatiha.count, 7, "Al-Fatiha should have 7 ayahs")
+    func testAyahCreation() {
+        let ayah = Ayah(
+            surahNumber: 2,
+            ayahNumber: 255,
+            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ",
+            textTranslation: "Allah - there is no deity except Him",
+            textTransliteration: "Allahu la ilaha illa huwa",
+            juzNumber: 3,
+            pageNumber: 42
+        )
+
+        XCTAssertEqual(ayah.id, "2:255")
+        XCTAssertEqual(ayah.surahNumber, 2)
+        XCTAssertEqual(ayah.ayahNumber, 255)
+        XCTAssertEqual(ayah.textArabic, "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ")
+        XCTAssertEqual(ayah.textTranslation, "Allah - there is no deity except Him")
+        XCTAssertEqual(ayah.textTransliteration, "Allahu la ilaha illa huwa")
+        XCTAssertEqual(ayah.juzNumber, 3)
+        XCTAssertEqual(ayah.pageNumber, 42)
     }
 
-    func testAyahHasRequiredFields() {
-        for ayah in Ayah.alFatiha {
-            XCTAssertEqual(ayah.surahNumber, 1)
-            XCTAssertGreaterThan(ayah.ayahNumber, 0)
-            XCTAssertFalse(ayah.textArabic.isEmpty)
-            XCTAssertFalse(ayah.textTranslation.isEmpty)
-        }
+    func testAyahReference() {
+        let ayah = Ayah(
+            surahNumber: 112,
+            ayahNumber: 1,
+            textArabic: "قُلْ هُوَ اللَّهُ أَحَدٌ",
+            textTranslation: "Say: He is Allah, the One",
+            juzNumber: 30,
+            pageNumber: 604
+        )
+
+        XCTAssertEqual(ayah.reference, "112:1")
     }
 
-    func testAyahIdFormat() {
-        for ayah in Ayah.alFatiha {
-            XCTAssertEqual(ayah.id, "\(ayah.surahNumber):\(ayah.ayahNumber)")
-        }
+    func testAyahWithoutTransliteration() {
+        let ayah = Ayah(
+            surahNumber: 1,
+            ayahNumber: 1,
+            textArabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+            textTranslation: "In the name of Allah, the Entirely Merciful, the Especially Merciful",
+            juzNumber: 1,
+            pageNumber: 1
+        )
+
+        XCTAssertNil(ayah.textTransliteration)
     }
 
-    // MARK: - Bookmark Tests
+    func testAyahCodable() throws {
+        let original = Ayah(
+            surahNumber: 1,
+            ayahNumber: 1,
+            textArabic: "بِسْمِ اللَّهِ",
+            textTranslation: "In the name of Allah",
+            textTransliteration: "Bismillah",
+            juzNumber: 1,
+            pageNumber: 1
+        )
 
-    func testQuranBookmarkInitialization() {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Ayah.self, from: data)
+
+        XCTAssertEqual(decoded.id, original.id)
+        XCTAssertEqual(decoded.surahNumber, original.surahNumber)
+        XCTAssertEqual(decoded.ayahNumber, original.ayahNumber)
+        XCTAssertEqual(decoded.textArabic, original.textArabic)
+    }
+
+    // MARK: - Juz Tests
+
+    func testJuzCreation() {
+        let juz = Juz(
+            id: 1,
+            startSurah: 1,
+            startAyah: 1,
+            endSurah: 2,
+            endAyah: 141
+        )
+
+        XCTAssertEqual(juz.id, 1)
+        XCTAssertEqual(juz.number, 1)
+        XCTAssertEqual(juz.startSurah, 1)
+        XCTAssertEqual(juz.startAyah, 1)
+        XCTAssertEqual(juz.endSurah, 2)
+        XCTAssertEqual(juz.endAyah, 141)
+    }
+
+    func testJuzCodable() throws {
+        let original = Juz(
+            id: 30,
+            startSurah: 78,
+            startAyah: 1,
+            endSurah: 114,
+            endAyah: 6
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Juz.self, from: data)
+
+        XCTAssertEqual(decoded.id, original.id)
+        XCTAssertEqual(decoded.startSurah, original.startSurah)
+        XCTAssertEqual(decoded.endSurah, original.endSurah)
+    }
+
+    // MARK: - QuranBookmark Tests
+
+    func testQuranBookmarkCreation() {
         let bookmark = QuranBookmark(
             surahNumber: 2,
             ayahNumber: 255,
-            note: "Ayat Al-Kursi"
+            note: "Ayatul Kursi"
         )
 
         XCTAssertEqual(bookmark.surahNumber, 2)
         XCTAssertEqual(bookmark.ayahNumber, 255)
-        XCTAssertEqual(bookmark.note, "Ayat Al-Kursi")
+        XCTAssertEqual(bookmark.note, "Ayatul Kursi")
+        XCTAssertNotNil(bookmark.id)
         XCTAssertNotNil(bookmark.createdAt)
     }
 
     func testQuranBookmarkReference() {
         let bookmark = QuranBookmark(
-            surahNumber: 1,
-            ayahNumber: 1,
-            note: nil
+            surahNumber: 18,
+            ayahNumber: 10
         )
 
-        XCTAssertEqual(bookmark.reference, "Surah 1:1")
+        XCTAssertEqual(bookmark.reference, "18:10")
     }
 
-    // MARK: - Reading Progress Tests
-
-    func testReadingProgressInitialization() {
-        let progress = QuranReadingProgress(
-            lastSurah: 2,
-            lastAyah: 100,
-            totalAyahsRead: 350
+    func testQuranBookmarkWithoutNote() {
+        let bookmark = QuranBookmark(
+            surahNumber: 36,
+            ayahNumber: 1
         )
 
-        XCTAssertEqual(progress.lastSurah, 2)
-        XCTAssertEqual(progress.lastAyah, 100)
-        XCTAssertEqual(progress.totalAyahsRead, 350)
+        XCTAssertNil(bookmark.note)
     }
 
-    func testReadingProgressDefaultValues() {
-        let progress = QuranReadingProgress()
+    func testQuranBookmarkCodable() throws {
+        let original = QuranBookmark(
+            surahNumber: 55,
+            ayahNumber: 13,
+            note: "Test note"
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(QuranBookmark.self, from: data)
+
+        XCTAssertEqual(decoded.surahNumber, original.surahNumber)
+        XCTAssertEqual(decoded.ayahNumber, original.ayahNumber)
+        XCTAssertEqual(decoded.note, original.note)
+    }
+
+    // MARK: - QuranProgress Tests
+
+    func testQuranProgressDefaults() {
+        let progress = QuranProgress()
 
         XCTAssertEqual(progress.lastSurah, 1)
         XCTAssertEqual(progress.lastAyah, 1)
         XCTAssertEqual(progress.totalAyahsRead, 0)
+        XCTAssertEqual(progress.khatmCount, 0)
+    }
+
+    func testQuranProgressCreation() {
+        let progress = QuranProgress(
+            lastSurah: 2,
+            lastAyah: 100,
+            totalAyahsRead: 107, // 7 from Al-Fatiha + 100 from Al-Baqarah
+            khatmCount: 0
+        )
+
+        XCTAssertEqual(progress.lastSurah, 2)
+        XCTAssertEqual(progress.lastAyah, 100)
+        XCTAssertEqual(progress.totalAyahsRead, 107)
+        XCTAssertEqual(progress.khatmCount, 0)
+    }
+
+    func testQuranProgressPercentage() {
+        // Total ayahs in Quran: 6236
+        let progress = QuranProgress(
+            lastSurah: 1,
+            lastAyah: 1,
+            totalAyahsRead: 623, // ~10%
+            khatmCount: 0
+        )
+
+        let percentage = progress.progressPercentage
+        XCTAssertEqual(percentage, 623.0 / 6236.0 * 100.0, accuracy: 0.001)
+    }
+
+    func testQuranProgressPercentageComplete() {
+        let progress = QuranProgress(
+            lastSurah: 114,
+            lastAyah: 6,
+            totalAyahsRead: 6236,
+            khatmCount: 1
+        )
+
+        XCTAssertEqual(progress.progressPercentage, 100.0, accuracy: 0.001)
+    }
+
+    func testQuranProgressPercentageZero() {
+        let progress = QuranProgress()
+
+        XCTAssertEqual(progress.progressPercentage, 0.0, accuracy: 0.001)
+    }
+
+    func testQuranProgressCodable() throws {
+        let original = QuranProgress(
+            lastSurah: 36,
+            lastAyah: 83,
+            totalAyahsRead: 3000,
+            khatmCount: 2
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(QuranProgress.self, from: data)
+
+        XCTAssertEqual(decoded.lastSurah, original.lastSurah)
+        XCTAssertEqual(decoded.lastAyah, original.lastAyah)
+        XCTAssertEqual(decoded.totalAyahsRead, original.totalAyahsRead)
+        XCTAssertEqual(decoded.khatmCount, original.khatmCount)
+    }
+
+    // MARK: - Reciter Tests
+
+    func testReciterCreation() {
+        let reciter = Reciter(
+            id: "mishary",
+            nameEnglish: "Mishary Rashid Alafasy",
+            nameArabic: "مشاري راشد العفاسي",
+            style: "Murattal",
+            audioBaseURL: URL(string: "https://example.com/audio")
+        )
+
+        XCTAssertEqual(reciter.id, "mishary")
+        XCTAssertEqual(reciter.nameEnglish, "Mishary Rashid Alafasy")
+        XCTAssertEqual(reciter.nameArabic, "مشاري راشد العفاسي")
+        XCTAssertEqual(reciter.style, "Murattal")
+        XCTAssertNotNil(reciter.audioBaseURL)
+    }
+
+    func testReciterWithoutStyle() {
+        let reciter = Reciter(
+            id: "test",
+            nameEnglish: "Test Reciter",
+            nameArabic: "قارئ اختبار",
+            style: nil,
+            audioBaseURL: nil
+        )
+
+        XCTAssertNil(reciter.style)
+        XCTAssertNil(reciter.audioBaseURL)
+    }
+
+    func testReciterCodable() throws {
+        let original = Reciter(
+            id: "sudais",
+            nameEnglish: "Abdul Rahman Al-Sudais",
+            nameArabic: "عبد الرحمن السديس",
+            style: "Mujawwad",
+            audioBaseURL: URL(string: "https://example.com")
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Reciter.self, from: data)
+
+        XCTAssertEqual(decoded.id, original.id)
+        XCTAssertEqual(decoded.nameEnglish, original.nameEnglish)
+        XCTAssertEqual(decoded.style, original.style)
     }
 }

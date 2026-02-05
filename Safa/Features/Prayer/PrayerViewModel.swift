@@ -17,8 +17,8 @@ final class PrayerViewModel {
 
     // MARK: - Dependencies
     private let prayerRepository: PrayerRepositoryProtocol
-    private let locationService: LocationService
-    private let notificationService: NotificationService
+    private let locationService: LocationServiceProtocol
+    private let notificationService: NotificationServiceProtocol
     private let userState: UserStateManager
 
     // MARK: - Private State
@@ -27,8 +27,8 @@ final class PrayerViewModel {
     // MARK: - Init
     init(
         prayerRepository: PrayerRepositoryProtocol,
-        locationService: LocationService,
-        notificationService: NotificationService,
+        locationService: LocationServiceProtocol,
+        notificationService: NotificationServiceProtocol,
         userState: UserStateManager
     ) {
         self.prayerRepository = prayerRepository

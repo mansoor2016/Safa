@@ -14,10 +14,26 @@ struct HomeView: View {
     @State private var hijriDate = ""
     @State private var dailyVerse: Ayah?
     @State private var isRamadan = false
+    @State private var showRamadanBanner = true
+    @State private var suhoorTime: Date?
+    @State private var iftarTime: Date?
+    @State private var currentRamadanDay: Int = 0
+    @State private var daysUntilRamadan: Int?
+    @State private var isLastTenNights = false
+
+    // Banner dismiss key (reappears next day)
+    private var bannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
+                // Ramadan banner (dismissible, reappears next day)
+                ramadanBannerSection
+
                 // Header with date
                 dateHeader
 
@@ -60,6 +76,46 @@ struct HomeView: View {
         }
         .task {
             await loadHomeData()
+        }
+    }
+
+    // MARK: - Ramadan Banner Section
+
+    @ViewBuilder
+    private var ramadanBannerSection: some View {
+        if showRamadanBanner && !UserDefaults.standard.bool(forKey: bannerDismissKey) {
+            if isRamadan {
+                if isLastTenNights {
+                    // Last 10 nights special banner
+                    LastTenNightsBanner(
+                        currentNight: currentRamadanDay,
+                        onDismiss: dismissBanner
+                    )
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                } else {
+                    // Regular Ramadan banner
+                    RamadanBanner(
+                        suhoorTime: suhoorTime,
+                        iftarTime: iftarTime,
+                        onDismiss: dismissBanner
+                    )
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            } else if let days = daysUntilRamadan, days <= 7, days > 0 {
+                // Pre-Ramadan banner (1 week before)
+                PreRamadanBanner(
+                    daysUntil: days,
+                    onDismiss: dismissBanner
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+    }
+
+    private func dismissBanner() {
+        withAnimation {
+            UserDefaults.standard.set(true, forKey: bannerDismissKey)
+            showRamadanBanner = false
         }
     }
 
@@ -255,6 +311,16 @@ struct HomeView: View {
         hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         isRamadan = HijriDateConverter.shared.isRamadan()
 
+        // Load Ramadan data
+        let ramadanService = dependencies.ramadanService
+        ramadanService.checkRamadanStatus()
+        currentRamadanDay = ramadanService.currentRamadanDay
+        daysUntilRamadan = ramadanService.daysUntilRamadan
+        isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
+
+        // Check if banner was dismissed today
+        showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
+
         // Load prayer times
         do {
             if let location = dependencies.locationService.coordinates {
@@ -264,6 +330,10 @@ struct HomeView: View {
                     method: .isna
                 )
                 nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
+
+                // Set Suhoor (Fajr) and Iftar (Maghrib) times for Ramadan banner
+                suhoorTime = todayPrayers.first { $0.type == .fajr }?.time
+                iftarTime = todayPrayers.first { $0.type == .maghrib }?.time
             }
         } catch {
             // Handle error silently on home screen
