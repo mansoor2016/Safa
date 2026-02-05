@@ -1,0 +1,15 @@
+{
+  "names": [
+    {"id": 1, "arabic": "الرَّحْمَنُ", "transliteration": "Ar-Rahman", "meaning": "The Most Gracious", "explanation": "The One who has plenty of mercy for the believers and the disbelievers in this world and especially for the believers in the hereafter."},
+    {"id": 2, "arabic": "الرَّحِيمُ", "transliteration": "Ar-Raheem", "meaning": "The Most Merciful", "explanation": "The One who has plenty of mercy for the believers."},
+    {"id": 3, "arabic": "الْمَلِكُ", "transliteration": "Al-Malik", "meaning": "The King", "explanation": "The One with complete dominion."},
+    {"id": 4, "arabic": "الْقُدُّوسُ", "transliteration": "Al-Quddus", "meaning": "The Most Sacred", "explanation": "The One who is pure from any imperfection."},
+    {"id": 5, "arabic": "السَّلاَمُ", "transliteration": "As-Salam", "meaning": "The Source of Peace", "explanation": "The One who is free from every imperfection."},
+    {"id": 6, "arabic": "الْمُؤْمِنُ", "transliteration": "Al-Mu'min", "meaning": "The Inspirer of Faith", "explanation": "The One who gives security and faith."},
+    {"id": 7, "arabic": "الْمُهَيْمِنُ", "transliteration": "Al-Muhaymin", "meaning": "The Guardian", "explanation": "The One who watches over and protects."},
+    {"id": 8, "arabic": "الْعَزِيزُ", "transliteration": "Al-Aziz", "meaning": "The Almighty", "explanation": "The One who is Mighty and Powerful."},
+    {"id": 9, "arabic": "الْجَبَّارُ", "transliteration": "Al-Jabbar", "meaning": "The Compeller", "explanation": "The One who repairs all broken things."},
+    {"id": 10, "arabic": "الْمُتَكَبِّرُ", "transliteration": "Al-Mutakabbir", "meaning": "The Greatest", "explanation": "The One who is clear from the attributes of the creatures."}
+  ],
+  "categories": ["Names of Mercy", "Names of Majesty", "Names of Beauty", "Names of Power"]
+}

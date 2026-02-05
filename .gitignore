@@ -1,0 +1,105 @@
+# Xcode
+.DS_Store
+*/build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+*.xcscmblueprint
+*.xcworkspace
+!default.xcworkspace
+
+# CocoaPods
+Pods/
+!Podfile.lock
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Carthage
+Carthage/Build
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Xcode automatically generated files
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build artifacts
+build/
+DerivedData/
+
+# AppCode
+.idea/
+
+# Secrets and credentials
+*.p12
+*.mobileprovision
+*.cer
+Secrets/
+credentials.json
+GoogleService-Info.plist
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Large files tracked by Git LFS (comment out if not using LFS)
+# *.mlmodel
+# *.mlpackage
+# *.mp3
+# *.m4a
+# *.wav
+
+# Test outputs
+*.xcresult
+TestResults/
+
+# Archives
+*.xcarchive
+
+# Temporary files
+*.tmp
+*.temp

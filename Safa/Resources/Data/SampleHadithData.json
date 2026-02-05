@@ -1,0 +1,141 @@
+{
+  "collections": [
+    {
+      "id": "bukhari",
+      "name": "Sahih al-Bukhari",
+      "arabicName": "صحيح البخاري",
+      "compiler": "Imam al-Bukhari",
+      "totalHadith": 7563,
+      "description": "The most authentic collection of hadith"
+    },
+    {
+      "id": "muslim",
+      "name": "Sahih Muslim",
+      "arabicName": "صحيح مسلم",
+      "compiler": "Imam Muslim",
+      "totalHadith": 7500,
+      "description": "Second most authentic collection of hadith"
+    },
+    {
+      "id": "tirmidhi",
+      "name": "Jami' at-Tirmidhi",
+      "arabicName": "جامع الترمذي",
+      "compiler": "Imam at-Tirmidhi",
+      "totalHadith": 3956,
+      "description": "One of the six major hadith collections"
+    },
+    {
+      "id": "abu_dawud",
+      "name": "Sunan Abu Dawud",
+      "arabicName": "سنن أبي داود",
+      "compiler": "Imam Abu Dawud",
+      "totalHadith": 5274,
+      "description": "Collection focused on legal rulings"
+    },
+    {
+      "id": "nasai",
+      "name": "Sunan an-Nasa'i",
+      "arabicName": "سنن النسائي",
+      "compiler": "Imam an-Nasa'i",
+      "totalHadith": 5761,
+      "description": "Known for strict authenticity standards"
+    },
+    {
+      "id": "ibn_majah",
+      "name": "Sunan Ibn Majah",
+      "arabicName": "سنن ابن ماجه",
+      "compiler": "Imam Ibn Majah",
+      "totalHadith": 4341,
+      "description": "The sixth of the canonical hadith collections"
+    }
+  ],
+  "books": {
+    "bukhari": [
+      {
+        "id": "1",
+        "name": "Revelation",
+        "arabicName": "بدء الوحي",
+        "hadithCount": 7
+      },
+      {
+        "id": "2",
+        "name": "Belief",
+        "arabicName": "الإيمان",
+        "hadithCount": 51
+      },
+      {
+        "id": "3",
+        "name": "Knowledge",
+        "arabicName": "العلم",
+        "hadithCount": 134
+      },
+      {
+        "id": "4",
+        "name": "Ablutions",
+        "arabicName": "الوضوء",
+        "hadithCount": 113
+      },
+      {
+        "id": "8",
+        "name": "Prayer",
+        "arabicName": "الصلاة",
+        "hadithCount": 172
+      }
+    ]
+  },
+  "hadiths": [
+    {
+      "id": "bukhari_1",
+      "collection": "Sahih al-Bukhari",
+      "bookId": "1",
+      "number": 1,
+      "arabic": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى، فَمَنْ كَانَتْ هِجْرَتُهُ إِلَى دُنْيَا يُصِيبُهَا أَوْ إِلَى امْرَأَةٍ يَنْكِحُهَا فَهِجْرَتُهُ إِلَى مَا هَاجَرَ إِلَيْهِ",
+      "english": "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.",
+      "narrator": "Umar bin Al-Khattab",
+      "grade": "sahih",
+      "reference": "Sahih al-Bukhari 1",
+      "topics": ["intentions", "deeds", "sincerity"]
+    },
+    {
+      "id": "bukhari_6",
+      "collection": "Sahih al-Bukhari",
+      "bookId": "2",
+      "number": 6,
+      "arabic": "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ، وَالْمُهَاجِرُ مَنْ هَجَرَ مَا نَهَى اللَّهُ عَنْهُ",
+      "english": "A Muslim is the one from whose tongue and hands the Muslims are safe, and a Muhajir (emigrant) is the one who leaves what Allah has forbidden.",
+      "narrator": "Abdullah bin Amr",
+      "grade": "sahih",
+      "reference": "Sahih al-Bukhari 6",
+      "topics": ["faith", "character", "brotherhood"]
+    },
+    {
+      "id": "muslim_45",
+      "collection": "Sahih Muslim",
+      "bookId": "1",
+      "number": 45,
+      "arabic": "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
+      "english": "None of you truly believes until he loves for his brother what he loves for himself.",
+      "narrator": "Anas bin Malik",
+      "grade": "sahih",
+      "reference": "Sahih Muslim 45",
+      "topics": ["faith", "brotherhood", "love"]
+    },
+    {
+      "id": "bukhari_13",
+      "collection": "Sahih al-Bukhari",
+      "bookId": "2",
+      "number": 13,
+      "arabic": "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى أَكُونَ أَحَبَّ إِلَيْهِ مِنْ وَالِدِهِ وَوَلَدِهِ وَالنَّاسِ أَجْمَعِينَ",
+      "english": "None of you will have faith till he loves me more than his father, his children and all mankind.",
+      "narrator": "Anas bin Malik",
+      "grade": "sahih",
+      "reference": "Sahih al-Bukhari 15",
+      "topics": ["faith", "prophet", "love"]
+    }
+  ],
+  "dailyHadith": {
+    "2024-01-01": "bukhari_1",
+    "2024-01-02": "muslim_45",
+    "2024-01-03": "bukhari_13"
+  }
+}
