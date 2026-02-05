@@ -96,14 +96,28 @@ private struct PrayerContentView: View {
     // MARK: - Date Header
 
     private var dateHeader: some View {
-        VStack(spacing: SafaSpacing.xxs) {
-            Text(viewModel.currentDate.formatted(date: .complete, time: .omitted))
-                .font(SafaTypography.titleMedium)
-                .foregroundColor(SafaColors.Fallback.text)
+        VStack(spacing: SafaSpacing.sm) {
+            VStack(spacing: SafaSpacing.xxs) {
+                Text(viewModel.currentDate.formatted(date: .complete, time: .omitted))
+                    .font(SafaTypography.titleMedium)
+                    .foregroundColor(SafaColors.Fallback.text)
 
-            Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .full))
-                .font(SafaTypography.bodySmall)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
+                Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .full))
+                    .font(SafaTypography.bodySmall)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+            }
+
+            // Prayer progress indicator
+            PrayerProgressIndicator(
+                prayers: viewModel.todayPrayers,
+                loggedPrayers: viewModel.loggedPrayers,
+                nextPrayer: viewModel.nextPrayer,
+                style: .expanded,
+                onLogPrayer: { prayerType in
+                    Task { await viewModel.logPrayer(prayerType) }
+                }
+            )
+            .padding(.top, SafaSpacing.sm)
         }
         .frame(maxWidth: .infinity)
     }

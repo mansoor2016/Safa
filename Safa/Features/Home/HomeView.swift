@@ -11,6 +11,7 @@ struct HomeView: View {
 
     @State private var nextPrayer: PrayerTime?
     @State private var todayPrayers: [PrayerTime] = []
+    @State private var loggedPrayers: Set<PrayerType> = []
     @State private var hijriDate = ""
     @State private var dailyVerse: Ayah?
     @State private var isRamadan = false
@@ -20,6 +21,8 @@ struct HomeView: View {
     @State private var currentRamadanDay: Int = 0
     @State private var daysUntilRamadan: Int?
     @State private var isLastTenNights = false
+    @State private var isRamadanBannerExpanded = false
+    @State private var showShareBanner = !ShareBanner.isDismissed
 
     // Banner dismiss key (reappears next day)
     private var bannerDismissKey: String {
@@ -31,9 +34,6 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
-                // Ramadan banner (dismissible, reappears next day)
-                ramadanBannerSection
-
                 // Header with date
                 dateHeader
 
@@ -50,6 +50,9 @@ struct HomeView: View {
                 // Quick actions
                 quickActions
 
+                // Ramadan banner (collapsible, reappears next day)
+                ramadanBannerSection
+
                 // Daily verse
                 if let verse = dailyVerse {
                     dailyVerseCard(verse)
@@ -60,6 +63,15 @@ struct HomeView: View {
 
                 // Contextual reminders
                 contextualReminders
+
+                // Share app banner (hidden once user shares)
+                if showShareBanner {
+                    ShareBanner {
+                        withAnimation {
+                            showShareBanner = false
+                        }
+                    }
+                }
             }
             .padding()
         }
@@ -83,33 +95,104 @@ struct HomeView: View {
 
     @ViewBuilder
     private var ramadanBannerSection: some View {
-        if showRamadanBanner && !UserDefaults.standard.bool(forKey: bannerDismissKey) {
-            if isRamadan {
-                if isLastTenNights {
-                    // Last 10 nights special banner
-                    LastTenNightsBanner(
-                        currentNight: currentRamadanDay,
-                        onDismiss: dismissBanner
-                    )
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                } else {
-                    // Regular Ramadan banner
-                    RamadanBanner(
-                        suhoorTime: suhoorTime,
-                        iftarTime: iftarTime,
-                        onDismiss: dismissBanner
-                    )
-                    .transition(.move(edge: .top).combined(with: .opacity))
+        let shouldShow = showRamadanBanner
+            && !UserDefaults.standard.bool(forKey: bannerDismissKey)
+            && (isRamadan || (daysUntilRamadan ?? 0 > 0 && daysUntilRamadan ?? 0 <= 7))
+
+        if shouldShow {
+            VStack(spacing: 0) {
+                // Collapsed header row (always visible)
+                ramadanBannerCollapsedRow
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isRamadanBannerExpanded.toggle()
+                        }
+                    }
+
+                // Expanded content
+                if isRamadanBannerExpanded {
+                    ramadanBannerExpandedContent
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-            } else if let days = daysUntilRamadan, days <= 7, days > 0 {
-                // Pre-Ramadan banner (1 week before)
-                PreRamadanBanner(
-                    daysUntil: days,
-                    onDismiss: dismissBanner
-                )
-                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+        }
+    }
+
+    private var ramadanBannerCollapsedRow: some View {
+        HStack(spacing: SafaSpacing.sm) {
+            Image(systemName: ramadanBannerIcon)
+                .font(.body)
+                .foregroundColor(ramadanBannerIconColor)
+
+            Text(ramadanBannerSummaryText)
+                .font(SafaTypography.titleSmall)
+                .foregroundColor(SafaColors.Fallback.text)
+
+            Spacer()
+
+            Image(systemName: isRamadanBannerExpanded ? "chevron.down" : "chevron.right")
+                .font(.caption)
+                .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+            Button {
+                dismissBanner()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    .padding(SafaSpacing.xxs)
             }
         }
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.sm)
+        .background(Color(UIColor.secondarySystemBackground))
+    }
+
+    @ViewBuilder
+    private var ramadanBannerExpandedContent: some View {
+        if isRamadan {
+            if isLastTenNights {
+                LastTenNightsBanner(
+                    currentNight: currentRamadanDay,
+                    onDismiss: dismissBanner
+                )
+            } else {
+                RamadanBanner(
+                    suhoorTime: suhoorTime,
+                    iftarTime: iftarTime,
+                    onDismiss: dismissBanner
+                )
+            }
+        } else if let days = daysUntilRamadan, days <= 7, days > 0 {
+            PreRamadanBanner(
+                daysUntil: days,
+                onDismiss: dismissBanner
+            )
+        }
+    }
+
+    private var ramadanBannerSummaryText: String {
+        if isRamadan {
+            if isLastTenNights {
+                return "Last 10 Nights - Night \(currentRamadanDay)"
+            }
+            return "Ramadan - Day \(currentRamadanDay)"
+        } else if let days = daysUntilRamadan, days <= 7, days > 0 {
+            return "\(days) days until Ramadan"
+        }
+        return "Ramadan"
+    }
+
+    private var ramadanBannerIcon: String {
+        if isRamadan && isLastTenNights {
+            return "sparkles"
+        }
+        return "moon.stars.fill"
+    }
+
+    private var ramadanBannerIconColor: Color {
+        isRamadan ? .purple : .accentColor
     }
 
     private func dismissBanner() {
@@ -152,6 +235,17 @@ struct HomeView: View {
 
                     Spacer()
 
+                    // Prayer progress indicator (X/5)
+                    PrayerProgressIndicator(
+                        prayers: todayPrayers,
+                        loggedPrayers: loggedPrayers,
+                        nextPrayer: nextPrayer,
+                        style: .compact,
+                        onLogPrayer: { prayerType in
+                            Task { await logPrayer(prayerType) }
+                        }
+                    )
+
                     Button("See All") {
                         router.navigate(to: .prayer)
                     }
@@ -162,7 +256,8 @@ struct HomeView: View {
                     ForEach(todayPrayers.filter { $0.type.isObligatory }) { prayer in
                         PrayerTimelineItem(
                             prayer: prayer,
-                            isNext: prayer.id == nextPrayer?.id
+                            isNext: prayer.id == nextPrayer?.id,
+                            isLogged: loggedPrayers.contains(prayer.type)
                         )
                     }
                 }
@@ -304,6 +399,30 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Log Prayer
+
+    private func logPrayer(_ prayerType: PrayerType) async {
+        guard !loggedPrayers.contains(prayerType) else { return }
+
+        do {
+            let prayer = todayPrayers.first { $0.type == prayerType }
+            let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
+
+            try await dependencies.prayerRepository.logPrayer(
+                prayerType,
+                for: Date(),
+                at: Date(),
+                isOnTime: isOnTime
+            )
+
+            loggedPrayers.insert(prayerType)
+            await dependencies.userState.awardHasanat(.prayerLogged)
+            await dependencies.userState.recordActivity(type: .prayer)
+        } catch {
+            // Handle error silently on home screen
+        }
+    }
+
     // MARK: - Load Data
 
     private func loadHomeData() async {
@@ -318,6 +437,9 @@ struct HomeView: View {
         daysUntilRamadan = ramadanService.daysUntilRamadan
         isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
 
+        // Expanded by default during Ramadan, collapsed otherwise
+        isRamadanBannerExpanded = isRamadan
+
         // Check if banner was dismissed today
         showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
 
@@ -330,6 +452,10 @@ struct HomeView: View {
                     method: .isna
                 )
                 nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
+
+                // Load logged prayers for today
+                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+                loggedPrayers = Set(logs.map { $0.prayerType })
 
                 // Set Suhoor (Fajr) and Iftar (Maghrib) times for Ramadan banner
                 suhoorTime = todayPrayers.first { $0.type == .fajr }?.time
@@ -397,22 +523,53 @@ private struct NextPrayerHomeCard: View {
 private struct PrayerTimelineItem: View {
     let prayer: PrayerTime
     let isNext: Bool
+    let isLogged: Bool
 
     var body: some View {
         VStack(spacing: SafaSpacing.xxs) {
-            Circle()
-                .fill(isNext ? Color.accentColor : (prayer.time < Date() ? Color.green : Color.gray.opacity(0.3)))
-                .frame(width: 12, height: 12)
+            ZStack {
+                Circle()
+                    .fill(dotColor)
+                    .frame(width: 12, height: 12)
+
+                if isLogged {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 6, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
 
             Text(prayer.type.displayName.prefix(3))
                 .font(SafaTypography.labelSmall)
-                .foregroundColor(isNext ? .accentColor : SafaColors.Fallback.secondaryText)
+                .foregroundColor(labelColor)
 
             Text(prayer.time.formatted(date: .omitted, time: .shortened))
                 .font(SafaTypography.labelSmall)
                 .foregroundColor(SafaColors.Fallback.tertiaryText)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var dotColor: Color {
+        if isLogged {
+            return .green
+        } else if isNext {
+            return .accentColor
+        } else if prayer.time < Date() {
+            return .orange.opacity(0.5)
+        } else {
+            return Color.gray.opacity(0.3)
+        }
+    }
+
+    private var labelColor: Color {
+        if isLogged {
+            return .green
+        } else if isNext {
+            return .accentColor
+        } else {
+            return SafaColors.Fallback.secondaryText
+        }
     }
 }
 

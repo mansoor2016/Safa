@@ -257,24 +257,14 @@ struct AboutView: View {
             // Support Section
             Section {
                 NavigationLink {
-                    RequestFeatureView()
+                    FeedbackView()
                 } label: {
-                    Label("Request a Feature", systemImage: "lightbulb")
+                    Label("Send Feedback", systemImage: "envelope")
                 }
 
                 Link(destination: AppConstants.URLs.support) {
                     HStack {
                         Label("Help & Support", systemImage: "questionmark.circle")
-                        Spacer()
-                        Image(systemName: "arrow.up.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-
-                Link(destination: AppConstants.URLs.feedback) {
-                    HStack {
-                        Label("Send Feedback", systemImage: "envelope")
                         Spacer()
                         Image(systemName: "arrow.up.right")
                             .font(.caption)
@@ -334,111 +324,6 @@ struct AboutView: View {
     }
 }
 
-// MARK: - Request Feature View
-
-struct RequestFeatureView: View {
-    @State private var featureTitle = ""
-    @State private var featureDescription = ""
-    @State private var selectedCategory: FeatureCategory = .general
-    @State private var showMailComposer = false
-    @State private var showAlert = false
-    @State private var alertMessage = ""
-
-    enum FeatureCategory: String, CaseIterable {
-        case general = "General"
-        case prayer = "Prayer Times"
-        case quran = "Quran"
-        case learning = "Learning"
-        case ai = "AI Companion"
-        case widgets = "Widgets"
-        case accessibility = "Accessibility"
-
-        var emoji: String {
-            switch self {
-            case .general: return "💡"
-            case .prayer: return "🕌"
-            case .quran: return "📖"
-            case .learning: return "📚"
-            case .ai: return "🤖"
-            case .widgets: return "📱"
-            case .accessibility: return "♿"
-            }
-        }
-    }
-
-    var body: some View {
-        Form {
-            Section {
-                TextField("Feature title", text: $featureTitle)
-
-                Picker("Category", selection: $selectedCategory) {
-                    ForEach(FeatureCategory.allCases, id: \.self) { category in
-                        Text("\(category.emoji) \(category.rawValue)")
-                            .tag(category)
-                    }
-                }
-            } header: {
-                Text("What would you like to see?")
-            }
-
-            Section {
-                TextEditor(text: $featureDescription)
-                    .frame(minHeight: 150)
-            } header: {
-                Text("Description")
-            } footer: {
-                Text("Please describe the feature in detail. The more context you provide, the better we can understand your needs.")
-            }
-
-            Section {
-                Button {
-                    submitFeatureRequest()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("Submit Feature Request")
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                }
-                .disabled(featureTitle.isEmpty || featureDescription.isEmpty)
-            }
-        }
-        .navigationTitle("Request a Feature")
-        .navigationBarTitleDisplayMode(.large)
-        .alert("Feature Request", isPresented: $showAlert) {
-            Button("OK") {}
-        } message: {
-            Text(alertMessage)
-        }
-        .sheet(isPresented: $showMailComposer) {
-            MailComposerView(
-                subject: "[Feature Request] \(selectedCategory.rawValue): \(featureTitle)",
-                body: featureDescription,
-                recipient: "features@safaapp.com"
-            )
-        }
-    }
-
-    private func submitFeatureRequest() {
-        if MFMailComposeViewController.canSendMail() {
-            showMailComposer = true
-        } else {
-            // Copy to clipboard as fallback
-            let text = """
-            Feature Request: \(featureTitle)
-            Category: \(selectedCategory.rawValue)
-
-            Description:
-            \(featureDescription)
-            """
-            UIPasteboard.general.string = text
-            alertMessage = "Email is not configured. The feature request has been copied to your clipboard. Please email it to features@safaapp.com"
-            showAlert = true
-        }
-    }
-}
-
 // MARK: - Mail Composer View
 
 struct MailComposerView: UIViewControllerRepresentable {
@@ -485,12 +370,6 @@ struct MailComposerView: UIViewControllerRepresentable {
 #Preview("About") {
     NavigationStack {
         AboutView()
-    }
-}
-
-#Preview("Request Feature") {
-    NavigationStack {
-        RequestFeatureView()
     }
 }
 
@@ -798,31 +677,102 @@ struct DataExportView: View {
 // MARK: - Feedback View
 
 struct FeedbackView: View {
-    @State private var feedbackType = "Bug Report"
-    @State private var feedbackText = ""
+    @State private var feedbackType: FeedbackType = .bugReport
+    @State private var feedbackTitle = ""
+    @State private var feedbackDescription = ""
+    @State private var selectedCategory: FeedbackCategory = .general
+    @State private var showMailComposer = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+
+    enum FeedbackType: String, CaseIterable {
+        case bugReport = "Bug Report"
+        case featureRequest = "Feature Request"
+        case generalFeedback = "General Feedback"
+    }
+
+    enum FeedbackCategory: String, CaseIterable {
+        case general = "General"
+        case prayer = "Prayer Times"
+        case quran = "Quran"
+        case learning = "Learning"
+        case ai = "AI Companion"
+        case widgets = "Widgets"
+        case accessibility = "Accessibility"
+    }
 
     var body: some View {
         Form {
-            Picker("Type", selection: $feedbackType) {
-                Text("Bug Report").tag("Bug Report")
-                Text("Feature Request").tag("Feature Request")
-                Text("General Feedback").tag("General Feedback")
-            }
+            Section {
+                Picker("Type", selection: $feedbackType) {
+                    ForEach(FeedbackType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
 
-            Section("Description") {
-                TextEditor(text: $feedbackText)
-                    .frame(minHeight: 150)
+                Picker("Category", selection: $selectedCategory) {
+                    ForEach(FeedbackCategory.allCases, id: \.self) { category in
+                        Text(category.rawValue).tag(category)
+                    }
+                }
+
+                TextField("Title", text: $feedbackTitle)
             }
 
             Section {
-                Button("Send Feedback") {
-                    // Send feedback
+                TextEditor(text: $feedbackDescription)
+                    .frame(minHeight: 150)
+            } header: {
+                Text("Description")
+            } footer: {
+                Text("Please provide as much detail as possible so we can understand your feedback.")
+            }
+
+            Section {
+                Button {
+                    submitFeedback()
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Send Feedback")
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
                 }
-                .disabled(feedbackText.isEmpty)
+                .disabled(feedbackTitle.isEmpty || feedbackDescription.isEmpty)
             }
         }
-        .navigationTitle("Feedback")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Send Feedback")
+        .navigationBarTitleDisplayMode(.large)
+        .alert("Feedback", isPresented: $showAlert) {
+            Button("OK") {}
+        } message: {
+            Text(alertMessage)
+        }
+        .sheet(isPresented: $showMailComposer) {
+            MailComposerView(
+                subject: "[\(feedbackType.rawValue)] \(selectedCategory.rawValue): \(feedbackTitle)",
+                body: feedbackDescription,
+                recipient: "feedback@safaapp.com"
+            )
+        }
+    }
+
+    private func submitFeedback() {
+        if MFMailComposeViewController.canSendMail() {
+            showMailComposer = true
+        } else {
+            let text = """
+            \(feedbackType.rawValue): \(feedbackTitle)
+            Category: \(selectedCategory.rawValue)
+
+            Description:
+            \(feedbackDescription)
+            """
+            UIPasteboard.general.string = text
+            alertMessage = "Email is not configured. Your feedback has been copied to your clipboard. Please email it to feedback@safaapp.com"
+            showAlert = true
+        }
     }
 }
 

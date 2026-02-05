@@ -58,6 +58,17 @@ enum PrayerType: String, Codable, CaseIterable, Identifiable {
     static var obligatoryPrayers: [PrayerType] {
         [.fajr, .dhuhr, .asr, .maghrib, .isha]
     }
+
+    var shortName: String {
+        switch self {
+        case .fajr: return "Faj"
+        case .sunrise: return "Sun"
+        case .dhuhr: return "Dhu"
+        case .asr: return "Asr"
+        case .maghrib: return "Mag"
+        case .isha: return "Ish"
+        }
+    }
 }
 
 // MARK: - Prayer Time
@@ -78,6 +89,22 @@ struct PrayerTime: Identifiable, Hashable {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: time)
+    }
+
+    // MARK: - Sample Data for Previews
+
+    static var samplePrayers: [PrayerTime] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        return [
+            PrayerTime(type: .fajr, time: calendar.date(bySettingHour: 5, minute: 30, second: 0, of: today)!),
+            PrayerTime(type: .sunrise, time: calendar.date(bySettingHour: 6, minute: 45, second: 0, of: today)!),
+            PrayerTime(type: .dhuhr, time: calendar.date(bySettingHour: 12, minute: 15, second: 0, of: today)!),
+            PrayerTime(type: .asr, time: calendar.date(bySettingHour: 15, minute: 45, second: 0, of: today)!),
+            PrayerTime(type: .maghrib, time: calendar.date(bySettingHour: 18, minute: 30, second: 0, of: today)!),
+            PrayerTime(type: .isha, time: calendar.date(bySettingHour: 20, minute: 0, second: 0, of: today)!)
+        ]
     }
 }
 

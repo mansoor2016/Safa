@@ -36,6 +36,7 @@ struct SettingsView: View {
 
     var body: some View {
         List {
+            shareSection
             locationSection
             prayerSettingsSection
             notificationSettingsSection
@@ -365,6 +366,30 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Share Section
+
+    private var shareSection: some View {
+        Section {
+            Button {
+                showInviteFriendsSheet = true
+            } label: {
+                HStack {
+                    Label("Share Safa", systemImage: "square.and.arrow.up")
+                        .foregroundColor(.accentColor)
+                    Spacer()
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                        .foregroundColor(.pink)
+                }
+            }
+            .sheet(isPresented: $showInviteFriendsSheet) {
+                InviteFriendsView()
+            }
+        } footer: {
+            Text("Help others discover Safa by sharing it with friends and family.")
+        }
+    }
+
     // MARK: - About Section
 
     private var aboutSection: some View {
@@ -374,21 +399,6 @@ struct SettingsView: View {
                 Spacer()
                 Text("1.0.0")
                     .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            Button {
-                showInviteFriendsSheet = true
-            } label: {
-                HStack {
-                    Label("Share Safa", systemImage: "square.and.arrow.up")
-                    Spacer()
-                    Image(systemName: "heart.fill")
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-            }
-            .sheet(isPresented: $showInviteFriendsSheet) {
-                InviteFriendsView()
             }
 
             NavigationLink {
@@ -407,12 +417,6 @@ struct SettingsView: View {
                 TermsOfServiceView()
             } label: {
                 Text("Terms of Service")
-            }
-
-            NavigationLink {
-                RequestFeatureView()
-            } label: {
-                Text("Request a Feature")
             }
 
             NavigationLink {
