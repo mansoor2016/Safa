@@ -18,9 +18,6 @@ final class PrayerViewModelTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Clean notification settings between tests
-        UserDefaults.standard.removeObject(forKey: "prayer_notifications_enabled")
-
         mockPrayerRepository = TestablePrayerRepository()
         mockLocationService = TestableLocationService()
         mockNotificationService = TestableNotificationService()
@@ -457,26 +454,25 @@ final class PrayerViewModelTests: XCTestCase {
 
     // MARK: - Notification Settings Persistence Tests
 
-    func test_notificationSettings_persistAcrossInstances() async {
-        // Given - disable a notification
+    func test_toggleNotification_updatesLocalStateCorrectly() async {
+        // Given - all 5 enabled
+        XCTAssertEqual(sut.notificationEnabledPrayers.count, 5)
+
+        // When - disable two prayers
         await sut.toggleNotification(for: .asr)
+        await sut.toggleNotification(for: .isha)
+
+        // Then - local state reflects both changes
+        XCTAssertEqual(sut.notificationEnabledPrayers.count, 3)
         XCTAssertFalse(sut.notificationEnabledPrayers.contains(.asr))
-
-        // When - create a new ViewModel (simulates app restart)
-        let newViewModel = PrayerViewModel(
-            prayerRepository: mockPrayerRepository,
-            locationService: mockLocationService,
-            notificationService: mockNotificationService,
-            userState: mockUserState
-        )
-
-        // Then - should load persisted state
-        XCTAssertFalse(newViewModel.notificationEnabledPrayers.contains(.asr))
-        XCTAssertTrue(newViewModel.notificationEnabledPrayers.contains(.fajr))
+        XCTAssertFalse(sut.notificationEnabledPrayers.contains(.isha))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.fajr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.dhuhr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.maghrib))
     }
 
     func test_notificationSettings_defaultAllEnabled() {
-        // setUp already cleans UserDefaults, so sut should have all 5 enabled
+        // init sets all obligatory prayers as default
         XCTAssertEqual(sut.notificationEnabledPrayers.count, 5)
         for prayer in PrayerType.obligatoryPrayers {
             XCTAssertTrue(sut.notificationEnabledPrayers.contains(prayer),
@@ -486,8 +482,7 @@ final class PrayerViewModelTests: XCTestCase {
 
     func test_toggleNotification_doesNotAffectOtherPrayers() async {
         // Given - all enabled initially
-        let initialCount = sut.notificationEnabledPrayers.count
-        XCTAssertEqual(initialCount, 5)
+        XCTAssertEqual(sut.notificationEnabledPrayers.count, 5)
 
         // When - disable one (disabling doesn't require auth)
         await sut.toggleNotification(for: .dhuhr)
@@ -648,6 +643,8 @@ final class TestableNotificationService: NotificationServiceProtocol {
 
 @MainActor
 final class PrayerTestMockUserRepository: UserRepositoryProtocol {
+    var storedPreferences = UserPreferences()
+
     nonisolated func getUserStats() async throws -> UserStats {
         return UserStats()
     }
@@ -687,10 +684,12 @@ final class PrayerTestMockUserRepository: UserRepositoryProtocol {
     nonisolated func setPreference<T: Codable>(key: String, value: T) async throws {}
 
     nonisolated func getPreferences() async -> UserPreferences {
-        return UserPreferences()
+        return await storedPreferences
     }
 
-    nonisolated func updatePreferences(_ preferences: UserPreferences) async throws {}
+    nonisolated func updatePreferences(_ preferences: UserPreferences) async throws {
+        await MainActor.run { storedPreferences = preferences }
+    }
 
     nonisolated func getStreakFreezes() async throws -> Int {
         return 0

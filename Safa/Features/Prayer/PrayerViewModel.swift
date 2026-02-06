@@ -17,8 +17,6 @@ final class PrayerViewModel {
     var isLoading = false
     var error: Error?
 
-    private static let notificationKey = "prayer_notifications_enabled"
-
     // MARK: - Dependencies
     private let prayerRepository: PrayerRepositoryProtocol
     private let locationService: LocationServiceProtocol
@@ -46,8 +44,8 @@ final class PrayerViewModel {
             self.calculationMethod = method
         }
 
-        // Load per-prayer notification settings (default: all on)
-        loadNotificationSettings()
+        // Default notification state (will be overwritten by async load in loadPrayerTimes)
+        notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
     }
 
     // MARK: - Computed Properties
@@ -90,6 +88,9 @@ final class PrayerViewModel {
 
             // Update next prayer indicator
             updateNextPrayerIndicator()
+
+            // Load notification preferences from PreferencesManager
+            await loadNotificationSettings()
 
             // Schedule notifications for enabled prayers
             await scheduleEnabledNotifications()
@@ -179,7 +180,7 @@ final class PrayerViewModel {
         if notificationEnabledPrayers.contains(prayerType) {
             // Disable: remove from set and cancel notification
             notificationEnabledPrayers.remove(prayerType)
-            saveNotificationSettings()
+            await saveNotificationSettings()
             cancelNotification(for: prayerType)
         } else {
             // Enable: request permission if needed, then schedule
@@ -188,7 +189,7 @@ final class PrayerViewModel {
                 guard granted == true else { return }
             }
             notificationEnabledPrayers.insert(prayerType)
-            saveNotificationSettings()
+            await saveNotificationSettings()
             await scheduleNotification(for: prayerType)
         }
     }
@@ -241,18 +242,14 @@ final class PrayerViewModel {
         }
     }
 
-    private func loadNotificationSettings() {
-        if let saved = UserDefaults.standard.array(forKey: Self.notificationKey) as? [String] {
-            notificationEnabledPrayers = Set(saved.compactMap { PrayerType(rawValue: $0) })
-        } else {
-            // Default: all obligatory prayers enabled
-            notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
-        }
+    private func loadNotificationSettings() async {
+        let prefs = await PreferencesManager.shared.getPreferences()
+        notificationEnabledPrayers = Set(prefs.notificationEnabledPrayers.compactMap { PrayerType(rawValue: $0) })
     }
 
-    private func saveNotificationSettings() {
+    private func saveNotificationSettings() async {
         let values = notificationEnabledPrayers.map { $0.rawValue }
-        UserDefaults.standard.set(values, forKey: Self.notificationKey)
+        await PreferencesManager.shared.update(\.notificationEnabledPrayers, to: values)
     }
 
     func setCalculationMethod(_ method: CalculationMethod) async {
