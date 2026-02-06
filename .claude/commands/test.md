@@ -1,30 +1,31 @@
 # Run Unit Tests
 
-Run Safa unit tests and return a concise result. Filters verbose xcodebuild output to show only test results.
+Run Safa unit tests and return a concise result.
 
 ## Arguments
 
-- If an argument is provided, use it as the test class name: `-only-testing:SafaTests/{argument}`
-- If no argument is provided, run all unit tests: `-only-testing:SafaTests`
+Optional arguments:
+- First argument (no flag): test class name, e.g. `/test PrayerViewModelTests`
+- `--platform "iOS Simulator,name=iPhone 17 Pro"` (default)
+- `--scheme Safa` (default)
+
+Examples: `/test`, `/test PrayerViewModelTests`, `/test --platform "iOS Simulator,name=iPhone Air"`
 
 ## Instructions
 
-Run the appropriate command:
+Parse any arguments. Use defaults for anything not specified.
 
-**All tests (no argument):**
+**All tests (no class specified):**
 ```
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:SafaTests test 2>&1 | grep -E "Test case|Test Suite|passed|failed|Executed" | tail -40
-```
-
-**Specific test class (with argument):**
-```
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:SafaTests/{argument} test 2>&1 | grep -E "Test case|Test Suite|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
 ```
 
-After running tests:
+**Specific test class:**
+```
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+```
 
-1. If **all tests pass**: Report "All tests passed (X tests)."
-2. If **any tests fail**: List each failed test name and a brief reason if available. Then report "X passed, Y failed."
-3. Never output the raw xcodebuild log. Always summarize.
+- If all pass: "All N tests passed."
+- If failures: List each failed test, then "X passed, Y failed."
 
-**IMPORTANT:** Run tests in SERIES only. Never run multiple test commands in parallel.
+NEVER output raw xcodebuild logs. NEVER run multiple test commands in parallel.

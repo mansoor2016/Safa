@@ -1,19 +1,26 @@
 # Xcode Build
 
-Build the Safa iOS project and return a concise result. This command filters out Xcode's verbose output to avoid filling the context window.
+Build the Safa iOS project and return a concise result.
+
+## Arguments
+
+Optional arguments:
+- `--platform "iOS Simulator,name=iPhone 17 Pro"` (default)
+- `--scheme Safa` (default)
+
+Examples: `/build`, `/build --platform "iOS Simulator,name=iPad Air 11-inch (M3)"`, `/build --scheme SafaWidgets`
 
 ## Instructions
 
-Run the following command to build the project:
+Parse any arguments provided. Use defaults for anything not specified.
+
+Run:
 
 ```
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build 2>&1 | grep -E "error:|warning:|BUILD SUCCEEDED|BUILD FAILED|build failed|Undefined symbol|duplicate symbol|linker command failed" | head -30
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' build 2>&1 | grep -E "error:|warning:|BUILD SUCCEEDED|BUILD FAILED|Undefined symbol|duplicate symbol|linker command failed" | head -30
 ```
 
-After running the build:
+- If **BUILD SUCCEEDED**: Report "Build succeeded." plus warning count if any.
+- If **BUILD FAILED**: List each error as `FileName.swift:LINE: error message`. Max 10 errors.
 
-1. If **BUILD SUCCEEDED**: Report "Build succeeded." with no other details.
-2. If **BUILD FAILED**: Report each error on its own line, stripping file paths to just the filename. For example, instead of `/Users/mansoor.aman/src/Safa/Safa/Features/Prayer/PrayerView.swift:45:13: error: cannot find 'Foo'`, report `PrayerView.swift:45: cannot find 'Foo'`.
-3. If there are warnings but the build succeeded, mention the count of warnings but don't list them unless there are 3 or fewer.
-
-Do NOT output the raw xcodebuild log. Always summarize concisely.
+Do NOT output the raw xcodebuild log.
