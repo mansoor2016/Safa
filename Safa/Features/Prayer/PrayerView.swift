@@ -53,7 +53,7 @@ private struct PrayerContentView: View {
                     prayers: viewModel.todayPrayers,
                     notificationEnabledPrayers: viewModel.notificationEnabledPrayers,
                     onToggleNotification: { prayerType in
-                        viewModel.toggleNotification(for: prayerType)
+                        Task { await viewModel.toggleNotification(for: prayerType) }
                     }
                 )
 
@@ -131,16 +131,6 @@ private struct PrayerContentView: View {
                 icon: "location.north.fill",
                 title: "Qibla",
                 action: { showingQibla = true }
-            )
-
-            QuickActionButton(
-                icon: "bell.fill",
-                title: "Notifications",
-                action: {
-                    Task {
-                        await viewModel.requestNotificationPermission()
-                    }
-                }
             )
 
             QuickActionButton(

@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreLocation
+import UserNotifications
 
 @Observable
 final class PrayerViewModel {
@@ -90,6 +91,9 @@ final class PrayerViewModel {
             // Update next prayer indicator
             updateNextPrayerIndicator()
 
+            // Schedule notifications for enabled prayers
+            await scheduleEnabledNotifications()
+
         } catch {
             self.error = error
         }
@@ -171,13 +175,62 @@ final class PrayerViewModel {
         }
     }
 
-    func toggleNotification(for prayerType: PrayerType) {
+    func toggleNotification(for prayerType: PrayerType) async {
         if notificationEnabledPrayers.contains(prayerType) {
+            // Disable: remove from set and cancel notification
             notificationEnabledPrayers.remove(prayerType)
+            saveNotificationSettings()
+            cancelNotification(for: prayerType)
         } else {
+            // Enable: request permission if needed, then schedule
+            if !notificationService.isAuthorized {
+                let granted = try? await notificationService.requestAuthorization()
+                guard granted == true else { return }
+            }
             notificationEnabledPrayers.insert(prayerType)
+            saveNotificationSettings()
+            await scheduleNotification(for: prayerType)
         }
-        saveNotificationSettings()
+    }
+
+    private func scheduleNotification(for prayerType: PrayerType) async {
+        guard let prayer = todayPrayers.first(where: { $0.type == prayerType }),
+              prayer.time > Date() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "\(prayerType.displayName) Time"
+        content.body = "It's time for \(prayerType.displayName) prayer"
+        content.sound = .default
+        content.interruptionLevel = .timeSensitive
+
+        let components = Calendar.current.dateComponents(
+            [.year, .month, .day, .hour, .minute],
+            from: prayer.time
+        )
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "prayer_\(prayerType.rawValue)",
+            content: content,
+            trigger: trigger
+        )
+
+        try? await UNUserNotificationCenter.current().add(request)
+    }
+
+    private func cancelNotification(for prayerType: PrayerType) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: ["prayer_\(prayerType.rawValue)"]
+        )
+    }
+
+    private func scheduleEnabledNotifications() async {
+        for prayerType in PrayerType.obligatoryPrayers {
+            if notificationEnabledPrayers.contains(prayerType) {
+                await scheduleNotification(for: prayerType)
+            } else {
+                cancelNotification(for: prayerType)
+            }
+        }
     }
 
     private func loadNotificationSettings() {
