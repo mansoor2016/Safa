@@ -14,6 +14,7 @@ struct QiblaCompassView: View {
     @State private var deviceHeading: Double = 0
     @State private var isLoading = true
     @State private var error: Error?
+    @State private var isSimulatedHeading = false
 
     // Haptic feedback state
     @State private var previousAlignmentZone: AlignmentZone = .far
@@ -124,6 +125,21 @@ struct QiblaCompassView: View {
                 .foregroundColor(SafaColors.Fallback.tertiaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+
+            // Simulator debug notice
+            if isSimulatedHeading {
+                HStack(spacing: SafaSpacing.xs) {
+                    Image(systemName: "ant.fill")
+                        .font(.caption)
+                    Text("Debug mode: magnetometer reading not available")
+                        .font(SafaTypography.labelSmall)
+                }
+                .foregroundColor(.orange)
+                .padding(.horizontal, SafaSpacing.md)
+                .padding(.vertical, SafaSpacing.xs)
+                .background(Color.orange.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
+            }
         }
     }
 
@@ -177,24 +193,36 @@ struct QiblaCompassView: View {
         isLoading = true
         error = nil
 
-        do {
-            let location = try await dependencies.locationService.getCurrentLocation()
-            let coordinates = Coordinates(
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude
-            )
-
+        // Try cached/saved coordinates first, then live GPS
+        if let coords = dependencies.locationService.coordinates {
             let calculator = PrayerTimeCalculator()
-            qiblaDirection = calculator.calculateQiblaDirection(from: coordinates)
+            qiblaDirection = calculator.calculateQiblaDirection(from: coords)
             isLoading = false
-        } catch {
-            self.error = error
-            isLoading = false
+        } else {
+            do {
+                let location = try await dependencies.locationService.getCurrentLocation()
+                let coords = Coordinates(
+                    latitude: location.coordinate.latitude,
+                    longitude: location.coordinate.longitude
+                )
+                let calculator = PrayerTimeCalculator()
+                qiblaDirection = calculator.calculateQiblaDirection(from: coords)
+                isLoading = false
+            } catch {
+                self.error = error
+                isLoading = false
+            }
         }
     }
 
     private func startHeadingUpdates() {
-        dependencies.locationService.startUpdatingHeading()
+        if CLLocationManager.headingAvailable() {
+            dependencies.locationService.startUpdatingHeading()
+        } else {
+            // Simulator: no magnetometer, assume North (0°)
+            isSimulatedHeading = true
+            deviceHeading = 0
+        }
     }
 
     private func stopHeadingUpdates() {

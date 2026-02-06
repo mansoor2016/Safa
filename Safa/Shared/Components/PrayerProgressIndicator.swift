@@ -215,8 +215,10 @@ struct PrayerProgressIndicator: View {
 
                 // Prayer name (full)
                 Text(prayerType.displayName)
-                    .font(.system(size: 11, weight: isNext ? .semibold : .regular))
+                    .font(.system(size: 10, weight: isNext ? .semibold : .regular))
                     .foregroundColor(isLogged ? .green : (isNext ? .accentColor : SafaColors.Fallback.secondaryText))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
         }
         .buttonStyle(.plain)
