@@ -1307,5 +1307,41 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 - [ ] Implement audio download/caching for recitations
 - [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
 
+### TODO: v2 Strategic Enhancements
+
+**Priority: FUTURE — Post-launch features**
+
+#### watchOS Companion App
+- [ ] Create watchOS target in Xcode
+- [ ] Implement prayer time complications (Corner, Circular, Rectangular)
+- [ ] Implement haptic adhan with distinct patterns per prayer
+- [ ] Implement Digital Crown tasbeeh counter
+- [ ] Implement standalone Qibla compass on watch
+- [ ] Set up WatchConnectivity for iPhone ↔ Watch sync
+- [ ] Test standalone mode (without iPhone)
+
+#### Data Sovereignty & Export
+- [ ] Implement JSON export of all user data (prayer logs, streaks, bookmarks, progress, achievements)
+- [ ] Implement CSV export for prayer logs
+- [ ] Build "View All My Data" transparency screen
+- [ ] Implement manual backup/restore
+- [ ] Add per-category data deletion
+
+#### Apple Intelligence (App Intents)
+- [ ] Define Prayer, Surah, Hadith as AppEntities
+- [ ] Implement GetNextPrayerIntent for Siri
+- [ ] Implement PlayAdhanIntent
+- [ ] Implement OpenSurahIntent
+- [ ] Implement StartTasbeehIntent
+- [ ] Test Shortcuts automations (location-based prayer logging)
+
+#### Assistive Access Mode
+- [ ] Detect Assistive Access / Guided Access mode
+- [ ] Build simplified 3-tab layout (Prayer, Qibla, Dhikr)
+- [ ] Implement large-font prayer card
+- [ ] Implement full-screen Qibla arrow
+- [ ] Implement single-button tasbeeh
+- [ ] Test with Switch Control and Voice Control
+
 *Last Updated: February 6, 2026 (Progress: 85% complete)*
 *Latest: 93/115 acceptance criteria verified*

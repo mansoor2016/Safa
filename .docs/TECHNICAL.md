@@ -7,10 +7,11 @@
 ## 1. Platform & Technology Stack
 
 ### 1.1 Target Platform
-- **Platform**: iOS only (iPhone)
+- **Primary Platform**: iOS (iPhone)
 - **Minimum iOS Version**: iOS 17.0 (for @Observable, NavigationPath, modern SwiftUI)
 - **AI Companion Requirement**: iOS 18.4+ (for Apple Foundation Models)
 - **Devices**: iPhone (no iPad optimization initially)
+- **Future**: watchOS 10+ companion app (see Section 15)
 
 ### 1.1.1 Supported Device Matrix
 
@@ -46,6 +47,9 @@
 | Siri Shortcuts | ✅ | ✅ | ✅ |
 | CloudKit Sync | ✅ | ✅ | ✅ |
 | AI Companion | ❌ (shows fallback) | ❌ (shows fallback) | ✅ |
+| watchOS Companion | v2 (watchOS 10+) | v2 | v2 |
+| App Intents (Apple Intelligence) | Basic Shortcuts | Full App Entities | Full + Siri context |
+| Assistive Access Mode | ✅ (simplified UI) | ✅ | ✅ |
 
 **Graceful Degradation Strategy:**
 - AI Companion: Shows "Requires iOS 18.4" message with explanation
@@ -79,10 +83,12 @@
 | **StoreKit 2** | Donations/tips |
 | **CloudKit** | Cross-device sync |
 | **FamilyControls** | Family sharing features |
-| **AppIntents** | Siri Shortcuts |
+| **AppIntents** | Siri Shortcuts, Apple Intelligence integration |
 | **EventKit** | Calendar integration (Islamic events) |
 | **HealthKit** | Ramadan fasting tracking |
 | **CoreSpotlight** | iOS Spotlight search for Quran/Hadith/Duas |
+| **WatchConnectivity** | (v2) iPhone ↔ Watch data sync |
+| **ClockKit/WidgetKit** | (v2) watchOS complications |
 
 ---
 
@@ -1790,6 +1796,87 @@ struct PrayerStandByView: View {
 - Minimal information density
 - Works in both light and dark environments
 
+### 6.11 Apple Intelligence Integration (App Entities)
+
+Beyond interactive widgets, expose app content to the iOS system intelligence layer.
+
+```swift
+// MARK: - App Entities for Siri & System Intelligence
+
+struct PrayerEntity: AppEntity {
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Prayer")
+    static var defaultQuery = PrayerQuery()
+
+    var id: String
+    var displayRepresentation: DisplayRepresentation {
+        DisplayRepresentation(title: "\(name) at \(time)")
+    }
+
+    let name: String
+    let time: String
+}
+
+// Enables: "When is the next prayer?" without opening the app
+struct GetNextPrayerIntent: AppIntent {
+    static var title: LocalizedStringResource = "Get Next Prayer Time"
+    static var description = IntentDescription("Returns the next prayer time")
+
+    func perform() async throws -> some IntentResult & ReturnsValue<String> {
+        let prayer = await PrayerService.shared.getNextPrayer()
+        return .result(value: "\(prayer.name) at \(prayer.time)")
+    }
+}
+
+// Enables: "Play the adhan"
+struct PlayAdhanIntent: AppIntent {
+    static var title: LocalizedStringResource = "Play Adhan"
+    func perform() async throws -> some IntentResult {
+        await AudioPlayerService.shared.playSelectedAdhan()
+        return .result()
+    }
+}
+```
+
+**Exposed Intents:**
+- `GetNextPrayerTime` — "When is the next prayer?"
+- `GetPrayersLoggedToday` — "How many prayers have I logged?"
+- `LogPrayer` — "Log Dhuhr prayer"
+- `PlayAdhan` — "Play the adhan"
+- `OpenSurah` — "Open Surah Yasin"
+- `StartTasbeeh` — "Start tasbeeh for SubhanAllah"
+
+**Shortcut Automations:**
+- "When I arrive at the mosque → log my prayer"
+- "At Fajr time → play adhan + show prayer card"
+
+### 6.12 Assistive Access Mode
+
+Simplified UI for users with cognitive disabilities (iOS 17+).
+
+```swift
+// MARK: - Assistive Access Detection
+
+struct AssistiveAccessAdapter {
+    static var isAssistiveAccessEnabled: Bool {
+        // Check for Assistive Access or Guided Access
+        UIAccessibility.isGuidedAccessEnabled
+    }
+
+    static func adaptedTabCount() -> Int {
+        isAssistiveAccessEnabled ? 3 : 5  // Prayer, Qibla, Dhikr only
+    }
+}
+```
+
+**Simplified Layout:**
+- 3 tabs only: Prayer, Qibla, Dhikr
+- Next prayer: massive font, high contrast, full-width card
+- Qibla: full-screen directional arrow, no compass chrome
+- Tasbeeh: single large tap target filling screen
+- No gamification (streaks, hasanat) in this mode
+- Voice feedback for prayer logging confirmation
+- Compatible with Switch Control and Voice Control
+
 ---
 
 ## 7. Networking
@@ -2238,6 +2325,10 @@ class HealthKitService {
 | StandBy Mode | **WidgetKit** - prayer times visible when charging |
 | Future integrations | Planned for v1.1+ based on user feedback |
 | Predictive downloads | **Background fetch** of next surah/juz based on reading patterns |
+| watchOS companion | **v2** - haptic adhan, Digital Crown tasbeeh, complications |
+| Apple Intelligence | **App Entities** for Prayer, Surah, Hadith + contextual Siri |
+| Assistive Access | **Simplified 3-tab UI** auto-detected, large fonts, no gamification |
+| Data sovereignty | **JSON/CSV export** of all user data + manual backup/restore |
 
 ## 13. Open Questions
 
@@ -2261,9 +2352,91 @@ class HealthKitService {
 | **8** | Social Features | Family circle, sharing, CloudKit sync |
 | **9** | Content & Polish | Hadith, Duas, Calendar, Wind-down mode, UI polish |
 | **10** | Launch Prep | Testing, beta, App Store submission |
+| **11** | v2: watchOS | Watch companion, complications, haptic adhan, Digital Crown tasbeeh |
+| **12** | v2: Intelligence | App Entities, Siri context, Shortcut automations, Assistive Access |
 
 ---
 
-*Document Version: 0.9*
-*Last Updated: February 2026*
+## 15. watchOS Companion (v2)
+
+### 15.1 Architecture
+
+```
+┌──────────────┐    WatchConnectivity    ┌──────────────┐
+│   iPhone     │ ◄────────────────────► │  Apple Watch │
+│   Safa App   │    (bidirectional)      │  Safa Watch  │
+│              │                         │              │
+│  UserDefaults│ ◄── App Group ────────► │  Shared Data │
+│  (suite)     │                         │              │
+└──────────────┘                         └──────────────┘
+```
+
+- **Target**: watchOS 10+ (SwiftUI native)
+- **Sync**: `WCSession` for real-time + shared App Group `UserDefaults` for offline
+- **Standalone**: Works without iPhone using cached prayer times + local compass
+
+### 15.2 Watch Features
+
+| Feature | Implementation | Notes |
+|---------|---------------|-------|
+| Next prayer complication | `WidgetKit` timeline | Corner, Circular, Rectangular |
+| Haptic adhan | `WKInterfaceDevice.default().play(.notification)` | Distinct patterns per prayer |
+| Tasbeeh counter | Digital Crown via `digitalCrownRotation` | `.rotationSensitivity(.medium)` |
+| Qibla direction | `CLLocationManager` heading on watch | Standalone compass |
+| Prayer logging | Tap complication → log intent | Syncs back to iPhone |
+
+### 15.3 Haptic Patterns
+
+```swift
+// Fajr: strong triple-tap (wake up)
+WKInterfaceDevice.default().play(.directionUp)
+WKInterfaceDevice.default().play(.directionUp)
+WKInterfaceDevice.default().play(.directionUp)
+
+// Regular prayers: light double-tap
+WKInterfaceDevice.default().play(.click)
+WKInterfaceDevice.default().play(.click)
+```
+
+---
+
+## 16. Data Sovereignty (v2)
+
+### 16.1 Export Format
+
+```json
+{
+  "schema_version": "1.0",
+  "exported_at": "2026-02-06T12:00:00Z",
+  "app_version": "1.0.0",
+  "data": {
+    "prayer_logs": [...],
+    "streaks": [...],
+    "bookmarks": [...],
+    "reading_progress": {...},
+    "achievements": [...],
+    "preferences": {...}
+  }
+}
+```
+
+### 16.2 Implementation
+
+```swift
+struct DataExportService {
+    func exportJSON() async throws -> Data  // Full export
+    func exportCSV() async throws -> Data   // Prayer logs tabular
+    func importJSON(_ data: Data) async throws  // Restore from backup
+}
+```
+
+- **JSON Export**: All user data with ISO 8601 dates, UTF-8 encoded
+- **CSV Export**: Prayer logs as tabular data (date, prayer, time, on_time)
+- **"View All My Data" Screen**: Shows category counts and storage sizes
+- **Per-category deletion**: Delete chat history without losing prayer logs
+
+---
+
+*Document Version: 1.0*
+*Last Updated: February 6, 2026*
 *Status: Pre-Production*
