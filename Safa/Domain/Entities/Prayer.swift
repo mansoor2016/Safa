@@ -125,14 +125,9 @@ enum AdhanSound: String, Codable, CaseIterable, Identifiable {
 
     var isFajrSpecific: Bool { self == .misharyAlafasyFajr }
 
-    /// All adhan sounds suitable for regular (non-Fajr) prayers
+    /// All adhan sounds for the regular (non-Fajr) picker — excludes Fajr-specific and system default
     static var regularOptions: [AdhanSound] {
-        allCases.filter { !$0.isFajrSpecific }
-    }
-
-    /// All adhan sounds (for Fajr picker, which can use any)
-    static var fajrOptions: [AdhanSound] {
-        allCases.filter { $0 != .defaultSound }
+        allCases.filter { !$0.isFajrSpecific && $0 != .defaultSound }
     }
 }
 

@@ -13,7 +13,6 @@ struct SettingsView: View {
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
     @State private var adhanEnabled = false
     @State private var selectedAdhan: AdhanSound = .misharyAlafasy
-    @State private var selectedFajrAdhan: AdhanSound = .misharyAlafasyFajr
     @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
     @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
@@ -241,27 +240,14 @@ struct SettingsView: View {
                             await prefsManager.update(\.selectedAdhan, to: newValue.rawValue)
                         }
                     }
-
-                    Picker("Fajr Adhan", selection: $selectedFajrAdhan) {
-                        ForEach(AdhanSound.fajrOptions) { sound in
-                            VStack(alignment: .leading) {
-                                Text(sound.displayName)
-                                Text(sound.subtitle)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(sound)
-                        }
-                    }
-                    .onChange(of: selectedFajrAdhan) { _, newValue in
-                        Task {
-                            await prefsManager.update(\.selectedFajrAdhan, to: newValue.rawValue)
-                        }
-                    }
                 }
             }
         } header: {
             Text("Notifications")
+        } footer: {
+            if adhanEnabled {
+                Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
+            }
         }
     }
 
@@ -470,7 +456,6 @@ struct SettingsView: View {
         // Load adhan settings
         adhanEnabled = prefs.adhanEnabled
         selectedAdhan = AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy
-        selectedFajrAdhan = AdhanSound(rawValue: prefs.selectedFajrAdhan) ?? .misharyAlafasyFajr
 
         // Load accessibility settings
         reduceMotionEnabled = prefs.reduceMotionEnabled
