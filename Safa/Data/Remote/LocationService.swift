@@ -94,11 +94,14 @@ final class LocationService: NSObject, ObservableObject, LocationServiceProtocol
     }
 
     var coordinates: Coordinates? {
-        guard let location = currentLocation else { return nil }
-        return Coordinates(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude
-        )
+        if let location = currentLocation {
+            return Coordinates(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        }
+        // Fall back to default location (London, UK)
+        return AppDefaults.defaultCoordinates
     }
 
     /// Check if location permission is granted

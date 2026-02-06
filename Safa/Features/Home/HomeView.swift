@@ -44,9 +44,6 @@ struct HomeView: View {
                     }
                 }
 
-                // Prayer timeline
-                prayerTimeline
-
                 // Quick actions
                 quickActions
 
@@ -522,10 +519,16 @@ private struct NextPrayerHomeCard: View {
 
                 Spacer()
 
-                Text(countdown)
-                    .font(SafaTypography.counterSmall)
-                    .foregroundColor(SafaColors.Fallback.text)
-                    .monospacedDigit()
+                VStack(alignment: .trailing, spacing: SafaSpacing.xxs) {
+                    Text("Time until next prayer")
+                        .font(SafaTypography.labelSmall)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                    Text(countdown)
+                        .font(SafaTypography.counterSmall)
+                        .foregroundColor(SafaColors.Fallback.text)
+                        .monospacedDigit()
+                }
             }
         }
         .onReceive(timer) { _ in

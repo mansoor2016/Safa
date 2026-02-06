@@ -49,15 +49,7 @@ private struct PrayerContentView: View {
                 }
 
                 // All Prayer Times
-                PrayerTimesCard(
-                    prayers: viewModel.todayPrayers,
-                    loggedPrayers: viewModel.loggedPrayers,
-                    onTogglePrayer: { prayer in
-                        Task {
-                            await viewModel.togglePrayer(prayer)
-                        }
-                    }
-                )
+                PrayerTimesCard(prayers: viewModel.todayPrayers)
 
                 // Quick Actions
                 quickActionsSection
@@ -174,6 +166,10 @@ private struct NextPrayerCard: View {
                     .font(SafaTypography.headlineMedium)
                     .foregroundColor(prayer.type.color)
 
+                Text("Time until next prayer")
+                    .font(SafaTypography.labelSmall)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+
                 Text(countdown)
                     .font(SafaTypography.counterMedium)
                     .foregroundColor(SafaColors.Fallback.text)
@@ -217,18 +213,12 @@ private struct NextPrayerCard: View {
 
 private struct PrayerTimesCard: View {
     let prayers: [PrayerTime]
-    let loggedPrayers: Set<PrayerType>
-    let onTogglePrayer: (PrayerType) -> Void
 
     var body: some View {
         ContentCard {
             VStack(spacing: 0) {
                 ForEach(prayers) { prayer in
-                    PrayerTimeRow(
-                        prayer: prayer,
-                        isLogged: loggedPrayers.contains(prayer.type),
-                        onToggle: { onTogglePrayer(prayer.type) }
-                    )
+                    PrayerTimeRow(prayer: prayer)
 
                     if prayer.id != prayers.last?.id {
                         Divider()
@@ -244,8 +234,6 @@ private struct PrayerTimesCard: View {
 
 private struct PrayerTimeRow: View {
     let prayer: PrayerTime
-    let isLogged: Bool
-    let onToggle: () -> Void
 
     var body: some View {
         HStack {
@@ -255,8 +243,8 @@ private struct PrayerTimeRow: View {
                 .frame(width: 8, height: 8)
                 .accessibilityHidden(true)
 
-            // Prayer name
-            Text(prayer.type.displayName)
+            // Prayer name (with Sunset note for Maghrib)
+            Text(prayer.type == .maghrib ? "Maghrib (Sunset)" : prayer.type.displayName)
                 .font(SafaTypography.bodyLarge)
                 .foregroundColor(SafaColors.Fallback.text)
 
@@ -267,34 +255,12 @@ private struct PrayerTimeRow: View {
                 .font(SafaTypography.bodyMedium)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
                 .monospacedDigit()
-
-            // Toggle button (for obligatory prayers only)
-            if prayer.type.isObligatory {
-                Button(action: {
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.impactOccurred()
-                    onToggle()
-                }) {
-                    Image(systemName: isLogged ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(isLogged ? .green : SafaColors.Fallback.tertiaryText)
-                        .font(.title2)
-                }
-                .accessibilityLabel(isLogged ? "\(prayer.type.displayName) logged" : "Log \(prayer.type.displayName)")
-                .accessibilityHint(isLogged ? "Double tap to unmark" : "Double tap to mark this prayer as completed")
-            }
         }
         .padding(.horizontal, SafaSpacing.md)
         .padding(.vertical, SafaSpacing.sm)
         .background(prayer.isNext ? Color.accentColor.opacity(0.1) : Color.clear)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(prayerRowAccessibilityLabel)
-    }
-
-    private var prayerRowAccessibilityLabel: String {
-        let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
-        let status = isLogged ? "completed" : (prayer.isNext ? "upcoming" : "")
-        let statusSuffix = status.isEmpty ? "" : ", \(status)"
-        return "\(prayer.type.displayName) at \(timeString)\(statusSuffix)"
+        .accessibilityLabel("\(prayer.type.displayName) at \(prayer.time.formatted(date: .omitted, time: .shortened))\(prayer.isNext ? ", upcoming" : "")")
     }
 }
 

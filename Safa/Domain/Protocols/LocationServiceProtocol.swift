@@ -8,6 +8,9 @@ protocol LocationServiceProtocol {
     /// The current authorization status
     var authorizationStatus: CLAuthorizationStatus { get }
 
+    /// Cached or saved coordinates (available without live GPS)
+    var coordinates: Coordinates? { get }
+
     /// Request location permission
     func requestPermission()
 

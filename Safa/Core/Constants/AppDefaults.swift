@@ -44,4 +44,14 @@ enum AppDefaults {
 
     /// Use location-based recommendations by default
     static let useLocationBasedDefaults: Bool = true
+
+    /// Default location: London, UK
+    static let defaultLatitude: Double = 51.5074
+    static let defaultLongitude: Double = -0.1278
+    static let defaultLocationName: String = "London, UK"
+
+    /// Default coordinates when location is unavailable
+    static var defaultCoordinates: Coordinates {
+        Coordinates(latitude: defaultLatitude, longitude: defaultLongitude)
+    }
 }

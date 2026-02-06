@@ -540,7 +540,17 @@ After **every** code change:
 3. Write/update tests for the changes
 4. Run tests → If fails, fix and retest
 5. Only proceed to next task when build passes AND tests pass
+6. Commit completed feature → Once the build is green and tests pass, commit the changes before moving on
 ```
+
+### Commit Regularly
+
+**Commit after each completed feature or logical change once the build is green and all tests pass.**
+
+- Do not accumulate multiple unrelated changes before committing
+- Each commit should represent a coherent, working unit of change
+- Write clear commit messages summarizing what changed and why
+- This ensures progress is saved, changes are reviewable, and rollback is easy if needed
 
 ### Common Build Issues
 

@@ -190,12 +190,17 @@ final class PrayerViewModel {
             return cached
         }
 
+        // Try saved/cached coordinates first (works without live GPS)
+        if let saved = locationService.coordinates {
+            return saved
+        }
+
         // Check if we have permission
         if locationService.authorizationStatus == .notDetermined {
             locationService.requestPermission()
         }
 
-        // Get current location
+        // Fall back to live GPS
         let location = try await locationService.getCurrentLocation()
         return Coordinates(
             latitude: location.coordinate.latitude,
