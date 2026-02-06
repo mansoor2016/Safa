@@ -543,6 +543,20 @@ After **every** code change:
 6. Commit completed feature → Once the build is green and tests pass, commit the changes before moving on
 ```
 
+### Run Tests Before Committing
+
+**CRITICAL: Always run unit tests before committing any changes.**
+
+```bash
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing:SafaTests test
+```
+
+- All tests must pass before committing
+- If a test fails, fix the issue and re-run tests
+- Never commit with known failing tests
+- Run tests in series (one simulator at a time) to avoid resource issues
+
 ### Commit Regularly
 
 **Commit after each completed feature or logical change once the build is green and all tests pass.**

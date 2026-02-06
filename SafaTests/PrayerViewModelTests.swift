@@ -347,6 +347,111 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertNotNil(sut.error)
     }
 
+    // MARK: - Toggle Prayer Tests
+
+    func test_togglePrayer_logsWhenNotLogged() async {
+        // Given
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        await sut.loadPrayerTimes()
+
+        // When
+        await sut.togglePrayer(.fajr)
+
+        // Then
+        XCTAssertTrue(sut.loggedPrayers.contains(.fajr))
+        XCTAssertTrue(mockPrayerRepository.logPrayerCalled)
+    }
+
+    func test_togglePrayer_unlogsWhenAlreadyLogged() async {
+        // Given
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockPrayerRepository.prayerLogsToReturn = [
+            PrayerLog(prayerType: .fajr, date: Date(), loggedAt: Date(), isOnTime: true)
+        ]
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        await sut.loadPrayerTimes()
+        XCTAssertTrue(sut.loggedPrayers.contains(.fajr))
+
+        // When
+        await sut.togglePrayer(.fajr)
+
+        // Then
+        XCTAssertFalse(sut.loggedPrayers.contains(.fajr))
+    }
+
+    // MARK: - Reload Logged Prayers Tests
+
+    func test_reloadLoggedPrayers_updatesFromRepository() async {
+        // Given
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        await sut.loadPrayerTimes()
+        XCTAssertTrue(sut.loggedPrayers.isEmpty)
+
+        // Simulate external log
+        mockPrayerRepository.prayerLogsToReturn = [
+            PrayerLog(prayerType: .dhuhr, date: Date(), loggedAt: Date(), isOnTime: true)
+        ]
+
+        // When
+        await sut.reloadLoggedPrayers()
+
+        // Then
+        XCTAssertTrue(sut.loggedPrayers.contains(.dhuhr))
+    }
+
+    // MARK: - Notification Toggle Tests
+
+    func test_initialState_allObligatoryPrayerNotificationsEnabled() {
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.fajr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.dhuhr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.asr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.maghrib))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.isha))
+    }
+
+    func test_toggleNotification_disablesWhenEnabled() async {
+        // Given
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.fajr))
+
+        // When
+        await sut.toggleNotification(for: .fajr)
+
+        // Then
+        XCTAssertFalse(sut.notificationEnabledPrayers.contains(.fajr))
+    }
+
+    func test_toggleNotification_enablesWhenDisabledAndAuthorized() async {
+        // Given - mock is already authorized
+        mockNotificationService._isAuthorized = true
+        mockNotificationService.authorizationResult = true
+        await sut.toggleNotification(for: .fajr) // disable first
+        XCTAssertFalse(sut.notificationEnabledPrayers.contains(.fajr))
+
+        // When
+        await sut.toggleNotification(for: .fajr) // enable again
+
+        // Then
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.fajr))
+    }
+
+    // MARK: - Location Fallback Tests
+
+    func test_loadPrayerTimes_usesCoordinatesFallback() async {
+        // Given - no live GPS, but cached coordinates available
+        mockLocationService.errorToThrow = PrayerTestError.locationFailed
+        mockLocationService.coordinatesToReturn = Coordinates(latitude: 51.5074, longitude: -0.1278)
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+
+        // When
+        await sut.loadPrayerTimes()
+
+        // Then - should succeed via fallback
+        XCTAssertEqual(sut.todayPrayers.count, 6)
+        XCTAssertNil(sut.error)
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
@@ -421,8 +526,17 @@ final class TestablePrayerRepository: PrayerRepositoryProtocol {
 final class TestableLocationService: LocationServiceProtocol {
     var locationToReturn: CLLocation?
     var errorToThrow: Error?
+    var coordinatesToReturn: Coordinates?
 
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
+
+    var coordinates: Coordinates? {
+        if let coords = coordinatesToReturn { return coords }
+        if let loc = locationToReturn {
+            return Coordinates(latitude: loc.coordinate.latitude, longitude: loc.coordinate.longitude)
+        }
+        return nil
+    }
 
     func requestPermission() {
         // No-op for testing
@@ -447,7 +561,7 @@ final class TestableNotificationService: NotificationServiceProtocol {
     var _isAuthorized = false
 
     nonisolated var isAuthorized: Bool {
-        return false
+        return true // Always authorized in tests to avoid UNNotificationCenter issues
     }
 
     nonisolated func requestAuthorization() async throws -> Bool {

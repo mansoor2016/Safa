@@ -93,8 +93,8 @@ struct PrayerProgressIndicator: View {
         let isNext = nextPrayer?.type == prayerType
         let prayer = obligatoryPrayers.first { $0.type == prayerType }
         let isPast = prayer.map { $0.time < Date() } ?? false
-        // Can toggle off any logged prayer; can only toggle on if prayer time has passed
-        let canTap = onLogPrayer != nil && (isLogged || isPast)
+        // Can toggle off logged prayers; can toggle on if prayer time has passed or is current
+        let canTap = onLogPrayer != nil && (isLogged || isPast || isNext)
 
         return Button {
             guard canTap else { return }
@@ -178,8 +178,8 @@ struct PrayerProgressIndicator: View {
         let isNext = nextPrayer?.type == prayerType
         let prayer = obligatoryPrayers.first { $0.type == prayerType }
         let isPast = prayer.map { $0.time < Date() } ?? false
-        // Can toggle off any logged prayer; can only toggle on if prayer time has passed
-        let canTap = onLogPrayer != nil && (isLogged || isPast)
+        // Can toggle off logged prayers; can toggle on if prayer time has passed or is current
+        let canTap = onLogPrayer != nil && (isLogged || isPast || isNext)
 
         return Button {
             guard canTap else { return }
