@@ -150,8 +150,10 @@ struct QiblaCompassView: View {
         let zone = AlignmentZone.from(angle: relativeAngle)
 
         return HStack(spacing: SafaSpacing.xs) {
-            Image(systemName: zone == .perfect ? "checkmark.circle.fill" : "arrow.up")
-                .foregroundColor(zone == .perfect ? .green : .accentColor)
+            if zone == .perfect {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            }
 
             Text(alignmentStatusText(for: zone))
                 .font(SafaTypography.bodyMedium)

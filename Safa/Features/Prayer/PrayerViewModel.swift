@@ -10,10 +10,13 @@ final class PrayerViewModel {
     // MARK: - Published State
     var todayPrayers: [PrayerTime] = []
     var loggedPrayers: Set<PrayerType> = []
+    var notificationEnabledPrayers: Set<PrayerType> = []
     var currentDate = Date()
     var calculationMethod: CalculationMethod = .isna
     var isLoading = false
     var error: Error?
+
+    private static let notificationKey = "prayer_notifications_enabled"
 
     // MARK: - Dependencies
     private let prayerRepository: PrayerRepositoryProtocol
@@ -41,6 +44,9 @@ final class PrayerViewModel {
            let method = CalculationMethod(rawValue: savedMethod) {
             self.calculationMethod = method
         }
+
+        // Load per-prayer notification settings (default: all on)
+        loadNotificationSettings()
     }
 
     // MARK: - Computed Properties
@@ -163,6 +169,29 @@ final class PrayerViewModel {
         } catch {
             // Ignore - keep existing state
         }
+    }
+
+    func toggleNotification(for prayerType: PrayerType) {
+        if notificationEnabledPrayers.contains(prayerType) {
+            notificationEnabledPrayers.remove(prayerType)
+        } else {
+            notificationEnabledPrayers.insert(prayerType)
+        }
+        saveNotificationSettings()
+    }
+
+    private func loadNotificationSettings() {
+        if let saved = UserDefaults.standard.array(forKey: Self.notificationKey) as? [String] {
+            notificationEnabledPrayers = Set(saved.compactMap { PrayerType(rawValue: $0) })
+        } else {
+            // Default: all obligatory prayers enabled
+            notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
+        }
+    }
+
+    private func saveNotificationSettings() {
+        let values = notificationEnabledPrayers.map { $0.rawValue }
+        UserDefaults.standard.set(values, forKey: Self.notificationKey)
     }
 
     func setCalculationMethod(_ method: CalculationMethod) async {

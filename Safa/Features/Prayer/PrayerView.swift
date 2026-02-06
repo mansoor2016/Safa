@@ -49,7 +49,13 @@ private struct PrayerContentView: View {
                 }
 
                 // All Prayer Times
-                PrayerTimesCard(prayers: viewModel.todayPrayers)
+                PrayerTimesCard(
+                    prayers: viewModel.todayPrayers,
+                    notificationEnabledPrayers: viewModel.notificationEnabledPrayers,
+                    onToggleNotification: { prayerType in
+                        viewModel.toggleNotification(for: prayerType)
+                    }
+                )
 
                 // Quick Actions
                 quickActionsSection
@@ -213,12 +219,18 @@ private struct NextPrayerCard: View {
 
 private struct PrayerTimesCard: View {
     let prayers: [PrayerTime]
+    let notificationEnabledPrayers: Set<PrayerType>
+    let onToggleNotification: (PrayerType) -> Void
 
     var body: some View {
         ContentCard {
             VStack(spacing: 0) {
                 ForEach(prayers) { prayer in
-                    PrayerTimeRow(prayer: prayer)
+                    PrayerTimeRow(
+                        prayer: prayer,
+                        isNotificationEnabled: notificationEnabledPrayers.contains(prayer.type),
+                        onToggleNotification: { onToggleNotification(prayer.type) }
+                    )
 
                     if prayer.id != prayers.last?.id {
                         Divider()
@@ -234,6 +246,8 @@ private struct PrayerTimesCard: View {
 
 private struct PrayerTimeRow: View {
     let prayer: PrayerTime
+    let isNotificationEnabled: Bool
+    let onToggleNotification: () -> Void
 
     var body: some View {
         HStack {
@@ -255,6 +269,20 @@ private struct PrayerTimeRow: View {
                 .font(SafaTypography.bodyMedium)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
                 .monospacedDigit()
+
+            // Notification bell (obligatory prayers only)
+            if prayer.type.isObligatory {
+                Button {
+                    onToggleNotification()
+                } label: {
+                    Image(systemName: isNotificationEnabled ? "bell.fill" : "bell.slash")
+                        .font(.system(size: 14))
+                        .foregroundColor(isNotificationEnabled ? .accentColor : SafaColors.Fallback.tertiaryText)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isNotificationEnabled ? "Notification on for \(prayer.type.displayName)" : "Notification off for \(prayer.type.displayName)")
+                .accessibilityHint("Double tap to toggle notification")
+            }
         }
         .padding(.horizontal, SafaSpacing.md)
         .padding(.vertical, SafaSpacing.sm)
