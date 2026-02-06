@@ -293,8 +293,10 @@ final class PrayerViewModel {
             locationService.requestPermission()
         }
 
-        // Fall back to live GPS
-        let location = try await locationService.getCurrentLocation()
+        // Fall back to live GPS with retry
+        let location = try await withRetry(maxAttempts: 2, initialDelay: 1.0) {
+            try await locationService.getCurrentLocation()
+        }
         return Coordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude

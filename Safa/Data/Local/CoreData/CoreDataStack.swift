@@ -80,6 +80,18 @@ final class CoreDataStack {
         return context
     }
 
+    // MARK: - Storage Check
+
+    /// Checks if device has sufficient free storage (minimum 50MB)
+    var hasLowStorage: Bool {
+        guard let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
+              let attributes = try? FileManager.default.attributesOfFileSystem(forPath: path),
+              let freeSize = attributes[.systemFreeSize] as? Int64 else {
+            return false
+        }
+        return freeSize < 50 * 1024 * 1024 // 50MB threshold
+    }
+
     // MARK: - Save
 
     func save() throws {

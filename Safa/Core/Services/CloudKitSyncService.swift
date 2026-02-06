@@ -164,6 +164,8 @@ final class CloudKitSyncService {
             await MainActor.run {
                 if isNetworkError(error) {
                     status = .offline
+                } else if isQuotaExceeded(error) {
+                    status = .error("iCloud storage full. Sync paused.")
                 } else {
                     status = .error(error.localizedDescription)
                 }
@@ -461,6 +463,13 @@ final class CloudKitSyncService {
         if let ckError = error as? CKError {
             return ckError.code == .networkUnavailable ||
                    ckError.code == .networkFailure
+        }
+        return false
+    }
+
+    private func isQuotaExceeded(_ error: Error) -> Bool {
+        if let ckError = error as? CKError {
+            return ckError.code == .quotaExceeded
         }
         return false
     }
