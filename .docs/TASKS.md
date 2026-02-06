@@ -1323,8 +1323,8 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 #### Medium (User Experience)
 - [x] **Audio: Show user-facing error on playback failure** — Toast notification via `ToastService` on both PrayerView and RamadanBanner playback failures.
 - [ ] **Audio: Add resumable downloads** — Use URLSession resume data so interrupted downloads don't restart from zero.
-- [ ] **Network: Add exponential backoff** — Retry failed sync/download operations with 1s → 2s → 4s delay instead of immediate retry or permanent failure.
-- [ ] **Location: Show which location is being used** — When falling back to London defaults, show inline note "Using London, UK" with Settings link.
+- [x] **Network: Add exponential backoff** — `withRetry()` utility in `RetryUtility.swift` with configurable attempts, delay, and multiplier.
+- [x] **Location: Show which location is being used** — Prayer page shows "Using London, UK" with location.slash icon when location not authorized.
 - [ ] **CloudKit: Handle quota exceeded** — Show "Sync paused — storage full" indicator, offer data export as alternative.
 - [ ] **Notifications: Monitor delivery** — Track whether scheduled notifications actually fire, alert user if system is blocking them.
 
@@ -1332,7 +1332,7 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 - [ ] **Core Data: Add disk space check** — Before large write operations, verify sufficient storage.
 - [ ] **Offline queue: Migrate from UserDefaults to Core Data** — Current queue isn't crash-safe.
 - [ ] **Location: Add retry mechanism** — Auto-retry location request on resume from background.
-- [ ] **Audio session: Handle interruptions** — Respond to `AVAudioSession.interruptionNotification` (phone calls, other apps).
+- [x] **Audio session: Handle interruptions** — AudioPlayerService now observes `AVAudioSession.interruptionNotification`, pauses on interruption began, resumes when `.shouldResume` flag set.
 
 ### TODO: v2 Strategic Enhancements
 

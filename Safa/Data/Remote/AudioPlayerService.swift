@@ -34,6 +34,38 @@ final class AudioPlayerService: NSObject, ObservableObject {
         } catch {
             self.error = error
         }
+
+        // Handle audio interruptions (phone calls, other apps)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+    }
+
+    @objc private func handleInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+
+        switch type {
+        case .began:
+            // Interruption started (phone call, Siri, etc.) — pause playback
+            pause()
+        case .ended:
+            // Interruption ended — resume if appropriate
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    resume()
+                }
+            }
+        @unknown default:
+            break
+        }
     }
 
     // MARK: - Playback Controls

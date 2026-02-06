@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Combine
+import CoreLocation
 
 struct PrayerView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -107,6 +108,18 @@ private struct PrayerContentView: View {
                 Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .full))
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
+            }
+
+            // Location fallback indicator
+            if dependencies.locationService.authorizationStatus != .authorizedWhenInUse
+                && dependencies.locationService.authorizationStatus != .authorizedAlways {
+                HStack(spacing: SafaSpacing.xxs) {
+                    Image(systemName: "location.slash")
+                        .font(.caption2)
+                    Text("Using \(AppDefaults.defaultLocationName)")
+                        .font(SafaTypography.labelSmall)
+                }
+                .foregroundColor(.orange)
             }
 
             // Prayer progress indicator
