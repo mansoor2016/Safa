@@ -1606,8 +1606,75 @@ Once user base is established:
 
 Features planned for future releases:
 
-### Sharing as Sadaqah Jariyah
-The Islamic concept of "ongoing charity" - when you share beneficial knowledge, you continue to receive reward even after death. This powerful concept will be deeply integrated:
+### 14.1 watchOS Companion App
+
+**Philosophy:** Lightweight, glanceable, action-oriented. The Apple Watch is the most intimate device for a Muslim user — ideal for discreet prayer reminders and quick interaction without phone distractions.
+
+**Core Features:**
+- **Complications:** Next prayer time countdown (Corner, Circular, Rectangular styles)
+- **Haptic Adhan:** Silent distinct tap patterns on wrist at each prayer time — configurable per prayer, works without sound
+- **Tasbeeh Counter:** Digital Crown scrolling for dhikr with satisfying tactile feedback per count
+- **Qibla on Wrist:** Compass-based direction indicator using watch magnetometer
+- **Standalone Mode:** Works without iPhone nearby, syncs progress via iCloud
+- **Glance View:** Current prayer + countdown + progress dots (logged/remaining)
+
+**Design Notes:**
+- No text-heavy content (Quran reading stays on phone/iPad)
+- Haptic patterns: light double-tap for regular prayers, strong triple-tap for Fajr
+- Complication updates via Background App Refresh
+- SwiftUI-native with `.containerBackground` for watchOS 10+
+
+### 14.2 Data Sovereignty & Export
+
+**Philosophy:** Privacy-first users love "local-only" but fear data lock-in. Explicit data export builds trust and future-proofs users' spiritual data.
+
+**Features:**
+- **JSON Export:** Full export of all user history — prayer logs, streaks, bookmarks, reading progress, achievements, chat history
+- **CSV Export:** Tabular format for prayer logs and statistics (spreadsheet-friendly)
+- **Backup & Restore:** Manual backup file for users migrating Apple IDs or devices (complements iCloud sync)
+- **"View All My Data" Screen:** Transparency view showing exactly what data is stored, with counts and storage sizes
+- **Data Deletion:** Per-category deletion (e.g., "delete all chat history" without losing prayer logs)
+
+**Format:** ISO 8601 dates, UTF-8 encoded, human-readable JSON with schema version for forward compatibility.
+
+### 14.3 Apple Intelligence Integration (App Intents)
+
+**Philosophy:** Go beyond Siri Shortcuts. Expose app content to the iOS system intelligence layer so Safa becomes a first-class citizen of the Apple ecosystem.
+
+**App Entities:**
+- Define `Prayer`, `Surah`, `Hadith`, `Dua` as AppEntities
+- Allows system to understand: "Show me the prayer times" or "Open Surah Yasin" with zero setup
+- Entities appear in Spotlight, Siri suggestions, and Focus filters
+
+**Contextual Siri:**
+- "When is the next prayer?" — returns time from app context without opening the app
+- "How many prayers have I logged today?" — reads from prayer log
+- "Play the adhan" — triggers adhan playback
+- "Start tasbeeh for SubhanAllah" — opens dhikr counter with preset
+
+**Shortcuts Integration:**
+- Expose prayer logging, bookmark creation, and reading progress as Shortcut actions
+- Enable automation: "When I arrive at the mosque, log my prayer"
+
+### 14.4 Assistive Access Mode
+
+**Philosophy:** iOS 17 introduced Assistive Access for users with cognitive disabilities. Safa's clean design is a natural fit. Define a hyper-simplified layout.
+
+**Simplified Layout:**
+- **Large Prayer Card:** Next prayer name + time, massive font, high contrast
+- **Qibla Arrow:** Full-screen directional arrow, no compass chrome
+- **Tasbeeh Button:** Single large tap target filling the screen
+- **Minimal Navigation:** 3 tabs max (Prayer, Qibla, Dhikr)
+
+**Design Notes:**
+- Detects `UIAccessibility.isAssistiveAccessEnabled` and auto-adapts
+- No gamification elements (streaks, hasanat) in this mode
+- Voice feedback for prayer logging confirmation
+- Compatible with Switch Control and Voice Control
+
+### 14.5 Sharing as Sadaqah Jariyah
+
+The Islamic concept of "ongoing charity" — when you share beneficial knowledge, you continue to receive reward even after death.
 
 - **Sadaqah Jariyah tracker**: See how many people you've introduced to beneficial content
 - **Ripple effect visualization**: "Your shared verse was read by 47 people"
@@ -1615,9 +1682,7 @@ The Islamic concept of "ongoing charity" - when you share beneficial knowledge, 
 - **Family tree of knowledge**: See how your shares spread to others who then shared
 - **Milestone celebrations**: "MashaAllah! Your shared content has been viewed 1000 times"
 
-### Other v2 Features
-- Apple Watch app (Qibla, prayer alerts, tasbeeh on wrist)
-- Siri Shortcuts expansion
+### 14.6 Other v2 Features
 - Ambient audio library (nature sounds for reflection)
 - Community features (local mosque integration)
 - Advanced memorization tools (spaced repetition for Quran)
@@ -1652,6 +1717,6 @@ All content sourced from free, high-quality sources for zero-cost launch:
 
 ---
 
-*Document Version: 0.9*
-*Last Updated: February 5, 2026*
+*Document Version: 1.0*
+*Last Updated: February 6, 2026*
 *Status: Pre-Production*
