@@ -9,6 +9,7 @@ import CoreSpotlight
 final class AppRouter {
     // MARK: - Navigation State
     var path = NavigationPath()
+    var selectedTab: String = "home"
     var activeSheet: Sheet?
     var activeAlert: AlertType?
 

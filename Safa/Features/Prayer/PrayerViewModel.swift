@@ -93,6 +93,14 @@ final class PrayerViewModel {
         await loadPrayerTimes()
     }
 
+    func togglePrayer(_ prayerType: PrayerType) async {
+        if loggedPrayers.contains(prayerType) {
+            await unlogPrayer(prayerType)
+        } else {
+            await logPrayer(prayerType)
+        }
+    }
+
     func logPrayer(_ prayerType: PrayerType) async {
         guard !loggedPrayers.contains(prayerType) else { return }
 
@@ -133,6 +141,27 @@ final class PrayerViewModel {
 
         } catch {
             self.error = error
+        }
+    }
+
+    private func unlogPrayer(_ prayerType: PrayerType) async {
+        do {
+            let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
+            if let log = logs.first(where: { $0.prayerType == prayerType }) {
+                try await prayerRepository.deletePrayerLog(log)
+                loggedPrayers.remove(prayerType)
+            }
+        } catch {
+            self.error = error
+        }
+    }
+
+    func reloadLoggedPrayers() async {
+        do {
+            let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
+            loggedPrayers = Set(logs.map { $0.prayerType })
+        } catch {
+            // Ignore - keep existing state
         }
     }
 

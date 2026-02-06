@@ -93,10 +93,10 @@ struct PrayerProgressIndicator: View {
         let isNext = nextPrayer?.type == prayerType
         let prayer = obligatoryPrayers.first { $0.type == prayerType }
         let isPast = prayer.map { $0.time < Date() } ?? false
-        let canLog = !isLogged && onLogPrayer != nil
+        let canTap = onLogPrayer != nil
 
         return Button {
-            guard canLog else { return }
+            guard canTap else { return }
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             onLogPrayer?(prayerType)
@@ -124,7 +124,7 @@ struct PrayerProgressIndicator: View {
             .frame(width: 22, height: 22)
         }
         .buttonStyle(.plain)
-        .disabled(!canLog)
+        .disabled(!canTap)
     }
 
     private func compactDotColor(isLogged: Bool, isNext: Bool, isPast: Bool) -> Color {
@@ -177,10 +177,10 @@ struct PrayerProgressIndicator: View {
         let isNext = nextPrayer?.type == prayerType
         let prayer = obligatoryPrayers.first { $0.type == prayerType }
         let isPast = prayer.map { $0.time < Date() } ?? false
-        let canLog = !isLogged && onLogPrayer != nil
+        let canTap = onLogPrayer != nil
 
         return Button {
-            guard canLog else { return }
+            guard canTap else { return }
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             onLogPrayer?(prayerType)
@@ -218,7 +218,7 @@ struct PrayerProgressIndicator: View {
             }
         }
         .buttonStyle(.plain)
-        .disabled(!canLog)
+        .disabled(!canTap)
     }
 
     private func expandedConnectingLine(fromIndex: Int) -> some View {

@@ -64,8 +64,6 @@ struct SafaApp: App {
 struct MainTabView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
-    @State private var selectedTab: Tab = .home
-
     enum Tab: String, CaseIterable {
         case home
         case quran
@@ -104,8 +102,15 @@ struct MainTabView: View {
         }
     }
 
+    private var selectedTab: Binding<Tab> {
+        Binding(
+            get: { Tab(rawValue: router.selectedTab) ?? .home },
+            set: { router.selectedTab = $0.rawValue }
+        )
+    }
+
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: selectedTab) {
             // Home Tab
             NavigationStack(path: Binding(
                 get: { router.path },
@@ -117,7 +122,7 @@ struct MainTabView: View {
                     }
             }
             .tabItem {
-                Label(Tab.home.title, systemImage: selectedTab == .home ? Tab.home.selectedIcon : Tab.home.icon)
+                Label(Tab.home.title, systemImage: router.selectedTab == Tab.home.rawValue ? Tab.home.selectedIcon : Tab.home.icon)
             }
             .tag(Tab.home)
 
@@ -126,7 +131,7 @@ struct MainTabView: View {
                 QuranView()
             }
             .tabItem {
-                Label(Tab.quran.title, systemImage: selectedTab == .quran ? Tab.quran.selectedIcon : Tab.quran.icon)
+                Label(Tab.quran.title, systemImage: router.selectedTab == Tab.quran.rawValue ? Tab.quran.selectedIcon : Tab.quran.icon)
             }
             .tag(Tab.quran)
 
@@ -135,7 +140,7 @@ struct MainTabView: View {
                 PrayerView()
             }
             .tabItem {
-                Label(Tab.prayer.title, systemImage: selectedTab == .prayer ? Tab.prayer.selectedIcon : Tab.prayer.icon)
+                Label(Tab.prayer.title, systemImage: router.selectedTab == Tab.prayer.rawValue ? Tab.prayer.selectedIcon : Tab.prayer.icon)
             }
             .tag(Tab.prayer)
 
@@ -144,7 +149,7 @@ struct MainTabView: View {
                 LearnView()
             }
             .tabItem {
-                Label(Tab.learn.title, systemImage: selectedTab == .learn ? Tab.learn.selectedIcon : Tab.learn.icon)
+                Label(Tab.learn.title, systemImage: router.selectedTab == Tab.learn.rawValue ? Tab.learn.selectedIcon : Tab.learn.icon)
             }
             .tag(Tab.learn)
 
@@ -153,7 +158,7 @@ struct MainTabView: View {
                 MoreView()
             }
             .tabItem {
-                Label(Tab.more.title, systemImage: selectedTab == .more ? Tab.more.selectedIcon : Tab.more.icon)
+                Label(Tab.more.title, systemImage: router.selectedTab == Tab.more.rawValue ? Tab.more.selectedIcon : Tab.more.icon)
             }
             .tag(Tab.more)
         }

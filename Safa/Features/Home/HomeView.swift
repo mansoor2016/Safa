@@ -40,7 +40,7 @@ struct HomeView: View {
                 // Next prayer card
                 if let prayer = nextPrayer {
                     NextPrayerHomeCard(prayer: prayer) {
-                        router.navigate(to: .prayer)
+                        router.selectedTab = "prayer"
                     }
                 }
 
@@ -89,6 +89,9 @@ struct HomeView: View {
         .task {
             await loadHomeData()
         }
+        .onAppear {
+            Task { await reloadLoggedPrayers() }
+        }
     }
 
     // MARK: - Ramadan Banner Section
@@ -97,7 +100,7 @@ struct HomeView: View {
     private var ramadanBannerSection: some View {
         let shouldShow = showRamadanBanner
             && !UserDefaults.standard.bool(forKey: bannerDismissKey)
-            && (isRamadan || (daysUntilRamadan ?? 0 > 0 && daysUntilRamadan ?? 0 <= 7))
+            && (isRamadan || (daysUntilRamadan ?? 0 > 0 && daysUntilRamadan ?? 0 <= 30))
 
         if shouldShow {
             VStack(spacing: 0) {
@@ -164,7 +167,7 @@ struct HomeView: View {
                     onDismiss: dismissBanner
                 )
             }
-        } else if let days = daysUntilRamadan, days <= 7, days > 0 {
+        } else if let days = daysUntilRamadan, days <= 30, days > 0 {
             PreRamadanBanner(
                 daysUntil: days,
                 onDismiss: dismissBanner
@@ -178,7 +181,7 @@ struct HomeView: View {
                 return "Last 10 Nights - Night \(currentRamadanDay)"
             }
             return "Ramadan - Day \(currentRamadanDay)"
-        } else if let days = daysUntilRamadan, days <= 7, days > 0 {
+        } else if let days = daysUntilRamadan, days <= 30, days > 0 {
             return "\(days) days until Ramadan"
         }
         return "Ramadan"
@@ -242,12 +245,12 @@ struct HomeView: View {
                         nextPrayer: nextPrayer,
                         style: .compact,
                         onLogPrayer: { prayerType in
-                            Task { await logPrayer(prayerType) }
+                            Task { await togglePrayer(prayerType) }
                         }
                     )
 
                     Button("See All") {
-                        router.navigate(to: .prayer)
+                        router.selectedTab = "prayer"
                     }
                     .font(SafaTypography.labelSmall)
                 }
@@ -399,27 +402,48 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Log Prayer
+    // MARK: - Toggle Prayer Log
 
-    private func logPrayer(_ prayerType: PrayerType) async {
-        guard !loggedPrayers.contains(prayerType) else { return }
+    private func togglePrayer(_ prayerType: PrayerType) async {
+        if loggedPrayers.contains(prayerType) {
+            // Unlog the prayer
+            do {
+                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+                if let log = logs.first(where: { $0.prayerType == prayerType }) {
+                    try await dependencies.prayerRepository.deletePrayerLog(log)
+                    loggedPrayers.remove(prayerType)
+                }
+            } catch {
+                // Handle error silently on home screen
+            }
+        } else {
+            // Log the prayer
+            do {
+                let prayer = todayPrayers.first { $0.type == prayerType }
+                let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
 
+                try await dependencies.prayerRepository.logPrayer(
+                    prayerType,
+                    for: Date(),
+                    at: Date(),
+                    isOnTime: isOnTime
+                )
+
+                loggedPrayers.insert(prayerType)
+                await dependencies.userState.awardHasanat(.prayerLogged)
+                await dependencies.userState.recordActivity(type: .prayer)
+            } catch {
+                // Handle error silently on home screen
+            }
+        }
+    }
+
+    private func reloadLoggedPrayers() async {
         do {
-            let prayer = todayPrayers.first { $0.type == prayerType }
-            let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
-
-            try await dependencies.prayerRepository.logPrayer(
-                prayerType,
-                for: Date(),
-                at: Date(),
-                isOnTime: isOnTime
-            )
-
-            loggedPrayers.insert(prayerType)
-            await dependencies.userState.awardHasanat(.prayerLogged)
-            await dependencies.userState.recordActivity(type: .prayer)
+            let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+            loggedPrayers = Set(logs.map { $0.prayerType })
         } catch {
-            // Handle error silently on home screen
+            // Keep existing state
         }
     }
 

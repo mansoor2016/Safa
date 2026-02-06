@@ -52,9 +52,9 @@ private struct PrayerContentView: View {
                 PrayerTimesCard(
                     prayers: viewModel.todayPrayers,
                     loggedPrayers: viewModel.loggedPrayers,
-                    onLogPrayer: { prayer in
+                    onTogglePrayer: { prayer in
                         Task {
-                            await viewModel.logPrayer(prayer)
+                            await viewModel.togglePrayer(prayer)
                         }
                     }
                 )
@@ -91,6 +91,9 @@ private struct PrayerContentView: View {
         .task {
             await viewModel.loadPrayerTimes()
         }
+        .onAppear {
+            Task { await viewModel.reloadLoggedPrayers() }
+        }
     }
 
     // MARK: - Date Header
@@ -114,7 +117,7 @@ private struct PrayerContentView: View {
                 nextPrayer: viewModel.nextPrayer,
                 style: .expanded,
                 onLogPrayer: { prayerType in
-                    Task { await viewModel.logPrayer(prayerType) }
+                    Task { await viewModel.togglePrayer(prayerType) }
                 }
             )
             .padding(.top, SafaSpacing.sm)
@@ -215,7 +218,7 @@ private struct NextPrayerCard: View {
 private struct PrayerTimesCard: View {
     let prayers: [PrayerTime]
     let loggedPrayers: Set<PrayerType>
-    let onLogPrayer: (PrayerType) -> Void
+    let onTogglePrayer: (PrayerType) -> Void
 
     var body: some View {
         ContentCard {
@@ -224,7 +227,7 @@ private struct PrayerTimesCard: View {
                     PrayerTimeRow(
                         prayer: prayer,
                         isLogged: loggedPrayers.contains(prayer.type),
-                        onLog: { onLogPrayer(prayer.type) }
+                        onToggle: { onTogglePrayer(prayer.type) }
                     )
 
                     if prayer.id != prayers.last?.id {
@@ -242,7 +245,7 @@ private struct PrayerTimesCard: View {
 private struct PrayerTimeRow: View {
     let prayer: PrayerTime
     let isLogged: Bool
-    let onLog: () -> Void
+    let onToggle: () -> Void
 
     var body: some View {
         HStack {
@@ -265,20 +268,19 @@ private struct PrayerTimeRow: View {
                 .foregroundColor(SafaColors.Fallback.secondaryText)
                 .monospacedDigit()
 
-            // Log button (for obligatory prayers only)
+            // Toggle button (for obligatory prayers only)
             if prayer.type.isObligatory {
                 Button(action: {
                     let generator = UIImpactFeedbackGenerator(style: .medium)
                     generator.impactOccurred()
-                    onLog()
+                    onToggle()
                 }) {
                     Image(systemName: isLogged ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(isLogged ? .green : SafaColors.Fallback.tertiaryText)
                         .font(.title2)
                 }
-                .disabled(isLogged)
                 .accessibilityLabel(isLogged ? "\(prayer.type.displayName) logged" : "Log \(prayer.type.displayName)")
-                .accessibilityHint(isLogged ? "Prayer has been logged" : "Double tap to mark this prayer as completed")
+                .accessibilityHint(isLogged ? "Double tap to unmark" : "Double tap to mark this prayer as completed")
             }
         }
         .padding(.horizontal, SafaSpacing.md)
