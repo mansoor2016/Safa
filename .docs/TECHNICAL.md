@@ -2221,6 +2221,139 @@ class HealthKitService {
 
 ---
 
+## 8.8 Graceful Degradation & Resilience
+
+**Principle:** Never crash on external failure. Never silently fail. Inform the user and offer alternatives.
+
+### 8.8.1 Core Data Store Failure
+
+**Current risk:** `fatalError()` on persistent store load failure — app crashes.
+
+**Required fix:**
+```swift
+// BEFORE (crashes):
+container.loadPersistentStores { _, error in
+    if let error { fatalError("Core Data: \(error)") }
+}
+
+// AFTER (degrades):
+container.loadPersistentStores { description, error in
+    if let error {
+        // Log error, fall back to in-memory store
+        let inMemory = NSPersistentStoreDescription()
+        inMemory.type = NSInMemoryStoreType
+        container.persistentStoreDescriptions = [inMemory]
+        container.loadPersistentStores { _, _ in }
+        self.isDegradedMode = true
+        // Show user: "Data may not persist. Restart the app or check storage."
+    }
+}
+```
+
+### 8.8.2 Notification Scheduling Failure
+
+**Current risk:** `try?` silently swallows scheduling failures — user misses prayer alerts.
+
+**Required fix:**
+```swift
+// Replace try? with proper error handling
+do {
+    try await UNUserNotificationCenter.current().add(request)
+} catch {
+    // Notify the ViewModel that scheduling failed
+    await MainActor.run {
+        self.notificationSchedulingFailed = true
+    }
+    // User sees: bell icon changes to warning state
+}
+```
+
+**User-facing indicators:**
+- Bell icon: `bell.badge.xmark` (orange) when scheduling failed
+- Toast: "Prayer notification could not be set. Check notification permissions."
+- Settings link to iOS notification settings
+
+### 8.8.3 Compass Accuracy & Calibration
+
+**Current risk:** No accuracy check — Qibla could point wrong direction silently.
+
+**Required fix:**
+```swift
+func locationManager(_ manager: CLLocationManager, didUpdateHeading heading: CLHeading) {
+    if heading.headingAccuracy < 0 {
+        // Heading unreliable — show calibration prompt
+        compassAccuracy = .unreliable
+    } else if heading.headingAccuracy > 25 {
+        // Low accuracy — show warning
+        compassAccuracy = .low
+    } else {
+        compassAccuracy = .good
+    }
+    currentHeading = heading.magneticHeading
+}
+```
+
+**User-facing indicators:**
+- `.unreliable`: "Move your device in a figure-8 to calibrate"
+- `.low`: Yellow accuracy indicator, Qibla still shown but with caveat
+- `.good`: Normal green compass operation
+
+### 8.8.4 Network & Sync Resilience
+
+**Required patterns:**
+```swift
+// Exponential backoff for retries
+func withRetry<T>(maxAttempts: Int = 3, _ operation: () async throws -> T) async throws -> T {
+    var delay: TimeInterval = 1
+    for attempt in 1...maxAttempts {
+        do {
+            return try await operation()
+        } catch where attempt < maxAttempts {
+            try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            delay *= 2
+        }
+    }
+    return try await operation() // Final attempt throws
+}
+```
+
+**WiFi check fix:**
+```swift
+// Replace hardcoded true with real check
+var isOnWiFi: Bool {
+    guard let path = NWPathMonitor().currentPath else { return false }
+    return path.usesInterfaceType(.wifi)
+}
+```
+
+### 8.8.5 Audio Playback Failure
+
+**Required fix:**
+- Show toast on playback failure: "Could not play adhan. Check audio settings."
+- Fall back to system notification sound if custom adhan file not found
+- Resume downloads from where they left off (URLSession `downloadTask` with resume data)
+
+### 8.8.6 Location Permission Denied
+
+**Required fix:**
+- Show inline banner: "Location unavailable — using London, UK"
+- Settings deep-link button: "Update location in Settings"
+- Manual location entry as fallback (city picker)
+
+### 8.8.7 Degradation State Summary
+
+| Component | Degraded State | User Indicator | Fallback |
+|-----------|---------------|----------------|----------|
+| Core Data | In-memory store | "Data may not persist" banner | All features work, no persistence |
+| Location | Default coordinates | "Using London, UK" note | Manual city selection |
+| Compass | No heading | "Calibrate device" prompt | Show bearing number only |
+| Notifications | Scheduling failed | Orange bell icon + toast | Manual prayer checking |
+| Network | Offline | Sync status indicator | Offline queue, all features work |
+| Audio | Playback failed | Toast with error | System default sound |
+| CloudKit | Quota exceeded | "Sync paused" indicator | Local-only mode |
+
+---
+
 ## 9. Performance Considerations
 
 ### 9.1 App Size Budget

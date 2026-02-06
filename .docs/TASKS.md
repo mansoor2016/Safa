@@ -1307,6 +1307,33 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 - [ ] Implement audio download/caching for recitations
 - [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
 
+### TODO: Graceful Degradation & Resilience
+
+**Priority: HIGH — Must fix before launch**
+
+#### Critical (App Stability)
+- [ ] **Core Data: Replace `fatalError()` with in-memory fallback** — `CoreDataStack.swift` line 44 crashes app on store load failure. Fall back to `NSInMemoryStoreType` and show degraded mode banner.
+- [ ] **Notifications: Replace `try?` with proper error handling** — `PrayerViewModel.scheduleNotification()` silently swallows failures. Show orange bell icon + toast when scheduling fails.
+
+#### High (Incorrect Behavior)
+- [ ] **WiFi check: Replace hardcoded `true`** — `CloudKitSyncService.NetworkMonitor.isOnWiFi()` returns `true` always. Use `NWPathMonitor` for real check.
+- [ ] **Compass: Add accuracy checks** — Check `CLHeading.headingAccuracy`, show calibration prompt (figure-8) when unreliable, yellow warning when low accuracy.
+- [ ] **Compass: Add heading timeout** — If heading updates stop for >5 seconds, show "compass unavailable" state instead of frozen display.
+
+#### Medium (User Experience)
+- [ ] **Audio: Show user-facing error on playback failure** — Replace `print()` logging with toast notification. Fall back to system sound if custom adhan file missing.
+- [ ] **Audio: Add resumable downloads** — Use URLSession resume data so interrupted downloads don't restart from zero.
+- [ ] **Network: Add exponential backoff** — Retry failed sync/download operations with 1s → 2s → 4s delay instead of immediate retry or permanent failure.
+- [ ] **Location: Show which location is being used** — When falling back to London defaults, show inline note "Using London, UK" with Settings link.
+- [ ] **CloudKit: Handle quota exceeded** — Show "Sync paused — storage full" indicator, offer data export as alternative.
+- [ ] **Notifications: Monitor delivery** — Track whether scheduled notifications actually fire, alert user if system is blocking them.
+
+#### Low (Robustness)
+- [ ] **Core Data: Add disk space check** — Before large write operations, verify sufficient storage.
+- [ ] **Offline queue: Migrate from UserDefaults to Core Data** — Current queue isn't crash-safe.
+- [ ] **Location: Add retry mechanism** — Auto-retry location request on resume from background.
+- [ ] **Audio session: Handle interruptions** — Respond to `AVAudioSession.interruptionNotification` (phone calls, other apps).
+
 ### TODO: v2 Strategic Enhancements
 
 **Priority: FUTURE — Post-launch features**

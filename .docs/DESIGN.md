@@ -110,6 +110,32 @@ Settings → Appearance → Theme Color
 - Seamless transitions and micro-animations
 - Proactive in-app guidance and reminders
 - **Disabled features**: Greyed out with "Coming soon" label (never hidden)
+- **Graceful degradation**: Never crash, never silently fail. Inform the user and offer alternatives.
+
+### 2.4.2 Graceful Degradation Principles
+
+The app must handle sensor failures, network loss, and resource constraints without crashing or silently dropping functionality. The user should always know what's happening.
+
+**Core rules:**
+- **Never crash on external failure** — no `fatalError()` for recoverable conditions
+- **Never silently fail** — if a feature can't work, tell the user why and what to do
+- **Always offer a fallback** — cached data, defaults, or manual input
+- **Inform, don't alarm** — use subtle status indicators, not error dialogs, for degraded states
+
+**Degraded state indicators:**
+- Subtle banner or icon change (e.g., compass accuracy warning, offline indicator)
+- Feature remains usable with reduced fidelity rather than disabled entirely
+- Clear path to recovery: "Check location permissions in Settings" vs generic "Something went wrong"
+
+**Key scenarios:**
+| Failure | User Experience |
+|---------|----------------|
+| No GPS | Prayer times from saved/default location, note shown |
+| No network | All core features work offline, sync queued |
+| No compass | Qibla shows bearing number + "point device North", no rotating compass |
+| Notification denied | Bell icons show disabled state, Settings link offered |
+| Storage full | Warning before data loss, export offered |
+| Audio fails | Toast with reason, silent fallback for notifications |
 
 ### 2.4.1 Disabled Feature Pattern
 
