@@ -135,8 +135,8 @@ private struct PrayerContentView: View {
             )
 
             QuickActionButton(
-                icon: "speaker.wave.2.fill",
-                title: "Adhan",
+                icon: dependencies.audioPlayerService.isPlaying ? "stop.fill" : "speaker.wave.2.fill",
+                title: dependencies.audioPlayerService.isPlaying ? "Stop" : "Adhan",
                 action: {
                     playAdhan()
                 }
