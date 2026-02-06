@@ -1267,5 +1267,45 @@ Features implemented in the latest session:
 - **Build/Test Tooling**: `/build` and `/test` commands, `xcode-build` skill for filtered Xcode output
 - **Test Coverage**: AdhanSound, ShareBanner, prayer toggle, notification persistence, tab selection tests
 
+### TODO: Quran Data Population
+
+**Priority: HIGH — Quran tab is non-functional without complete data**
+
+The Quran UI, repository, and SQLite database structure are all in place but the database only has sample ayahs for ~10 surahs. Full population is needed.
+
+**Steps:**
+1. [ ] Download Arabic text (Uthmani script) from [tanzil.net/download](https://tanzil.net/download/) — plain text format
+2. [ ] Download Sahih International English translation from tanzil.net — plain text format
+3. [ ] Optionally source transliteration data (quran.com API or similar)
+4. [ ] Update `scripts/create_quran_database.py` to import the downloaded text files
+5. [ ] Regenerate `Resources/Data/Database/quran.sqlite` with all 6,236 ayahs
+6. [ ] Verify correct page numbers (604 pages) and juz boundaries (30 juz)
+7. [ ] Test QuranView loads all 114 surahs with full ayah content
+8. [ ] Test AyahReaderView displays Arabic + translation for each surah
+9. [ ] Test full-text search works across complete dataset
+10. [ ] Wire QuranSearchView to use SQLite FTS instead of hardcoded sample data
+
+**Data format expected per ayah (SQLite `ayahs` table):**
+
+| Column | Type | Example |
+|--------|------|---------|
+| `surah_number` | INTEGER | 2 |
+| `ayah_number` | INTEGER | 255 |
+| `text_arabic` | TEXT | بِسْمِ اللَّهِ... |
+| `text_translation` | TEXT | "In the name of Allah..." |
+| `text_transliteration` | TEXT | "Bismillahi..." (optional) |
+| `juz_number` | INTEGER | 3 |
+| `page_number` | INTEGER | 42 |
+
+**Data sources:**
+- Arabic + translation: tanzil.net (free, authoritative, pipe-delimited text)
+- Transliteration: quran.com API (optional, can be added later)
+- Page/juz mappings: tanzil.net metadata
+
+**Remaining Quran work beyond data:**
+- [ ] Connect audio player UI to AVFoundation for actual playback
+- [ ] Implement audio download/caching for recitations
+- [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
+
 *Last Updated: February 6, 2026 (Progress: 85% complete)*
 *Latest: 93/115 acceptance criteria verified*
