@@ -71,6 +71,71 @@ enum PrayerType: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Adhan Sound
+
+enum AdhanSound: String, Codable, CaseIterable, Identifiable {
+    case defaultSound = "default"
+    case misharyAlafasy = "mishary_alafasy"
+    case misharyAlafasyFajr = "mishary_alafasy_fajr"
+    case abdulbasitAbdusamad = "abdulbasit_abdusamad"
+    case adhamAlSharqawe = "adham_al_sharqawe"
+    case ahmadAlTrablsi = "ahmad_al_trablsi"
+    case ahmedElKourdi = "ahmed_el_kourdi"
+    case hamzaAlMajale = "hamza_al_majale"
+    case ismailAlSheikh = "ismail_al_sheikh"
+    case muhammadAlDamradash = "muhammad_al_damradash"
+    case muhammadRamadanSaadMakkah = "muhammad_ramadan_saad_makkah"
+    case rabehIbnDarah = "rabeh_ibn_darah"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .defaultSound: return "System Default"
+        case .misharyAlafasy: return "Mishary Rashid Alafasy"
+        case .misharyAlafasyFajr: return "Mishary Alafasy (Fajr)"
+        case .abdulbasitAbdusamad: return "Abdul Basit Abdul Samad"
+        case .adhamAlSharqawe: return "Adham Al Sharqawe"
+        case .ahmadAlTrablsi: return "Ahmad Al Trablsi"
+        case .ahmedElKourdi: return "Ahmed El Kourdi"
+        case .hamzaAlMajale: return "Hamza Al Majale"
+        case .ismailAlSheikh: return "Ismail Al Sheikh"
+        case .muhammadAlDamradash: return "Muhammad Al Damradash"
+        case .muhammadRamadanSaadMakkah: return "Muhammad Ramadan Saad"
+        case .rabehIbnDarah: return "Rabeh Ibn Darah"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .defaultSound: return "Standard iOS notification sound"
+        case .misharyAlafasy: return "Kuwaiti style, polished melody"
+        case .misharyAlafasyFajr: return "Fajr-specific with pre-dawn call"
+        case .abdulbasitAbdusamad: return "Egyptian, deep Maqam Bayati"
+        case .adhamAlSharqawe: return "Egyptian, ornate vocal style"
+        case .ahmadAlTrablsi: return "Levantine, warm Shami melody"
+        case .ahmedElKourdi: return "Contemplative Maqam Hijaz"
+        case .hamzaAlMajale: return "Jordanian, bright and uplifting"
+        case .ismailAlSheikh: return "Soft, meditative delivery"
+        case .muhammadAlDamradash: return "Cairo-style Maqam Rast"
+        case .muhammadRamadanSaadMakkah: return "Makkah Haram-style, majestic"
+        case .rabehIbnDarah: return "Algerian, Andalusian-influenced"
+        }
+    }
+
+    var isFajrSpecific: Bool { self == .misharyAlafasyFajr }
+
+    /// All adhan sounds suitable for regular (non-Fajr) prayers
+    static var regularOptions: [AdhanSound] {
+        allCases.filter { !$0.isFajrSpecific }
+    }
+
+    /// All adhan sounds (for Fajr picker, which can use any)
+    static var fajrOptions: [AdhanSound] {
+        allCases.filter { $0 != .defaultSound }
+    }
+}
+
 // MARK: - Prayer Time
 struct PrayerTime: Identifiable, Hashable {
     let id: UUID

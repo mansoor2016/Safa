@@ -200,8 +200,16 @@ final class PrayerViewModel {
         let content = UNMutableNotificationContent()
         content.title = "\(prayerType.displayName) Time"
         content.body = "It's time for \(prayerType.displayName) prayer"
-        content.sound = .default
         content.interruptionLevel = .timeSensitive
+
+        // Use adhan sound if enabled
+        let prefs = await PreferencesManager.shared.getPreferences()
+        if prefs.adhanEnabled {
+            let fileName = prayerType == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+            content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+        } else {
+            content.sound = .default
+        }
 
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],

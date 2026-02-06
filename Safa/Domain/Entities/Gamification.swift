@@ -275,6 +275,11 @@ struct UserPreferences: Codable, Hashable {
     var savedCountryCode: String?
     var useLocationBasedDefaults: Bool
 
+    // Adhan preferences
+    var adhanEnabled: Bool
+    var selectedAdhan: String
+    var selectedFajrAdhan: String
+
     // Accessibility preferences
     var reduceMotionEnabled: Bool
     var largerArabicTextEnabled: Bool
@@ -295,6 +300,9 @@ struct UserPreferences: Codable, Hashable {
         savedLongitude: Double? = nil,
         savedCountryCode: String? = nil,
         useLocationBasedDefaults: Bool = AppDefaults.useLocationBasedDefaults,
+        adhanEnabled: Bool = false,
+        selectedAdhan: String = AdhanSound.misharyAlafasy.rawValue,
+        selectedFajrAdhan: String = AdhanSound.misharyAlafasyFajr.rawValue,
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
         highContrastEnabled: Bool = false
@@ -313,6 +321,9 @@ struct UserPreferences: Codable, Hashable {
         self.savedLongitude = savedLongitude
         self.savedCountryCode = savedCountryCode
         self.useLocationBasedDefaults = useLocationBasedDefaults
+        self.adhanEnabled = adhanEnabled
+        self.selectedAdhan = selectedAdhan
+        self.selectedFajrAdhan = selectedFajrAdhan
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled
         self.highContrastEnabled = highContrastEnabled

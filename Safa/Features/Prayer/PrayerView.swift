@@ -33,6 +33,7 @@ struct PrayerView: View {
 // MARK: - Prayer Content View
 
 private struct PrayerContentView: View {
+    @Environment(Dependencies.self) private var dependencies
     @Bindable var viewModel: PrayerViewModel
     @State private var showingQibla = false
     @State private var showingSettings = false
@@ -134,12 +135,36 @@ private struct PrayerContentView: View {
             )
 
             QuickActionButton(
-                icon: "calendar",
-                title: "Prayer Log",
+                icon: "speaker.wave.2.fill",
+                title: "Adhan",
                 action: {
-                    // Navigate to prayer log
+                    playAdhan()
                 }
             )
+        }
+    }
+
+    // MARK: - Play Adhan
+
+    private func playAdhan() {
+        Task {
+            let prefs = await PreferencesManager.shared.getPreferences()
+            let isFajr = viewModel.nextPrayer?.type == .fajr
+            let fileName = isFajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+            let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
+
+            if adhanSound == .defaultSound {
+                return // No audio to play for system default
+            }
+
+            do {
+                try dependencies.audioPlayerService.playBundled(
+                    fileName: adhanSound.rawValue,
+                    fileExtension: "caf"
+                )
+            } catch {
+                // Audio file not available
+            }
         }
     }
 }

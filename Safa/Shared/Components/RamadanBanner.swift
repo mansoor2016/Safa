@@ -268,15 +268,25 @@ struct RamadanBanner: View {
     }
 
     private func playIftarAdhan() {
-        // Play bundled iftar adhan
-        do {
-            try dependencies.audioPlayerService.playBundled(fileName: "iftar_adhan")
-        } catch {
-            // Audio file not available
+        // Play selected adhan sound
+        Task {
+            let prefs = await PreferencesManager.shared.getPreferences()
+            let fileName = prefs.selectedAdhan
+            let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
+
+            if adhanSound != .defaultSound {
+                do {
+                    try dependencies.audioPlayerService.playBundled(
+                        fileName: adhanSound.rawValue,
+                        fileExtension: "caf"
+                    )
+                } catch {
+                    // Audio file not available
+                }
+            }
         }
 
-        // Show dua prompt after a short delay (adhan typically takes 3-5 minutes)
-        // For UX, show immediately so user can learn the dua while adhan plays
+        // Show dua prompt after a short delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             showingIftarDuaPrompt = true
         }

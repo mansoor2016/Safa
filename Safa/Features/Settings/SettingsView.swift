@@ -11,8 +11,9 @@ struct SettingsView: View {
     @State private var selectedCalculationMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
-    @State private var adhanEnabled = true
-    @State private var selectedAdhanSound = "Default"
+    @State private var adhanEnabled = false
+    @State private var selectedAdhan: AdhanSound = .misharyAlafasy
+    @State private var selectedFajrAdhan: AdhanSound = .misharyAlafasyFajr
     @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
     @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
@@ -216,21 +217,47 @@ struct SettingsView: View {
                 }
 
             if notificationsEnabled {
-                Toggle("Adhan Sound", isOn: $adhanEnabled)
+                Toggle("Use Adhan Sound", isOn: $adhanEnabled)
+                    .onChange(of: adhanEnabled) { _, newValue in
+                        Task {
+                            await prefsManager.update(\.adhanEnabled, to: newValue)
+                        }
+                    }
 
                 if adhanEnabled {
-                    Picker("Adhan Style", selection: $selectedAdhanSound) {
-                        Text("Default").tag("Default")
-                        Text("Makkah").tag("Makkah")
-                        Text("Madinah").tag("Madinah")
-                        Text("Silent").tag("Silent")
+                    Picker("Adhan", selection: $selectedAdhan) {
+                        ForEach(AdhanSound.regularOptions) { sound in
+                            VStack(alignment: .leading) {
+                                Text(sound.displayName)
+                                Text(sound.subtitle)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(sound)
+                        }
                     }
-                }
+                    .onChange(of: selectedAdhan) { _, newValue in
+                        Task {
+                            await prefsManager.update(\.selectedAdhan, to: newValue.rawValue)
+                        }
+                    }
 
-                NavigationLink {
-                    NotificationScheduleView()
-                } label: {
-                    Text("Notification Schedule")
+                    Picker("Fajr Adhan", selection: $selectedFajrAdhan) {
+                        ForEach(AdhanSound.fajrOptions) { sound in
+                            VStack(alignment: .leading) {
+                                Text(sound.displayName)
+                                Text(sound.subtitle)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(sound)
+                        }
+                    }
+                    .onChange(of: selectedFajrAdhan) { _, newValue in
+                        Task {
+                            await prefsManager.update(\.selectedFajrAdhan, to: newValue.rawValue)
+                        }
+                    }
                 }
             }
         } header: {
@@ -439,6 +466,11 @@ struct SettingsView: View {
         notificationsEnabled = prefs.notificationsEnabled
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
         savedLocationName = prefs.savedLocationName
+
+        // Load adhan settings
+        adhanEnabled = prefs.adhanEnabled
+        selectedAdhan = AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy
+        selectedFajrAdhan = AdhanSound(rawValue: prefs.selectedFajrAdhan) ?? .misharyAlafasyFajr
 
         // Load accessibility settings
         reduceMotionEnabled = prefs.reduceMotionEnabled
