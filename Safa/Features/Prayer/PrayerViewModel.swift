@@ -246,6 +246,28 @@ final class PrayerViewModel {
                 cancelNotification(for: prayerType)
             }
         }
+
+        // Verify notifications were actually registered
+        await verifyScheduledNotifications()
+    }
+
+    private func verifyScheduledNotifications() async {
+        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        let scheduledPrayerIDs = Set(pending.map { $0.identifier })
+
+        // Check if any enabled prayer's notification is missing
+        for prayerType in notificationEnabledPrayers {
+            let expectedID = "prayer_\(prayerType.rawValue)"
+            let prayer = todayPrayers.first { $0.type == prayerType }
+            let isFuture = prayer.map { $0.time > Date() } ?? false
+
+            if isFuture && !scheduledPrayerIDs.contains(expectedID) {
+                // Notification should exist but doesn't — system may be blocking
+                notificationSchedulingFailed = true
+                return
+            }
+        }
+        notificationSchedulingFailed = false
     }
 
     private func loadNotificationSettings() async {

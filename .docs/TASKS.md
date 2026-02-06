@@ -1326,7 +1326,7 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 - [x] **Network: Add exponential backoff** — `withRetry()` utility in `RetryUtility.swift` with configurable attempts, delay, and multiplier.
 - [x] **Location: Show which location is being used** — Prayer page shows "Using London, UK" with location.slash icon when location not authorized.
 - [x] **CloudKit: Handle quota exceeded** — `isQuotaExceeded()` check in `performSync()`, shows "iCloud storage full. Sync paused." status.
-- [ ] **Notifications: Monitor delivery** — Track whether scheduled notifications actually fire, alert user if system is blocking them.
+- [x] **Notifications: Monitor delivery** — `verifyScheduledNotifications()` checks pending requests after scheduling, sets `notificationSchedulingFailed` if enabled prayers are missing.
 
 #### Low (Robustness)
 - [x] **Core Data: Add disk space check** — `hasLowStorage` property checks for <50MB free space before writes.
