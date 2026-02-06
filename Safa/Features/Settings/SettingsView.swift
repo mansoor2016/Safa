@@ -31,8 +31,15 @@ struct SettingsView: View {
     @State private var isUpdatingLocation = false
     @State private var showLocationRecommendations = false
     @State private var showInviteFriendsSheet = false
+    @State private var showRamadanBanner = true
 
     private let prefsManager = PreferencesManager.shared
+
+    private var ramadanBannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
+    }
 
     var body: some View {
         List {
@@ -309,6 +316,17 @@ struct SettingsView: View {
                     Task { await prefsManager.saveHapticFeedback(newValue) }
                 }
 
+            Toggle("Show Ramadan Banner", isOn: $showRamadanBanner)
+                .onChange(of: showRamadanBanner) { _, newValue in
+                    if newValue {
+                        // Restore: remove the dismiss key
+                        UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
+                    } else {
+                        // Dismiss: set the dismiss key
+                        UserDefaults.standard.set(true, forKey: ramadanBannerDismissKey)
+                    }
+                }
+
             Picker("Accent Color", selection: $selectedAccentColor) {
                 ForEach(AccentColorOption.allCases, id: \.self) { option in
                     HStack {
@@ -343,16 +361,10 @@ struct SettingsView: View {
                 .onChange(of: highContrastEnabled) { _, newValue in
                     Task { await prefsManager.saveAccessibility(highContrast: newValue) }
                 }
-
-            NavigationLink {
-                AccessibilityInfoView()
-            } label: {
-                Text("VoiceOver Tips")
-            }
         } header: {
             Text("Accessibility")
         } footer: {
-            Text("Safa supports Dynamic Type, VoiceOver, and other iOS accessibility features. These settings provide additional customization.")
+            Text("Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update.")
         }
     }
 
@@ -452,6 +464,9 @@ struct SettingsView: View {
         notificationsEnabled = prefs.notificationsEnabled
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
         savedLocationName = prefs.savedLocationName
+
+        // Load Ramadan banner state (synced with HomeView dismiss key)
+        showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
 
         // Load adhan settings
         adhanEnabled = prefs.adhanEnabled

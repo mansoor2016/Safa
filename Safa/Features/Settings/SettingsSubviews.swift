@@ -132,11 +132,6 @@ struct TermsOfServiceView: View {
                     }
                 }
 
-                section(title: "Acceptable Use") {
-                    Text("Use Safa for lawful purposes consistent with Islamic ethics. Do not reverse engineer, redistribute content without permission, or use the app to spread misinformation.")
-                        .font(.body)
-                }
-
                 section(title: "Limitation of Liability") {
                     Text("Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages.")
                         .font(.body)

@@ -88,6 +88,8 @@ struct HomeView: View {
         }
         .onAppear {
             Task { await reloadLoggedPrayers() }
+            // Re-check Ramadan banner dismiss state (synced with Settings toggle)
+            showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
         }
     }
 

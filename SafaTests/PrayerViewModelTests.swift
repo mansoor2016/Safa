@@ -476,19 +476,11 @@ final class PrayerViewModelTests: XCTestCase {
     }
 
     func test_notificationSettings_defaultAllEnabled() {
-        // Clean UserDefaults to test fresh state
-        UserDefaults.standard.removeObject(forKey: "prayer_notifications_enabled")
-
-        let freshViewModel = PrayerViewModel(
-            prayerRepository: mockPrayerRepository,
-            locationService: mockLocationService,
-            notificationService: mockNotificationService,
-            userState: mockUserState
-        )
-
-        XCTAssertEqual(freshViewModel.notificationEnabledPrayers.count, 5)
+        // setUp already cleans UserDefaults, so sut should have all 5 enabled
+        XCTAssertEqual(sut.notificationEnabledPrayers.count, 5)
         for prayer in PrayerType.obligatoryPrayers {
-            XCTAssertTrue(freshViewModel.notificationEnabledPrayers.contains(prayer))
+            XCTAssertTrue(sut.notificationEnabledPrayers.contains(prayer),
+                          "\(prayer.rawValue) should be enabled by default")
         }
     }
 
