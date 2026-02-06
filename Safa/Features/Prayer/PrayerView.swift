@@ -147,6 +147,13 @@ private struct PrayerContentView: View {
     // MARK: - Play Adhan
 
     private func playAdhan() {
+        // If already playing, stop playback
+        if dependencies.audioPlayerService.isPlaying {
+            dependencies.audioPlayerService.stop()
+            return
+        }
+
+        // Start playback from the beginning
         Task {
             let prefs = await PreferencesManager.shared.getPreferences()
             let isFajr = viewModel.nextPrayer?.type == .fajr
@@ -154,7 +161,7 @@ private struct PrayerContentView: View {
             let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
 
             if adhanSound == .defaultSound {
-                return // No audio to play for system default
+                return
             }
 
             do {
