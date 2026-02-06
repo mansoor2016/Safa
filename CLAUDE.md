@@ -543,9 +543,19 @@ After **every** code change:
 6. Commit completed feature → Once the build is green and tests pass, commit the changes before moving on
 ```
 
+### Build & Test via Skill (Preferred)
+
+**Use the `xcode-build` skill or `/build` and `/test` commands instead of running xcodebuild directly.** These filter Xcode's verbose output to avoid filling the context window.
+
+- **Skill** (`xcode-build`): Auto-invoked by the agent, uses haiku model. Pass `build`, `test`, or `test --class ClassName`.
+- **Commands**: `/build` and `/test` for manual invocation.
+- Both support `--platform`, `--scheme`, and `--class` parameters.
+
 ### Run Tests Before Committing
 
 **CRITICAL: Always run unit tests before committing any changes.**
+
+Use `/test` or the xcode-build skill with `test` argument. Alternatively:
 
 ```bash
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \

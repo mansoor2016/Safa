@@ -373,9 +373,15 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 ### 4.1 Prayer Times & Salah Tracker
 - Accurate prayer times based on location and calculation method
 - Multiple calculation methods (ISNA, MWL, Egypt, Makkah, Karachi, etc.)
-- Beautiful adhan notifications (customizable sound)
+- Default location fallback (London, UK) when GPS unavailable
+- Prayer progress indicator: 5 tappable dots (Fajr, Dhuhr, Asr, Maghrib, Isha) to log/unlog prayers
+- Per-prayer notification bell icons (toggle individually)
+- Adhan notifications: 11 reciters in CAF format, separate Fajr adhan selection, system sound by default
+- "Time until next prayer" countdown header
+- Prayer table: name + time rows, "Maghrib (Sunset)" label, highlighted next prayer row
+- Play Adhan button (full-length playback with play/stop toggle)
 - Prayer tracking/logging with streaks
-- Qibla compass with clean visual indicator
+- Qibla compass with clean visual indicator (simulator fallback assumes North with debug banner)
 - Mosque finder with directions (MapKit integration)
 - Makeup prayer (Qada) tracker
 
@@ -1114,43 +1120,41 @@ Optional weekly challenges for extra engagement:
 
 ### 7.1 Home Screen (Default) - Minimal Design
 
-The home screen prioritizes simplicity and calm. Clean, uncluttered, focused on the essentials.
+The home screen prioritizes simplicity and calm. Scrollable content with focused sections.
 
 ```
 ┌─────────────────────────────────┐
+│  Date header (Gregorian + Hijri)│
 │                                 │
-│           ASR                   │
-│          3:45 PM                │
-│        in 2h 34m                │
+│  ┌─ Next Prayer ────────────┐  │
+│  │ ASR           Time until  │  │
+│  │ 3:45 PM     next prayer   │  │
+│  │             02:34:15      │  │
+│  └───────────────────────────┘  │
 │                                 │
-│  ┌─────────────────────────┐   │
-│  │ · · · ● ·               │   │  ← Prayer timeline
-│  │ F   D   A   M   I       │   │    (current = filled)
-│  └─────────────────────────┘   │
+│  [Quran] [Qibla] [Learn] [Ask] │  ← Quick actions grid
 │                                 │
+│  ┌─ Ramadan (collapsible) ──┐  │  ← Only when in/near Ramadan
+│  │ 🌙 Ramadan - Day 15    ▶ │  │    Collapsed: thin row + chevron
+│  └───────────────────────────┘  │    Expanded during Ramadan
 │                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
-│                                 │
+│  Daily Verse card               │
+│  Your Progress card             │
+│  Contextual reminders           │
+│  Share banner (dismissible)     │
 │                                 │
 ├─────────────────────────────────┤
-│  [Home] [Quran] [Learn] [More] │
+│ [Home] [Quran] [Prayer] [Learn]│
+│              [More]             │
 └─────────────────────────────────┘
 ```
 
 **Design Notes:**
-- Vast whitespace creates calm, contemplative feel
-- Single focus: next prayer time, prominently displayed
-- Minimal prayer timeline shows day's progress at a glance
-- No cards, no clutter - just breathing room
-- Additional features accessed via tab bar
-- Contextual reminder appears only when relevant (subtle banner at top)
+- Next prayer card: tapping switches to the Prayer tab (not push)
+- Quick actions: 2x2 grid for primary features
+- Ramadan banner: collapsible, positioned between quick actions and daily verse, shows 30 days before Ramadan, expanded by default during Ramadan, restorable via Settings toggle
+- Share banner: shown until user shares the app, then permanently dismissed
+- No prayer timeline on home page (prayer details live on the Prayer tab)
 
 ### 7.2 Home Screen with Contextual Alert
 

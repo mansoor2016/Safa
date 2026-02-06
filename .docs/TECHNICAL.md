@@ -398,6 +398,7 @@ let sharedStoreURL = FileManager.default
 @Observable
 final class AppRouter {
     var path = NavigationPath()
+    var selectedTab: String = "home"  // Cross-tab navigation (home/quran/prayer/learn/more)
     var activeSheet: Sheet?
     var activeAlert: AlertType?
 
@@ -491,7 +492,7 @@ final class Dependencies {
         // Initialize services
         self.audioPlayer = AudioPlayerService()
         self.notificationService = NotificationService()
-        self.locationService = LocationService()
+        self.locationService = LocationService()  // Falls back to London, UK (AppDefaults.defaultCoordinates) when GPS unavailable
         self.llmService = LLMService()
 
         // Initialize global state
@@ -1384,7 +1385,17 @@ class NotificationService {
         content.body = mosqueMode
             ? "Time to head to the mosque for \(prayer.name)"
             : "\(prayer.name) in \(minutesBefore) minutes"
-        content.sound = .default // Vibration by default, athan configurable
+        // Adhan sound system: 11 reciters in CAF format
+        // Full-length files in Resources/Audio/Adhan/ for playback
+        // 30-second clips in Resources/Audio/Adhan/Notifications/ for notification sounds
+        // Per-prayer selection: regular adhan + separate Fajr adhan (includes "prayer is better than sleep")
+        // Default: system sound (adhan off). When enabled, default reciter is Mishary Alafasy
+        if adhanEnabled {
+            let fileName = prayer.type == .fajr ? selectedFajrAdhan : selectedAdhan
+            content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+        } else {
+            content.sound = .default
+        }
         content.categoryIdentifier = "PRAYER_REMINDER"
 
         // Enable action to log prayer directly from notification

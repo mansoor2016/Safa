@@ -1249,5 +1249,23 @@ The following features have complete implementations and are now enabled by defa
 
 ---
 
-*Last Updated: February 5, 2026 (Progress: 85% complete)*
-*Latest: 1447 unit tests - 93/115 acceptance criteria verified*
+### Recent Changes (February 6, 2026)
+
+Features implemented in the latest session:
+
+- **Prayer Progress Indicator**: Compact (home) and expanded (prayer page) with tappable dots to log/unlog prayers
+- **Adhan Sound System**: 11 reciters in CAF format, per-prayer notification sounds, full-length playback, Fajr-specific adhan
+- **Share Banner**: Card on home page, permanently dismisses after sharing
+- **Settings Overhaul**: Unified feedback form, share section at top, adhan picker, Ramadan banner toggle, accessibility marked as not yet functional
+- **Collapsible Ramadan Banner**: Repositioned between quick actions and daily verse, collapsed by default (expanded during Ramadan), shows 30 days before
+- **Prayer Times Page**: Removed redundant checkboxes, added per-prayer bell notification icons, play/stop adhan button, removed Today's Prayers timeline from home
+- **Tab Navigation**: "See All" and Next Prayer switch to Prayer tab via AppRouter.selectedTab (not push)
+- **Location Fallback**: Default to London, UK when GPS unavailable
+- **Qibla Compass**: Simulator fallback (assume North) with debug banner
+- **"Maghrib (Sunset)"** label in prayer table, full names in progress dots
+- **"Time until next prayer"** header above countdown timers
+- **Build/Test Tooling**: `/build` and `/test` commands, `xcode-build` skill for filtered Xcode output
+- **Test Coverage**: AdhanSound, ShareBanner, prayer toggle, notification persistence, tab selection tests
+
+*Last Updated: February 6, 2026 (Progress: 85% complete)*
+*Latest: 93/115 acceptance criteria verified*
