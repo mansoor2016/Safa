@@ -18,6 +18,9 @@ final class PrayerViewModelTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        // Clean notification settings between tests
+        UserDefaults.standard.removeObject(forKey: "prayer_notifications_enabled")
+
         mockPrayerRepository = TestablePrayerRepository()
         mockLocationService = TestableLocationService()
         mockNotificationService = TestableNotificationService()
@@ -452,6 +455,60 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertNil(sut.error)
     }
 
+    // MARK: - Notification Settings Persistence Tests
+
+    func test_notificationSettings_persistAcrossInstances() async {
+        // Given - disable a notification
+        await sut.toggleNotification(for: .asr)
+        XCTAssertFalse(sut.notificationEnabledPrayers.contains(.asr))
+
+        // When - create a new ViewModel (simulates app restart)
+        let newViewModel = PrayerViewModel(
+            prayerRepository: mockPrayerRepository,
+            locationService: mockLocationService,
+            notificationService: mockNotificationService,
+            userState: mockUserState
+        )
+
+        // Then - should load persisted state
+        XCTAssertFalse(newViewModel.notificationEnabledPrayers.contains(.asr))
+        XCTAssertTrue(newViewModel.notificationEnabledPrayers.contains(.fajr))
+    }
+
+    func test_notificationSettings_defaultAllEnabled() {
+        // Clean UserDefaults to test fresh state
+        UserDefaults.standard.removeObject(forKey: "prayer_notifications_enabled")
+
+        let freshViewModel = PrayerViewModel(
+            prayerRepository: mockPrayerRepository,
+            locationService: mockLocationService,
+            notificationService: mockNotificationService,
+            userState: mockUserState
+        )
+
+        XCTAssertEqual(freshViewModel.notificationEnabledPrayers.count, 5)
+        for prayer in PrayerType.obligatoryPrayers {
+            XCTAssertTrue(freshViewModel.notificationEnabledPrayers.contains(prayer))
+        }
+    }
+
+    func test_toggleNotification_doesNotAffectOtherPrayers() async {
+        // Given - all enabled initially
+        let initialCount = sut.notificationEnabledPrayers.count
+        XCTAssertEqual(initialCount, 5)
+
+        // When - disable one (disabling doesn't require auth)
+        await sut.toggleNotification(for: .dhuhr)
+
+        // Then - only dhuhr affected
+        XCTAssertFalse(sut.notificationEnabledPrayers.contains(.dhuhr))
+        XCTAssertEqual(sut.notificationEnabledPrayers.count, 4)
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.fajr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.asr))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.maghrib))
+        XCTAssertTrue(sut.notificationEnabledPrayers.contains(.isha))
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
@@ -463,6 +520,18 @@ final class PrayerViewModelTests: XCTestCase {
             PrayerTime(type: .asr, time: now.addingTimeInterval(21600)),
             PrayerTime(type: .maghrib, time: now.addingTimeInterval(28800)),
             PrayerTime(type: .isha, time: now.addingTimeInterval(36000))
+        ]
+    }
+
+    private func createMockPrayersWithPast() -> [PrayerTime] {
+        let now = Date()
+        return [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),    // 2 hours ago
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)), // 1.5 hours ago
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-3600)),   // 1 hour ago
+            PrayerTime(type: .asr, time: now.addingTimeInterval(3600)),      // 1 hour from now
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(7200)),  // 2 hours from now
+            PrayerTime(type: .isha, time: now.addingTimeInterval(10800))     // 3 hours from now
         ]
     }
 }

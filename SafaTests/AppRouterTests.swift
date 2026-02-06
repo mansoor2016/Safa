@@ -277,4 +277,31 @@ final class AppRouterTests: XCTestCase {
         let content3 = AppRouter.ShareContent(text: "different", url: nil)
         XCTAssertNotEqual(content1, content3)
     }
+
+    // MARK: - Tab Selection Tests
+
+    func testSelectedTab_defaultsToHome() {
+        XCTAssertEqual(sut.selectedTab, "home")
+    }
+
+    func testSelectedTab_canSwitchToPrayer() {
+        sut.selectedTab = "prayer"
+        XCTAssertEqual(sut.selectedTab, "prayer")
+    }
+
+    func testSelectedTab_canSwitchToQuran() {
+        sut.selectedTab = "quran"
+        XCTAssertEqual(sut.selectedTab, "quran")
+    }
+
+    func testSelectedTab_canSwitchBetweenTabs() {
+        sut.selectedTab = "prayer"
+        XCTAssertEqual(sut.selectedTab, "prayer")
+
+        sut.selectedTab = "home"
+        XCTAssertEqual(sut.selectedTab, "home")
+
+        sut.selectedTab = "more"
+        XCTAssertEqual(sut.selectedTab, "more")
+    }
 }
