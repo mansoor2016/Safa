@@ -16,6 +16,7 @@ final class PrayerViewModel {
     var calculationMethod: CalculationMethod = .isna
     var isLoading = false
     var error: Error?
+    var notificationSchedulingFailed = false
 
     // MARK: - Dependencies
     private let prayerRepository: PrayerRepositoryProtocol
@@ -223,7 +224,12 @@ final class PrayerViewModel {
             trigger: trigger
         )
 
-        try? await UNUserNotificationCenter.current().add(request)
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+            notificationSchedulingFailed = false
+        } catch {
+            notificationSchedulingFailed = true
+        }
     }
 
     private func cancelNotification(for prayerType: PrayerType) {

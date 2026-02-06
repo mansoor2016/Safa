@@ -170,7 +170,10 @@ private struct PrayerContentView: View {
                     fileExtension: "caf"
                 )
             } catch {
-                // Audio file not available
+                ToastService.shared.show(Toast(
+                    message: "Could not play adhan. Check audio settings.",
+                    type: .warning
+                ))
             }
         }
     }

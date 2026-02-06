@@ -308,8 +308,7 @@ final class AudioDownloadManager {
     // MARK: - Private Methods
 
     private func isOnWiFi() -> Bool {
-        // Simplified check - in production would use NWPathMonitor
-        return true
+        NetworkMonitor.shared.isOnWiFi
     }
 
     // MARK: - Errors

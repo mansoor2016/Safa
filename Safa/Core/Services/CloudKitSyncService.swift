@@ -472,8 +472,14 @@ import Network
 
 @Observable
 final class NetworkMonitor {
+    static let shared = NetworkMonitor()
+
     private(set) var isConnected = true
     private(set) var connectionType: NWInterface.InterfaceType?
+
+    var isOnWiFi: Bool {
+        isConnected && connectionType == .wifi
+    }
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")

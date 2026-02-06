@@ -358,8 +358,7 @@ final class PredictiveDownloadService {
     // MARK: - Utility Methods
 
     private func isOnWiFi() -> Bool {
-        // Simplified - would use NWPathMonitor in production
-        return true
+        NetworkMonitor.shared.isOnWiFi
     }
 
     private func juzForSurah(_ surahNumber: Int) -> Int {

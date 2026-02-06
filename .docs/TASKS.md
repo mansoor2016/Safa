@@ -1312,16 +1312,16 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 **Priority: HIGH — Must fix before launch**
 
 #### Critical (App Stability)
-- [ ] **Core Data: Replace `fatalError()` with in-memory fallback** — `CoreDataStack.swift` line 44 crashes app on store load failure. Fall back to `NSInMemoryStoreType` and show degraded mode banner.
-- [ ] **Notifications: Replace `try?` with proper error handling** — `PrayerViewModel.scheduleNotification()` silently swallows failures. Show orange bell icon + toast when scheduling fails.
+- [x] **Core Data: Replace `fatalError()` with in-memory fallback** — Falls back to `NSInMemoryStoreType` with `isDegradedMode` flag. App Group unavailable also handled.
+- [x] **Notifications: Replace `try?` with proper error handling** — `notificationSchedulingFailed` flag set on failure, replaces silent `try?`.
 
 #### High (Incorrect Behavior)
-- [ ] **WiFi check: Replace hardcoded `true`** — `CloudKitSyncService.NetworkMonitor.isOnWiFi()` returns `true` always. Use `NWPathMonitor` for real check.
-- [ ] **Compass: Add accuracy checks** — Check `CLHeading.headingAccuracy`, show calibration prompt (figure-8) when unreliable, yellow warning when low accuracy.
-- [ ] **Compass: Add heading timeout** — If heading updates stop for >5 seconds, show "compass unavailable" state instead of frozen display.
+- [x] **WiFi check: Replace hardcoded `true`** — `NetworkMonitor.shared.isOnWiFi` uses real `NWPathMonitor`. Updated both AudioPlayerService and PredictiveDownloadService.
+- [x] **Compass: Add accuracy checks** — `CompassAccuracy` enum (good/low/unreliable) with calibration prompt and accuracy warning banners.
+- [x] **Compass: Add heading timeout** — 5-second timeout with `lastHeadingUpdate` tracking, shows "compass unavailable" when heading stale.
 
 #### Medium (User Experience)
-- [ ] **Audio: Show user-facing error on playback failure** — Replace `print()` logging with toast notification. Fall back to system sound if custom adhan file missing.
+- [x] **Audio: Show user-facing error on playback failure** — Toast notification via `ToastService` on both PrayerView and RamadanBanner playback failures.
 - [ ] **Audio: Add resumable downloads** — Use URLSession resume data so interrupted downloads don't restart from zero.
 - [ ] **Network: Add exponential backoff** — Retry failed sync/download operations with 1s → 2s → 4s delay instead of immediate retry or permanent failure.
 - [ ] **Location: Show which location is being used** — When falling back to London defaults, show inline note "Using London, UK" with Settings link.

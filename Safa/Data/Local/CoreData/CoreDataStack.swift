@@ -13,35 +13,51 @@ final class CoreDataStack {
     private static let appGroupIdentifier = "group.com.safa.app"
     private static let modelName = "Safa"
 
+    // MARK: - Degraded Mode
+    /// True when persistent store failed to load and app is using in-memory fallback
+    private(set) var isDegradedMode = false
+
     // MARK: - Container
     lazy var persistentContainer: NSPersistentCloudKitContainer = {
         let container = NSPersistentCloudKitContainer(name: Self.modelName)
 
         // Configure store URL for App Group (shared with widgets)
-        guard let appGroupURL = FileManager.default.containerURL(
+        if let appGroupURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: Self.appGroupIdentifier
-        ) else {
-            fatalError("App Group container not found")
+        ) {
+            let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
+            let storeDescription = NSPersistentStoreDescription(url: storeURL)
+
+            // Enable CloudKit sync
+            storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                containerIdentifier: "iCloud.com.safa.app"
+            )
+
+            // Enable persistent history tracking for CloudKit
+            storeDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            storeDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+
+            container.persistentStoreDescriptions = [storeDescription]
+        } else {
+            // App Group unavailable — fall back to in-memory store
+            let inMemoryDescription = NSPersistentStoreDescription()
+            inMemoryDescription.type = NSInMemoryStoreType
+            container.persistentStoreDescriptions = [inMemoryDescription]
+            self.isDegradedMode = true
         }
-
-        let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
-        let storeDescription = NSPersistentStoreDescription(url: storeURL)
-
-        // Enable CloudKit sync
-        storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-            containerIdentifier: "iCloud.com.safa.app"
-        )
-
-        // Enable persistent history tracking for CloudKit
-        storeDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-        storeDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-
-        container.persistentStoreDescriptions = [storeDescription]
 
         container.loadPersistentStores { description, error in
             if let error = error as NSError? {
-                // In production, handle this gracefully
-                fatalError("Core Data store failed to load: \(error), \(error.userInfo)")
+                // Fall back to in-memory store instead of crashing
+                let fallbackDescription = NSPersistentStoreDescription()
+                fallbackDescription.type = NSInMemoryStoreType
+                container.persistentStoreDescriptions = [fallbackDescription]
+                container.loadPersistentStores { _, fallbackError in
+                    if fallbackError != nil {
+                        // Even in-memory failed — nothing more we can do
+                    }
+                }
+                self.isDegradedMode = true
             }
         }
 

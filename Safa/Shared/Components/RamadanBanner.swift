@@ -281,7 +281,10 @@ struct RamadanBanner: View {
                         fileExtension: "caf"
                     )
                 } catch {
-                    // Audio file not available
+                    ToastService.shared.show(Toast(
+                        message: "Could not play adhan.",
+                        type: .warning
+                    ))
                 }
             }
         }

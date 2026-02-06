@@ -15,6 +15,15 @@ struct QiblaCompassView: View {
     @State private var isLoading = true
     @State private var error: Error?
     @State private var isSimulatedHeading = false
+    @State private var compassAccuracy: CompassAccuracy = .good
+    @State private var headingTimedOut = false
+    @State private var lastHeadingUpdate = Date()
+
+    private enum CompassAccuracy {
+        case good       // headingAccuracy <= 25
+        case low        // headingAccuracy > 25
+        case unreliable // headingAccuracy < 0
+    }
 
     // Haptic feedback state
     @State private var previousAlignmentZone: AlignmentZone = .far
@@ -68,6 +77,16 @@ struct QiblaCompassView: View {
         }
         .onDisappear {
             stopHeadingUpdates()
+        }
+        .onChange(of: deviceHeading) { _, _ in
+            lastHeadingUpdate = Date()
+            headingTimedOut = false
+        }
+        .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
+            guard !isSimulatedHeading && !isLoading && CLLocationManager.headingAvailable() else { return }
+            if Date().timeIntervalSince(lastHeadingUpdate) > 5 {
+                headingTimedOut = true
+            }
         }
     }
 
@@ -126,19 +145,31 @@ struct QiblaCompassView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
-            // Simulator debug notice
+            // Compass status notices
             if isSimulatedHeading {
-                HStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: "ant.fill")
-                        .font(.caption)
-                    Text("Debug mode: magnetometer reading not available")
-                        .font(SafaTypography.labelSmall)
-                }
-                .foregroundColor(.orange)
-                .padding(.horizontal, SafaSpacing.md)
-                .padding(.vertical, SafaSpacing.xs)
-                .background(Color.orange.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
+                compassNotice(
+                    icon: "ant.fill",
+                    text: "Debug mode: magnetometer reading not available",
+                    color: .orange
+                )
+            } else if headingTimedOut {
+                compassNotice(
+                    icon: "exclamationmark.triangle.fill",
+                    text: "Compass unavailable. Try moving to an open area.",
+                    color: .red
+                )
+            } else if compassAccuracy == .unreliable {
+                compassNotice(
+                    icon: "arrow.triangle.2.circlepath",
+                    text: "Move your device in a figure-8 to calibrate the compass",
+                    color: .orange
+                )
+            } else if compassAccuracy == .low {
+                compassNotice(
+                    icon: "exclamationmark.circle",
+                    text: "Low compass accuracy. Move away from metal objects.",
+                    color: .yellow
+                )
             }
         }
     }
@@ -229,6 +260,20 @@ struct QiblaCompassView: View {
 
     private func stopHeadingUpdates() {
         dependencies.locationService.stopUpdatingHeading()
+    }
+
+    private func compassNotice(icon: String, text: String, color: Color) -> some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: icon)
+                .font(.caption)
+            Text(text)
+                .font(SafaTypography.labelSmall)
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.xs)
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
     }
 
     // MARK: - Haptic Feedback

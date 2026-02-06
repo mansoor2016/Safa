@@ -68,6 +68,10 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertNil(sut.nextPrayer)
     }
 
+    func test_initialState_notificationSchedulingNotFailed() {
+        XCTAssertFalse(sut.notificationSchedulingFailed)
+    }
+
     func test_initialState_prayersCompletedTodayIsZero() {
         XCTAssertEqual(sut.prayersCompletedToday, 0)
     }
