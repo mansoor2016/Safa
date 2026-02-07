@@ -13,6 +13,9 @@ final class AppRouter {
     var activeSheet: Sheet?
     var activeAlert: AlertType?
 
+    // MARK: - App-Wide State
+    var accentColor: Color = AccentColorOption.teal.color
+
     // MARK: - Destination Enum
     enum Destination: Hashable {
         // Quran

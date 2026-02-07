@@ -6,6 +6,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(Dependencies.self) private var dependencies
+    @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCalculationMethod: CalculationMethod = AppDefaults.calculationMethod
@@ -53,6 +54,9 @@ struct SettingsView: View {
             accessibilitySection
             dataPrivacySection
             aboutSection
+            #if DEBUG
+            debugSection
+            #endif
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
@@ -349,6 +353,8 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: selectedAccentColor) { _, newValue in
+                // Apply immediately via router (shared observable)
+                router.accentColor = newValue.color
                 Task {
                     await prefsManager.update(\.accentColorName, to: newValue.rawValue)
                 }
@@ -468,6 +474,35 @@ struct SettingsView: View {
             Text("About")
         }
     }
+
+    // MARK: - Debug Section
+
+    #if DEBUG
+    @State private var forceRamadan = false
+
+    private var debugSection: some View {
+        Section {
+            Toggle("Force Ramadan Mode", isOn: $forceRamadan)
+                .onChange(of: forceRamadan) { _, newValue in
+                    if newValue {
+                        FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
+                    } else {
+                        FeatureFlags.shared.removeOverride(.ramadanMode)
+                    }
+                }
+
+            NavigationLink {
+                RamadanView()
+            } label: {
+                Label("Open Ramadan Page", systemImage: "moon.stars")
+            }
+        } header: {
+            Text("Developer")
+        } footer: {
+            Text("Debug options only visible in development builds.")
+        }
+    }
+    #endif
 
     // MARK: - Load/Save Methods
 
