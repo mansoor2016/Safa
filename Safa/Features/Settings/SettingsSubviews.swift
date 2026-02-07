@@ -644,29 +644,118 @@ struct FontSettingsView: View {
 // MARK: - Data Export View
 
 struct DataExportView: View {
+    @Environment(Dependencies.self) private var dependencies
+    @State private var isExporting = false
+    @State private var exportedFileURL: URL?
+    @State private var showShareSheet = false
+    @State private var exportError: String?
+
     var body: some View {
-        VStack(spacing: SafaSpacing.lg) {
-            Image(systemName: "square.and.arrow.up")
-                .font(.system(size: 48))
-                .foregroundColor(.accentColor)
+        List {
+            Section {
+                Button {
+                    Task { await exportJSON() }
+                } label: {
+                    HStack {
+                        Label("Export All Data (JSON)", systemImage: "doc.text")
+                        Spacer()
+                        if isExporting { ProgressView() }
+                    }
+                }
+                .disabled(isExporting)
 
-            Text("Export Your Data")
-                .font(SafaTypography.headlineMedium)
-
-            Text("Download a copy of your Safa data including bookmarks, progress, and settings.")
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-                .multilineTextAlignment(.center)
-
-            Button("Export as JSON") {
-                // Export functionality
+                Button {
+                    Task { await exportPrayerCSV() }
+                } label: {
+                    Label("Export Prayer Logs (CSV)", systemImage: "tablecells")
+                }
+                .disabled(isExporting)
+            } header: {
+                Text("Export")
+            } footer: {
+                Text("Your data is exported as a file you can save or share. JSON includes all data; CSV is a spreadsheet of prayer logs.")
             }
-            .buttonStyle(.borderedProminent)
+
+            Section {
+                VStack(alignment: .leading, spacing: SafaSpacing.xs) {
+                    Text("What's included in JSON export:")
+                        .font(SafaTypography.labelMedium)
+                    Text("• Preferences and settings")
+                    Text("• Prayer log history")
+                    Text("• Quran bookmarks and reading progress")
+                    Text("• Streaks and achievements")
+                    Text("• User statistics")
+                }
+                .font(SafaTypography.bodySmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+            }
+
+            if let error = exportError {
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(SafaTypography.bodySmall)
+                }
+            }
         }
-        .padding()
         .navigationTitle("Export Data")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showShareSheet) {
+            if let url = exportedFileURL {
+                ShareActivityView(items: [url])
+            }
+        }
     }
+
+    private func exportJSON() async {
+        isExporting = true
+        exportError = nil
+        do {
+            let data = try await DataExportService.exportJSON(
+                userRepository: dependencies.userRepository,
+                quranRepository: dependencies.quranRepository
+            )
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("safa_export.json")
+            try data.write(to: url)
+            exportedFileURL = url
+            showShareSheet = true
+        } catch {
+            exportError = "Export failed: \(error.localizedDescription)"
+        }
+        isExporting = false
+    }
+
+    private func exportPrayerCSV() async {
+        isExporting = true
+        exportError = nil
+        do {
+            let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+            let data = try await DataExportService.exportPrayerLogsCSV(
+                prayerRepository: dependencies.prayerRepository,
+                from: thirtyDaysAgo,
+                to: Date()
+            )
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("safa_prayer_logs.csv")
+            try data.write(to: url)
+            exportedFileURL = url
+            showShareSheet = true
+        } catch {
+            exportError = "Export failed: \(error.localizedDescription)"
+        }
+        isExporting = false
+    }
+}
+
+// MARK: - Share Activity View
+
+private struct ShareActivityView: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Feedback View

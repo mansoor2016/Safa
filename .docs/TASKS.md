@@ -894,9 +894,9 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Test standalone mode (without iPhone)
 
 #### Data Sovereignty & Export
-- [ ] Implement JSON export of all user data (prayer logs, streaks, bookmarks, progress, achievements)
-- [ ] Implement CSV export for prayer logs
-- [ ] Build "View All My Data" transparency screen
+- [x] Implement JSON export of all user data (preferences, stats, streaks, achievements, bookmarks, progress)
+- [x] Implement CSV export for prayer logs (last 30 days)
+- [x] Build "View All My Data" transparency screen (DataExportView with export descriptions)
 - [ ] Implement manual backup/restore
 - [ ] Add per-category data deletion
 
