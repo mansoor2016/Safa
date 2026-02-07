@@ -538,9 +538,10 @@ After **every** code change:
 1. Write/modify code
 2. Build → If fails, fix and rebuild (max 5 attempts, else revert)
 3. Write/update tests for the changes
-4. Run tests → If fails, fix and retest
-5. Only proceed to next task when build passes AND tests pass
-6. Commit completed feature → Once the build is green and tests pass, commit the changes before moving on
+4. Run quick checks during iteration (targeted tests + build)
+5. Run full checks before commit (build + SafaTests + lint/format validation when configured)
+6. Only proceed to next task when full checks pass
+7. Commit completed feature → Once checks are green, commit before moving on
 ```
 
 ### Build & Test via Skill (Preferred)
@@ -551,25 +552,42 @@ After **every** code change:
 - **Commands**: `/build` and `/test` for manual invocation.
 - Both support `--platform`, `--scheme`, and `--class` parameters.
 
-### Run Tests Before Committing
+### Local Checks Standard (No CI Yet)
 
-**CRITICAL: Always run unit tests before committing any changes.**
+Use this local-first model until CI exists:
 
-Use `/test` or the xcode-build skill with `test` argument. Alternatively:
+1. **Quick checks** (while coding):
+   - `/build`
+   - `/test <TestClassName>` for touched areas
+
+2. **Full checks** (required before commit):
+   - `/build`
+   - `/test`
+   - Run formatter/linter validation once configured
+
+Terminology note: use **`full checks`** (this replaces `fast-ci` wording).
+
+### Run Full Checks Before Committing
+
+**CRITICAL: Always run full checks before committing any changes.**
+
+Use `/build` and `/test` (or xcode-build skill equivalents). Alternatively:
 
 ```bash
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:SafaTests test
 ```
 
-- All tests must pass before committing
+- Build and unit tests must pass before committing
+- Formatter/linter checks must pass once those configs are added
 - If a test fails, fix the issue and re-run tests
 - Never commit with known failing tests
 - Run tests in series (one simulator at a time) to avoid resource issues
 
 ### Commit Regularly
 
-**Commit after each completed feature or logical change once the build is green and all tests pass.**
+**Commit after each completed feature or logical change once full checks are green.**
 
 - Do not accumulate multiple unrelated changes before committing
 - Each commit should represent a coherent, working unit of change
