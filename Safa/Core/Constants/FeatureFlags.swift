@@ -79,6 +79,9 @@ enum Feature: String, CaseIterable {
         // Requires iOS 18.4+ for Apple Foundation Models
         case .aiCompanion:
             return false
+        // Content not yet ready
+        case .learning:
+            return false
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets,
              .standByMode:

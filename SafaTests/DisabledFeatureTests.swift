@@ -169,7 +169,6 @@ final class DisabledFeatureTests: XCTestCase {
             .tasbeehCounter,
             .islamicCalendar,
             .gamification,
-            .learning,
             .familyCircle,
             .ramadanMode,
             .windDown,
@@ -186,6 +185,7 @@ final class DisabledFeatureTests: XCTestCase {
         // Features requiring Widget extension target or iOS 18.4+
         let upcomingFeatures: [Feature] = [
             .aiCompanion,       // Requires iOS 18.4+
+            .learning,          // Content not yet ready
             .interactiveWidgets, // Requires Widget extension target
             .standByMode        // Requires Widget extension target
         ]

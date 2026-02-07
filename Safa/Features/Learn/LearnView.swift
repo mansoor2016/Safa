@@ -10,19 +10,53 @@ struct LearnView: View {
 
     var body: some View {
         Group {
-            if let viewModel = viewModel {
+            if FeatureFlags.shared.isDisabled(.learning) {
+                comingSoonView
+            } else if let viewModel = viewModel {
                 LearnContentView(viewModel: viewModel)
             } else {
                 LoadingView(message: "Loading lessons...")
             }
         }
+        .navigationTitle("Learn")
+        .navigationBarTitleDisplayMode(.large)
         .task {
-            if viewModel == nil {
+            if viewModel == nil && FeatureFlags.shared.isEnabled(.learning) {
                 viewModel = LearnViewModel(
                     learningRepository: dependencies.learningRepository,
                     userState: dependencies.userState
                 )
             }
+        }
+    }
+
+    private var comingSoonView: some View {
+        VStack(spacing: SafaSpacing.lg) {
+            Spacer()
+
+            Image(systemName: "graduationcap.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.accentColor.opacity(0.3))
+
+            Text("Learn")
+                .font(SafaTypography.headlineMedium)
+                .foregroundColor(SafaColors.Fallback.text)
+
+            Text("Arabic, Tajweed, and Islamic studies lessons are coming soon.")
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, SafaSpacing.xl)
+
+            Text("Coming Soon")
+                .font(SafaTypography.labelMedium)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, SafaSpacing.md)
+                .padding(.vertical, SafaSpacing.xs)
+                .background(Color.gray.opacity(0.2))
+                .clipShape(Capsule())
+
+            Spacer()
         }
     }
 }

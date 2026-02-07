@@ -88,7 +88,14 @@ struct HomeView: View {
         }
         .onAppear {
             Task { await reloadLoggedPrayers() }
-            // Re-check Ramadan banner dismiss state (synced with Settings toggle)
+            // Re-check Ramadan state (respects Force Ramadan Mode toggle)
+            isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
+            if isRamadan && !HijriDateConverter.shared.isRamadan() {
+                // Forced mode — set a sensible day
+                currentRamadanDay = max(currentRamadanDay, 1)
+                daysUntilRamadan = nil
+            }
+            // Re-check banner dismiss state (synced with Settings toggle)
             showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
         }
     }
@@ -259,6 +266,7 @@ struct HomeView: View {
             ) {
                 router.navigate(to: .learn)
             }
+            .disabledFeature(.learning)
 
             QuickActionCard(
                 icon: "sparkles",
