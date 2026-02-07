@@ -93,6 +93,7 @@ private struct PrayerContentView: View {
         }
         .onAppear {
             Task { await viewModel.reloadLoggedPrayers() }
+            viewModel.updateNextPrayerIndicator()
         }
     }
 

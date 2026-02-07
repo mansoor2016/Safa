@@ -88,6 +88,8 @@ struct HomeView: View {
         }
         .onAppear {
             Task { await reloadLoggedPrayers() }
+            // Recalculate next prayer (may have changed since last appear)
+            nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
             // Re-check Ramadan state (respects Force Ramadan Mode toggle)
             isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
             if isRamadan && !HijriDateConverter.shared.isRamadan() {

@@ -343,7 +343,7 @@ final class PrayerViewModel {
         )
     }
 
-    private func updateNextPrayerIndicator() {
+    func updateNextPrayerIndicator() {
         let now = Date()
         for i in 0..<todayPrayers.count {
             todayPrayers[i].isNext = todayPrayers[i].time > now &&
