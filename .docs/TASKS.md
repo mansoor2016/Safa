@@ -51,8 +51,8 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ### 0.3 Xcode Project Configuration
 - [x] Set deployment target (iOS 17.0)
 - [x] Configure App Group (`group.com.safa.app`)
-- [ ] Create Widget extension target (`SafaWidgets`) - Add via Xcode: File > New > Target
-- [ ] Create Intents extension target (`SafaIntents`) - Add via Xcode: File > New > Target
+- [x] Create Widget extension target (`SafaWidgets`) - Add via Xcode: File > New > Target
+- [x] Create Intents extension target (`SafaIntents`) - Add via Xcode: File > New > Target
 - [x] Configure build schemes (Debug, Release)
 - [x] Set up bundle identifiers
 - [x] Configure signing & capabilities
