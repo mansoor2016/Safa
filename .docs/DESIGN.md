@@ -366,8 +366,57 @@ The app automatically adapts its interface and features based on the Islamic cal
 - **Default timing:** 15 minutes before prayer time
 - **Configurable:** User can set 5/10/15/30/60 min or at prayer time
 - **Mosque mode:** If user selects "I pray at mosque", suggest earlier reminder (+15 min for travel)
-- **Sound:** Vibration only by default, Athan sound OFF by default (configurable)
+- **Sound:** System notification tone by default. Adhan sound OFF by default (opt-in via Settings).
 - **Smart acknowledgment:** Tapping notification = prayer logged (counts toward streaks/achievements)
+
+#### Smart Adhan (Location-Aware Sound)
+
+**Problem:** Users want the adhan as their prayer notification at home, but not when they're at work, on public transport, or in meetings. Providing per-location settings would create an overwhelming settings matrix.
+
+**Solution:** A single "Smart Adhan" toggle that automatically selects the right sound based on two conditions:
+
+| At Home? | Ringer On? | Sound Played |
+|----------|-----------|--------------|
+| Yes | Yes | Selected adhan (CAF file) |
+| Yes | No (silent) | Standard iOS notification |
+| No | Any | Standard iOS notification |
+
+**"At Home" detection:** Uses the saved location from Settings > Location (the same coordinates used for prayer calculation). A ~200m radius defines "home". No additional location entry needed — the user already set this up.
+
+**Silent mode detection:** Check the device ringer state before scheduling the notification sound.
+
+**Settings UI:**
+```
+Notifications
+├── Prayer Notifications     [ON]
+├── Use Adhan Sound          [ON]
+│   ├── Adhan: Mishary Alafasy    ▶
+│   └── Smart Adhan           [ON]  ← NEW
+│       "Adhan plays at home only.
+│        Standard tone elsewhere."
+└── Fajr uses distinct adhan automatically
+```
+
+**Edge cases:**
+- No saved location → Smart Adhan is disabled (greyed out with note "Set your location first")
+- Location services off → Falls back to standard tone (never crashes)
+- User travels for Ramadan → Standard tone at hotel, adhan at home when they return
+
+#### Mosque Mode (v2)
+
+**Problem:** When at the mosque, the phone should be silent. Users forget to silence their phones, and an adhan notification playing during congregational prayer is embarrassing.
+
+**Solution:** Geofence-based auto-silence when entering a mosque zone.
+
+**Behaviour:**
+- On entering mosque geofence (~100m radius): switch to haptic-only notifications, suppress all sounds
+- On exiting: restore previous notification sound settings
+- Visual: "In Mosque" badge appears on Prayer page header
+- Notifications still arrive but as silent banners + haptic tap
+
+**Mosque definition:** User-defined locations ("My Mosques" in Settings). No global mosque database needed for v1 — the user adds their regular mosque(s) manually.
+
+**Why v2:** Requires background geofence monitoring (`CLCircularRegion`), careful battery management, and edge case handling (overlapping zones, GPS drift). Not a v1 priority but the `FeatureFlags` and `.disabledFeature()` pattern already shows it as "Coming Soon" in onboarding.
 
 #### Streak Reminders (In-App Only)
 - **Never push notifications** for streaks
@@ -447,7 +496,23 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 - Sadaqah tracker
 - I'tikaf mode for last 10 nights
 - Eid preparation checklist
-- **Ramadan page enhancements:** Prayer progress indicator (compact dots), "Time until Iftar" hero countdown, Play Adhan button, link to Prayer tab for full timetable
+#### Ramadan Page Enhancement
+
+**Design intent:** The Ramadan page should feel like a Ramadan-specific companion view — not a duplicate of the Prayer page. It shares some elements (prayer progress, adhan) but reframes them around fasting.
+
+**Layout (top to bottom):**
+1. Ramadan header (day X of 30, progress bar) — *existing*
+2. **"Time until Iftar" hero countdown** — largest element on page, replaces generic prayer countdown. Shows HH:MM:SS until Maghrib. After Iftar, switches to "Time until Suhoor" (Fajr).
+3. Suhoor/Iftar times card — *existing*
+4. **Prayer progress dots** (compact `PrayerProgressIndicator`) — shows which prayers have been logged today, same tappable dots as home/prayer page. Provides context: "have I prayed Dhuhr while fasting?"
+5. **Play Adhan button** — same play/stop toggle pattern as Prayer page, uses selected adhan from Settings
+6. Fasting tracker grid — *existing*
+7. Quick actions, daily goals, Quran khatm — *existing*
+
+**Key decisions:**
+- Do NOT duplicate the full prayer timetable — link "See all prayer times" to the Prayer tab
+- The hero countdown always shows the next fasting milestone (Iftar or Suhoor), not the next prayer
+- Prayer dots are compact style (small, horizontal) — not the expanded style from the Prayer page
 
 #### Apple Health Integration (Fasting)
 Sync Ramadan fasting data to Apple Health:

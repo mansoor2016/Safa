@@ -1460,6 +1460,72 @@ class NotificationService {
 - ❌ Multiple reminders per prayer
 - ❌ Marketing or promotional content
 
+### 6.6.1 Smart Adhan (Technical Implementation)
+
+```swift
+// In PrayerViewModel.scheduleNotification()
+private func selectNotificationSound(for prayerType: PrayerType) async -> UNNotificationSound {
+    let prefs = await PreferencesManager.shared.getPreferences()
+
+    guard prefs.adhanEnabled else { return .default }
+
+    // Smart Adhan: check location + ringer
+    if prefs.smartAdhanEnabled {
+        let isAtHome = isNearHomeLocation(prefs: prefs)
+        let isRingerOn = checkRingerState()
+
+        guard isAtHome && isRingerOn else { return .default }
+    }
+
+    // Play adhan
+    let fileName = prayerType == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+    return UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+}
+
+private func isNearHomeLocation(prefs: UserPreferences) -> Bool {
+    guard let homeLat = prefs.savedLatitude,
+          let homeLng = prefs.savedLongitude,
+          let current = locationService.coordinates else { return false }
+
+    let home = CLLocation(latitude: homeLat, longitude: homeLng)
+    let now = CLLocation(latitude: current.latitude, longitude: current.longitude)
+    return home.distance(from: now) < 200 // 200m radius
+}
+```
+
+**UserPreferences additions:**
+- `smartAdhanEnabled: Bool` (default: false)
+
+**Settings UI placement:** Below the adhan picker, inside the `if adhanEnabled` block.
+
+### 6.6.2 Mosque Mode (v2 Technical Approach)
+
+```swift
+// Geofence registration
+func registerMosqueGeofence(name: String, latitude: Double, longitude: Double) {
+    let region = CLCircularRegion(
+        center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+        radius: 100,  // 100m
+        identifier: "mosque_\(name)"
+    )
+    region.notifyOnEntry = true
+    region.notifyOnExit = true
+    locationManager.startMonitoring(for: region)
+}
+
+// On entry: suppress sounds
+func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    if region.identifier.hasPrefix("mosque_") {
+        isInMosque = true
+        // Override notification sound to .default (no adhan)
+    }
+}
+```
+
+**Data model:** `MosqueLocation` with name, coordinates, radius. Stored in UserDefaults or Core Data.
+
+**Battery:** iOS limits to 20 geofenced regions. Sufficient for "My Mosques" use case.
+
 ### 6.7 Accessibility Implementation
 
 **Priority:** Best effort for v1, full support in v1.1
