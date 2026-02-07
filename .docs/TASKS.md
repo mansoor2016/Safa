@@ -581,7 +581,7 @@ xcodebuild -scheme SafaWidget build
 ### 9.13 Search & Navigation Coherence
 - [ ] Unify search UI pattern across Quran/Hadith/Calendar
 - [x] Restructure "More" tab: Daily Practice, Knowledge & Tools, Progress, Settings
-- [ ] Normalise screen entry points through AppRouter destinations
+- [x] Normalise screen entry points through AppRouter destinations (deep links use selectedTab for quran/prayer/learn)
 
 ### 9.14 Dark Mode Implementation
 - [ ] Define semantic color tokens with light/dark parity (Background, Card, Text tiers, Accent, Status)
@@ -647,7 +647,7 @@ xcodebuild -scheme SafaWidget build
 
 **Supported Device Range:**
 - **Minimum iOS**: 26.0 (uses latest SwiftUI, @Observable, NavigationPath)
-- **AI Companion**: iOS 18.4+ (graceful "Requires iOS 18.4" fallback)
+- **AI Companion**: Disabled by default via FeatureFlags (iOS version gate removed — feature not yet implemented)
 - **Supported iPhones**: iPhone XS (2018) and newer (~6 years of devices)
 
 **Note:** SwiftUI scales layouts natively. Only boundary testing required.
@@ -667,7 +667,7 @@ xcodebuild -scheme SafaWidget build
 #### 10.2.3 Feature Verification
 - [ ] Dynamic Island displays correctly (Pro models)
 - [ ] Live Activities work
-- [ ] AI Companion graceful fallback on older iOS
+- [x] AI Companion disabled via FeatureFlags (shows "Coming Soon" on home and More tab)
 
 #### 10.2.4 Test Coverage
 - [ ] Achieve 90%+ unit test coverage for Domain layer
@@ -779,7 +779,7 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 ### Critical Gaps
 - **SQLite database schemas created**: `scripts/create_quran_database.py` and `scripts/create_hadith_database.py` generate databases with sample data. **Full data population needed** (6,236 ayahs from tanzil.net, ~30,000 hadiths from sunnah.com)
 - **Pronunciation audio**: Audio files not yet bundled
-- **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready (requires iOS 18.4 SDK)
+- **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready. Feature disabled by default via FeatureFlags until implementation is complete.
 - **Acceptance criteria counts need recalculation** after compacting and re-verification
 - **Widget extension target created** (`SafaWidgetExtensionExtension`). Intents extension target still missing.
 - **Old `SafaWidget/` folder** is orphaned (code ported to `SafaWidgetExtension/`). Can be removed after verification.
