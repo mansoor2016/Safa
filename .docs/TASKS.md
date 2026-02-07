@@ -47,6 +47,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [x] Set deployment target to iOS 26 (confirmed in `Safa.xcodeproj/project.pbxproj`)
 - [x] Create Widget extension target in Xcode project (`SafaWidgetExtension`)
 - [ ] Create Intents extension target in Xcode project (`SafaIntents`)
+- [ ] [manual] Verify Apple Developer account/certificates/provisioning are valid for both `Mawj.Safa` and `Mawj.Safa.SafaWidgetExtension` by running on a physical iPhone
 
 ### 0.4 Core Directory Structure
 
@@ -393,11 +394,15 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 ## Phase 7: Platform Features
 
 ### 7.1 Widgets (Prioritized)
-**v1 Must-have:**
 
-**v1 Nice-to-have:**
+**Known limitation:** Widget prayer times are hardcoded London seasonal approximations.
+Proper fix requires App Group data sharing from main app (needs paid developer account).
+See `SafaWidgetExtension/PrayerTimesWidget.swift` TECH DEBT comment.
 
-**v1.1:**
+- [ ] Share prayer times from main app to widget via App Group UserDefaults
+- [ ] Widget reads user's actual location and calculation method
+- [ ] Widget shows correct Hijri date (currently hardcoded)
+- [ ] Add streak widget (AC-7.3 — not implemented)
 
 ### 7.1.1 Lock Screen Widgets
 - [x] Implement `.accessoryCircular` widget (next prayer countdown ring)

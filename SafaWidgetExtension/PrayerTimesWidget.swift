@@ -37,8 +37,21 @@ struct Provider: AppIntentTimelineProvider {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
 
-        // Read from shared UserDefaults if available, else use reasonable London defaults
-        // These approximate times will be replaced when App Group sharing is implemented
+        // TECH DEBT: Widget uses hardcoded approximate London prayer times with seasonal
+        // adjustment. This is a temporary solution because:
+        // 1. Widget extension can't access main app's PrayerTimeCalculator (different target)
+        // 2. App Group shared UserDefaults requires paid Apple Developer account
+        // 3. No shared framework exists yet to share prayer calculation code
+        //
+        // Proper fix: Main app writes calculated prayer times to App Group UserDefaults
+        // on each calculation, widget reads from there. Requires AppDefaults.useCloudKit = true
+        // and App Group entitlements properly configured.
+        //
+        // Limitations:
+        // - Times are approximate (not calculated from coordinates)
+        // - Only London seasonal defaults (no user location support)
+        // - No calculation method or madhab respect
+        // - Hijri date is hardcoded
         let month = cal.component(.month, from: Date())
 
         // Seasonal adjustment for London (rough approximation)
