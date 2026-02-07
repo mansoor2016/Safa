@@ -136,16 +136,8 @@ final class AppRouter {
 
         switch components.host {
         case "quran":
-            if pathComponents.count >= 2,
-               let surah = Int(pathComponents[0]),
-               let ayah = Int(pathComponents[1]) {
-                navigate(to: .ayah(surah: surah, ayah: ayah))
-            } else if pathComponents.count >= 1,
-                      let surah = Int(pathComponents[0]) {
-                navigate(to: .surah(number: surah))
-            } else {
-                navigate(to: .quran)
-            }
+            selectedTab = "quran"
+            // TODO: deep link to specific surah/ayah within Quran tab
             return true
 
         case "prayer":
@@ -153,15 +145,12 @@ final class AppRouter {
             return true
 
         case "qibla":
+            // Qibla opens as a sheet, not a tab — navigate is correct here
             navigate(to: .qibla)
             return true
 
         case "learn":
-            if pathComponents.count >= 2 {
-                navigate(to: .lesson(trackId: pathComponents[0], lessonId: pathComponents[1]))
-            } else {
-                navigate(to: .learn)
-            }
+            selectedTab = "learn"
             return true
 
         case "chat":

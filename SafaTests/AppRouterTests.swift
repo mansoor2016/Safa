@@ -108,31 +108,33 @@ final class AppRouterTests: XCTestCase {
     func testDeepLinkQuran() {
         let url = URL(string: "safa://quran")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        XCTAssertEqual(sut.selectedTab, "quran")
     }
 
     func testDeepLinkQuranWithSurah() {
         let url = URL(string: "safa://quran/2")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        // Switches to quran tab (deep link to specific surah is TODO)
+        XCTAssertEqual(sut.selectedTab, "quran")
     }
 
     func testDeepLinkQuranWithSurahAndAyah() {
         let url = URL(string: "safa://quran/2/255")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        XCTAssertEqual(sut.selectedTab, "quran")
     }
 
     func testDeepLinkLearn() {
         let url = URL(string: "safa://learn")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        XCTAssertEqual(sut.selectedTab, "learn")
     }
 
     func testDeepLinkLearnWithLesson() {
         let url = URL(string: "safa://learn/arabic/lesson1")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        // Switches to learn tab (deep link to specific lesson is TODO)
+        XCTAssertEqual(sut.selectedTab, "learn")
     }
 
     func testDeepLinkChat() {
