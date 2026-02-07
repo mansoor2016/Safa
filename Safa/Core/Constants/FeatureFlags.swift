@@ -116,16 +116,6 @@ final class FeatureFlags {
             return override
         }
 
-        // Check for iOS version requirements
-        if feature == .aiCompanion {
-            // AI Companion requires iOS 18.4+
-            if #available(iOS 18.4, *) {
-                return true
-            } else {
-                return false
-            }
-        }
-
         return feature.isEnabledByDefault
     }
 
