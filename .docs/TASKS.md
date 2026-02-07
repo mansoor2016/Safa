@@ -559,7 +559,7 @@ xcodebuild -scheme SafaWidget build
 - [x] Create shared `DegradedStateBanner` component (icon + message + optional action)
 - [x] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused (5 standard variants)
 - [x] Replace ad-hoc inline indicators with consistent banner component (PrayerView updated)
-- [ ] Add "System Status" sheet in Settings (location, notifications, sync, storage)
+- [x] Add "System Status" sheet in Settings (location, notifications, sync, storage, network)
 
 ### 9.11 Home Intent Resolver
 - [ ] Build `HomeIntentResolver` service (returns 1-3 prioritised actions based on time + streak + recency)

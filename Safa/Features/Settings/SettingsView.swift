@@ -397,6 +397,12 @@ struct SettingsView: View {
                 Label("Export Data", systemImage: "square.and.arrow.up")
             }
 
+            NavigationLink {
+                SystemStatusView()
+            } label: {
+                Label("System Status", systemImage: "heart.text.square")
+            }
+
             Button(role: .destructive) {
                 showDeleteConfirmation = true
             } label: {
