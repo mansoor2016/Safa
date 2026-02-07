@@ -62,18 +62,18 @@ struct DuaCategoriesView: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.prayer)) {
+                        QuickAccessButton(title: "After Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                    }
+                    .buttonStyle(.plain)
+
                     NavigationLink(destination: DuaListView(category: DuaCategoryData.food)) {
                         QuickAccessButton(title: "Food & Drink", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.protection)) {
-                        QuickAccessButton(title: "Protection", arabicTitle: "أذكار الحماية", iconName: "shield.fill", color: .blue)
-                    }
-                    .buttonStyle(.plain)
-
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.prayer)) {
-                        QuickAccessButton(title: "After Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.sleep)) {
+                        QuickAccessButton(title: "Sleep", arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .purple)
                     }
                     .buttonStyle(.plain)
                 }
