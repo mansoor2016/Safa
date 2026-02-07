@@ -11,6 +11,7 @@ struct SafaApp: App {
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
     @State private var hasCompletedOnboarding = false
+    @State private var accentColor: Color = AccentColorOption.teal.color
 
     // Spotlight service
     private let spotlightService = SpotlightIndexService.shared
@@ -30,6 +31,7 @@ struct SafaApp: App {
                     OnboardingView(isOnboardingComplete: $hasCompletedOnboarding)
                 }
             }
+            .tint(accentColor)
             .environment(dependencies)
             .environment(router)
             .onOpenURL { url in
@@ -45,6 +47,10 @@ struct SafaApp: App {
                 // Check if onboarding is complete
                 let prefs = await dependencies.userRepository.getPreferences()
                 hasCompletedOnboarding = prefs.hasCompletedOnboarding
+
+                // Apply saved accent color
+                let savedColor = AccentColorOption(rawValue: prefs.accentColorName) ?? .teal
+                accentColor = savedColor.color
 
                 // Index Spotlight content on first launch (after onboarding)
                 if prefs.hasCompletedOnboarding && spotlightService.lastIndexDate == nil {

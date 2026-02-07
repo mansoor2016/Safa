@@ -348,6 +348,11 @@ struct SettingsView: View {
                     .tag(option)
                 }
             }
+            .onChange(of: selectedAccentColor) { _, newValue in
+                Task {
+                    await prefsManager.update(\.accentColorName, to: newValue.rawValue)
+                }
+            }
         } header: {
             Text("Appearance")
         }
@@ -474,6 +479,9 @@ struct SettingsView: View {
         notificationsEnabled = prefs.notificationsEnabled
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
         savedLocationName = prefs.savedLocationName
+
+        // Load accent color
+        selectedAccentColor = AccentColorOption(rawValue: prefs.accentColorName) ?? .teal
 
         // Load Ramadan banner state (synced with HomeView dismiss key)
         showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
