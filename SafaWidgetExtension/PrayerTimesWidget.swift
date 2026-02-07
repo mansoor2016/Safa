@@ -17,6 +17,10 @@ struct PrayerTimeEntry: TimelineEntry {
 
     private let calculator = NextPrayerCalculator()
 
+    var hasNextPrayer: Bool {
+        calculator.nextPrayer(from: prayers) != nil
+    }
+
     var nextPrayerName: String {
         calculator.nextPrayerName(from: prayers)
     }
@@ -113,18 +117,28 @@ struct SmallWidgetView: View {
 
             Spacer()
 
-            Text("Next Prayer")
-                .font(.caption2)
-                .foregroundColor(.secondary)
+            if entry.hasNextPrayer {
+                Text("Next Prayer")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
 
-            Text(entry.nextPrayerName)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
+                Text(entry.nextPrayerName)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
 
-            Text(entry.nextPrayerTime, style: .time)
-                .font(.caption)
-                .foregroundColor(.accentColor)
+                Text(entry.nextPrayerTime, style: .time)
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+            } else {
+                Text("All Prayers Complete")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.green)
+            }
 
             if entry.configuration.showHijriDate {
                 Text(entry.hijriDate)
@@ -155,21 +169,33 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                Text("Next Prayer")
+                if entry.hasNextPrayer {
+                    Text("Next Prayer")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Text(entry.nextPrayerName)
+                        .font(.title)
+                        .fontWeight(.bold)
+
+                    HStack {
+                        Text(entry.nextPrayerTime, style: .time)
+                        Text("·")
+                        Text(entry.nextPrayerTime, style: .relative)
+                    }
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.accentColor)
+                } else {
+                    Spacer()
 
-                Text(entry.nextPrayerName)
-                    .font(.title)
-                    .fontWeight(.bold)
+                    Text("All Prayers Complete")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
-                HStack {
-                    Text(entry.nextPrayerTime, style: .time)
-                    Text("•")
-                    Text(entry.nextPrayerTime, style: .relative)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.green)
                 }
-                .font(.caption)
-                .foregroundColor(.accentColor)
             }
 
             Spacer()
