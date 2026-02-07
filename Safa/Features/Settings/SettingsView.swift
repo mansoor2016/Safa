@@ -441,7 +441,7 @@ struct SettingsView: View {
             HStack {
                 Text("Version")
                 Spacer()
-                Text("1.0.0")
+                Text("0.0.1")
                     .foregroundColor(SafaColors.Fallback.secondaryText)
             }
 
