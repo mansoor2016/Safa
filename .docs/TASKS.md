@@ -378,13 +378,19 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 **v1.1:**
 
-### 7.1.1 Interactive Widgets (iOS 17+)
+### 7.1.1 Lock Screen Widgets (iOS 16+)
+- [ ] Implement `.accessoryCircular` widget (next prayer countdown ring)
+- [ ] Implement `.accessoryRectangular` widget (next prayer name + time + countdown)
+- [ ] Implement `.accessoryInline` widget (next prayer name and time, single line)
+- [ ] Test Lock Screen widgets on device (requires Widget extension target setup)
+
+### 7.1.2 Interactive Widgets (iOS 17+)
 - [ ] Test interactive widgets on device (requires Widget extension target setup)
 
-### 7.1.2 StandBy Mode (iOS 17+)
+### 7.1.3 StandBy Mode (iOS 17+)
 - [ ] Test in StandBy simulator (requires Widget extension target setup)
 
-### 7.1.3 Spotlight Search (CoreSpotlight)
+### 7.1.4 Spotlight Search (CoreSpotlight)
 
 ### 7.2 Live Activities
 
@@ -401,9 +407,14 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [ ] **AC-7.4**: Live Activity shows countdown to next prayer (requires widget target)
 - [ ] **AC-7.5**: Dynamic Island shows prayer name and time remaining (requires widget target)
 - [ ] **AC-7.6**: Tapping Live Activity opens app to prayer screen (requires widget target)
+- [ ] **AC-7.7**: "Hey Siri, what's the next prayer?" returns correct answer (needs on-device verification)
+- [ ] **AC-7.8**: "Hey Siri, open Qibla" opens Qibla compass screen (needs on-device verification)
+- [ ] **AC-7.9**: Focus Mode silences non-prayer notifications (needs on-device verification)
 - [ ] **AC-7.10**: Tap prayer in interactive widget → logs prayer without opening app (requires widget target)
 - [ ] **AC-7.11**: Tap tasbeeh widget → counter increments (requires widget target)
 - [ ] **AC-7.12**: StandBy mode shows prayer times in large, readable format (requires widget target)
+- [ ] **AC-7.13**: Search "Ayatul Kursi" in iOS Spotlight → shows result from Safa (needs on-device verification)
+- [ ] **AC-7.14**: Tap Spotlight result → opens correct content in Safa (needs on-device verification)
 
 ### Phase 7 Integration Tests
 - [ ] **IT-7.1**: Add widget to home screen → Shows correct prayer time
