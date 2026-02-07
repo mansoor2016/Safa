@@ -1,6 +1,6 @@
 // MARK: - QuranSearchView.swift
 // PURPOSE: Search functionality for the Quran
-// DEPENDENCIES: SwiftUI
+// DEPENDENCIES: SwiftUI, QuranRepository
 
 import SwiftUI
 
@@ -13,6 +13,7 @@ final class QuranSearchViewModel {
     var isSearching: Bool = false
     var recentSearches: [String] = []
     var selectedFilter: SearchFilter = .all
+    private let repository: QuranRepositoryProtocol
 
     enum SearchFilter: String, CaseIterable {
         case all = "All"
@@ -21,88 +22,18 @@ final class QuranSearchViewModel {
         case surahName = "Surah Name"
     }
 
-    // Sample Quran data for search
-    private let sampleAyahs: [QuranSearchResult] = [
-        QuranSearchResult(
-            surahNumber: 1,
-            surahName: "Al-Fatiha",
-            ayahNumber: 1,
-            arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-            translation: "In the name of Allah, the Most Gracious, the Most Merciful"
-        ),
-        QuranSearchResult(
-            surahNumber: 1,
-            surahName: "Al-Fatiha",
-            ayahNumber: 2,
-            arabicText: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
-            translation: "All praise is due to Allah, the Lord of all the worlds"
-        ),
-        QuranSearchResult(
-            surahNumber: 2,
-            surahName: "Al-Baqarah",
-            ayahNumber: 255,
-            arabicText: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
-            translation: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence"
-        ),
-        QuranSearchResult(
-            surahNumber: 2,
-            surahName: "Al-Baqarah",
-            ayahNumber: 286,
-            arabicText: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
-            translation: "Allah does not charge a soul except with that within its capacity"
-        ),
-        QuranSearchResult(
-            surahNumber: 3,
-            surahName: "Al-Imran",
-            ayahNumber: 139,
-            arabicText: "وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ",
-            translation: "So do not weaken and do not grieve, and you will be superior"
-        ),
-        QuranSearchResult(
-            surahNumber: 12,
-            surahName: "Yusuf",
-            ayahNumber: 86,
-            arabicText: "إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ",
-            translation: "I only complain of my suffering and my grief to Allah"
-        ),
-        QuranSearchResult(
-            surahNumber: 13,
-            surahName: "Ar-Ra'd",
-            ayahNumber: 28,
-            arabicText: "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
-            translation: "Verily, in the remembrance of Allah do hearts find rest"
-        ),
-        QuranSearchResult(
-            surahNumber: 55,
-            surahName: "Ar-Rahman",
-            ayahNumber: 13,
-            arabicText: "فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ",
-            translation: "So which of the favors of your Lord would you deny?"
-        ),
-        QuranSearchResult(
-            surahNumber: 94,
-            surahName: "Ash-Sharh",
-            ayahNumber: 5,
-            arabicText: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
-            translation: "For indeed, with hardship comes ease"
-        ),
-        QuranSearchResult(
-            surahNumber: 112,
-            surahName: "Al-Ikhlas",
-            ayahNumber: 1,
-            arabicText: "قُلْ هُوَ اللَّهُ أَحَدٌ",
-            translation: "Say: He is Allah, the One"
-        )
-    ]
+    init(repository: QuranRepositoryProtocol? = nil) {
+        self.repository = repository ?? Dependencies.shared.quranRepository
+    }
 
-    func search() {
+    func search() async {
         guard !searchText.isEmpty else {
             searchResults = []
             return
         }
 
         isSearching = true
-        let query = searchText.lowercased()
+        defer { isSearching = false }
 
         // Add to recent searches
         if !recentSearches.contains(searchText) {
@@ -112,23 +43,98 @@ final class QuranSearchViewModel {
             }
         }
 
-        // Perform search based on filter
-        searchResults = sampleAyahs.filter { result in
+        do {
+            // Search based on filter
             switch selectedFilter {
             case .all:
-                return result.translation.lowercased().contains(query) ||
-                       result.arabicText.contains(searchText) ||
-                       result.surahName.lowercased().contains(query)
-            case .arabic:
-                return result.arabicText.contains(searchText)
-            case .translation:
-                return result.translation.lowercased().contains(query)
-            case .surahName:
-                return result.surahName.lowercased().contains(query)
-            }
-        }
+                // Search both Arabic and English via FTS, plus surah names
+                let ayahs = try await repository.searchAyahs(query: searchText)
+                let surahs = try await repository.getAllSurahs()
 
-        isSearching = false
+                searchResults = ayahs.map { ayah in
+                    let surahName = surahs.first(where: { $0.id == ayah.surahNumber })?.nameEnglish ?? "Unknown"
+                    return QuranSearchResult(
+                        surahNumber: ayah.surahNumber,
+                        surahName: surahName,
+                        ayahNumber: ayah.ayahNumber,
+                        arabicText: ayah.textArabic,
+                        translation: ayah.textTranslation
+                    )
+                }
+
+                // Also search for matching surah names
+                let matchingSurahs = surahs.filter { surah in
+                    surah.nameEnglish.lowercased().contains(searchText.lowercased()) ||
+                    surah.nameTransliteration.lowercased().contains(searchText.lowercased())
+                }
+
+                // Add first ayah of matching surahs
+                for surah in matchingSurahs {
+                    if !searchResults.contains(where: { $0.surahNumber == surah.id && $0.ayahNumber == 1 }) {
+                        if let firstAyah = try await repository.getAyah(surah: surah.id, ayah: 1) {
+                            searchResults.append(QuranSearchResult(
+                                surahNumber: surah.id,
+                                surahName: surah.nameEnglish,
+                                ayahNumber: 1,
+                                arabicText: firstAyah.textArabic,
+                                translation: firstAyah.textTranslation
+                            ))
+                        }
+                    }
+                }
+
+            case .arabic:
+                let ayahs = try await repository.searchAyahs(query: searchText)
+                searchResults = ayahs.map { ayah in
+                    let surahNumber = ayah.surahNumber
+                    // Get surah name
+                    let surah = try? await repository.getSurah(number: surahNumber)
+                    return QuranSearchResult(
+                        surahNumber: surahNumber,
+                        surahName: surah?.nameEnglish ?? "Unknown",
+                        ayahNumber: ayah.ayahNumber,
+                        arabicText: ayah.textArabic,
+                        translation: ayah.textTranslation
+                    )
+                }
+
+            case .translation:
+                let ayahs = try await repository.searchAyahs(query: searchText)
+                searchResults = ayahs.map { ayah in
+                    let surahNumber = ayah.surahNumber
+                    let surah = try? await repository.getSurah(number: surahNumber)
+                    return QuranSearchResult(
+                        surahNumber: surahNumber,
+                        surahName: surah?.nameEnglish ?? "Unknown",
+                        ayahNumber: ayah.ayahNumber,
+                        arabicText: ayah.textArabic,
+                        translation: ayah.textTranslation
+                    )
+                }
+
+            case .surahName:
+                let surahs = try await repository.getAllSurahs()
+                let matchingSurahs = surahs.filter { surah in
+                    surah.nameEnglish.lowercased().contains(searchText.lowercased()) ||
+                    surah.nameTransliteration.lowercased().contains(searchText.lowercased())
+                }
+
+                searchResults = []
+                for surah in matchingSurahs {
+                    if let firstAyah = try await repository.getAyah(surah: surah.id, ayah: 1) {
+                        searchResults.append(QuranSearchResult(
+                            surahNumber: surah.id,
+                            surahName: surah.nameEnglish,
+                            ayahNumber: 1,
+                            arabicText: firstAyah.textArabic,
+                            translation: firstAyah.textTranslation
+                        ))
+                    }
+                }
+            }
+        } catch {
+            searchResults = []
+        }
     }
 
     func clearRecentSearches() {
@@ -137,7 +143,9 @@ final class QuranSearchViewModel {
 
     func selectRecentSearch(_ search: String) {
         searchText = search
-        self.search()
+        Task {
+            await search()
+        }
     }
 }
 
@@ -159,8 +167,13 @@ struct QuranSearchResult: Identifiable {
 // MARK: - Quran Search View
 
 struct QuranSearchView: View {
-    @State private var viewModel = QuranSearchViewModel()
+    @State private var viewModel: QuranSearchViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(Dependencies.self) private var dependencies
+
+    init(repository: QuranRepositoryProtocol? = nil) {
+        _viewModel = State(initialValue: QuranSearchViewModel(repository: repository))
+    }
 
     var body: some View {
         NavigationStack {
@@ -205,7 +218,9 @@ struct QuranSearchView: View {
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
                 .onSubmit {
-                    viewModel.search()
+                    Task {
+                        await viewModel.search()
+                    }
                 }
 
             if !viewModel.searchText.isEmpty {
