@@ -243,12 +243,12 @@ struct HomeView: View {
     private var quickActions: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: SafaSpacing.md) {
             QuickActionCard(
-                icon: "book.fill",
-                title: "Quran",
-                subtitle: "Continue reading",
+                icon: "clock.fill",
+                title: "Prayer",
+                subtitle: "Times & logging",
                 color: .green
             ) {
-                router.navigate(to: .quran)
+                router.selectedTab = "prayer"
             }
 
             QuickActionCard(
