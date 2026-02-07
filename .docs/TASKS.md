@@ -1334,9 +1334,48 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 - [x] **Location: Add retry mechanism** — `getCurrentLocation()` now uses `withRetry(maxAttempts: 2)` for live GPS fallback.
 - [x] **Audio session: Handle interruptions** — AudioPlayerService now observes `AVAudioSession.interruptionNotification`, pauses on interruption began, resumes when `.shouldResume` flag set.
 
+### TODO: Ramadan Page Enhancement
+
+**Priority: MEDIUM — Enhance existing RamadanView**
+
+- [ ] Add compact PrayerProgressIndicator to RamadanView (reuse existing component)
+- [ ] Add "Time until Iftar" as hero countdown (replace generic countdown)
+- [ ] Add Play Adhan button (reuse same pattern as Prayer page)
+- [ ] Link to Prayer tab for full prayer timetable (don't duplicate)
+- [ ] Ensure prayer data loads on Ramadan page (uses same location/repository)
+
+### TODO: Smart Adhan (Location-Aware Notification Sounds)
+
+**Priority: MEDIUM — v1 enhancement to existing notification system**
+
+Design: One toggle, two automatic modes. No settings explosion.
+
+| Condition | Behaviour |
+|-----------|-----------|
+| At Home + ringer on | Adhan sound (if adhan enabled) |
+| Away from home OR silent mode | Standard iOS notification tone |
+
+- [ ] Add "Smart Adhan" toggle to Settings notification section (below adhan picker)
+- [ ] Detect "at home" using saved location from Settings (within ~200m radius)
+- [ ] Detect silent/ringer mode via `AVAudioSession` or system settings
+- [ ] In `PrayerViewModel.scheduleNotification()`, check location + ringer to select sound
+- [ ] Test: at home + ringer on → adhan plays
+- [ ] Test: away from home → standard tone
+- [ ] Test: at home + silent mode → standard tone
+
 ### TODO: v2 Strategic Enhancements
 
 **Priority: FUTURE — Post-launch features**
+
+#### Mosque Mode
+- [ ] Define mosque geofence data model (user-defined locations or mosque database)
+- [ ] Implement CLCircularRegion monitoring for mosque zones (~100m radius)
+- [ ] Auto-switch to silent/vibrate when entering mosque zone
+- [ ] Adjust notification delivery: haptic only, no sound while in mosque
+- [ ] Integrate with iOS Focus modes (if possible)
+- [ ] Settings UI: "My Mosques" list with add/remove
+- [ ] Show "In Mosque" indicator on prayer page when inside geofence
+- [ ] Test geofence entry/exit transitions
 
 #### watchOS Companion App
 - [ ] Create watchOS target in Xcode

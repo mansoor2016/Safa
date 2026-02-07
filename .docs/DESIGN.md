@@ -410,6 +410,8 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 - Qibla compass with clean visual indicator (simulator fallback assumes North with debug banner)
 - Mosque finder with directions (MapKit integration)
 - Makeup prayer (Qada) tracker
+- **Smart Adhan**: Single toggle — adhan plays at home with ringer on, standard tone everywhere else or in silent mode. No settings explosion.
+- **Mosque Mode** (v2): Auto-silence via geofencing when user enters a mosque, haptic-only notifications
 
 ### 4.2 Quran
 - Full Quran with Arabic text (multiple scripts: Uthmani, IndoPak)
@@ -445,6 +447,7 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 - Sadaqah tracker
 - I'tikaf mode for last 10 nights
 - Eid preparation checklist
+- **Ramadan page enhancements:** Prayer progress indicator (compact dots), "Time until Iftar" hero countdown, Play Adhan button, link to Prayer tab for full timetable
 
 #### Apple Health Integration (Fasting)
 Sync Ramadan fasting data to Apple Health:
