@@ -113,13 +113,7 @@ private struct PrayerContentView: View {
             // Location fallback indicator
             if dependencies.locationService.authorizationStatus != .authorizedWhenInUse
                 && dependencies.locationService.authorizationStatus != .authorizedAlways {
-                HStack(spacing: SafaSpacing.xxs) {
-                    Image(systemName: "location.slash")
-                        .font(.caption2)
-                    Text("Using \(AppDefaults.defaultLocationName)")
-                        .font(SafaTypography.labelSmall)
-                }
-                .foregroundColor(.orange)
+                DegradedStateBanner.locationFallback(locationName: AppDefaults.defaultLocationName)
             }
 
             // Prayer progress indicator
