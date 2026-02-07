@@ -38,7 +38,7 @@ enum AppDefaults {
     static let hapticFeedbackEnabled: Bool = true
 
     /// Default accent color
-    static let accentColorName: String = "teal"
+    static let accentColorName: String = "Teal"
 
     // MARK: - Location
 
