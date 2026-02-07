@@ -69,7 +69,7 @@ find Safa -type d -name "*.swift" | head -20
 **Demo Checklist:**
 - [ ] Fresh clone builds without errors
 - [ ] App launches to empty screen in simulator
-- [ ] Widget extension compiles
+- [x] Widget extension compiles
 - [ ] All directories created per technical spec
 - [ ] Documentation files in place
 
@@ -403,13 +403,13 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [x] Implement `.accessoryCircular` widget (next prayer countdown ring)
 - [x] Implement `.accessoryRectangular` widget (next prayer name + time + countdown)
 - [x] Implement `.accessoryInline` widget (next prayer name and time, single line)
-- [ ] Test Lock Screen widgets on device (requires Widget extension target setup)
+- [ ] Test Lock Screen widgets on device
 
-### 7.1.2 Interactive Widgets (iOS 17+)
-- [ ] Test interactive widgets on device (requires Widget extension target setup)
+### 7.1.2 Interactive Widgets
+- [ ] Test interactive widgets on device
 
-### 7.1.3 StandBy Mode (iOS 17+)
-- [ ] Test in StandBy simulator (requires Widget extension target setup)
+### 7.1.3 StandBy Mode
+- [ ] Test in StandBy simulator
 
 ### 7.1.4 Spotlight Search (CoreSpotlight)
 
@@ -422,20 +422,20 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [ ] Test Siri invocations
 
 ### Phase 7 Acceptance Criteria
-- [ ] **AC-7.1**: Small prayer widget shows next prayer name and time (requires widget target)
-- [ ] **AC-7.2**: Widget updates at each prayer time automatically (requires widget target)
-- [ ] **AC-7.3**: Streak widget shows current daily streak count (requires widget target)
-- [ ] **AC-7.4**: Live Activity shows countdown to next prayer (requires widget target)
-- [ ] **AC-7.5**: Dynamic Island shows prayer name and time remaining (requires widget target)
-- [ ] **AC-7.6**: Tapping Live Activity opens app to prayer screen (requires widget target)
-- [ ] **AC-7.7**: "Hey Siri, what's the next prayer?" returns correct answer (needs on-device verification)
-- [ ] **AC-7.8**: "Hey Siri, open Qibla" opens Qibla compass screen (needs on-device verification)
-- [ ] **AC-7.9**: Focus Mode silences non-prayer notifications (needs on-device verification)
-- [ ] **AC-7.10**: Tap prayer in interactive widget → logs prayer without opening app (requires widget target)
-- [ ] **AC-7.11**: Tap tasbeeh widget → counter increments (requires widget target)
-- [ ] **AC-7.12**: StandBy mode shows prayer times in large, readable format (requires widget target)
-- [ ] **AC-7.13**: Search "Ayatul Kursi" in iOS Spotlight → shows result from Safa (needs on-device verification)
-- [ ] **AC-7.14**: Tap Spotlight result → opens correct content in Safa (needs on-device verification)
+- [ ] **AC-7.1**: Small prayer widget shows next prayer name and time (code complete, needs device testing)
+- [ ] **AC-7.2**: Widget updates at each prayer time automatically (code complete, needs device testing)
+- [ ] **AC-7.3**: Streak widget shows current daily streak count (not implemented — no streak widget)
+- [ ] **AC-7.4**: Live Activity shows countdown to next prayer (Live Activity code exists in main app)
+- [ ] **AC-7.5**: Dynamic Island shows prayer name and time remaining (Live Activity code exists)
+- [ ] **AC-7.6**: Tapping Live Activity opens app to prayer screen (needs device testing)
+- [ ] **AC-7.7**: "Hey Siri, what's the next prayer?" returns correct answer (needs device testing)
+- [ ] **AC-7.8**: "Hey Siri, open Qibla" opens Qibla compass screen (needs device testing)
+- [ ] **AC-7.9**: Focus Mode silences non-prayer notifications (needs device testing)
+- [ ] **AC-7.10**: Tap prayer in interactive widget → logs prayer without opening app (code complete, needs device testing)
+- [ ] **AC-7.11**: Tap tasbeeh widget → counter increments (code complete, needs device testing)
+- [ ] **AC-7.12**: StandBy mode shows prayer times in large, readable format (code complete, needs device testing)
+- [ ] **AC-7.13**: Search "Ayatul Kursi" in iOS Spotlight → shows result from Safa (needs device testing)
+- [ ] **AC-7.14**: Tap Spotlight result → opens correct content in Safa (needs device testing)
 
 ### Phase 7 Integration Tests
 - [ ] **IT-7.1**: Add widget to home screen → Shows correct prayer time
@@ -723,7 +723,7 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 - Blocked tasks: 0
 
 ### Project Reality Checks
-- Xcode targets currently configured: `Safa`, `SafaTests`, `SafaUITests` (no widget/intents extension targets yet)
+- Xcode targets currently configured: `Safa`, `SafaTests`, `SafaUITests`, `SafaWidgetExtensionExtension` (intents extension target not yet created)
 - Deployment target in project build settings: iOS 26.2
 - Device family in app target: `1,2` (iPhone + iPad)
 
@@ -739,7 +739,8 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 - **Pronunciation audio**: Audio files not yet bundled
 - **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready (requires iOS 18.4 SDK)
 - **Acceptance criteria counts need recalculation** after compacting and re-verification
-- **Widget/Intents extension targets are still missing** from `Safa.xcodeproj`
+- **Widget extension target created** (`SafaWidgetExtensionExtension`). Intents extension target still missing.
+- **Old `SafaWidget/` folder** is orphaned (code ported to `SafaWidgetExtension/`). Can be removed after verification.
 
 ### Recently Enabled Features
 The following features have complete implementations and are now enabled by default:
