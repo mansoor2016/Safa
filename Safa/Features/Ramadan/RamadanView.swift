@@ -244,9 +244,9 @@ struct RamadanView: View {
 
     private var suhoorTimeView: some View {
         VStack(spacing: SafaSpacing.xs) {
-            Image(systemName: "moon.fill")
+            Image(systemName: "sun.horizon.fill")
                 .font(.title2)
-                .foregroundColor(.purple)
+                .foregroundColor(.orange)
 
             Text("Suhoor Ends")
                 .font(SafaTypography.labelSmall)
@@ -267,9 +267,9 @@ struct RamadanView: View {
 
     private var iftarTimeView: some View {
         VStack(spacing: SafaSpacing.xs) {
-            Image(systemName: "sun.horizon.fill")
+            Image(systemName: "moon.fill")
                 .font(.title2)
-                .foregroundColor(.orange)
+                .foregroundColor(.purple)
 
             Text("Iftar")
                 .font(SafaTypography.labelSmall)

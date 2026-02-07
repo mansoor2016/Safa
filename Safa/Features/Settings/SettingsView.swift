@@ -481,6 +481,9 @@ struct SettingsView: View {
     private var debugSection: some View {
         Section {
             Toggle("Force Ramadan Mode", isOn: $forceRamadan)
+                .onAppear {
+                    forceRamadan = FeatureFlags.shared.isEnabled(.ramadanMode)
+                }
                 .onChange(of: forceRamadan) { _, newValue in
                     if newValue {
                         FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
