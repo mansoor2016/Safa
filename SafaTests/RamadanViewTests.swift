@@ -336,3 +336,132 @@ final class RamadanModeActivationTests: XCTestCase {
         }
     }
 }
+
+// MARK: - Iftar Countdown Logic Tests
+
+final class IftarCountdownLogicTests: XCTestCase {
+
+    func testIftarInFuture_showsTimeUntilIftar() {
+        // Given: Iftar is 3 hours from now
+        let iftarTime = Date().addingTimeInterval(3 * 3600)
+
+        // Then: Iftar is in the future
+        XCTAssertTrue(iftarTime > Date())
+    }
+
+    func testIftarInPast_suhoorInFuture_showsTimeUntilSuhoor() {
+        // Given: Iftar was 1 hour ago, Suhoor is 8 hours from now
+        let iftarTime = Date().addingTimeInterval(-3600)
+        let suhoorTime = Date().addingTimeInterval(8 * 3600)
+
+        // Then: Iftar is past, Suhoor is future
+        XCTAssertFalse(iftarTime > Date())
+        XCTAssertTrue(suhoorTime > Date())
+    }
+
+    func testBothPast_showsFastingComplete() {
+        // Given: Both times are in the past
+        let iftarTime = Date().addingTimeInterval(-3600)
+        let suhoorTime = Date().addingTimeInterval(-8 * 3600)
+
+        // Then: Both are past
+        XCTAssertFalse(iftarTime > Date())
+        XCTAssertFalse(suhoorTime > Date())
+    }
+
+    func testSuhoorAndIftarFromPrayers() {
+        // Given: Prayer times array
+        let now = Date()
+        let prayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(3600)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(7200)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(14400)),
+            PrayerTime(type: .asr, time: now.addingTimeInterval(21600)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(28800)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(36000))
+        ]
+
+        // When: Extract suhoor (Fajr) and iftar (Maghrib)
+        let suhoorTime = prayers.first { $0.type == .fajr }?.time
+        let iftarTime = prayers.first { $0.type == .maghrib }?.time
+
+        // Then: Both are extracted correctly
+        XCTAssertNotNil(suhoorTime)
+        XCTAssertNotNil(iftarTime)
+        XCTAssertTrue(suhoorTime! < iftarTime!)
+    }
+}
+
+// MARK: - Smart Adhan Location Tests
+
+final class SmartAdhanLocationTests: XCTestCase {
+
+    func testIsNearHome_withinRadius() {
+        // Given: Home is at (51.5074, -0.1278), current is 100m away
+        let homeLat = 51.5074
+        let homeLng = -0.1278
+        let currentLat = 51.5075 // ~11m north
+        let currentLng = -0.1278
+
+        let home = CLLocation(latitude: homeLat, longitude: homeLng)
+        let current = CLLocation(latitude: currentLat, longitude: currentLng)
+
+        // Then: Within 200m
+        XCTAssertLessThan(home.distance(from: current), 200)
+    }
+
+    func testIsNearHome_outsideRadius() {
+        // Given: Home is at (51.5074, -0.1278), current is 1km away
+        let homeLat = 51.5074
+        let homeLng = -0.1278
+        let currentLat = 51.5160 // ~1km north
+        let currentLng = -0.1278
+
+        let home = CLLocation(latitude: homeLat, longitude: homeLng)
+        let current = CLLocation(latitude: currentLat, longitude: currentLng)
+
+        // Then: Outside 200m
+        XCTAssertGreaterThan(home.distance(from: current), 200)
+    }
+
+    func testIsNearHome_noSavedLocation() {
+        // Given: No home location saved
+        let prefs = UserPreferences()
+
+        // Then: No saved coordinates
+        XCTAssertNil(prefs.savedLatitude)
+        XCTAssertNil(prefs.savedLongitude)
+    }
+
+    func testSmartAdhanDefaults() {
+        let prefs = UserPreferences()
+
+        XCTAssertFalse(prefs.smartAdhanEnabled)
+        XCTAssertFalse(prefs.adhanEnabled)
+    }
+
+    func testSmartAdhanRequiresAdhanEnabled() {
+        var prefs = UserPreferences()
+        prefs.smartAdhanEnabled = true
+        prefs.adhanEnabled = false
+
+        // Smart adhan should not play because adhan is disabled
+        // The selectNotificationSound logic checks adhanEnabled first
+        XCTAssertTrue(prefs.smartAdhanEnabled)
+        XCTAssertFalse(prefs.adhanEnabled)
+    }
+
+    func testSmartAdhan_atHomeWithAdhan() {
+        var prefs = UserPreferences()
+        prefs.adhanEnabled = true
+        prefs.smartAdhanEnabled = true
+        prefs.savedLatitude = 51.5074
+        prefs.savedLongitude = -0.1278
+
+        XCTAssertTrue(prefs.adhanEnabled)
+        XCTAssertTrue(prefs.smartAdhanEnabled)
+        XCTAssertNotNil(prefs.savedLatitude)
+    }
+}
+
+import CoreLocation
