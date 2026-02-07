@@ -76,8 +76,8 @@ struct DuaCategoriesView: View {
             .padding(.bottom, 100)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Duas & Adhkar")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Duas")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     private var headerView: some View {

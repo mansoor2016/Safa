@@ -69,7 +69,7 @@ struct MainTabView: View {
         case home
         case quran
         case prayer
-        case learn
+        case duas
         case more
 
         var title: String {
@@ -77,7 +77,7 @@ struct MainTabView: View {
             case .home: return "Home"
             case .quran: return "Quran"
             case .prayer: return "Prayer"
-            case .learn: return "Learn"
+            case .duas: return "Duas"
             case .more: return "More"
             }
         }
@@ -87,7 +87,7 @@ struct MainTabView: View {
             case .home: return "house"
             case .quran: return "book"
             case .prayer: return "clock"
-            case .learn: return "graduationcap"
+            case .duas: return "heart.text.square"
             case .more: return "ellipsis.circle"
             }
         }
@@ -97,7 +97,7 @@ struct MainTabView: View {
             case .home: return "house.fill"
             case .quran: return "book.fill"
             case .prayer: return "clock.fill"
-            case .learn: return "graduationcap.fill"
+            case .duas: return "heart.text.square.fill"
             case .more: return "ellipsis.circle.fill"
             }
         }
@@ -145,14 +145,14 @@ struct MainTabView: View {
             }
             .tag(Tab.prayer)
 
-            // Learn Tab
+            // Duas Tab
             NavigationStack {
-                LearnView()
+                DuaCategoriesView()
             }
             .tabItem {
-                Label(Tab.learn.title, systemImage: router.selectedTab == Tab.learn.rawValue ? Tab.learn.selectedIcon : Tab.learn.icon)
+                Label(Tab.duas.title, systemImage: router.selectedTab == Tab.duas.rawValue ? Tab.duas.selectedIcon : Tab.duas.icon)
             }
-            .tag(Tab.learn)
+            .tag(Tab.duas)
 
             // More Tab
             NavigationStack {
@@ -247,12 +247,6 @@ struct MoreView: View {
                 }
 
                 NavigationLink {
-                    DuaCategoriesView()
-                } label: {
-                    Label("Duas", systemImage: "heart.text.square")
-                }
-
-                NavigationLink {
                     QiblaCompassView()
                 } label: {
                     Label("Qibla Compass", systemImage: "location.north.fill")
@@ -262,6 +256,12 @@ struct MoreView: View {
                     HadithView()
                 } label: {
                     Label("Hadith", systemImage: "text.book.closed")
+                }
+
+                NavigationLink {
+                    LearnView()
+                } label: {
+                    Label("Learn", systemImage: "graduationcap")
                 }
             }
 

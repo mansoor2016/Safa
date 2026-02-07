@@ -257,7 +257,7 @@ struct HomeView: View {
                 subtitle: "Daily supplications",
                 color: .blue
             ) {
-                router.navigate(to: .dhikr)
+                router.selectedTab = "duas"
             }
 
             QuickActionCard(
