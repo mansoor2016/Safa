@@ -34,6 +34,13 @@
 			remoteGlobalIDString = 76F0B0642F37B493007EB798;
 			remoteInfo = SafaWidgetExtensionExtension;
 		};
+		76F0B0B12F37D6C2007EB798 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 76F09F7B2F32DE70007EB798 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 76F09F822F32DE70007EB798;
+			remoteInfo = Safa;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -57,6 +64,7 @@
 		76F0B0652F37B493007EB798 /* SafaWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SafaWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		76F0B0672F37B493007EB798 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		76F0B0692F37B493007EB798 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		76F0B0AD2F37D6C2007EB798 /* SafaWidgetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SafaWidgetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -103,6 +111,11 @@
 			path = SafaWidgetExtension;
 			sourceTree = "<group>";
 		};
+		76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SafaWidgetTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +149,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		76F0B0AA2F37D6C2007EB798 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -146,6 +166,7 @@
 				76F09F972F32DE72007EB798 /* SafaTests */,
 				76F09FA12F32DE72007EB798 /* SafaUITests */,
 				76F0B06B2F37B493007EB798 /* SafaWidgetExtension */,
+				76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */,
 				76F0B0662F37B493007EB798 /* Frameworks */,
 				76F09F842F32DE70007EB798 /* Products */,
 			);
@@ -158,6 +179,7 @@
 				76F09F942F32DE72007EB798 /* SafaTests.xctest */,
 				76F09F9E2F32DE72007EB798 /* SafaUITests.xctest */,
 				76F0B0652F37B493007EB798 /* SafaWidgetExtensionExtension.appex */,
+				76F0B0AD2F37D6C2007EB798 /* SafaWidgetTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -266,6 +288,29 @@
 			productReference = 76F0B0652F37B493007EB798 /* SafaWidgetExtensionExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		76F0B0AC2F37D6C2007EB798 /* SafaWidgetTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 76F0B0B32F37D6C2007EB798 /* Build configuration list for PBXNativeTarget "SafaWidgetTests" */;
+			buildPhases = (
+				76F0B0A92F37D6C2007EB798 /* Sources */,
+				76F0B0AA2F37D6C2007EB798 /* Frameworks */,
+				76F0B0AB2F37D6C2007EB798 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				76F0B0B22F37D6C2007EB798 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */,
+			);
+			name = SafaWidgetTests;
+			packageProductDependencies = (
+			);
+			productName = SafaWidgetTests;
+			productReference = 76F0B0AD2F37D6C2007EB798 /* SafaWidgetTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -290,6 +335,10 @@
 					76F0B0642F37B493007EB798 = {
 						CreatedOnToolsVersion = 26.2;
 					};
+					76F0B0AC2F37D6C2007EB798 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 76F09F822F32DE70007EB798;
+					};
 				};
 			};
 			buildConfigurationList = 76F09F7E2F32DE70007EB798 /* Build configuration list for PBXProject "Safa" */;
@@ -310,6 +359,7 @@
 				76F09F932F32DE72007EB798 /* SafaTests */,
 				76F09F9D2F32DE72007EB798 /* SafaUITests */,
 				76F0B0642F37B493007EB798 /* SafaWidgetExtensionExtension */,
+				76F0B0AC2F37D6C2007EB798 /* SafaWidgetTests */,
 			);
 		};
 /* End PBXProject section */
@@ -337,6 +387,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		76F0B0632F37B493007EB798 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		76F0B0AB2F37D6C2007EB798 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -374,6 +431,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		76F0B0A92F37D6C2007EB798 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -391,6 +455,11 @@
 			isa = PBXTargetDependency;
 			target = 76F0B0642F37B493007EB798 /* SafaWidgetExtensionExtension */;
 			targetProxy = 76F0B0792F37B494007EB798 /* PBXContainerItemProxy */;
+		};
+		76F0B0B22F37D6C2007EB798 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 76F09F822F32DE70007EB798 /* Safa */;
+			targetProxy = 76F0B0B12F37D6C2007EB798 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -730,6 +799,48 @@
 			};
 			name = Release;
 		};
+		76F0B0B42F37D6C2007EB798 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WHV4D5B6R6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Mawj.Safa.SafaWidgetTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Safa.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Safa";
+			};
+			name = Debug;
+		};
+		76F0B0B52F37D6C2007EB798 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WHV4D5B6R6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Mawj.Safa.SafaWidgetTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Safa.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Safa";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -774,6 +885,15 @@
 			buildConfigurations = (
 				76F0B07D2F37B494007EB798 /* Debug */,
 				76F0B07E2F37B494007EB798 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		76F0B0B32F37D6C2007EB798 /* Build configuration list for PBXNativeTarget "SafaWidgetTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76F0B0B42F37D6C2007EB798 /* Debug */,
+				76F0B0B52F37D6C2007EB798 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

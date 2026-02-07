@@ -1,17 +1,16 @@
 // MARK: - WidgetPrayerTimeTests.swift
-// PURPOSE: Tests for widget prayer time next-prayer logic to prevent regression
-// DEPENDENCIES: XCTest
+// PURPOSE: Tests for widget next-prayer algorithm to prevent regression
+// NOTE: Tests the same algorithm used in SafaWidgetExtension/PrayerTimesWidget.swift
+// Can't directly import widget types (different binary), so we test the equivalent logic.
 
 import XCTest
 @testable import Safa
 
-/// Tests the "next prayer" calculation logic used by the widget.
-/// Since widget types aren't directly importable from test target,
-/// we test the equivalent algorithm here.
 final class WidgetPrayerTimeTests: XCTestCase {
 
     typealias PrayerEntry = (name: String, time: Date)
 
+    /// Same algorithm as PrayerTimeEntry.nextPrayer in the widget
     private func nextPrayer(from prayers: [PrayerEntry]) -> PrayerEntry? {
         let now = Date()
         return prayers.first { $0.time > now }

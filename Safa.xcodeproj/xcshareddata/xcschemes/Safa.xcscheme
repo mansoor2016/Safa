@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "2620"
-   wasCreatedForAppExtension = "YES"
-   version = "2.0">
+   version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
       <BuildActionEntries>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "76F0B0642F37B493007EB798"
-               BuildableName = "SafaWidgetExtensionExtension.appex"
-               BlueprintName = "SafaWidgetExtensionExtension"
-               ReferencedContainer = "container:Safa.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
@@ -50,6 +35,28 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "76F09F932F32DE72007EB798"
+               BuildableName = "SafaTests.xctest"
+               BlueprintName = "SafaTests"
+               ReferencedContainer = "container:Safa.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "76F09F9D2F32DE72007EB798"
+               BuildableName = "SafaUITests.xctest"
+               BlueprintName = "SafaUITests"
+               ReferencedContainer = "container:Safa.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "76F0B0AC2F37D6C2007EB798"
                BuildableName = "SafaWidgetTests.xctest"
                BlueprintName = "SafaWidgetTests"
@@ -60,28 +67,16 @@
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
-      selectedDebuggerIdentifier = ""
-      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
-      askForAppToLaunch = "Yes"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "2">
-      <RemoteRunnable
-         runnableDebuggingMode = "2"
-         BundleIdentifier = "com.apple.springboard">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "76F0B0642F37B493007EB798"
-            BuildableName = "SafaWidgetExtensionExtension.appex"
-            BlueprintName = "SafaWidgetExtensionExtension"
-            ReferencedContainer = "container:Safa.xcodeproj">
-         </BuildableReference>
-      </RemoteRunnable>
-      <MacroExpansion>
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "76F09F822F32DE70007EB798"
@@ -89,38 +84,14 @@
             BlueprintName = "Safa"
             ReferencedContainer = "container:Safa.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "_XCWidgetKind"
-            value = ""
-            isEnabled = "YES">
-         </EnvironmentVariable>
-         <EnvironmentVariable
-            key = "_XCWidgetDefaultView"
-            value = "timeline"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-         <EnvironmentVariable
-            key = "_XCWidgetFamily"
-            value = "systemMedium"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-         <EnvironmentVariable
-            key = "_XCWidgetKind"
-            value = "SafaWidget"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
-      debugDocumentVersioning = "YES"
-      askForAppToLaunch = "Yes"
-      launchAutomaticallySubstyle = "2">
+      debugDocumentVersioning = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
