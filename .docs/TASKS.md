@@ -136,6 +136,11 @@ xcodebuild test -only-testing:SafaTests/DomainTests
 
 ### 2.6 Prayer Notifications
 
+### 2.7 Prayer Quality Logs (Optional)
+- [ ] Add optional lightweight prayer log fields: on-time, congregation, focus rating
+- [ ] Keep private and non-judgmental — no gamification pressure on quality
+- [ ] Show in personal progress only
+
 ### Phase 2 Acceptance Criteria
 
 ### Phase 2 Integration Tests
@@ -234,6 +239,11 @@ xcodebuild test -only-testing:SafaTests/QuranTests
 
 ### 4.5 Progress UI
 
+### 4.6 Weekly Reflection Summary
+- [ ] Aggregate weekly metrics (prayers logged, Quran continuity, streak trends)
+- [ ] Design summary layout with suggested focus for next week
+- [ ] Schedule weekly notification prompt (opt-in, not pushy)
+
 ### Phase 4 Acceptance Criteria
 
 ### Phase 4 Integration Tests
@@ -281,6 +291,17 @@ xcodebuild test -only-testing:SafaTests/StreakTests
 - [ ] Write unit tests with sample audio
 
 ### 5.4 Learning UI
+
+### 5.5 Progressive Learn Rollout
+- [ ] Audit which learning tracks have content ready
+- [ ] Enable ready tracks individually via FeatureFlags instead of gating entire tab
+- [ ] Add track-level "Coming Soon" for incomplete tracks
+
+### 5.6 Micro-Practice Sessions
+- [ ] Define `PracticeSession` model (type, duration, content)
+- [ ] Build 1-ayah read + reflection prompt flow
+- [ ] Build 33-count dhikr quick session
+- [ ] Build 1-hadith/day with save/share
 
 ### Phase 5 Acceptance Criteria
 
@@ -526,6 +547,37 @@ xcodebuild -scheme SafaWidget build
 
 ### 9.8 Home Screen
 
+### 9.9 Haptic System Unification
+- [ ] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
+- [ ] Create event-to-style mapping in `HapticFeedbackService`
+- [ ] Replace all direct `UIImpactFeedbackGenerator` calls in feature views with service calls
+- [ ] Add Haptics settings section (On/Off, Intensity: Subtle/Balanced/Strong, Test button)
+- [ ] Gate haptics on `UIAccessibility.isReduceMotionEnabled`
+- [ ] Unit tests for event mapping and preference gating
+
+### 9.10 Degraded State Banners
+- [ ] Create shared `DegradedStateBanner` component (icon + message + optional action)
+- [ ] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused
+- [ ] Replace ad-hoc inline indicators with consistent banner component
+- [ ] Add "System Status" sheet in Settings (location, notifications, sync, storage)
+
+### 9.11 Home Intent Resolver
+- [ ] Build `HomeIntentResolver` service (returns 1-3 prioritised actions based on time + streak + recency)
+- [ ] Create reusable `ResumeCard` component (last surah, last lesson, last dhikr)
+- [ ] Update HomeView with context-aware quick actions
+
+### 9.12 Motion & Spacing Tokens
+- [ ] Define motion tokens in design system (durations, curves, spring presets)
+- [ ] Define semantic elevation/surface tokens for card styles
+- [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
+- [ ] Add skeleton loaders for key screens
+- [ ] Smooth numeric transitions for counters and streaks
+
+### 9.13 Search & Navigation Coherence
+- [ ] Unify search UI pattern across Quran/Hadith/Calendar
+- [ ] Restructure "More" tab: Daily Practice, Learning, Community, Settings
+- [ ] Normalise screen entry points through AppRouter destinations
+
 ### Phase 9 Acceptance Criteria
 
 ### Phase 9 Integration Tests
@@ -554,9 +606,14 @@ xcodebuild -scheme SafaWidget build
 
 ## Phase 10: Launch Preparation
 
-### 10.1 Accessibility (Best Effort v1)
+### 10.1 Accessibility
 - [ ] Verify Dynamic Type scaling on all screens
 - [ ] Verify color contrast meets WCAG AA (4.5:1)
+- [ ] Complete Dynamic Type support audit for all major screens
+- [ ] Improve VoiceOver rotor flow for Quran ayah navigation
+- [ ] Refine high-contrast mode for core cards and charts
+- [ ] Add "Minimal Motion" profile that suppresses all non-essential animation
+- [ ] UI tests for large content size and VoiceOver labels on critical screens
 
 ### 10.2 Device Compatibility & Testing
 
@@ -858,76 +915,6 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Implement full-screen Qibla arrow
 - [ ] Implement single-button tasbeeh
 - [ ] Test with Switch Control and Voice Control
-
----
-
-### Phase A: Polish & Foundations (High Impact, Low Risk)
-
-#### A.1 Haptic System Unification
-- [ ] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
-- [ ] Create event-to-style mapping in `HapticFeedbackService`
-- [ ] Replace all direct `UIImpactFeedbackGenerator` calls in feature views with service calls
-- [ ] Add Haptics settings section (On/Off, Intensity: Subtle/Balanced/Strong, Test button)
-- [ ] Gate haptics on `UIAccessibility.isReduceMotionEnabled`
-- [ ] Unit tests for event mapping and preference gating
-
-#### A.2 Degraded State Banners
-- [ ] Create shared `DegradedStateBanner` component (icon + message + optional action)
-- [ ] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused
-- [ ] Replace ad-hoc inline indicators with consistent banner component
-- [ ] Add "System Status" sheet in Settings (location, notifications, sync, storage)
-
-#### A.3 Home Intent Resolver
-- [ ] Build `HomeIntentResolver` service (returns 1-3 prioritised actions based on time + streak + recency)
-- [ ] Create reusable `ResumeCard` component (last surah, last lesson, last dhikr)
-- [ ] Update HomeView with context-aware quick actions
-- [ ] Test engagement with different time-of-day scenarios
-
-### Phase B: Experience Quality & Coherence
-
-#### B.1 Motion & Spacing Tokens
-- [ ] Define motion tokens in design system (durations, curves, spring presets)
-- [ ] Define semantic elevation/surface tokens for card styles
-- [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
-- [ ] Add skeleton loaders for key screens
-- [ ] Smooth numeric transitions for counters and streaks
-
-#### B.2 Search & Navigation Coherence
-- [ ] Unify search UI pattern across Quran/Hadith/Calendar
-- [ ] Restructure "More" tab: Daily Practice, Learning, Community, Settings
-- [ ] Normalise screen entry points through AppRouter destinations
-
-#### B.3 Accessibility Polish
-- [ ] Complete Dynamic Type support audit for all major screens
-- [ ] Improve VoiceOver rotor flow for Quran ayah navigation
-- [ ] Refine high-contrast mode for core cards and charts
-- [ ] Add "Minimal Motion" profile that suppresses all non-essential animation
-- [ ] UI tests for large content size and VoiceOver labels on critical screens
-
-### Phase C: Retention Depth (Without Clutter)
-
-#### C.1 Micro-Practice Sessions
-- [ ] Define `PracticeSession` model (type, duration, content)
-- [ ] Build 1-ayah read + reflection prompt flow
-- [ ] Build 33-count dhikr quick session
-- [ ] Build 1-hadith/day with save/share
-
-#### C.2 Weekly Reflection Summary
-- [ ] Aggregate weekly metrics (prayers logged, Quran continuity, streak trends)
-- [ ] Design summary layout with suggested focus for next week
-- [ ] Schedule weekly notification prompt (opt-in, not pushy)
-
-#### C.3 Progressive Learn Rollout
-- [ ] Audit which learning tracks have content ready
-- [ ] Enable ready tracks individually via FeatureFlags instead of gating entire tab
-- [ ] Add track-level "Coming Soon" for incomplete tracks
-
-#### C.4 Prayer Quality Logs (Optional)
-- [ ] Add optional lightweight prayer log fields: on-time, congregation, focus rating
-- [ ] Keep private and non-judgmental — no streaks or gamification pressure on quality
-- [ ] Show in personal progress only
-
----
 
 *Last Updated: February 7, 2026*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-07.md`*
