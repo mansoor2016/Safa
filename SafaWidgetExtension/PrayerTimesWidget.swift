@@ -5,26 +5,24 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import SafaShared
 
 // MARK: - Widget Entry
 
 struct PrayerTimeEntry: TimelineEntry {
     let date: Date
-    let prayers: [(name: String, time: Date)]
+    let prayers: [PrayerInfo]
     let hijriDate: String
     let configuration: ConfigurationAppIntent
 
-    var nextPrayer: (name: String, time: Date)? {
-        let now = Date()
-        return prayers.first { $0.time > now }
-    }
+    private let calculator = NextPrayerCalculator()
 
     var nextPrayerName: String {
-        nextPrayer?.name ?? "Isha"
+        calculator.nextPrayerName(from: prayers)
     }
 
     var nextPrayerTime: Date {
-        nextPrayer?.time ?? Date()
+        calculator.nextPrayerTime(from: prayers)
     }
 }
 
@@ -32,63 +30,13 @@ struct PrayerTimeEntry: TimelineEntry {
 
 struct Provider: AppIntentTimelineProvider {
 
-    // London, UK default prayer times (approximate, updated per timeline refresh)
-    private func todayPrayers() -> [(name: String, time: Date)] {
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-
-        // TECH DEBT: Widget uses hardcoded approximate London prayer times with seasonal
-        // adjustment. This is a temporary solution because:
-        // 1. Widget extension can't access main app's PrayerTimeCalculator (different target)
-        // 2. App Group shared UserDefaults requires paid Apple Developer account
-        // 3. No shared framework exists yet to share prayer calculation code
-        //
-        // Proper fix: Main app writes calculated prayer times to App Group UserDefaults
-        // on each calculation, widget reads from there. Requires AppDefaults.useCloudKit = true
-        // and App Group entitlements properly configured.
-        //
-        // Limitations:
-        // - Times are approximate (not calculated from coordinates)
-        // - Only London seasonal defaults (no user location support)
-        // - No calculation method or madhab respect
-        // - Hijri date is hardcoded
-        let month = cal.component(.month, from: Date())
-
-        // Seasonal adjustment for London (rough approximation)
-        let fajrHour: Int
-        let dhuhrHour = 12
-        let dhuhrMin = 30
-        let asrHour: Int
-        let maghribHour: Int
-        let maghribMin: Int
-        let ishaHour: Int
-
-        switch month {
-        case 11, 12, 1, 2: // Winter
-            fajrHour = 6; asrHour = 14; maghribHour = 16; maghribMin = 15; ishaHour = 18
-        case 3, 4: // Spring
-            fajrHour = 5; asrHour = 15; maghribHour = 18; maghribMin = 30; ishaHour = 20
-        case 5, 6, 7: // Summer
-            fajrHour = 3; asrHour = 17; maghribHour = 21; maghribMin = 0; ishaHour = 22
-        case 8, 9, 10: // Autumn
-            fajrHour = 5; asrHour = 16; maghribHour = 19; maghribMin = 0; ishaHour = 20
-        default:
-            fajrHour = 5; asrHour = 15; maghribHour = 18; maghribMin = 0; ishaHour = 20
-        }
-
-        return [
-            ("Fajr", cal.date(bySettingHour: fajrHour, minute: 30, second: 0, of: today)!),
-            ("Dhuhr", cal.date(bySettingHour: dhuhrHour, minute: dhuhrMin, second: 0, of: today)!),
-            ("Asr", cal.date(bySettingHour: asrHour, minute: 45, second: 0, of: today)!),
-            ("Maghrib", cal.date(bySettingHour: maghribHour, minute: maghribMin, second: 0, of: today)!),
-            ("Isha", cal.date(bySettingHour: ishaHour, minute: 0, second: 0, of: today)!)
-        ]
-    }
+    // Prayer times from SafaShared (single source of truth)
+    private let defaultPrayers = DefaultPrayerTimes()
 
     private func makeEntry(configuration: ConfigurationAppIntent) -> PrayerTimeEntry {
         PrayerTimeEntry(
             date: Date(),
-            prayers: todayPrayers(),
+            prayers: defaultPrayers.forToday(),
             hijriDate: "Sha'ban 1447",
             configuration: configuration
         )
@@ -106,7 +54,8 @@ struct Provider: AppIntentTimelineProvider {
         let entry = makeEntry(configuration: configuration)
 
         // Refresh at the next prayer time, or in 30 minutes if all prayers passed
-        let refreshDate = entry.nextPrayer?.time ?? Date().addingTimeInterval(1800)
+        let calculator = NextPrayerCalculator()
+        let refreshDate = calculator.nextPrayer(from: entry.prayers)?.time ?? Date().addingTimeInterval(1800)
         return Timeline(entries: [entry], policy: .after(refreshDate))
     }
 }
