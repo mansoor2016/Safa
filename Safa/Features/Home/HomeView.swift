@@ -44,6 +44,17 @@ struct HomeView: View {
                     }
                 }
 
+                // Prayer progress (same expanded style as Prayer page)
+                PrayerProgressIndicator(
+                    prayers: todayPrayers,
+                    loggedPrayers: loggedPrayers,
+                    nextPrayer: nextPrayer,
+                    style: .expanded,
+                    onLogPrayer: { prayerType in
+                        Task { await togglePrayer(prayerType) }
+                    }
+                )
+
                 // Quick actions
                 quickActions
 
@@ -111,10 +122,13 @@ struct HomeView: View {
                         }
                     }
 
-                // Expanded content
+                // Expanded content (tap to open Ramadan page)
                 if isRamadanBannerExpanded {
                     ramadanBannerExpandedContent
                         .transition(.opacity.combined(with: .move(edge: .top)))
+                        .onTapGesture {
+                            router.navigate(to: .ramadan)
+                        }
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
@@ -224,47 +238,6 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Prayer Timeline
-
-    private var prayerTimeline: some View {
-        ContentCard {
-            VStack(spacing: SafaSpacing.sm) {
-                HStack {
-                    Text("Today's Prayers")
-                        .font(SafaTypography.titleSmall)
-
-                    Spacer()
-
-                    // Prayer progress indicator (X/5)
-                    PrayerProgressIndicator(
-                        prayers: todayPrayers,
-                        loggedPrayers: loggedPrayers,
-                        nextPrayer: nextPrayer,
-                        style: .compact,
-                        onLogPrayer: { prayerType in
-                            Task { await togglePrayer(prayerType) }
-                        }
-                    )
-
-                    Button("See All") {
-                        router.selectedTab = "prayer"
-                    }
-                    .font(SafaTypography.labelSmall)
-                }
-
-                HStack(spacing: SafaSpacing.xs) {
-                    ForEach(todayPrayers.filter { $0.type.isObligatory }) { prayer in
-                        PrayerTimelineItem(
-                            prayer: prayer,
-                            isNext: prayer.id == nextPrayer?.id,
-                            isLogged: loggedPrayers.contains(prayer.type)
-                        )
-                    }
-                }
-            }
-        }
     }
 
     // MARK: - Quick Actions
@@ -545,61 +518,6 @@ private struct NextPrayerHomeCard: View {
     private func updateCountdown() {
         let (hours, minutes, seconds) = prayer.time.countdown()
         countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-}
-
-// MARK: - Prayer Timeline Item
-
-private struct PrayerTimelineItem: View {
-    let prayer: PrayerTime
-    let isNext: Bool
-    let isLogged: Bool
-
-    var body: some View {
-        VStack(spacing: SafaSpacing.xxs) {
-            ZStack {
-                Circle()
-                    .fill(dotColor)
-                    .frame(width: 12, height: 12)
-
-                if isLogged {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 6, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-
-            Text(prayer.type.displayName.prefix(3))
-                .font(SafaTypography.labelSmall)
-                .foregroundColor(labelColor)
-
-            Text(prayer.time.formatted(date: .omitted, time: .shortened))
-                .font(SafaTypography.labelSmall)
-                .foregroundColor(SafaColors.Fallback.tertiaryText)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var dotColor: Color {
-        if isLogged {
-            return .green
-        } else if isNext {
-            return .accentColor
-        } else if prayer.time < Date() {
-            return .orange.opacity(0.5)
-        } else {
-            return Color.gray.opacity(0.3)
-        }
-    }
-
-    private var labelColor: Color {
-        if isLogged {
-            return .green
-        } else if isNext {
-            return .accentColor
-        } else {
-            return SafaColors.Fallback.secondaryText
-        }
     }
 }
 

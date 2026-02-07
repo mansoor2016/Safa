@@ -489,11 +489,6 @@ struct SettingsView: View {
                     }
                 }
 
-            NavigationLink {
-                RamadanView()
-            } label: {
-                Label("Open Ramadan Page", systemImage: "moon.stars")
-            }
         } header: {
             Text("Developer")
         } footer: {
