@@ -2520,7 +2520,16 @@ var isOnWiFi: Bool {
 
 **Decision**: Small app size is critical for downloads. Apple Foundation Models eliminate the biggest size concern (LLM). Audio downloads on-demand, not bundled.
 
-### 9.2 Memory Management
+### 9.2 Performance Budgets
+
+| Metric | Target | Gate |
+|--------|--------|------|
+| App launch (cold) | p50 < 1s, p95 < 2s | Block release if p95 > 3s |
+| Interaction latency | p95 < 200ms | Block release if p95 > 500ms |
+| Memory baseline | < 200MB | Block release if > 300MB |
+| Crash-free sessions | > 99.5% | Block release if < 99% |
+
+### 9.3 Memory Management
 
 - Lazy load Quran/Hadith pages
 - Stream audio rather than load fully into memory
@@ -2533,6 +2542,65 @@ var isOnWiFi: Bool {
 - Efficient background refresh scheduling
 - Avoid continuous compass updates (only when Qibla screen active)
 - Audio session management
+
+---
+
+## 9.5 Dark Mode Token Architecture
+
+Semantic color tokens with strict light/dark parity:
+
+```swift
+// Semantic tokens — use these, not raw colors
+extension Color {
+    static var sfBackground: Color { Color("Background") }        // Light: white, Dark: #1C1C1E
+    static var sfCardBackground: Color { Color("CardBackground") } // Light: systemGray6, Dark: #2C2C2E
+    static var sfPrimaryText: Color { Color("PrimaryText") }       // Light: #000000, Dark: #F2F2F7
+    static var sfSecondaryText: Color { Color("SecondaryText") }   // Light: #8E8E93, Dark: #98989D
+}
+```
+
+**Rules:**
+- No hardcoded `Color.white` or `Color.black` in views — use semantic tokens
+- Quran reading surface: extra-low glare dark background, never pure black
+- Cards use subtle shadow/elevation differences, not just borders
+- All new components must be verified in both themes before merge
+
+---
+
+## 9.6 Observability Architecture
+
+**Philosophy:** Measure quality with metrics, not opinions. Respect user privacy absolutely.
+
+### Event Schema
+
+```swift
+struct AnalyticsEvent {
+    let name: String          // e.g., "prayer_logged", "quran_resumed"
+    let flow: String          // e.g., "prayer", "quran", "onboarding"
+    let context: [String: String] // e.g., ["prayer": "fajr", "source": "widget"]
+    let result: String        // "success", "failure", "fallback"
+    let durationMs: Int?      // Optional timing
+}
+```
+
+### Event Categories
+
+| Category | Examples | Purpose |
+|----------|---------|---------|
+| Product | onboarding_completed, prayer_logged, quran_resumed | Engagement funnels |
+| Technical | app_launch, sync_completed, notification_scheduled | Health monitoring |
+| Degraded | location_fallback, compass_unreliable, offline_mode | Reliability tracking |
+
+### Privacy Rules
+- **Never log:** User religious content, private notes, AI chat prompts/responses, prayer quality ratings
+- **Log only:** Event metadata (action type, timing, outcome, state)
+- **Minimise** retention window and aggregate early
+- **Respect** user privacy settings and regional compliance
+
+### Release Quality Gates
+- Crash-free sessions > 99.5% → else block release
+- Launch p95 < 3s → else block release
+- Zero critical degraded-state regressions → else investigate
 
 ---
 

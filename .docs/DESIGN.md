@@ -102,6 +102,20 @@ Settings → Appearance → Theme Color
 └─────────────────────────────────┘
 ```
 
+### 2.3.1 Dark Mode
+
+**Philosophy:** Dark mode should feel intentionally designed, not auto-inverted. Calm, low-glare, high readability.
+
+**Theme modes:** System (default), Light, Dark — selectable in Settings > Appearance.
+
+**Dark mode design rules:**
+- No pure black (#000000) backgrounds — use dark grey for depth
+- No harsh white (#FFFFFF) text — use off-white for comfort
+- Quran reading surface: extra-low glare, tuned Arabic contrast for extended night reading
+- Cards use subtle elevation differences, not just borders
+- Status chips and banners maintain legibility without glowing
+- All semantic color tokens have strict light/dark parity
+
 ### 2.4 UX Principles
 - Maximum 2-3 taps to reach any feature
 - No advertisements disrupting the experience
@@ -1647,6 +1661,37 @@ Once user base is established:
 - Daily goal completion percentage
 - Lesson completion rate
 - Pronunciation check pass rate
+
+**Quality & Performance Metrics**
+- App launch time: p50 < 1s, p95 < 2s
+- Interaction latency: p95 < 200ms for key actions
+- Memory baseline: < 200MB
+- Crash-free sessions: > 99.5%
+- Degraded-state recovery rate improving release-over-release
+- Dark mode defect rate below release threshold
+
+**Observability (Privacy-Safe)**
+- Onboarding completion funnel
+- Time to first meaningful action
+- Core action completion rates (prayer log, Quran resume, dhikr)
+- Fallback state frequency and recovery rates
+- Never log: religious content, private notes, AI chat prompts/responses
+- Log: event metadata only (action type, timing, outcome, state)
+
+---
+
+## 12.1 Definition of Done (Premium Quality)
+
+A feature is "done" only when it satisfies:
+1. Functional correctness
+2. Visual and motion consistency with design system
+3. Light and dark theme parity on the target flow
+4. Haptic/feedback consistency with event model
+5. Accessibility compliance for key actions
+6. Graceful degradation messaging for failure states
+7. Performance acceptance target for the flow
+8. Observability instrumentation for key outcomes and failure states
+9. Test coverage for critical behaviour
 
 ---
 

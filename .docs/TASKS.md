@@ -578,6 +578,29 @@ xcodebuild -scheme SafaWidget build
 - [x] Restructure "More" tab: Daily Practice, Knowledge & Tools, Progress, Settings
 - [ ] Normalise screen entry points through AppRouter destinations
 
+### 9.14 Dark Mode Implementation
+- [ ] Define semantic color tokens with light/dark parity (Background, Card, Text tiers, Accent, Status)
+- [ ] Add theme mode selector in Settings: System (default), Light, Dark
+- [ ] Tune Quran reading surface for night comfort (low-glare, no pure-black + harsh-white)
+- [ ] Dark mode pass: Home, Prayer, Qibla
+- [ ] Dark mode pass: Quran reader and search
+- [ ] Dark mode pass: Dhikr, counters, Settings, Onboarding
+- [ ] Dark mode pass: Banners, alerts, progress visuals, sheets
+- [ ] Screenshot/snapshot coverage for key screens in both themes
+
+### 9.15 Sharing & Social Polish
+- [ ] Upgrade share cards with refined layout presets and export quality
+- [ ] Add cleaner share composer flow for verses/hadith/achievements
+- [ ] Improve invite flow with clear post-share confirmation states
+
+### 9.16 Observability Instrumentation
+- [ ] Define analytics event schema (name, flow, context, result, durationMs)
+- [ ] Instrument onboarding completion funnel
+- [ ] Instrument core actions: prayer log, Quran resume, dhikr completion
+- [ ] Instrument degraded-state frequency and recovery rates
+- [ ] Implement privacy rules: never log religious content, private notes, AI prompts
+- [ ] Add release quality gate checks for crash-free sessions and performance budgets
+
 ### Phase 9 Acceptance Criteria
 
 ### Phase 9 Integration Tests
@@ -654,12 +677,26 @@ xcodebuild -scheme SafaWidget build
 - [ ] Test in Dark Mode
 
 ### 10.3 Performance Optimization
-- [ ] Profile app launch time (target <2s)
-- [ ] Profile memory usage (target <200MB baseline)
+- [ ] Profile app launch time (target: p50 < 1s, p95 < 2s)
+- [ ] Profile memory usage (target: < 200MB baseline)
+- [ ] Add skeleton loading states for Home, Prayer, Quran screens
+- [ ] Precompute and cache home context for instant rendering
 - [ ] Optimize Core Data fetch requests
 - [ ] Optimize LLM inference memory
 - [ ] Test battery impact over 1 hour usage
 - [ ] Optimize image assets
+- [ ] Set up performance budget gates for release (block if p95 > 3s or crash-free < 99%)
+
+### 10.3.1 Dark Mode QA
+- [ ] Dark mode contrast audit for all primary screens
+- [ ] Verify Quran reading surface readability in dark mode
+- [ ] Verify all semantic tokens have light/dark parity
+- [ ] Screenshot comparison: light vs dark for key flows
+
+### 10.3.2 Observability & Release Quality
+- [ ] Quality dashboards operational (crash rate, launch time, feature adoption)
+- [ ] Release gating thresholds set and validated
+- [ ] Regression prevention: UI snapshots + flow checks in CI
 
 ### 10.4 Beta Testing
 - [ ] Set up TestFlight
