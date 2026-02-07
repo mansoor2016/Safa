@@ -276,7 +276,7 @@ struct HomeView: View {
                 subtitle: "AI companion",
                 color: .orange
             ) {
-                router.navigate(to: .chat)
+                // No-op — feature not yet implemented
             }
             .disabledFeature(.aiCompanion)
         }
