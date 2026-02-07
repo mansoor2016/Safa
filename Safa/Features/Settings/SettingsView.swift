@@ -7,6 +7,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCalculationMethod: CalculationMethod = AppDefaults.calculationMethod
@@ -19,6 +20,7 @@ struct SettingsView: View {
     @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
     @State private var selectedTranslation = AppDefaults.translationLanguage
+    @State private var selectedAppearance: AppearanceOption = .system
     @State private var selectedAccentColor: AccentColorOption = .teal
     @State private var showDeleteConfirmation = false
 
@@ -325,21 +327,15 @@ struct SettingsView: View {
 
     private var appearanceSection: some View {
         Section {
-            Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
-                .onChange(of: hapticFeedbackEnabled) { _, newValue in
-                    Task { await prefsManager.saveHapticFeedback(newValue) }
+            Picker("Appearance", selection: $selectedAppearance) {
+                ForEach(AppearanceOption.allCases) { option in
+                    Label(option.rawValue, systemImage: option.iconName)
+                        .tag(option)
                 }
-
-            Toggle("Show Ramadan Banner", isOn: $showRamadanBanner)
-                .onChange(of: showRamadanBanner) { _, newValue in
-                    if newValue {
-                        // Restore: remove the dismiss key
-                        UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
-                    } else {
-                        // Dismiss: set the dismiss key
-                        UserDefaults.standard.set(true, forKey: ramadanBannerDismissKey)
-                    }
-                }
+            }
+            .onChange(of: selectedAppearance) { _, newValue in
+                themeManager.setColorScheme(newValue.colorScheme)
+            }
 
             Picker("Accent Color", selection: $selectedAccentColor) {
                 ForEach(AccentColorOption.allCases, id: \.self) { option in
@@ -353,10 +349,25 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: selectedAccentColor) { _, newValue in
+                themeManager.setAccentColor(newValue)
                 Task {
                     await prefsManager.update(\.accentColorName, to: newValue.rawValue)
                 }
             }
+
+            Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
+                .onChange(of: hapticFeedbackEnabled) { _, newValue in
+                    Task { await prefsManager.saveHapticFeedback(newValue) }
+                }
+
+            Toggle("Show Ramadan Banner", isOn: $showRamadanBanner)
+                .onChange(of: showRamadanBanner) { _, newValue in
+                    if newValue {
+                        UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
+                    } else {
+                        UserDefaults.standard.set(true, forKey: ramadanBannerDismissKey)
+                    }
+                }
         } header: {
             Text("Appearance")
         }
@@ -517,8 +528,13 @@ struct SettingsView: View {
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
         savedLocationName = prefs.savedLocationName
 
-        // Load accent color
-        selectedAccentColor = AccentColorOption(rawValue: prefs.accentColorName) ?? .teal
+        // Load appearance from ThemeManager
+        if let scheme = themeManager.colorScheme {
+            selectedAppearance = scheme == .light ? .light : .dark
+        } else {
+            selectedAppearance = .system
+        }
+        selectedAccentColor = themeManager.accentColor
 
         // Load Ramadan banner state (synced with HomeView dismiss key)
         showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)

@@ -10,6 +10,7 @@ struct SafaApp: App {
     // MARK: - State
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
+    @State private var themeManager = ThemeManager()
     @State private var hasCompletedOnboarding = false
 
     // Spotlight service
@@ -30,9 +31,10 @@ struct SafaApp: App {
                     OnboardingView(isOnboardingComplete: $hasCompletedOnboarding)
                 }
             }
-            .tint(.accentColor)
+            .safaTheme(themeManager)
             .environment(dependencies)
             .environment(router)
+            .environment(themeManager)
             .onOpenURL { url in
                 router.handleDeepLink(url)
             }
