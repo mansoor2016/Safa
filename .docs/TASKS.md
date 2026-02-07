@@ -45,13 +45,13 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 
 ### 0.3 Xcode Project Configuration
 - [x] Set deployment target to iOS 26 (confirmed in `Safa.xcodeproj/project.pbxproj`)
-- [ ] Create Widget extension target in Xcode project (`SafaWidget`/`SafaWidgets`)
+- [x] Create Widget extension target in Xcode project (`SafaWidgetExtension`)
 - [ ] Create Intents extension target in Xcode project (`SafaIntents`)
 
 ### 0.4 Core Directory Structure
 
 ### Phase 0 Acceptance Criteria
-- [ ] **AC-0.4**: Widget extension target builds independently
+- [x] **AC-0.4**: Widget extension target builds independently
 
 ### Phase 0 Verification
 ```bash
@@ -399,10 +399,10 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 **v1.1:**
 
-### 7.1.1 Lock Screen Widgets (iOS 16+)
-- [ ] Implement `.accessoryCircular` widget (next prayer countdown ring)
-- [ ] Implement `.accessoryRectangular` widget (next prayer name + time + countdown)
-- [ ] Implement `.accessoryInline` widget (next prayer name and time, single line)
+### 7.1.1 Lock Screen Widgets
+- [x] Implement `.accessoryCircular` widget (next prayer countdown ring)
+- [x] Implement `.accessoryRectangular` widget (next prayer name + time + countdown)
+- [x] Implement `.accessoryInline` widget (next prayer name and time, single line)
 - [ ] Test Lock Screen widgets on device (requires Widget extension target setup)
 
 ### 7.1.2 Interactive Widgets (iOS 17+)
