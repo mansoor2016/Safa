@@ -131,13 +131,13 @@ struct SmallWidgetView: View {
                     .font(.caption)
                     .foregroundColor(.accentColor)
             } else {
-                Text("All Prayers Complete")
+                Text("No More Prayers Today")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
-                Image(systemName: "checkmark.circle.fill")
+                Image(systemName: "moon.zzz.fill")
                     .font(.title2)
-                    .foregroundColor(.green)
+                    .foregroundColor(.secondary)
             }
 
             if entry.configuration.showHijriDate {
@@ -188,13 +188,13 @@ struct MediumWidgetView: View {
                 } else {
                     Spacer()
 
-                    Text("All Prayers Complete")
+                    Text("No More Prayers Today")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: "moon.zzz.fill")
                         .font(.largeTitle)
-                        .foregroundColor(.green)
+                        .foregroundColor(.secondary)
                 }
             }
 
