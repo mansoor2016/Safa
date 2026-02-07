@@ -170,7 +170,6 @@ final class DisabledFeatureTests: XCTestCase {
             .islamicCalendar,
             .gamification,
             .familyCircle,
-            .ramadanMode,
             .windDown,
             .zakatCalculator,
             .namesOfAllah
@@ -186,6 +185,7 @@ final class DisabledFeatureTests: XCTestCase {
         let upcomingFeatures: [Feature] = [
             .aiCompanion,       // Requires iOS 18.4+
             .learning,          // Content not yet ready
+            .ramadanMode,       // Debug override, not user-facing
             .interactiveWidgets, // Requires Widget extension target
             .standByMode        // Requires Widget extension target
         ]

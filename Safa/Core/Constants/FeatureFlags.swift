@@ -82,6 +82,9 @@ enum Feature: String, CaseIterable {
         // Content not yet ready
         case .learning:
             return false
+        // Debug override — not a user-facing feature
+        case .ramadanMode:
+            return false
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets,
              .standByMode:
