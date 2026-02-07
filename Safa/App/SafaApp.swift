@@ -106,7 +106,13 @@ struct MainTabView: View {
     private var selectedTab: Binding<Tab> {
         Binding(
             get: { Tab(rawValue: router.selectedTab) ?? .home },
-            set: { router.selectedTab = $0.rawValue }
+            set: { newTab in
+                // Clear Home's nav stack when switching away so pushed views don't block tabs
+                if newTab != .home && !router.path.isEmpty {
+                    router.popToRoot()
+                }
+                router.selectedTab = newTab.rawValue
+            }
         )
     }
 

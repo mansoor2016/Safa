@@ -498,6 +498,12 @@ struct SettingsView: View {
                     }
                 }
 
+            Button("Reset All Feature Flags") {
+                FeatureFlags.shared.resetAllOverrides()
+                forceRamadan = false
+            }
+            .foregroundColor(.red)
+
         } header: {
             Text("Developer")
         } footer: {
