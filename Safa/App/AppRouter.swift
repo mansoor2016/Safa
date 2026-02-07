@@ -149,7 +149,7 @@ final class AppRouter {
             return true
 
         case "prayer":
-            navigate(to: .prayer)
+            selectedTab = "prayer"
             return true
 
         case "qibla":

@@ -371,6 +371,7 @@ struct PrayerTimesWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             SafaWidgetEntryView(entry: entry)
+                .widgetURL(URL(string: "safa://prayer"))
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Prayer Times")

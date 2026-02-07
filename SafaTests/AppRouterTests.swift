@@ -95,7 +95,8 @@ final class AppRouterTests: XCTestCase {
     func testDeepLinkPrayer() {
         let url = URL(string: "safa://prayer")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
+        // Prayer deep link switches to prayer tab, not push navigation
+        XCTAssertEqual(sut.selectedTab, "prayer")
     }
 
     func testDeepLinkQibla() {
