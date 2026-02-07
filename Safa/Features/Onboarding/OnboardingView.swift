@@ -469,12 +469,6 @@ struct OnboardingView: View {
                         }
                     }
                 }
-
-                Section {
-                    Toggle("Prayer Notifications", isOn: $notificationsEnabled)
-                } footer: {
-                    Text("You can further customize notifications in Settings after setup.")
-                }
             }
             .navigationTitle("Customize")
             .navigationBarTitleDisplayMode(.inline)
