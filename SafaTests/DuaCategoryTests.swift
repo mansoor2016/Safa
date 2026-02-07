@@ -24,8 +24,8 @@ final class DuaCategoryTests: XCTestCase {
         XCTAssertNil(combined, "Should not have a combined morning_evening category")
     }
 
-    func test_allCategories_hasTenEntries() {
-        XCTAssertEqual(DuaCategoryData.allCategories.count, 10)
+    func test_allCategories_hasTwelveEntries() {
+        XCTAssertEqual(DuaCategoryData.allCategories.count, 12)
     }
 
     func test_allCategories_haveUniqueIds() {
@@ -65,6 +65,47 @@ final class DuaCategoryTests: XCTestCase {
                              dua.textTranslation.lowercased().contains("name of allah")
             XCTAssertTrue(isRelevant,
                           "Food dua '\(dua.titleEnglish)' should be about food/drink")
+        }
+    }
+
+    // MARK: - Funeral Content
+
+    func test_funeralCategory_hasDuas() {
+        let duas = DuaData.allDuas.filter { $0.categoryId == "funeral" }
+        XCTAssertGreaterThan(duas.count, 0, "Funeral category should have duas")
+    }
+
+    func test_funeralDuas_areRelevant() {
+        let duas = DuaData.allDuas.filter { $0.categoryId == "funeral" }
+        for dua in duas {
+            let relevant = dua.titleEnglish.lowercased().contains("funeral") ||
+                           dua.titleEnglish.lowercased().contains("death") ||
+                           dua.titleEnglish.lowercased().contains("grave") ||
+                           dua.titleEnglish.lowercased().contains("deceased") ||
+                           dua.textTranslation.lowercased().contains("forgive") ||
+                           dua.textTranslation.lowercased().contains("return")
+            XCTAssertTrue(relevant, "Funeral dua '\(dua.titleEnglish)' should be relevant")
+        }
+    }
+
+    // MARK: - Ramadan Content
+
+    func test_ramadanCategory_hasDuas() {
+        let duas = DuaData.allDuas.filter { $0.categoryId == "ramadan" }
+        XCTAssertGreaterThan(duas.count, 0, "Ramadan category should have duas")
+    }
+
+    func test_ramadanDuas_areRelevant() {
+        let duas = DuaData.allDuas.filter { $0.categoryId == "ramadan" }
+        for dua in duas {
+            let relevant = dua.titleEnglish.lowercased().contains("fast") ||
+                           dua.titleEnglish.lowercased().contains("iftar") ||
+                           dua.titleEnglish.lowercased().contains("suhoor") ||
+                           dua.titleEnglish.lowercased().contains("qadr") ||
+                           dua.titleEnglish.lowercased().contains("intention") ||
+                           dua.textTranslation.lowercased().contains("thirst") ||
+                           dua.textTranslation.lowercased().contains("forgiv")
+            XCTAssertTrue(relevant, "Ramadan dua '\(dua.titleEnglish)' should be relevant")
         }
     }
 

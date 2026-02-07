@@ -147,9 +147,11 @@ struct DuaCategoryData: Identifiable, Hashable {
     static let food = DuaCategoryData(id: "food", name: "Food & Drink", arabicName: "أذكار الطعام", iconName: "fork.knife")
     static let sleep = DuaCategoryData(id: "sleep", name: "Sleep", arabicName: "أذكار النوم", iconName: "moon.zzz")
     static let anxiety = DuaCategoryData(id: "anxiety", name: "Anxiety & Distress", arabicName: "أدعية الهم والحزن", iconName: "heart.circle")
+    static let funeral = DuaCategoryData(id: "funeral", name: "Funeral & Bereavement", arabicName: "أدعية الجنازة", iconName: "leaf")
+    static let ramadan = DuaCategoryData(id: "ramadan", name: "Ramadan", arabicName: "أدعية رمضان", iconName: "moon.stars")
 
     static let allCategories: [DuaCategoryData] = [
-        morning, evening, prayer, daily, protection, forgiveness, travel, food, sleep, anxiety
+        morning, evening, prayer, daily, protection, forgiveness, travel, food, sleep, anxiety, funeral, ramadan
     ]
 }
 
@@ -276,6 +278,50 @@ struct DuaData {
             textTransliteration: "Bismillahi tawakkaltu 'alAllah, la hawla wa la quwwata illa billah",
             textTranslation: "In the name of Allah, I place my trust in Allah. There is no might or power except with Allah.",
             source: "Abu Dawud 5095", occasion: "When leaving the home", repetitions: 1),
+
+        // MARK: Funeral & Bereavement
+        Dua(id: "fn1", categoryId: "funeral", titleEnglish: "Funeral Prayer (Janazah)",
+            textArabic: "اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ، وَعَافِهِ وَاعْفُ عَنْهُ، وَأَكْرِمْ نُزُلَهُ، وَوَسِّعْ مُدْخَلَهُ",
+            textTransliteration: "Allahum-maghfir lahu warhamhu, wa 'afihi wa'fu 'anhu, wa akrim nuzulahu, wa wassi' mudkhalahu",
+            textTranslation: "O Allah, forgive him and have mercy on him, grant him well-being and pardon him, honour his resting place and widen his entrance.",
+            source: "Muslim 963", occasion: "During the funeral prayer", repetitions: 1),
+        Dua(id: "fn2", categoryId: "funeral", titleEnglish: "Upon Hearing of a Death",
+            textArabic: "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ",
+            textTransliteration: "Inna lillahi wa inna ilayhi raji'un",
+            textTranslation: "Indeed we belong to Allah, and indeed to Him we will return.",
+            source: "Quran 2:156", occasion: "Upon hearing news of someone's passing", repetitions: 1),
+        Dua(id: "fn3", categoryId: "funeral", titleEnglish: "Visiting the Grave",
+            textArabic: "السَّلَامُ عَلَيْكُمْ أَهْلَ الدِّيَارِ مِنَ الْمُؤْمِنِينَ وَالْمُسْلِمِينَ، وَإِنَّا إِنْ شَاءَ اللَّهُ بِكُمْ لَاحِقُونَ",
+            textTransliteration: "As-salamu 'alaykum ahlad-diyari minal-mu'mineena wal-muslimeen, wa inna in sha Allahu bikum lahiqun",
+            textTranslation: "Peace be upon you, O inhabitants of the graves, from among the believers and the Muslims. Indeed, if Allah wills, we will join you.",
+            source: "Muslim 975", occasion: "When visiting the graveyard", repetitions: 1),
+        Dua(id: "fn4", categoryId: "funeral", titleEnglish: "For the Deceased",
+            textArabic: "اللَّهُمَّ اغْفِرْ لِحَيِّنَا وَمَيِّتِنَا، وَشَاهِدِنَا وَغَائِبِنَا، وَصَغِيرِنَا وَكَبِيرِنَا، وَذَكَرِنَا وَأُنْثَانَا",
+            textTransliteration: "Allahum-maghfir lihayyina wa mayyitina, wa shahidina wa gha'ibina, wa sagheerina wa kabeerina, wa dhakarina wa unthana",
+            textTranslation: "O Allah, forgive our living and our dead, those who are present and those who are absent, our young and our old, our males and our females.",
+            source: "Tirmidhi 1024", occasion: "During funeral prayer", repetitions: 1),
+
+        // MARK: Ramadan
+        Dua(id: "rm1", categoryId: "ramadan", titleEnglish: "Intention for Fasting",
+            textArabic: "نَوَيْتُ أَنْ أَصُومَ غَدًا مِنْ شَهْرِ رَمَضَانَ الْمُبَارَكِ فَرْضًا لَكَ يَا اللَّهُ فَتَقَبَّلْ مِنِّي إِنَّكَ أَنْتَ السَّمِيعُ الْعَلِيمُ",
+            textTransliteration: "Nawaytu an asuma ghadan min shahri Ramadan al-mubarak, fardhan laka ya Allah, fataqabbal minni innaka antas-Samee'ul-'Aleem",
+            textTranslation: "I intend to fast tomorrow in the blessed month of Ramadan, as an obligation for You, O Allah, so accept it from me. Indeed You are the All-Hearing, the All-Knowing.",
+            source: "Scholarly tradition", occasion: "Before Fajr, intending to fast", repetitions: 1),
+        Dua(id: "rm2", categoryId: "ramadan", titleEnglish: "Breaking the Fast (Iftar)",
+            textArabic: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ",
+            textTransliteration: "Dhahaba ath-thama'u wab-tallat al-'urooqu wa thabat al-ajru in sha Allah",
+            textTranslation: "The thirst has gone, the veins are moistened and the reward is confirmed, if Allah wills.",
+            source: "Abu Dawud 2357", occasion: "At the time of breaking the fast", repetitions: 1),
+        Dua(id: "rm3", categoryId: "ramadan", titleEnglish: "Laylatul Qadr",
+            textArabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
+            textTransliteration: "Allahumma innaka 'afuwwun tuhibbul-'afwa fa'fu 'anni",
+            textTranslation: "O Allah, You are the Most Forgiving, and You love forgiveness, so forgive me.",
+            source: "Tirmidhi 3513", occasion: "During the last 10 nights of Ramadan, especially odd nights", repetitions: 3),
+        Dua(id: "rm4", categoryId: "ramadan", titleEnglish: "Suhoor Supplication",
+            textArabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ بِرَحْمَتِكَ الَّتِي وَسِعَتْ كُلَّ شَيْءٍ أَنْ تَغْفِرَ لِي",
+            textTransliteration: "Allahumma inni as'aluka birahmatik-allatee wasi'at kulla shay'in an taghfira lee",
+            textTranslation: "O Allah, I ask You by Your mercy which encompasses all things, to forgive me.",
+            source: "Ibn Majah", occasion: "During suhoor (pre-dawn meal)", repetitions: 1),
     ]
 }
 
