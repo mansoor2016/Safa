@@ -29,9 +29,10 @@ struct DisabledFeatureModifier: ViewModifier {
     private func disabledContent(_ content: Content) -> some View {
         content
             .opacity(0.5)
-            .overlay {
+            .overlay(alignment: .trailing) {
                 if showLabel {
                     comingSoonLabel
+                        .padding(.trailing, 8)
                 }
             }
             .contentShape(Rectangle())
@@ -49,16 +50,15 @@ struct DisabledFeatureModifier: ViewModifier {
     }
 
     private var comingSoonLabel: some View {
-        Text("Coming soon")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(.white)
+        Text("Coming Soon")
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.secondary)
             .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.vertical, 3)
             .background {
                 Capsule()
-                    .fill(Color.purple.opacity(0.9))
+                    .fill(Color.gray.opacity(0.2))
             }
-            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
     }
 }
 
@@ -75,9 +75,10 @@ struct SimpleDisabledModifier: ViewModifier {
         if isDisabled {
             content
                 .opacity(0.5)
-                .overlay {
+                .overlay(alignment: .trailing) {
                     if showLabel {
                         comingSoonLabel
+                            .padding(.trailing, 8)
                     }
                 }
                 .contentShape(Rectangle())
@@ -93,16 +94,15 @@ struct SimpleDisabledModifier: ViewModifier {
     }
 
     private var comingSoonLabel: some View {
-        Text("Coming soon")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(.white)
+        Text("Coming Soon")
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.secondary)
             .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.vertical, 3)
             .background {
                 Capsule()
-                    .fill(Color.purple.opacity(0.9))
+                    .fill(Color.gray.opacity(0.2))
             }
-            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
     }
 }
 
@@ -164,12 +164,12 @@ struct DisabledFeatureRow: View {
                         .foregroundStyle(isDisabled ? .secondary : .primary)
 
                     if isDisabled {
-                        Text("Coming soon")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.white)
+                        Text("Coming Soon")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(.secondary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.purple))
+                            .background(Capsule().fill(Color.gray.opacity(0.2)))
                     }
                 }
 
