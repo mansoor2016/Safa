@@ -1239,6 +1239,48 @@ RESPONSE FORMAT:
 
 ## 6. Key Feature Technical Specs
 
+### 6.0 Haptic System Architecture
+
+All haptic feedback should route through `HapticFeedbackService` using a typed event enum. No direct `UIImpactFeedbackGenerator` usage in feature views.
+
+```swift
+enum HapticEvent {
+    case tap            // Light — navigation, toggle
+    case selection      // Selection — picker changes
+    case commit         // Medium — log prayer, start lesson
+    case success        // Notification success — milestone reached
+    case warning        // Notification warning — degraded state
+    case error          // Notification error — action failed
+    case qiblaLight     // Light periodic — getting closer
+    case qiblaPerfect   // Success — facing Qibla
+    case tasbeehTap     // Soft — per-count
+    case tasbeehMilestone // Medium + success — 33/99 count
+}
+
+class HapticFeedbackService {
+    static let shared = HapticFeedbackService()
+
+    func play(_ event: HapticEvent) {
+        guard !isReduceMotionEnabled else { return }
+        switch event {
+        case .tap: UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        case .selection: UISelectionFeedbackGenerator().selectionChanged()
+        case .commit: UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
+        case .warning: UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        case .error: UINotificationFeedbackGenerator().notificationOccurred(.error)
+        // ... Qibla and tasbeeh patterns
+        }
+    }
+
+    private var isReduceMotionEnabled: Bool {
+        UIAccessibility.isReduceMotionEnabled
+    }
+}
+```
+
+**Settings UI:** Haptics On/Off toggle + Intensity (Subtle/Balanced/Strong) + "Test Haptic" button.
+
 ### 6.1 Widgets (WidgetKit)
 
 **v1 Priority:**
@@ -2279,6 +2321,48 @@ class HealthKitService {
 ## 8.8 Graceful Degradation & Resilience
 
 **Principle:** Never crash on external failure. Never silently fail. Inform the user and offer alternatives.
+
+### 8.8.0 DegradedStateBanner Component
+
+Shared reusable component for all inline degraded state indicators.
+
+```swift
+struct DegradedStateBanner: View {
+    let icon: String          // SF Symbol name
+    let message: String       // User-facing description
+    let actionLabel: String?  // Optional action ("Open Settings", "Retry")
+    let action: (() -> Void)? // Action callback
+    let color: Color          // .orange for warning, .red for error
+
+    var body: some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: icon).font(.caption2)
+            Text(message).font(SafaTypography.labelSmall)
+            Spacer()
+            if let actionLabel {
+                Button(actionLabel) { action?() }
+                    .font(SafaTypography.labelSmall)
+            }
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.xs)
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
+    }
+}
+```
+
+**Standard variants:**
+| State | Icon | Message | Action |
+|-------|------|---------|--------|
+| Location fallback | `location.slash` | "Using London, UK" | "Update" |
+| Offline | `wifi.slash` | "Offline — changes saved locally" | nil |
+| Compass accuracy | `exclamationmark.circle` | "Low compass accuracy" | "Calibrate" |
+| Sync paused | `icloud.slash` | "Sync paused" | nil |
+| Storage low | `externaldrive.badge.exclamationmark` | "Storage low" | "Manage" |
+
+**Placement:** Inline above main content, never blocking. Subtle, not alarming.
 
 ### 8.8.1 Core Data Store Failure
 

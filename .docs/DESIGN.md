@@ -111,6 +111,8 @@ Settings → Appearance → Theme Color
 - Proactive in-app guidance and reminders
 - **Disabled features**: Greyed out with "Coming soon" label (never hidden)
 - **Graceful degradation**: Never crash, never silently fail. Inform the user and offer alternatives.
+- **Premium haptics**: Tactile feedback should be intentional, calm, and consistent — encoding meaning in patterns (commit, success, warning), not just buzzing on every tap. Route all haptics through a central service with accessibility gating.
+- **Intent-driven home**: Home should be a strict intent launcher — next prayer, continue Quran, quick dhikr. Most daily actions should complete in ≤2 taps.
 
 ### 2.4.2 Graceful Degradation Principles
 
@@ -1782,6 +1784,26 @@ The Islamic concept of "ongoing charity" — when you share beneficial knowledge
 - Advanced memorization tools (spaced repetition for Quran)
 - Podcast-style Islamic lectures
 - Integration with Muslim Pro/other apps for data import
+
+### 14.7 Polish & Experience Quality
+
+Mid-term improvements to elevate from "feature-complete" to "experience-complete":
+
+**Phase A — High impact, low risk:**
+- **Haptic system unification**: Central `HapticEvent` enum replacing scattered `UIImpactFeedbackGenerator` calls. Consistent haptic language: tap (light), commit (medium), success (notification), milestone (celebration pattern). Settings for intensity.
+- **Degraded state banners**: Shared `DegradedStateBanner` component for all failure modes (location fallback, offline, compass accuracy, sync paused). Replace silent failures with subtle inline feedback.
+- **Home intent resolver**: Context-aware service returning 1-3 prioritised actions (next prayer, continue Quran, morning adhkar). "Quick Resume" cards for last surah, last lesson, last dhikr routine.
+
+**Phase B — Experience quality:**
+- **Motion tokens**: Standardised durations, curves, spring presets in the design system. Semantic elevation tokens for card styles. Skeleton loaders for key screens.
+- **Navigation coherence**: Unified search pattern across Quran/Hadith/Calendar. "More" tab grouped by Daily Practice, Learning, Community, Settings.
+- **Accessibility polish**: Complete Dynamic Type audit, VoiceOver rotor flow for Quran, high-contrast refinements, Minimal Motion profile.
+
+**Phase C — Retention depth:**
+- **Micro-practice mode**: 1-ayah read + reflection, 33-count quick dhikr, 1-hadith/day with save/share. Lightweight, no pressure.
+- **Prayer quality logs**: Optional on-time, congregation, focus rating (very lightweight, private).
+- **Weekly reflection summary**: Prayers logged, Quran continuity, streak trends, suggested focus for next week.
+- **Progressive Learn rollout**: Enable ready tracks individually instead of gating the entire feature.
 
 ---
 
