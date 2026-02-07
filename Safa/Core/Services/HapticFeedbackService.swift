@@ -5,6 +5,25 @@
 import UIKit
 import CoreHaptics
 
+// MARK: - Haptic Event Enum
+
+/// Typed haptic events — use these instead of direct UIImpactFeedbackGenerator calls in views.
+/// Route all haptics through `HapticFeedbackService.shared.play(_:)`.
+enum HapticEvent {
+    case tap            // Light — navigation, toggle
+    case selection      // Selection — picker changes
+    case commit         // Medium — log prayer, start lesson
+    case success        // Notification success — milestone reached
+    case warning        // Notification warning — degraded state
+    case error          // Notification error — action failed
+    case qiblaLight     // Light periodic — getting closer
+    case qiblaPerfect   // Custom — facing Qibla
+    case tasbeehTap     // Soft — per-count
+    case tasbeehMilestone // Rigid — 33/99 count
+    case celebration    // Custom — achievement, all 5 prayers
+    case levelUp        // Custom — rising intensity
+}
+
 // MARK: - Haptic Feedback Service
 
 @Observable
@@ -67,6 +86,27 @@ final class HapticFeedbackService {
             try hapticEngine?.start()
         } catch {
             print("Haptic engine initialization failed: \(error)")
+        }
+    }
+
+    // MARK: - Event Dispatcher
+
+    /// Primary entry point — use this instead of direct generator calls in views.
+    func play(_ event: HapticEvent) {
+        guard isEnabled && !UIAccessibility.isReduceMotionEnabled else { return }
+        switch event {
+        case .tap: impact(.light, intensity: 0.7)
+        case .selection: selection()
+        case .commit: impact(.medium)
+        case .success: notification(.success)
+        case .warning: notification(.warning)
+        case .error: notification(.error)
+        case .qiblaLight: impact(.light, intensity: 0.4)
+        case .qiblaPerfect: playCustomPattern(.qiblaLock)
+        case .tasbeehTap: impact(.soft, intensity: 0.6)
+        case .tasbeehMilestone: impact(.rigid, intensity: 1.0)
+        case .celebration: playCustomPattern(.celebration)
+        case .levelUp: playCustomPattern(.levelUp)
         }
     }
 

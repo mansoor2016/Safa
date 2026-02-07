@@ -298,7 +298,7 @@ xcodebuild test -only-testing:SafaTests/StreakTests
 - [ ] Add track-level "Coming Soon" for incomplete tracks
 
 ### 5.6 Micro-Practice Sessions
-- [ ] Define `PracticeSession` model (type, duration, content)
+- [x] Define `PracticeSession` model (type, duration, content)
 - [ ] Build 1-ayah read + reflection prompt flow
 - [ ] Build 33-count dhikr quick session
 - [ ] Build 1-hadith/day with save/share
@@ -548,17 +548,17 @@ xcodebuild -scheme SafaWidget build
 ### 9.8 Home Screen
 
 ### 9.9 Haptic System Unification
-- [ ] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
-- [ ] Create event-to-style mapping in `HapticFeedbackService`
+- [x] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
+- [x] Create event-to-style mapping in `HapticFeedbackService` (`play(_:)` dispatcher)
 - [ ] Replace all direct `UIImpactFeedbackGenerator` calls in feature views with service calls
 - [ ] Add Haptics settings section (On/Off, Intensity: Subtle/Balanced/Strong, Test button)
-- [ ] Gate haptics on `UIAccessibility.isReduceMotionEnabled`
+- [x] Gate haptics on `UIAccessibility.isReduceMotionEnabled` (in `play(_:)` dispatcher)
 - [ ] Unit tests for event mapping and preference gating
 
 ### 9.10 Degraded State Banners
-- [ ] Create shared `DegradedStateBanner` component (icon + message + optional action)
-- [ ] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused
-- [ ] Replace ad-hoc inline indicators with consistent banner component
+- [x] Create shared `DegradedStateBanner` component (icon + message + optional action)
+- [x] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused (5 standard variants)
+- [x] Replace ad-hoc inline indicators with consistent banner component (PrayerView updated)
 - [ ] Add "System Status" sheet in Settings (location, notifications, sync, storage)
 
 ### 9.11 Home Intent Resolver

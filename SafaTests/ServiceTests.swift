@@ -213,6 +213,39 @@ final class HapticFeedbackServiceTests: XCTestCase {
         let service = HapticFeedbackService.shared
         XCTAssertNotNil(service)
     }
+
+    func testServiceDefaultEnabled() {
+        let service = HapticFeedbackService.shared
+        XCTAssertTrue(service.isEnabled)
+    }
+
+    func testAllHapticEventCases() {
+        // Verify all enum cases exist and can be created
+        let events: [HapticEvent] = [
+            .tap, .selection, .commit, .success, .warning, .error,
+            .qiblaLight, .qiblaPerfect, .tasbeehTap, .tasbeehMilestone,
+            .celebration, .levelUp
+        ]
+        XCTAssertEqual(events.count, 12)
+    }
+
+    func testPlayEventDoesNotCrash() {
+        // Verify play() doesn't crash for any event
+        let service = HapticFeedbackService.shared
+        for event in [HapticEvent.tap, .selection, .commit, .success, .warning, .error,
+                      .qiblaLight, .qiblaPerfect, .tasbeehTap, .tasbeehMilestone,
+                      .celebration, .levelUp] {
+            service.play(event) // Should not crash even in test environment
+        }
+    }
+
+    func testDisabledServiceDoesNotPlay() {
+        let service = HapticFeedbackService.shared
+        let wasEnabled = service.isEnabled
+        service.setEnabled(false)
+        service.play(.tap) // Should be a no-op
+        service.setEnabled(wasEnabled) // Restore
+    }
 }
 
 // MARK: - CloudKitSyncService Tests
