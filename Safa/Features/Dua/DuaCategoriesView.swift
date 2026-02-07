@@ -62,13 +62,13 @@ struct DuaCategoriesView: View {
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.evening)) {
-                        QuickAccessButton(title: "Evening", arabicTitle: "أذكار المساء", iconName: "sunset.fill", color: .purple)
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.food)) {
+                        QuickAccessButton(title: "Food & Drink", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.sleep)) {
-                        QuickAccessButton(title: "Sleep", arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .indigo)
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.protection)) {
+                        QuickAccessButton(title: "Protection", arabicTitle: "أذكار الحماية", iconName: "shield.fill", color: .blue)
                     }
                     .buttonStyle(.plain)
 
@@ -137,8 +137,8 @@ struct DuaCategoryData: Identifiable, Hashable {
         DuaData.allDuas.filter { $0.categoryId == id }.count
     }
 
-    static let morning = DuaCategoryData(id: "morning", name: "Morning Adhkar", arabicName: "أذكار الصباح", iconName: "sunrise")
-    static let evening = DuaCategoryData(id: "evening", name: "Evening Adhkar", arabicName: "أذكار المساء", iconName: "sunset")
+    static let morning = DuaCategoryData(id: "morning", name: "Morning", arabicName: "أذكار الصباح", iconName: "sunrise")
+    static let evening = DuaCategoryData(id: "evening", name: "Evening", arabicName: "أذكار المساء", iconName: "sunset")
     static let prayer = DuaCategoryData(id: "prayer", name: "Prayer", arabicName: "أدعية الصلاة", iconName: "moon.stars")
     static let daily = DuaCategoryData(id: "daily", name: "Daily Activities", arabicName: "أذكار اليومية", iconName: "sun.max")
     static let protection = DuaCategoryData(id: "protection", name: "Protection", arabicName: "أدعية الحفظ", iconName: "shield")
