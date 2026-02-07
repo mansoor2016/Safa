@@ -44,17 +44,6 @@ struct HomeView: View {
                     }
                 }
 
-                // Prayer progress (same expanded style as Prayer page)
-                PrayerProgressIndicator(
-                    prayers: todayPrayers,
-                    loggedPrayers: loggedPrayers,
-                    nextPrayer: nextPrayer,
-                    style: .expanded,
-                    onLogPrayer: { prayerType in
-                        Task { await togglePrayer(prayerType) }
-                    }
-                )
-
                 // Quick actions
                 quickActions
 
