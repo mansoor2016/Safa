@@ -1338,11 +1338,11 @@ The Quran UI, repository, and SQLite database structure are all in place but the
 
 **Priority: MEDIUM — Enhance existing RamadanView**
 
-- [ ] Add compact PrayerProgressIndicator to RamadanView (reuse existing component)
-- [ ] Add "Time until Iftar" as hero countdown (replace generic countdown)
-- [ ] Add Play Adhan button (reuse same pattern as Prayer page)
-- [ ] Link to Prayer tab for full prayer timetable (don't duplicate)
-- [ ] Ensure prayer data loads on Ramadan page (uses same location/repository)
+- [x] Add compact PrayerProgressIndicator to RamadanView (reuse existing component)
+- [x] Add "Time until Iftar" as hero countdown (replace generic countdown)
+- [x] Add Play Adhan button (reuse same pattern as Prayer page)
+- [x] Link to Prayer tab for full prayer timetable (don't duplicate)
+- [x] Ensure prayer data loads on Ramadan page (uses same location/repository)
 
 ### TODO: Smart Adhan (Location-Aware Notification Sounds)
 

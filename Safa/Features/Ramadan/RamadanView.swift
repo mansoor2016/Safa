@@ -6,10 +6,14 @@ import SwiftUI
 
 struct RamadanView: View {
     @Environment(Dependencies.self) private var dependencies
+    @Environment(AppRouter.self) private var router
     @State private var todayFasted = false
     @State private var currentDay = 1
     @State private var suhoorTime: Date?
     @State private var iftarTime: Date?
+    @State private var todayPrayers: [PrayerTime] = []
+    @State private var loggedPrayers: Set<PrayerType> = []
+    @State private var nextPrayer: PrayerTime?
     @State private var fastingDays: Set<Int> = []
     @State private var showTaraweehReminder = false
     @State private var showSettings = false
@@ -23,7 +27,9 @@ struct RamadanView: View {
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
                 ramadanHeader
+                iftarCountdown
                 todayTimesCard
+                prayerProgressSection
                 fastingTrackerCard
                 quickActionsSection
                 dailyGoalsSection
@@ -123,6 +129,92 @@ struct RamadanView: View {
         .padding(.horizontal, SafaSpacing.lg)
     }
 
+    // MARK: - Iftar/Suhoor Hero Countdown
+
+    private var iftarCountdown: some View {
+        ContentCard {
+            VStack(spacing: SafaSpacing.sm) {
+                if let iftar = iftarTime, iftar > Date() {
+                    Text("Time until Iftar")
+                        .font(SafaTypography.labelMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                    let (hours, minutes, seconds) = iftar.countdown()
+                    Text(String(format: "%02d:%02d:%02d", hours, minutes, seconds))
+                        .font(SafaTypography.counterLarge)
+                        .foregroundColor(SafaColors.Fallback.text)
+                        .monospacedDigit()
+                } else if let suhoor = suhoorTime, suhoor > Date() {
+                    Text("Time until Suhoor ends")
+                        .font(SafaTypography.labelMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                    let (hours, minutes, seconds) = suhoor.countdown()
+                    Text(String(format: "%02d:%02d:%02d", hours, minutes, seconds))
+                        .font(SafaTypography.counterLarge)
+                        .foregroundColor(SafaColors.Fallback.text)
+                        .monospacedDigit()
+                } else {
+                    Text("Fasting complete for today")
+                        .font(SafaTypography.titleSmall)
+                        .foregroundColor(.green)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, SafaSpacing.md)
+        }
+    }
+
+    // MARK: - Prayer Progress Section
+
+    private var prayerProgressSection: some View {
+        VStack(spacing: SafaSpacing.sm) {
+            HStack {
+                PrayerProgressIndicator(
+                    prayers: todayPrayers,
+                    loggedPrayers: loggedPrayers,
+                    nextPrayer: nextPrayer,
+                    style: .compact
+                )
+
+                Spacer()
+
+                Button {
+                    router.selectedTab = "prayer"
+                } label: {
+                    HStack(spacing: SafaSpacing.xxs) {
+                        Text("All prayer times")
+                            .font(SafaTypography.labelSmall)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                    }
+                    .foregroundColor(.accentColor)
+                }
+            }
+
+            // Play Adhan button
+            HStack(spacing: SafaSpacing.md) {
+                Button {
+                    playAdhan()
+                } label: {
+                    HStack(spacing: SafaSpacing.xs) {
+                        Image(systemName: dependencies.audioPlayerService.isPlaying ? "stop.fill" : "speaker.wave.2.fill")
+                            .font(.body)
+                        Text(dependencies.audioPlayerService.isPlaying ? "Stop" : "Play Adhan")
+                            .font(SafaTypography.labelMedium)
+                    }
+                    .foregroundColor(.accentColor)
+                    .padding(.horizontal, SafaSpacing.md)
+                    .padding(.vertical, SafaSpacing.xs)
+                    .background(Color.accentColor.opacity(0.1))
+                    .clipShape(Capsule())
+                }
+
+                Spacer()
+            }
+        }
+    }
+
     // MARK: - Today's Times Card
 
     private var todayTimesCard: some View {
@@ -145,18 +237,7 @@ struct RamadanView: View {
                     iftarTimeView
                 }
 
-                if let iftar = iftarTime, iftar > Date() {
-                    let (hours, minutes, _) = iftar.countdown()
-                    HStack {
-                        Image(systemName: "clock")
-                            .foregroundColor(.accentColor)
-
-                        Text("\(hours)h \(minutes)m until Iftar")
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(.accentColor)
-                    }
-                    .padding(.top, SafaSpacing.xs)
-                }
+                // Countdown moved to hero section above
             }
         }
     }
@@ -348,6 +429,35 @@ struct RamadanView: View {
         .frame(height: 8)
     }
 
+    // MARK: - Play Adhan
+
+    private func playAdhan() {
+        if dependencies.audioPlayerService.isPlaying {
+            dependencies.audioPlayerService.stop()
+            return
+        }
+
+        Task {
+            let prefs = await PreferencesManager.shared.getPreferences()
+            let fileName = prefs.selectedAdhan
+            let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
+
+            if adhanSound != .defaultSound {
+                do {
+                    try dependencies.audioPlayerService.playBundled(
+                        fileName: adhanSound.rawValue,
+                        fileExtension: "caf"
+                    )
+                } catch {
+                    ToastService.shared.show(Toast(
+                        message: "Could not play adhan.",
+                        type: .warning
+                    ))
+                }
+            }
+        }
+    }
+
     // MARK: - Load Data
 
     private func loadRamadanData() async {
@@ -361,10 +471,16 @@ struct RamadanView: View {
                     location: location,
                     method: .isna
                 )
+                todayPrayers = prayers
+                nextPrayer = prayers.first { $0.time > Date() && $0.type.isObligatory }
                 suhoorTime = prayers.first { $0.type == .fajr }?.time
                 iftarTime = prayers.first { $0.type == .maghrib }?.time
+
+                // Load logged prayers
+                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+                loggedPrayers = Set(logs.map { $0.prayerType })
             } catch {
-                // Handle error
+                // Handle error silently
             }
         }
 
