@@ -632,11 +632,13 @@ Revert your changes if:
 - User data in Core Data with CloudKit sync
 - Audio downloaded async over WiFi only
 
-### App Defaults
-- All defaults centralized in `Core/Constants/AppDefaults.swift`
-- Default calculation method: `.muslimWorldLeague`
-- Default madhab: `.hanafi`
-- Change defaults in one place to update entire app
+### App Defaults (Single Source of Truth)
+All defaults are centralized in `Core/Constants/AppDefaults.swift`:
+- **CloudKit/iCloud sync:** `useCloudKit = false` — set to `true` when paid Apple Developer account is available. This single flag switches between `NSPersistentContainer` (local) and `NSPersistentCloudKitContainer` (iCloud sync).
+- **Calculation method:** `.muslimWorldLeague` (MWL)
+- **Madhab:** `.hanafi`
+- **Default location:** London, UK (fallback when GPS unavailable)
+- Change these values in one place to update across entire app
 
 ### Location Intelligence
 - `LocationInferenceService` infers user preferences from location

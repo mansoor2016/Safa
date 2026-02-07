@@ -40,6 +40,13 @@ enum AppDefaults {
     /// Default accent color
     static let accentColorName: String = "Teal"
 
+    // MARK: - CloudKit & iCloud Sync
+    // Requires a paid Apple Developer account ($99/year).
+    // When false: Core Data works locally, no cross-device sync. All features work normally.
+    // When true: Enables NSPersistentCloudKitContainer for iCloud sync.
+    // To enable: set to true AND ensure CloudKit entitlements are configured in Xcode.
+    static let useCloudKit: Bool = false
+
     // MARK: - Location
 
     /// Use location-based recommendations by default

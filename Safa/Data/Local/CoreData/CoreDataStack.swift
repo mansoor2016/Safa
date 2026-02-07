@@ -9,12 +9,6 @@ final class CoreDataStack {
     // MARK: - Shared Instance
     static let shared = CoreDataStack()
 
-    // MARK: - CloudKit Toggle
-    // Set to true when a paid Apple Developer account is available.
-    // When false, uses NSPersistentContainer (local-only, no iCloud sync).
-    // This is the ONLY change needed to re-enable CloudKit.
-    private static let useCloudKit = false
-
     // MARK: - App Group
     private static let appGroupIdentifier = "group.com.safa.app"
     private static let modelName = "Safa"
@@ -26,7 +20,7 @@ final class CoreDataStack {
     // MARK: - Container
     lazy var persistentContainer: NSPersistentContainer = {
         let container: NSPersistentContainer
-        if Self.useCloudKit {
+        if AppDefaults.useCloudKit {
             container = NSPersistentCloudKitContainer(name: Self.modelName)
         } else {
             container = NSPersistentContainer(name: Self.modelName)
@@ -39,7 +33,7 @@ final class CoreDataStack {
             let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
             let storeDescription = NSPersistentStoreDescription(url: storeURL)
 
-            if Self.useCloudKit {
+            if AppDefaults.useCloudKit {
                 // Enable CloudKit sync
                 storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
                     containerIdentifier: "iCloud.com.safa.app"
