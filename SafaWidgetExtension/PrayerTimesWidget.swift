@@ -30,14 +30,15 @@ struct PrayerTimeEntry: TimelineEntry {
 
 struct Provider: AppIntentTimelineProvider {
 
-    // Prayer times from SafaShared (single source of truth)
+    // Shared logic from SafaShared (single source of truth)
     private let defaultPrayers = DefaultPrayerTimes()
+    private let hijriHelper = HijriDateHelper()
 
     private func makeEntry(configuration: ConfigurationAppIntent) -> PrayerTimeEntry {
         PrayerTimeEntry(
             date: Date(),
             prayers: defaultPrayers.forToday(),
-            hijriDate: "Sha'ban 1447",
+            hijriDate: hijriHelper.hijriDateString(),
             configuration: configuration
         )
     }

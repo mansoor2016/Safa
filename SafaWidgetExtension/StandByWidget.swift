@@ -5,6 +5,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import SafaShared
 
 // MARK: - Widget Entry
 
@@ -26,7 +27,7 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
             nextPrayer: "Fajr",
             nextPrayerTime: Date().addingTimeInterval(3600),
             fajrTime: Date().addingTimeInterval(3600),
-            hijriDate: "1 Ramadan 1446",
+            hijriDate: HijriDateHelper().hijriDateString(),
             configuration: StandByConfigIntent()
         )
     }
@@ -37,7 +38,7 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
             nextPrayer: "Fajr",
             nextPrayerTime: Date().addingTimeInterval(18000),
             fajrTime: Date().addingTimeInterval(18000),
-            hijriDate: "15 Sha'ban 1446",
+            hijriDate: HijriDateHelper().hijriDateString(),
             configuration: configuration
         )
     }
@@ -65,13 +66,13 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
         // Load from App Group UserDefaults
         guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
             let defaultTime = Date().addingTimeInterval(18000)
-            return ("Fajr", defaultTime, defaultTime, "15 Sha'ban 1446")
+            return ("Fajr", defaultTime, defaultTime, HijriDateHelper().hijriDateString())
         }
 
         let nextPrayer = defaults.string(forKey: "nextPrayerName") ?? "Fajr"
         let nextPrayerTime = defaults.object(forKey: "nextPrayerTime") as? Date ?? Date().addingTimeInterval(18000)
         let fajrTime = defaults.object(forKey: "fajrTime") as? Date
-        let hijriDate = defaults.string(forKey: "hijriDate") ?? "15 Sha'ban 1446"
+        let hijriDate = defaults.string(forKey: "hijriDate") ?? HijriDateHelper().hijriDateString()
 
         return (nextPrayer, nextPrayerTime, fajrTime, hijriDate)
     }
@@ -283,7 +284,7 @@ struct StandByPrayerWidget: Widget {
         nextPrayer: "Fajr",
         nextPrayerTime: Date().addingTimeInterval(18000),
         fajrTime: Date().addingTimeInterval(18000),
-        hijriDate: "15 Sha'ban 1446",
+        hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent()
     )
 }
@@ -296,7 +297,7 @@ struct StandByPrayerWidget: Widget {
         nextPrayer: "Isha",
         nextPrayerTime: Date().addingTimeInterval(3600),
         fajrTime: Date().addingTimeInterval(28800),
-        hijriDate: "15 Sha'ban 1446",
+        hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent()
     )
 }
@@ -309,7 +310,7 @@ struct StandByPrayerWidget: Widget {
         nextPrayer: "Fajr",
         nextPrayerTime: Date().addingTimeInterval(14400),
         fajrTime: Date().addingTimeInterval(14400),
-        hijriDate: "15 Sha'ban 1446",
+        hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent()
     )
 }
