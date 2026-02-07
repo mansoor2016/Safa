@@ -5,7 +5,6 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
-import AppIntents
 
 // MARK: - Widget Entry
 
@@ -67,7 +66,6 @@ struct InteractivePrayerProvider: AppIntentTimelineProvider {
     }
 
     private static func loadPrayers() -> [PrayerStatus] {
-        // Load from App Group UserDefaults
         guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
             return samplePrayers()
         }
@@ -75,14 +73,39 @@ struct InteractivePrayerProvider: AppIntentTimelineProvider {
         let now = Date()
         let loggedPrayers = defaults.stringArray(forKey: "loggedPrayers_\(dateKey())") ?? []
 
-        // In production, these times would come from the prayer calculation
-        return [
-            PrayerStatus(id: "fajr", name: "Fajr", time: now.addingTimeInterval(-36000), isLogged: loggedPrayers.contains("fajr"), isPast: true, isNext: false),
-            PrayerStatus(id: "dhuhr", name: "Dhuhr", time: now.addingTimeInterval(-14400), isLogged: loggedPrayers.contains("dhuhr"), isPast: true, isNext: false),
-            PrayerStatus(id: "asr", name: "Asr", time: now.addingTimeInterval(-3600), isLogged: loggedPrayers.contains("asr"), isPast: true, isNext: false),
-            PrayerStatus(id: "maghrib", name: "Maghrib", time: now.addingTimeInterval(1800), isLogged: loggedPrayers.contains("maghrib"), isPast: false, isNext: true),
-            PrayerStatus(id: "isha", name: "Isha", time: now.addingTimeInterval(7200), isLogged: loggedPrayers.contains("isha"), isPast: false, isNext: false)
+        // Read real prayer times from App Group (written by main app)
+        let prayerKeys: [(String, String, String)] = [
+            ("fajr", "Fajr", "fajrTime"),
+            ("dhuhr", "Dhuhr", "dhuhrTime"),
+            ("asr", "Asr", "asrTime"),
+            ("maghrib", "Maghrib", "maghribTime"),
+            ("isha", "Isha", "ishaTime")
         ]
+
+        var prayers: [PrayerStatus] = []
+        var foundNextPrayer = false
+
+        for (id, name, key) in prayerKeys {
+            guard let time = defaults.object(forKey: key) as? Date else {
+                // If any prayer time is missing, fall back to sample data
+                return samplePrayers()
+            }
+
+            let isPast = time <= now
+            let isNext = !isPast && !foundNextPrayer
+            if isNext { foundNextPrayer = true }
+
+            prayers.append(PrayerStatus(
+                id: id,
+                name: name,
+                time: time,
+                isLogged: loggedPrayers.contains(id),
+                isPast: isPast,
+                isNext: isNext
+            ))
+        }
+
+        return prayers
     }
 
     private static func dateKey() -> String {
@@ -131,13 +154,6 @@ struct WidgetLogPrayerIntent: AppIntent {
             if !loggedPrayers.contains(prayerId) {
                 loggedPrayers.append(prayerId)
                 defaults.set(loggedPrayers, forKey: "loggedPrayers_\(dateKey)")
-
-                // Notify main app to sync and award Hasanat
-                NotificationCenter.default.post(
-                    name: Notification.Name("com.safa.prayerLoggedFromWidget"),
-                    object: nil,
-                    userInfo: ["prayerId": prayerId]
-                )
             }
         }
 

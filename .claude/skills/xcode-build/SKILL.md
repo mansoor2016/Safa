@@ -52,33 +52,71 @@ If no action is provided, default to `build`.
 
 ## Build Workflow
 
-Construct and run:
+Run commands sequentially:
 
+**Step 1: Run the build and capture exit code**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' build 2>&1 | grep -E "error:|warning:|BUILD SUCCEEDED|BUILD FAILED|Undefined symbol|duplicate symbol|linker command failed" | head -30
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' build 2>&1 | tail -3
 ```
+The last few lines always contain either `** BUILD SUCCEEDED **` or `** BUILD FAILED **`.
+
+**Step 2: If BUILD FAILED, get the Swift compiler errors**
+```bash
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' build 2>&1 | grep -E "\.swift:[0-9]+:[0-9]+: error:" | head -15
+```
+This grep pattern matches Swift compiler errors in the format `FileName.swift:LINE:COL: error: message`. It avoids false positives from environment variable dumps and sandbox output.
+
+**Step 3: If Step 2 returned NO results (non-Swift errors like linker, signing, etc.)**
+```bash
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' build 2>&1 | grep -E "^(ld:|Undefined symbols|error:|fatal error|Code Signing Error|clang:)" | head -10
+```
+This catches linker errors (`ld:`, `Undefined symbols`), code signing errors, and other non-Swift build failures.
 
 **Report format:**
 - If `BUILD SUCCEEDED`: Reply with exactly `Build succeeded.` plus warning count if any.
-- If `BUILD FAILED`: List each error, shortened to `FileName.swift:LINE: error message`. Maximum 10 errors.
+- If `BUILD FAILED`: List each error, shortened to `FileName.swift:LINE: error message`. Maximum 10 errors. If no Swift errors found, report the linker/signing/other errors from Step 3.
+
+**IMPORTANT:** Do NOT use a single grep pipeline for the build. The `error:` string appears in environment variable dumps and sandbox setup lines, producing false matches. Always check the last few lines first for BUILD SUCCEEDED/FAILED, then only grep for errors if the build failed.
 
 ## Test Workflow
 
-Construct and run:
+Run commands sequentially:
 
-**All tests:**
+**Step 1: Run tests and check for build failure first**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | tail -5
+```
+Where `{ONLY_TESTING}` is:
+- All tests: `-only-testing:SafaTests`
+- Specific class: `-only-testing:SafaTests/{CLASS}`
+
+Check the last lines for:
+- `** TEST SUCCEEDED **` → tests passed
+- `** BUILD FAILED **` or `Testing cancelled because the build failed` → build error, not test failure
+- `** TEST FAILED **` → actual test failures
+
+**Step 2a: If BUILD FAILED during test, get Swift compiler errors**
+```bash
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "\.swift:[0-9]+:[0-9]+: error:" | head -15
 ```
 
-**Specific test class:**
+**Step 2a-fallback: If Step 2a returned NO results (linker/signing/other errors)**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "^(ld:|Undefined symbols|error:|fatal error|Code Signing Error|clang:)" | head -10
 ```
+
+**Step 2b: If TEST FAILED (but build succeeded), get test results**
+```bash
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "Test case .*(passed|failed)" | tail -50
+```
+Then count passed/failed from those lines.
 
 **Report format:**
 - If all pass: `All N tests passed.`
-- If failures: List each failed test name, then `X passed, Y failed.`
+- If build fails: Report as build failure with errors (same format as build workflow). If no Swift errors found, report the linker/signing/other errors from the fallback step.
+- If test failures: List each failed test name, then `X passed, Y failed.`
+
+**IMPORTANT:** A test run can fail because the BUILD failed (not because tests failed). Always distinguish between build failures and test failures. If you see "Testing cancelled because the build failed", report it as a build failure and show the compiler errors.
 
 ## Available Simulators
 
@@ -105,3 +143,5 @@ For reference, these simulators are available on this machine:
 3. Timeout: 5 minutes for builds, 5 minutes for tests
 4. If build/test hangs, report timeout and suggest the caller investigate
 5. Parse arguments flexibly — the caller may use natural language like "build for iPad" which means use an iPad simulator
+6. ALWAYS check for BUILD SUCCEEDED/FAILED in the last few lines BEFORE grepping for errors
+7. When tests fail due to build failure, report the build errors — not "0 tests passed"

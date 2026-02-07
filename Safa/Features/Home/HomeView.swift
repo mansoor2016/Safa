@@ -453,6 +453,11 @@ struct HomeView: View {
                 let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
                 loggedPrayers = Set(logs.map { $0.prayerType })
 
+                // Sync to widgets via App Group
+                WidgetDataService.shared.writePrayerTimes(todayPrayers)
+                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+                WidgetDataService.shared.writeHijriDate(hijriDate)
+
                 // Set Suhoor (Fajr) and Iftar (Maghrib) times for Ramadan banner
                 suhoorTime = todayPrayers.first { $0.type == .fajr }?.time
                 iftarTime = todayPrayers.first { $0.type == .maghrib }?.time

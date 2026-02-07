@@ -23,6 +23,7 @@ final class PrayerViewModel {
     private let locationService: LocationServiceProtocol
     private let notificationService: NotificationServiceProtocol
     private let userState: UserStateManager
+    private let widgetDataService: WidgetDataService
 
     // MARK: - Private State
     private var currentLocation: Coordinates?
@@ -32,12 +33,14 @@ final class PrayerViewModel {
         prayerRepository: PrayerRepositoryProtocol,
         locationService: LocationServiceProtocol,
         notificationService: NotificationServiceProtocol,
-        userState: UserStateManager
+        userState: UserStateManager,
+        widgetDataService: WidgetDataService = .shared
     ) {
         self.prayerRepository = prayerRepository
         self.locationService = locationService
         self.notificationService = notificationService
         self.userState = userState
+        self.widgetDataService = widgetDataService
 
         // Load saved calculation method
         if let savedMethod = UserDefaults.standard.string(forKey: "calculationMethod"),
@@ -90,6 +93,10 @@ final class PrayerViewModel {
             // Update next prayer indicator
             updateNextPrayerIndicator()
 
+            // Sync prayer times and logged state to widgets via App Group
+            widgetDataService.writePrayerTimes(prayers)
+            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+
             // Load notification preferences from PreferencesManager
             await loadNotificationSettings()
 
@@ -134,6 +141,9 @@ final class PrayerViewModel {
             // Update local state
             loggedPrayers.insert(prayerType)
 
+            // Sync logged state to widgets
+            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+
             // Award Hasanat
             await userState.awardHasanat(.prayerLogged)
 
@@ -162,6 +172,7 @@ final class PrayerViewModel {
             if let log = logs.first(where: { $0.prayerType == prayerType }) {
                 try await prayerRepository.deletePrayerLog(log)
                 loggedPrayers.remove(prayerType)
+                widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
             }
         } catch {
             self.error = error

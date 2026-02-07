@@ -37,18 +37,62 @@ struct Provider: AppIntentTimelineProvider {
     // Shared logic from SafaShared (single source of truth)
     private let defaultPrayers = DefaultPrayerTimes()
     private let hijriHelper = HijriDateHelper()
+    private let appGroupId = "group.com.safa.app"
+
+    /// Load prayer times from App Group (written by main app), fall back to London defaults
+    private func loadPrayers() -> [PrayerInfo] {
+        guard let defaults = UserDefaults(suiteName: appGroupId) else {
+            return defaultPrayers.forToday()
+        }
+
+        let keys: [(String, String)] = [
+            ("Fajr", "fajrTime"),
+            ("Dhuhr", "dhuhrTime"),
+            ("Asr", "asrTime"),
+            ("Maghrib", "maghribTime"),
+            ("Isha", "ishaTime")
+        ]
+
+        var prayers: [PrayerInfo] = []
+        for (name, key) in keys {
+            if let time = defaults.object(forKey: key) as? Date {
+                prayers.append(PrayerInfo(name: name, time: time))
+            }
+        }
+
+        // If we got all 5 prayer times from App Group, use them; otherwise fall back
+        guard prayers.count == 5 else {
+            return defaultPrayers.forToday()
+        }
+
+        return prayers
+    }
+
+    /// Load hijri date from App Group, fall back to local calculation
+    private func loadHijriDate() -> String {
+        guard let defaults = UserDefaults(suiteName: appGroupId),
+              let hijri = defaults.string(forKey: "hijriDate"), !hijri.isEmpty else {
+            return hijriHelper.hijriDateString()
+        }
+        return hijri
+    }
 
     private func makeEntry(configuration: ConfigurationAppIntent) -> PrayerTimeEntry {
         PrayerTimeEntry(
             date: Date(),
-            prayers: defaultPrayers.forToday(),
-            hijriDate: hijriHelper.hijriDateString(),
+            prayers: loadPrayers(),
+            hijriDate: loadHijriDate(),
             configuration: configuration
         )
     }
 
     func placeholder(in context: Context) -> PrayerTimeEntry {
-        makeEntry(configuration: ConfigurationAppIntent())
+        PrayerTimeEntry(
+            date: Date(),
+            prayers: defaultPrayers.forToday(),
+            hijriDate: hijriHelper.hijriDateString(),
+            configuration: ConfigurationAppIntent()
+        )
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> PrayerTimeEntry {

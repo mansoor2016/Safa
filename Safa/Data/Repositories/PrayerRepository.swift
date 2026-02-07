@@ -80,11 +80,29 @@ final class PrayerRepository: PrayerRepositoryProtocol {
     }
 
     // MARK: - Temporary UserDefaults Storage (until Core Data entities are created)
+    // Uses App Group UserDefaults so widgets can also access prayer logs
 
     private let prayerLogsKey = "com.safa.prayerLogs"
+    private let migrationKey = "com.safa.prayerLogsMigratedToAppGroup"
+    private lazy var appGroupDefaults: UserDefaults = {
+        let defaults = UserDefaults(suiteName: AppConstants.appGroupId) ?? .standard
+        migrateToAppGroupIfNeeded(defaults)
+        return defaults
+    }()
+
+    /// One-time migration from UserDefaults.standard to App Group
+    private func migrateToAppGroupIfNeeded(_ appGroup: UserDefaults) {
+        guard !appGroup.bool(forKey: migrationKey) else { return }
+
+        // Copy existing data from standard to App Group
+        if let data = UserDefaults.standard.data(forKey: prayerLogsKey) {
+            appGroup.set(data, forKey: prayerLogsKey)
+        }
+        appGroup.set(true, forKey: migrationKey)
+    }
 
     private func getPrayerLogsFromDefaults() -> [PrayerLog] {
-        guard let data = UserDefaults.standard.data(forKey: prayerLogsKey),
+        guard let data = appGroupDefaults.data(forKey: prayerLogsKey),
               let logs = try? JSONDecoder().decode([PrayerLog].self, from: data) else {
             return []
         }
@@ -93,6 +111,6 @@ final class PrayerRepository: PrayerRepositoryProtocol {
 
     private func savePrayerLogsToDefaults(_ logs: [PrayerLog]) {
         guard let data = try? JSONEncoder().encode(logs) else { return }
-        UserDefaults.standard.set(data, forKey: prayerLogsKey)
+        appGroupDefaults.set(data, forKey: prayerLogsKey)
     }
 }
