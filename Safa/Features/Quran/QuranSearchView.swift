@@ -83,29 +83,14 @@ final class QuranSearchViewModel {
                     }
                 }
 
-            case .arabic:
+            case .arabic, .translation:
                 let ayahs = try await repository.searchAyahs(query: searchText)
+                let surahs = try await repository.getAllSurahs()
                 searchResults = ayahs.map { ayah in
-                    let surahNumber = ayah.surahNumber
-                    // Get surah name
-                    let surah = try? await repository.getSurah(number: surahNumber)
+                    let surahName = surahs.first(where: { $0.id == ayah.surahNumber })?.nameEnglish ?? "Unknown"
                     return QuranSearchResult(
-                        surahNumber: surahNumber,
-                        surahName: surah?.nameEnglish ?? "Unknown",
-                        ayahNumber: ayah.ayahNumber,
-                        arabicText: ayah.textArabic,
-                        translation: ayah.textTranslation
-                    )
-                }
-
-            case .translation:
-                let ayahs = try await repository.searchAyahs(query: searchText)
-                searchResults = ayahs.map { ayah in
-                    let surahNumber = ayah.surahNumber
-                    let surah = try? await repository.getSurah(number: surahNumber)
-                    return QuranSearchResult(
-                        surahNumber: surahNumber,
-                        surahName: surah?.nameEnglish ?? "Unknown",
+                        surahNumber: ayah.surahNumber,
+                        surahName: surahName,
                         ayahNumber: ayah.ayahNumber,
                         arabicText: ayah.textArabic,
                         translation: ayah.textTranslation
@@ -141,8 +126,8 @@ final class QuranSearchViewModel {
         recentSearches.removeAll()
     }
 
-    func selectRecentSearch(_ search: String) {
-        searchText = search
+    func selectRecentSearch(_ query: String) {
+        searchText = query
         Task {
             await search()
         }
@@ -251,7 +236,7 @@ struct QuranSearchView: View {
                         action: {
                             viewModel.selectedFilter = filter
                             if !viewModel.searchText.isEmpty {
-                                viewModel.search()
+                                Task { await viewModel.search() }
                             }
                         }
                     )
@@ -314,7 +299,7 @@ struct QuranSearchView: View {
                     ForEach(["mercy", "patience", "prayer", "paradise", "guidance", "peace"], id: \.self) { term in
                         Button {
                             viewModel.searchText = term
-                            viewModel.search()
+                            Task { await viewModel.search() }
                         } label: {
                             Text(term.capitalized)
                                 .font(.subheadline)
