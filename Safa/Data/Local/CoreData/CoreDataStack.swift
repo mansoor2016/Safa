@@ -1,5 +1,5 @@
 // MARK: - CoreDataStack.swift
-// PURPOSE: Core Data stack configuration with CloudKit sync and App Group support
+// PURPOSE: Core Data stack configuration with optional CloudKit sync and App Group support
 // DEPENDENCIES: CoreData, CloudKit
 
 import CoreData
@@ -8,6 +8,12 @@ import CloudKit
 final class CoreDataStack {
     // MARK: - Shared Instance
     static let shared = CoreDataStack()
+
+    // MARK: - CloudKit Toggle
+    // Set to true when a paid Apple Developer account is available.
+    // When false, uses NSPersistentContainer (local-only, no iCloud sync).
+    // This is the ONLY change needed to re-enable CloudKit.
+    private static let useCloudKit = false
 
     // MARK: - App Group
     private static let appGroupIdentifier = "group.com.safa.app"
@@ -18,8 +24,13 @@ final class CoreDataStack {
     private(set) var isDegradedMode = false
 
     // MARK: - Container
-    lazy var persistentContainer: NSPersistentCloudKitContainer = {
-        let container = NSPersistentCloudKitContainer(name: Self.modelName)
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container: NSPersistentContainer
+        if Self.useCloudKit {
+            container = NSPersistentCloudKitContainer(name: Self.modelName)
+        } else {
+            container = NSPersistentContainer(name: Self.modelName)
+        }
 
         // Configure store URL for App Group (shared with widgets)
         if let appGroupURL = FileManager.default.containerURL(
@@ -28,14 +39,16 @@ final class CoreDataStack {
             let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
             let storeDescription = NSPersistentStoreDescription(url: storeURL)
 
-            // Enable CloudKit sync
-            storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                containerIdentifier: "iCloud.com.safa.app"
-            )
+            if Self.useCloudKit {
+                // Enable CloudKit sync
+                storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                    containerIdentifier: "iCloud.com.safa.app"
+                )
 
-            // Enable persistent history tracking for CloudKit
-            storeDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-            storeDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+                // Enable persistent history tracking for CloudKit
+                storeDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+                storeDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+            }
 
             container.persistentStoreDescriptions = [storeDescription]
         } else {
