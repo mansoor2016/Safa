@@ -218,7 +218,7 @@ struct MoreView: View {
     var body: some View {
         List {
             // Ramadan section (shown during Ramadan)
-            if hijriConverter.isRamadan() {
+            if hijriConverter.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode) {
                 Section {
                     NavigationLink {
                         RamadanView()

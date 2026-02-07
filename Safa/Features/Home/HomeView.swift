@@ -414,13 +414,13 @@ struct HomeView: View {
     private func loadHomeData() async {
         // Load Hijri date
         hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
-        isRamadan = HijriDateConverter.shared.isRamadan()
+        isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
 
         // Load Ramadan data
         let ramadanService = dependencies.ramadanService
         ramadanService.checkRamadanStatus()
-        currentRamadanDay = ramadanService.currentRamadanDay
-        daysUntilRamadan = ramadanService.daysUntilRamadan
+        currentRamadanDay = isRamadan ? max(ramadanService.currentRamadanDay, 1) : 0
+        daysUntilRamadan = isRamadan ? nil : ramadanService.daysUntilRamadan
         isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
 
         // Expanded by default during Ramadan, collapsed otherwise
