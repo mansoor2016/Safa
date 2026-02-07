@@ -353,8 +353,6 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: selectedAccentColor) { _, newValue in
-                // Apply immediately via router (shared observable)
-                router.accentColor = newValue.color
                 Task {
                     await prefsManager.update(\.accentColorName, to: newValue.rawValue)
                 }
