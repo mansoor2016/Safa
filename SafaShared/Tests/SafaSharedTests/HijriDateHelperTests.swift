@@ -45,4 +45,20 @@ final class HijriDateHelperTests: XCTestCase {
         let result2 = helper.hijriDateString(from: date)
         XCTAssertEqual(result1, result2)
     }
+
+    func test_hijriDateString_isNotHardcoded1446() {
+        // Ensure we're using dynamic calculation, not a hardcoded string
+        let result = helper.hijriDateString()
+        // The year should match the current Hijri year, not a stale value
+        let currentYear = Calendar(identifier: .islamicUmmAlQura).component(.year, from: Date())
+        XCTAssertTrue(result.contains("\(currentYear)"),
+                      "Hijri date '\(result)' should contain current year \(currentYear)")
+    }
+
+    func test_hijriDateString_changesOverTime() {
+        // 30 days apart should produce different dates
+        let today = helper.hijriDateString(from: Date())
+        let thirtyDaysLater = helper.hijriDateString(from: Date().addingTimeInterval(30 * 86400))
+        XCTAssertNotEqual(today, thirtyDaysLater)
+    }
 }
