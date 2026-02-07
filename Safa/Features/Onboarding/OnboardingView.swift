@@ -276,19 +276,11 @@ struct OnboardingView: View {
                         }
 
                         Spacer()
-
-                        Text("Coming Soon")
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(SafaColors.Fallback.tertiaryText)
-                            .padding(.horizontal, SafaSpacing.sm)
-                            .padding(.vertical, SafaSpacing.xxs)
-                            .background(Color.gray.opacity(0.2))
-                            .clipShape(Capsule())
                     }
                     .padding()
                     .background(Color(UIColor.secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    .opacity(0.6)
+                    .disabledFeature(isDisabled: true, name: "Mosque Mode")
                 }
                 .padding(.horizontal)
 

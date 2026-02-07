@@ -259,27 +259,21 @@ struct FajrAlarmSheet: View {
 
     private var optionsSection: some View {
         Section("Alarm Options") {
-            NavigationLink {
-                Text("Sound selection coming soon")
-            } label: {
-                HStack {
-                    Text("Sound")
-                    Spacer()
-                    Text("Adhan")
-                        .foregroundStyle(.secondary)
-                }
+            HStack {
+                Text("Sound")
+                Spacer()
+                Text("Adhan")
+                    .foregroundStyle(.secondary)
             }
+            .disabledFeature(isDisabled: true, name: "Sound Selection")
 
-            NavigationLink {
-                Text("Snooze settings coming soon")
-            } label: {
-                HStack {
-                    Text("Snooze")
-                    Spacer()
-                    Text("9 minutes")
-                        .foregroundStyle(.secondary)
-                }
+            HStack {
+                Text("Snooze")
+                Spacer()
+                Text("9 minutes")
+                    .foregroundStyle(.secondary)
             }
+            .disabledFeature(isDisabled: true, name: "Snooze Settings")
         }
     }
 

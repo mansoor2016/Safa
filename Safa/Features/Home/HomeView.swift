@@ -306,6 +306,7 @@ struct HomeView: View {
             ) {
                 router.navigate(to: .chat)
             }
+            .disabledFeature(.aiCompanion)
         }
     }
 

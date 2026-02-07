@@ -669,6 +669,12 @@ Key components:
 - `ToastView.swift` - Contains `ToastService` for "Coming soon" messages
 - Apply `.toastContainer()` to root view to enable toasts
 
+**MANDATORY:** Every unimplemented or partially implemented feature MUST use this pattern.
+- **Never** leave a button/link that navigates to an empty or broken screen
+- **Never** use manual "coming soon" placeholder text — always use `.disabledFeature()` or `DisabledFeatureRow`
+- **Never** silently hide a planned feature — show it greyed out so users know it's coming
+- If a feature exists in `FeatureFlags.Feature` enum and `isDisabled()`, its UI entry point must use `.disabledFeature()`
+
 ---
 
 ## Getting Help
