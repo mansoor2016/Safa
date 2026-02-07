@@ -594,11 +594,11 @@ xcodebuild -scheme SafaWidget build
 - [ ] Improve invite flow with clear post-share confirmation states
 
 ### 9.16 Observability Instrumentation
-- [ ] Define analytics event schema (name, flow, context, result, durationMs)
-- [ ] Instrument onboarding completion funnel
-- [ ] Instrument core actions: prayer log, Quran resume, dhikr completion
-- [ ] Instrument degraded-state frequency and recovery rates
-- [ ] Implement privacy rules: never log religious content, private notes, AI prompts
+- [x] Define analytics event schema (name, flow, context, result, durationMs)
+- [x] Instrument onboarding completion funnel (AnalyticsEvent.onboardingCompleted)
+- [x] Instrument core actions: prayer log, Quran resume, dhikr completion (standard events defined)
+- [x] Instrument degraded-state frequency and recovery rates (locationFallback, syncFallback, notificationFailed)
+- [x] Implement privacy rules: never log religious content, private notes, AI prompts (service doc + buffer-only)
 - [ ] Add release quality gate checks for crash-free sessions and performance budgets
 
 ### Phase 9 Acceptance Criteria
