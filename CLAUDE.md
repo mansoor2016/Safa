@@ -13,7 +13,7 @@ Safa is an iOS Islamic companion app built with Swift and SwiftUI. This document
 
 **Tech Stack:**
 - Swift 5.9+
-- SwiftUI (iOS 17+)
+- SwiftUI (iOS 26+)
 - Core Data + CloudKit
 - Core ML (on-device LLM)
 - WidgetKit, ActivityKit

@@ -8,54 +8,43 @@
 
 ### 1.1 Target Platform
 - **Primary Platform**: iOS (iPhone)
-- **Minimum iOS Version**: iOS 17.0 (for @Observable, NavigationPath, modern SwiftUI)
-- **AI Companion Requirement**: iOS 18.4+ (for Apple Foundation Models)
+- **Minimum iOS Version**: iOS 26.0 (latest SwiftUI, @Observable, NavigationPath)
+- **AI Companion**: Apple Foundation Models (included in iOS 26)
 - **Devices**: iPhone (no iPad optimization initially)
 - **Future**: watchOS 10+ companion app (see Section 15)
 
 ### 1.1.1 Supported Device Matrix
 
-**Philosophy**: Optimize for latest generation first, ensure quality experience on older supported devices.
+**Target: iOS 26.0+** — Devices that support iOS 26.
 
-| Device | Year | Chip | iOS 17 | Screen | Support Tier |
-|--------|------|------|--------|--------|--------------|
-| iPhone 16 Pro Max | 2024 | A18 Pro | ✅ | 6.9" | Tier 1 - Primary |
-| iPhone 16 Pro | 2024 | A18 Pro | ✅ | 6.3" | Tier 1 - Primary |
-| iPhone 16 / Plus | 2024 | A18 | ✅ | 6.1"/6.7" | Tier 1 - Primary |
-| iPhone 15 Pro Max | 2023 | A17 Pro | ✅ | 6.7" | Tier 2 - High |
-| iPhone 15 Pro | 2023 | A17 Pro | ✅ | 6.1" | Tier 2 - High |
-| iPhone 15 / Plus | 2023 | A16 | ✅ | 6.1"/6.7" | Tier 2 - High |
-| iPhone 14 Pro Max | 2022 | A16 | ✅ | 6.7" | Tier 3 - Medium |
-| iPhone 14 Pro | 2022 | A16 | ✅ | 6.1" | Tier 3 - Medium |
-| iPhone 14 / Plus | 2022 | A15 | ✅ | 6.1"/6.7" | Tier 3 - Medium |
-| iPhone 13 series | 2021 | A15 | ✅ | 5.4"-6.7" | Tier 3 - Medium |
-| iPhone 12 series | 2020 | A14 | ✅ | 5.4"-6.7" | Tier 3 - Medium |
-| iPhone SE (3rd) | 2022 | A15 | ✅ | 4.7" | Tier 4 - Compact |
-| iPhone 11 series | 2019 | A13 | ✅ | 6.1"-6.5" | Tier 5 - Legacy |
-| iPhone XS / Max | 2018 | A12 | ✅ | 5.8"/6.5" | Tier 5 - Legacy |
-| iPhone XR | 2018 | A12 | ✅ | 6.1" | Tier 5 - Legacy |
+| Device | Year | Chip | Screen | Support Tier |
+|--------|------|------|--------|--------------|
+| iPhone 17 Pro Max | 2025 | A19 Pro | 6.9" | Tier 1 - Primary |
+| iPhone 17 Pro | 2025 | A19 Pro | 6.3" | Tier 1 - Primary |
+| iPhone 17 / Air | 2025 | A19 | 6.1"/6.6" | Tier 1 - Primary |
+| iPhone 16 Pro Max | 2024 | A18 Pro | 6.9" | Tier 2 - High |
+| iPhone 16 Pro | 2024 | A18 Pro | 6.3" | Tier 2 - High |
+| iPhone 16 / Plus | 2024 | A18 | 6.1"/6.7" | Tier 2 - High |
+| iPhone 15 Pro Max | 2023 | A17 Pro | 6.7" | Tier 3 - Medium |
+| iPhone 15 Pro | 2023 | A17 Pro | 6.1" | Tier 3 - Medium |
+| iPhone 15 / Plus | 2023 | A16 | 6.1"/6.7" | Tier 3 - Medium |
+| iPhone SE (3rd) | 2022 | A15 | 4.7" | Tier 4 - Compact |
 
 **Feature Availability by iOS Version:**
 
-| Feature | iOS 17.0+ | iOS 18.0+ | iOS 18.4+ |
-|---------|-----------|-----------|-----------|
-| Core app (Prayer, Quran, Learn) | ✅ | ✅ | ✅ |
-| Gamification (Hasanat, Streaks) | ✅ | ✅ | ✅ |
-| Widgets (Home, Lock Screen) | ✅ | ✅ | ✅ |
-| Live Activities | ✅ | ✅ | ✅ |
-| Dynamic Island | ✅ | ✅ | ✅ |
-| Siri Shortcuts | ✅ | ✅ | ✅ |
-| CloudKit Sync | ✅ | ✅ | ✅ |
-| AI Companion | ❌ (shows fallback) | ❌ (shows fallback) | ✅ |
-| watchOS Companion | v2 (watchOS 10+) | v2 | v2 |
-| App Intents (Apple Intelligence) | Basic Shortcuts | Full App Entities | Full + Siri context |
-| Assistive Access Mode | ✅ (simplified UI) | ✅ | ✅ |
+**Target: iOS 26.0+** — All features available on the target platform. No multi-version degradation matrix needed.
 
-**Graceful Degradation Strategy:**
-- AI Companion: Shows "Requires iOS 18.4" message with explanation
-- Dynamic Island: Hidden on devices without Dynamic Island (not an error)
-- ProMotion: Falls back to 60Hz on non-Pro devices (SwiftUI handles automatically)
-- Screen sizes: Flexible layouts adapt from 4.7" to 6.9"
+| Feature | iOS 26.0+ |
+|---------|-----------|
+| Core app (Prayer, Quran, Learn) | ✅ |
+| Gamification (Hasanat, Streaks) | ✅ |
+| Widgets (Home, Lock Screen) | ✅ |
+| Live Activities & Dynamic Island | ✅ |
+| AI Companion (Apple Foundation Models) | ✅ |
+| Siri Shortcuts & App Intents | ✅ |
+| CloudKit Sync | ✅ (requires `AppDefaults.useCloudKit = true` + paid dev account) |
+| watchOS Companion | v2 |
+| Assistive Access Mode | v2 |
 
 ### 1.2 Language & Frameworks
 | Layer | Technology |

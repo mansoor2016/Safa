@@ -48,31 +48,22 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' -on
 
 | Device | Screen | iOS | Test Priority |
 |--------|--------|-----|---------------|
-| iPhone SE (3rd gen) | 4.7" | 17.0+ | **Required** - smallest |
-| iPhone 16 Pro Max | 6.9" | 18.0+ | **Required** - largest |
+| iPhone SE (3rd gen) | 4.7" | 26.0+ | **Required** - smallest |
+| iPhone 17 Pro Max | 6.9" | 26.0+ | **Required** - largest |
 
 **SwiftUI scales natively** - if boundaries pass, middle sizes work.
 
 ### 2.2 iOS Version Matrix
 
-| iOS Version | Test Device | AI Companion | Status |
-|-------------|-------------|--------------|--------|
-| iOS 17.0 | iPhone SE simulator | ❌ Fallback | Required |
-| iOS 17.5 | Any simulator | ❌ Fallback | Optional |
-| iOS 18.0 | Any simulator | ❌ Fallback | Optional |
-| iOS 18.4+ | Latest simulator | ✅ Enabled | Required |
+**Target: iOS 26.0+** — Single version target, no multi-version matrix needed.
+
+| iOS Version | Test Device | Status |
+|-------------|-------------|--------|
+| iOS 26.0 | iPhone 17 Pro simulator | Required |
 
 ### 2.3 Feature Availability
 
-| Feature | iOS 17.0 | iOS 18.4+ |
-|---------|----------|-----------|
-| Prayer Times | ✅ | ✅ |
-| Quran Reader | ✅ | ✅ |
-| Learning | ✅ | ✅ |
-| Gamification | ✅ | ✅ |
-| Widgets | ✅ | ✅ |
-| Live Activities | ✅ | ✅ |
-| AI Companion | ❌ Shows fallback | ✅ |
+All features available on iOS 26.0+ (single target platform).
 
 ---
 
@@ -189,14 +180,13 @@ Run boundary tests when:
 ### 6.1 Simulators Required
 
 ```
-iPhone SE (3rd generation) - iOS 17.0  (smallest screen, min iOS)
-iPhone 16 Pro Max - iOS 18.4+          (largest screen, AI enabled)
+iPhone SE (3rd generation) - iOS 26.0  (smallest screen)
+iPhone 17 Pro Max - iOS 26.0           (largest screen)
 ```
 
 ### 6.2 Physical Devices (Recommended for Beta)
 
-- iPhone with iOS 17.x (verify min iOS)
-- iPhone with iOS 18.4+ (verify AI Companion)
+- iPhone with iOS 26.0+ (target platform)
 - iPhone SE (verify compact layout)
 
 ---

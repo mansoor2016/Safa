@@ -44,7 +44,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ### 0.2 Agent Guidance Documentation
 
 ### 0.3 Xcode Project Configuration
-- [ ] Set deployment target to iOS 17.0 (currently 26.2 in `Safa.xcodeproj/project.pbxproj`)
+- [x] Set deployment target to iOS 26 (confirmed in `Safa.xcodeproj/project.pbxproj`)
 - [ ] Create Widget extension target in Xcode project (`SafaWidget`/`SafaWidgets`)
 - [ ] Create Intents extension target in Xcode project (`SafaIntents`)
 
@@ -561,7 +561,7 @@ xcodebuild -scheme SafaWidget build
 ### 10.2 Device Compatibility & Testing
 
 **Supported Device Range:**
-- **Minimum iOS**: 17.0 (uses @Observable, NavigationPath, modern SwiftUI)
+- **Minimum iOS**: 26.0 (uses latest SwiftUI, @Observable, NavigationPath)
 - **AI Companion**: iOS 18.4+ (graceful "Requires iOS 18.4" fallback)
 - **Supported iPhones**: iPhone XS (2018) and newer (~6 years of devices)
 
@@ -575,7 +575,7 @@ xcodebuild -scheme SafaWidget build
 - [ ] Spot check: Quran reader, Prayer cards, Home screen
 
 #### 10.2.2 iOS Version Testing
-- [ ] Test on iOS 17.0 (minimum supported)
+- [ ] Test on iOS 26.0 (minimum supported)
 - [ ] Test on iOS 18.4+ (verify AI Companion activates)
 - [ ] Verify "Requires iOS 18.4" fallback message works
 
@@ -613,12 +613,12 @@ xcodebuild -scheme SafaWidget build
 - [ ] Incorporate top feedback items
 
 ### 10.5 App Store Submission
-- [ ] **Verify deployment target is iOS 17.0** (currently set to SDK version, must be 17.0 for broad support)
+- [x] **Verify deployment target is iOS 26** (confirmed in project.pbxproj)
 - [ ] Create App Store screenshots (6.9", 6.7", 6.1", 5.5" - all supported sizes)
 - [ ] Write App Store description (highlight device compatibility)
 - [ ] Create 30-second app preview video
 - [ ] Configure App Store Connect metadata
-- [ ] Set minimum iOS version to 17.0 in App Store Connect
+- [ ] Set minimum iOS version to 26.0 in App Store Connect
 - [ ] Set up pricing (Free)
 - [ ] Submit for App Review
 - [ ] Address any review feedback
