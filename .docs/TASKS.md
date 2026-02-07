@@ -575,7 +575,7 @@ xcodebuild -scheme SafaWidget build
 
 ### 9.13 Search & Navigation Coherence
 - [ ] Unify search UI pattern across Quran/Hadith/Calendar
-- [ ] Restructure "More" tab: Daily Practice, Learning, Community, Settings
+- [x] Restructure "More" tab: Daily Practice, Knowledge & Tools, Progress, Settings
 - [ ] Normalise screen entry points through AppRouter destinations
 
 ### Phase 9 Acceptance Criteria

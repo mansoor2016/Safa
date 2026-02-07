@@ -238,14 +238,8 @@ struct MoreView: View {
                 }
             }
 
-            // Main features
-            Section("Features") {
-                NavigationLink {
-                    ChatView()
-                } label: {
-                    Label("Ask Safa", systemImage: "sparkles")
-                }
-
+            // Daily Practice
+            Section("Daily Practice") {
                 NavigationLink {
                     DhikrView()
                 } label: {
@@ -253,9 +247,30 @@ struct MoreView: View {
                 }
 
                 NavigationLink {
+                    DuaCategoriesView()
+                } label: {
+                    Label("Duas", systemImage: "heart.text.square")
+                }
+
+                NavigationLink {
+                    QiblaCompassView()
+                } label: {
+                    Label("Qibla Compass", systemImage: "location.north.fill")
+                }
+
+                NavigationLink {
                     HadithView()
                 } label: {
                     Label("Hadith", systemImage: "text.book.closed")
+                }
+            }
+
+            // Knowledge & Tools
+            Section("Knowledge & Tools") {
+                NavigationLink {
+                    NamesOfAllahView()
+                } label: {
+                    Label("99 Names of Allah", systemImage: "list.star")
                 }
 
                 NavigationLink {
@@ -265,31 +280,17 @@ struct MoreView: View {
                 }
 
                 NavigationLink {
-                    QiblaCompassView()
-                } label: {
-                    Label("Qibla Compass", systemImage: "location.north.fill")
-                }
-            }
-
-            // Tools
-            Section("Tools") {
-                NavigationLink {
                     ZakatCalculatorView()
                 } label: {
                     Label("Zakat Calculator", systemImage: "dollarsign.circle")
                 }
 
                 NavigationLink {
-                    NamesOfAllahView()
+                    ChatView()
                 } label: {
-                    Label("99 Names of Allah", systemImage: "list.star")
+                    Label("Ask Safa", systemImage: "sparkles")
                 }
-
-                NavigationLink {
-                    DuaCategoriesView()
-                } label: {
-                    Label("Duas", systemImage: "heart.text.square")
-                }
+                .disabledFeature(.aiCompanion)
             }
 
             // Progress
