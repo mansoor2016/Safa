@@ -252,12 +252,12 @@ struct HomeView: View {
             }
 
             QuickActionCard(
-                icon: "location.north.fill",
-                title: "Qibla",
-                subtitle: "Find direction",
+                icon: "heart.text.square.fill",
+                title: "Duas",
+                subtitle: "Daily supplications",
                 color: .blue
             ) {
-                router.navigate(to: .qibla)
+                router.navigate(to: .dhikr)
             }
 
             QuickActionCard(
