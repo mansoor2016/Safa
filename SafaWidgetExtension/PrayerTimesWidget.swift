@@ -10,52 +10,91 @@ import AppIntents
 
 struct PrayerTimeEntry: TimelineEntry {
     let date: Date
-    let nextPrayer: String
-    let nextPrayerTime: Date
+    let prayers: [(name: String, time: Date)]
     let hijriDate: String
     let configuration: ConfigurationAppIntent
+
+    var nextPrayer: (name: String, time: Date)? {
+        let now = Date()
+        return prayers.first { $0.time > now }
+    }
+
+    var nextPrayerName: String {
+        nextPrayer?.name ?? "Isha"
+    }
+
+    var nextPrayerTime: Date {
+        nextPrayer?.time ?? Date()
+    }
 }
 
 // MARK: - Widget Provider
 
 struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> PrayerTimeEntry {
+
+    // London, UK default prayer times (approximate, updated per timeline refresh)
+    private func todayPrayers() -> [(name: String, time: Date)] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+
+        // Read from shared UserDefaults if available, else use reasonable London defaults
+        // These approximate times will be replaced when App Group sharing is implemented
+        let month = cal.component(.month, from: Date())
+
+        // Seasonal adjustment for London (rough approximation)
+        let fajrHour: Int
+        let dhuhrHour = 12
+        let dhuhrMin = 30
+        let asrHour: Int
+        let maghribHour: Int
+        let maghribMin: Int
+        let ishaHour: Int
+
+        switch month {
+        case 11, 12, 1, 2: // Winter
+            fajrHour = 6; asrHour = 14; maghribHour = 16; maghribMin = 15; ishaHour = 18
+        case 3, 4: // Spring
+            fajrHour = 5; asrHour = 15; maghribHour = 18; maghribMin = 30; ishaHour = 20
+        case 5, 6, 7: // Summer
+            fajrHour = 3; asrHour = 17; maghribHour = 21; maghribMin = 0; ishaHour = 22
+        case 8, 9, 10: // Autumn
+            fajrHour = 5; asrHour = 16; maghribHour = 19; maghribMin = 0; ishaHour = 20
+        default:
+            fajrHour = 5; asrHour = 15; maghribHour = 18; maghribMin = 0; ishaHour = 20
+        }
+
+        return [
+            ("Fajr", cal.date(bySettingHour: fajrHour, minute: 30, second: 0, of: today)!),
+            ("Dhuhr", cal.date(bySettingHour: dhuhrHour, minute: dhuhrMin, second: 0, of: today)!),
+            ("Asr", cal.date(bySettingHour: asrHour, minute: 45, second: 0, of: today)!),
+            ("Maghrib", cal.date(bySettingHour: maghribHour, minute: maghribMin, second: 0, of: today)!),
+            ("Isha", cal.date(bySettingHour: ishaHour, minute: 0, second: 0, of: today)!)
+        ]
+    }
+
+    private func makeEntry(configuration: ConfigurationAppIntent) -> PrayerTimeEntry {
         PrayerTimeEntry(
             date: Date(),
-            nextPrayer: "Fajr",
-            nextPrayerTime: Date().addingTimeInterval(3600),
-            hijriDate: "1 Ramadan 1446",
-            configuration: ConfigurationAppIntent()
+            prayers: todayPrayers(),
+            hijriDate: "Sha'ban 1447",
+            configuration: configuration
         )
+    }
+
+    func placeholder(in context: Context) -> PrayerTimeEntry {
+        makeEntry(configuration: ConfigurationAppIntent())
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> PrayerTimeEntry {
-        // Load actual data from App Group
-        PrayerTimeEntry(
-            date: Date(),
-            nextPrayer: "Dhuhr",
-            nextPrayerTime: Date().addingTimeInterval(7200),
-            hijriDate: "15 Sha'ban 1446",
-            configuration: configuration
-        )
+        makeEntry(configuration: configuration)
     }
 
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<PrayerTimeEntry> {
-        var entries: [PrayerTimeEntry] = []
+        let entry = makeEntry(configuration: configuration)
 
-        // Generate a timeline of prayer times
-        let currentDate = Date()
-        let entry = PrayerTimeEntry(
-            date: currentDate,
-            nextPrayer: "Asr",
-            nextPrayerTime: currentDate.addingTimeInterval(10800),
-            hijriDate: "15 Sha'ban 1446",
-            configuration: configuration
-        )
-        entries.append(entry)
-
-        // Refresh after the next prayer time
-        return Timeline(entries: entries, policy: .after(entry.nextPrayerTime))
+        // Refresh at the next prayer time, or in 30 minutes if all prayers passed
+        let refreshDate = entry.nextPrayer?.time ?? Date().addingTimeInterval(1800)
+        return Timeline(entries: [entry], policy: .after(refreshDate))
     }
 }
 
@@ -115,7 +154,7 @@ struct SmallWidgetView: View {
                 .font(.caption2)
                 .foregroundColor(.secondary)
 
-            Text(entry.nextPrayer)
+            Text(entry.nextPrayerName)
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -157,7 +196,7 @@ struct MediumWidgetView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text(entry.nextPrayer)
+                Text(entry.nextPrayerName)
                     .font(.title)
                     .fontWeight(.bold)
 
@@ -174,11 +213,13 @@ struct MediumWidgetView: View {
 
             // Prayer times column
             VStack(alignment: .trailing, spacing: 4) {
-                PrayerRow(name: "Fajr", time: "5:23 AM", isNext: false)
-                PrayerRow(name: "Dhuhr", time: "12:30 PM", isNext: false)
-                PrayerRow(name: "Asr", time: "3:45 PM", isNext: true)
-                PrayerRow(name: "Maghrib", time: "6:15 PM", isNext: false)
-                PrayerRow(name: "Isha", time: "7:45 PM", isNext: false)
+                ForEach(entry.prayers, id: \.name) { prayer in
+                    PrayerRow(
+                        name: prayer.name,
+                        time: prayer.time.formatted(date: .omitted, time: .shortened),
+                        isNext: prayer.name == entry.nextPrayerName
+                    )
+                }
             }
         }
         .padding()
@@ -244,7 +285,7 @@ struct LargeWidgetView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Text(entry.nextPrayer)
+                    Text(entry.nextPrayerName)
                         .font(.title)
                         .fontWeight(.bold)
                 }
@@ -268,12 +309,14 @@ struct LargeWidgetView: View {
 
             // All prayers
             VStack(spacing: 8) {
-                LargePrayerRow(name: "Fajr", time: "5:23 AM", isPast: true)
-                LargePrayerRow(name: "Sunrise", time: "6:45 AM", isPast: true)
-                LargePrayerRow(name: "Dhuhr", time: "12:30 PM", isPast: true)
-                LargePrayerRow(name: "Asr", time: "3:45 PM", isPast: false, isNext: true)
-                LargePrayerRow(name: "Maghrib", time: "6:15 PM", isPast: false)
-                LargePrayerRow(name: "Isha", time: "7:45 PM", isPast: false)
+                ForEach(entry.prayers, id: \.name) { prayer in
+                    LargePrayerRow(
+                        name: prayer.name,
+                        time: prayer.time.formatted(date: .omitted, time: .shortened),
+                        isPast: prayer.time < Date(),
+                        isNext: prayer.name == entry.nextPrayerName
+                    )
+                }
             }
 
             Spacer()
@@ -318,7 +361,7 @@ struct AccessoryCircularView: View {
             AccessoryWidgetBackground()
 
             VStack(spacing: 2) {
-                Text(entry.nextPrayer.prefix(3))
+                Text(entry.nextPrayerName.prefix(3))
                     .font(.caption2)
                     .fontWeight(.bold)
 
@@ -335,7 +378,7 @@ struct AccessoryRectangularView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text("Next: \(entry.nextPrayer)")
+                Text("Next: \(entry.nextPrayerName)")
                     .font(.headline)
 
                 Text(entry.nextPrayerTime, style: .time)
@@ -353,7 +396,7 @@ struct AccessoryInlineView: View {
     let entry: PrayerTimeEntry
 
     var body: some View {
-        Text("\(entry.nextPrayer) at \(entry.nextPrayerTime, style: .time)")
+        Text("\(entry.nextPrayerName) at \(entry.nextPrayerTime, style: .time)")
     }
 }
 
