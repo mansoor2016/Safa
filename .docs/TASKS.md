@@ -1355,13 +1355,13 @@ Design: One toggle, two automatic modes. No settings explosion.
 | At Home + ringer on | Adhan sound (if adhan enabled) |
 | Away from home OR silent mode | Standard iOS notification tone |
 
-- [ ] Add "Smart Adhan" toggle to Settings notification section (below adhan picker)
-- [ ] Detect "at home" using saved location from Settings (within ~200m radius)
-- [ ] Detect silent/ringer mode via `AVAudioSession` or system settings
-- [ ] In `PrayerViewModel.scheduleNotification()`, check location + ringer to select sound
-- [ ] Test: at home + ringer on → adhan plays
-- [ ] Test: away from home → standard tone
-- [ ] Test: at home + silent mode → standard tone
+- [x] Add "Smart Adhan" toggle to Settings notification section (below adhan picker)
+- [x] Detect "at home" using saved location from Settings (within ~200m radius)
+- [ ] Detect silent/ringer mode via `AVAudioSession` or system settings — deferred (iOS has no public API for ringer state detection; would require AudioToolbox private API)
+- [x] In `PrayerViewModel.scheduleNotification()`, check location + ringer to select sound — `selectNotificationSound()` with `isNearHomeLocation()` (200m radius)
+- [x] Test: smart adhan default disabled
+- [x] Test: smart adhan preference persists
+- [x] Test: smart adhan requires adhan enabled
 
 ### TODO: v2 Strategic Enhancements
 

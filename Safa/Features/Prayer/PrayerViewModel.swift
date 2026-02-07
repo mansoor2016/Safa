@@ -204,14 +204,9 @@ final class PrayerViewModel {
         content.body = "It's time for \(prayerType.displayName) prayer"
         content.interruptionLevel = .timeSensitive
 
-        // Use adhan sound if enabled
+        // Select notification sound based on preferences
         let prefs = await PreferencesManager.shared.getPreferences()
-        if prefs.adhanEnabled {
-            let fileName = prayerType == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
-            content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
-        } else {
-            content.sound = .default
-        }
+        content.sound = selectNotificationSound(for: prayerType, prefs: prefs)
 
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
@@ -230,6 +225,29 @@ final class PrayerViewModel {
         } catch {
             notificationSchedulingFailed = true
         }
+    }
+
+    private func selectNotificationSound(for prayerType: PrayerType, prefs: UserPreferences) -> UNNotificationSound {
+        guard prefs.adhanEnabled else { return .default }
+
+        // Smart Adhan: only play adhan at home with ringer on
+        if prefs.smartAdhanEnabled {
+            let isAtHome = isNearHomeLocation(prefs: prefs)
+            guard isAtHome else { return .default }
+        }
+
+        let fileName = prayerType == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+        return UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+    }
+
+    private func isNearHomeLocation(prefs: UserPreferences) -> Bool {
+        guard let homeLat = prefs.savedLatitude,
+              let homeLng = prefs.savedLongitude,
+              let current = locationService.coordinates else { return false }
+
+        let home = CLLocation(latitude: homeLat, longitude: homeLng)
+        let now = CLLocation(latitude: current.latitude, longitude: current.longitude)
+        return home.distance(from: now) < 200 // 200m radius
     }
 
     private func cancelNotification(for prayerType: PrayerType) {

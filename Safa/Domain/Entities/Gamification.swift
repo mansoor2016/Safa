@@ -279,6 +279,7 @@ struct UserPreferences: Codable, Hashable {
     var adhanEnabled: Bool
     var selectedAdhan: String
     var selectedFajrAdhan: String
+    var smartAdhanEnabled: Bool
 
     // Per-prayer notification settings (stored as prayer rawValues, e.g. ["fajr", "dhuhr", ...])
     var notificationEnabledPrayers: [String]
@@ -306,6 +307,7 @@ struct UserPreferences: Codable, Hashable {
         adhanEnabled: Bool = false,
         selectedAdhan: String = AdhanSound.misharyAlafasy.rawValue,
         selectedFajrAdhan: String = AdhanSound.misharyAlafasyFajr.rawValue,
+        smartAdhanEnabled: Bool = false,
         notificationEnabledPrayers: [String] = PrayerType.obligatoryPrayers.map { $0.rawValue },
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
@@ -328,6 +330,7 @@ struct UserPreferences: Codable, Hashable {
         self.adhanEnabled = adhanEnabled
         self.selectedAdhan = selectedAdhan
         self.selectedFajrAdhan = selectedFajrAdhan
+        self.smartAdhanEnabled = smartAdhanEnabled
         self.notificationEnabledPrayers = notificationEnabledPrayers
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled

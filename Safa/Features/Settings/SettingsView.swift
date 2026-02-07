@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
     @State private var adhanEnabled = false
     @State private var selectedAdhan: AdhanSound = .misharyAlafasy
+    @State private var smartAdhanEnabled = false
     @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
     @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
@@ -247,12 +248,21 @@ struct SettingsView: View {
                             await prefsManager.update(\.selectedAdhan, to: newValue.rawValue)
                         }
                     }
+
+                    Toggle("Smart Adhan", isOn: $smartAdhanEnabled)
+                        .onChange(of: smartAdhanEnabled) { _, newValue in
+                            Task {
+                                await prefsManager.update(\.smartAdhanEnabled, to: newValue)
+                            }
+                        }
                 }
             }
         } header: {
             Text("Notifications")
         } footer: {
-            if adhanEnabled {
+            if adhanEnabled && smartAdhanEnabled {
+                Text("Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.")
+            } else if adhanEnabled {
                 Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
             }
         }
@@ -471,6 +481,7 @@ struct SettingsView: View {
         // Load adhan settings
         adhanEnabled = prefs.adhanEnabled
         selectedAdhan = AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy
+        smartAdhanEnabled = prefs.smartAdhanEnabled
 
         // Load accessibility settings
         reduceMotionEnabled = prefs.reduceMotionEnabled

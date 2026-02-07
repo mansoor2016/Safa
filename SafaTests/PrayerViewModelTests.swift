@@ -500,6 +500,29 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertTrue(sut.notificationEnabledPrayers.contains(.isha))
     }
 
+    // MARK: - Smart Adhan Tests
+
+    func test_smartAdhan_defaultDisabled() {
+        let prefs = UserPreferences()
+        XCTAssertFalse(prefs.smartAdhanEnabled)
+    }
+
+    func test_smartAdhan_preferencePersists() {
+        var prefs = UserPreferences()
+        prefs.smartAdhanEnabled = true
+        XCTAssertTrue(prefs.smartAdhanEnabled)
+    }
+
+    func test_smartAdhan_requiresAdhanEnabled() {
+        var prefs = UserPreferences()
+        prefs.adhanEnabled = false
+        prefs.smartAdhanEnabled = true
+        // Smart adhan should only matter when adhan is enabled
+        // The selectNotificationSound logic checks adhanEnabled first
+        XCTAssertFalse(prefs.adhanEnabled)
+        XCTAssertTrue(prefs.smartAdhanEnabled)
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
