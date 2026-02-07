@@ -4,73 +4,27 @@
 
 import SwiftUI
 
-// MARK: - Dua Category Collection (for display)
+// MARK: - Dua Categories View
 
-struct DuaCategoryCollection: Identifiable, Codable, Hashable {
-    let id: String
-    let name: String
-    let arabicName: String
-    let iconName: String
-    let duaCount: Int
+struct DuaCategoriesView: View {
+    @State private var searchText = ""
 
-    static let sampleCategories: [DuaCategoryCollection] = [
-        DuaCategoryCollection(id: "morning_evening", name: "Morning & Evening", arabicName: "أذكار الصباح والمساء", iconName: "sunrise", duaCount: 15),
-        DuaCategoryCollection(id: "prayer", name: "Prayer", arabicName: "أدعية الصلاة", iconName: "moon.stars", duaCount: 12),
-        DuaCategoryCollection(id: "daily", name: "Daily Activities", arabicName: "أذكار اليومية", iconName: "sun.max", duaCount: 20),
-        DuaCategoryCollection(id: "protection", name: "Protection", arabicName: "أدعية الحفظ", iconName: "shield", duaCount: 8),
-        DuaCategoryCollection(id: "forgiveness", name: "Forgiveness", arabicName: "أدعية الاستغفار", iconName: "heart", duaCount: 10),
-        DuaCategoryCollection(id: "travel", name: "Travel", arabicName: "أذكار السفر", iconName: "airplane", duaCount: 6),
-        DuaCategoryCollection(id: "food", name: "Food & Drink", arabicName: "أذكار الطعام", iconName: "fork.knife", duaCount: 8),
-        DuaCategoryCollection(id: "sleep", name: "Sleep", arabicName: "أذكار النوم", iconName: "moon.zzz", duaCount: 10),
-        DuaCategoryCollection(id: "anxiety", name: "Anxiety & Distress", arabicName: "أدعية الهم والحزن", iconName: "heart.circle", duaCount: 7),
-        DuaCategoryCollection(id: "gratitude", name: "Gratitude", arabicName: "أدعية الشكر", iconName: "hands.clap", duaCount: 5)
-    ]
-}
-
-// MARK: - Dua Categories View Model
-
-@Observable
-final class DuaCategoriesViewModel {
-    var categories: [DuaCategoryCollection] = []
-    var searchText = ""
-
-    var filteredCategories: [DuaCategoryCollection] {
+    private var filteredCategories: [DuaCategoryData] {
         if searchText.isEmpty {
-            return categories
+            return DuaCategoryData.allCategories
         }
-        return categories.filter {
+        return DuaCategoryData.allCategories.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
             $0.arabicName.contains(searchText)
         }
     }
 
-    init() {
-        loadCategories()
-    }
-
-    private func loadCategories() {
-        categories = DuaCategoryCollection.sampleCategories
-    }
-}
-
-// MARK: - Dua Categories View
-
-struct DuaCategoriesView: View {
-    @State private var viewModel = DuaCategoriesViewModel()
-
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                // Header
                 headerView
-
-                // Quick Access
                 quickAccessSection
-
-                // Search
                 searchBar
-
-                // Categories
                 categoriesSection
             }
             .padding(.bottom, 100)
@@ -103,33 +57,25 @@ struct DuaCategoriesView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    QuickAccessButton(
-                        title: "Morning",
-                        arabicTitle: "أذكار الصباح",
-                        iconName: "sunrise.fill",
-                        color: .orange
-                    )
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.morning)) {
+                        QuickAccessButton(title: "Morning", arabicTitle: "أذكار الصباح", iconName: "sunrise.fill", color: .orange)
+                    }
+                    .buttonStyle(.plain)
 
-                    QuickAccessButton(
-                        title: "Evening",
-                        arabicTitle: "أذكار المساء",
-                        iconName: "sunset.fill",
-                        color: .purple
-                    )
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.evening)) {
+                        QuickAccessButton(title: "Evening", arabicTitle: "أذكار المساء", iconName: "sunset.fill", color: .purple)
+                    }
+                    .buttonStyle(.plain)
 
-                    QuickAccessButton(
-                        title: "Sleep",
-                        arabicTitle: "أذكار النوم",
-                        iconName: "moon.zzz.fill",
-                        color: .indigo
-                    )
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.sleep)) {
+                        QuickAccessButton(title: "Sleep", arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .indigo)
+                    }
+                    .buttonStyle(.plain)
 
-                    QuickAccessButton(
-                        title: "After Prayer",
-                        arabicTitle: "بعد الصلاة",
-                        iconName: "hands.sparkles.fill",
-                        color: .teal
-                    )
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.prayer)) {
+                        QuickAccessButton(title: "After Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
             }
@@ -141,12 +87,12 @@ struct DuaCategoriesView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
 
-            TextField("Search duas...", text: $viewModel.searchText)
+            TextField("Search duas...", text: $searchText)
                 .textFieldStyle(.plain)
 
-            if !viewModel.searchText.isEmpty {
+            if !searchText.isEmpty {
                 Button {
-                    viewModel.searchText = ""
+                    searchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
@@ -168,7 +114,7 @@ struct DuaCategoriesView: View {
                 .textCase(.uppercase)
                 .padding(.horizontal)
 
-            ForEach(viewModel.filteredCategories) { category in
+            ForEach(filteredCategories) { category in
                 NavigationLink(destination: DuaListView(category: category)) {
                     CategoryRow(category: category)
                 }
@@ -177,6 +123,160 @@ struct DuaCategoriesView: View {
             .padding(.horizontal)
         }
     }
+}
+
+// MARK: - Category Data (Single Source of Truth)
+
+struct DuaCategoryData: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let arabicName: String
+    let iconName: String
+
+    var duaCount: Int {
+        DuaData.allDuas.filter { $0.categoryId == id }.count
+    }
+
+    static let morning = DuaCategoryData(id: "morning", name: "Morning Adhkar", arabicName: "أذكار الصباح", iconName: "sunrise")
+    static let evening = DuaCategoryData(id: "evening", name: "Evening Adhkar", arabicName: "أذكار المساء", iconName: "sunset")
+    static let prayer = DuaCategoryData(id: "prayer", name: "Prayer", arabicName: "أدعية الصلاة", iconName: "moon.stars")
+    static let daily = DuaCategoryData(id: "daily", name: "Daily Activities", arabicName: "أذكار اليومية", iconName: "sun.max")
+    static let protection = DuaCategoryData(id: "protection", name: "Protection", arabicName: "أدعية الحفظ", iconName: "shield")
+    static let forgiveness = DuaCategoryData(id: "forgiveness", name: "Forgiveness", arabicName: "أدعية الاستغفار", iconName: "heart")
+    static let travel = DuaCategoryData(id: "travel", name: "Travel", arabicName: "أذكار السفر", iconName: "airplane")
+    static let food = DuaCategoryData(id: "food", name: "Food & Drink", arabicName: "أذكار الطعام", iconName: "fork.knife")
+    static let sleep = DuaCategoryData(id: "sleep", name: "Sleep", arabicName: "أذكار النوم", iconName: "moon.zzz")
+    static let anxiety = DuaCategoryData(id: "anxiety", name: "Anxiety & Distress", arabicName: "أدعية الهم والحزن", iconName: "heart.circle")
+
+    static let allCategories: [DuaCategoryData] = [
+        morning, evening, prayer, daily, protection, forgiveness, travel, food, sleep, anxiety
+    ]
+}
+
+// MARK: - Dua Data (Actual Content)
+
+struct DuaData {
+    static let allDuas: [Dua] = [
+        // MARK: Morning
+        Dua(id: "m1", categoryId: "morning", titleEnglish: "Morning Remembrance",
+            textArabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
+            textTransliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la shareeka lah",
+            textTranslation: "We have reached the morning and at this very time the whole kingdom belongs to Allah. All praise is due to Allah.",
+            source: "Abu Dawud 4:317", occasion: "Said upon waking", repetitions: 1),
+        Dua(id: "m2", categoryId: "morning", titleEnglish: "Morning Glorification",
+            textArabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+            textTransliteration: "SubhanAllahi wa bihamdihi",
+            textTranslation: "Glory is to Allah and praise is to Him.",
+            source: "Muslim 4:2071", occasion: "100 times in morning — sins forgiven even if like foam of the sea", repetitions: 100),
+        Dua(id: "m3", categoryId: "morning", titleEnglish: "Seeking Refuge",
+            textArabic: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+            textTransliteration: "A'udhu bikalimatillahit-tammaati min sharri ma khalaq",
+            textTranslation: "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+            source: "Muslim 4:2080", occasion: "Morning and evening", repetitions: 3),
+
+        // MARK: Evening
+        Dua(id: "e1", categoryId: "evening", titleEnglish: "Evening Remembrance",
+            textArabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
+            textTransliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah",
+            textTranslation: "We have reached the evening and the whole kingdom belongs to Allah.",
+            source: "Abu Dawud 4:317", occasion: "Said in the evening", repetitions: 1),
+        Dua(id: "e2", categoryId: "evening", titleEnglish: "Evening Glorification",
+            textArabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+            textTransliteration: "SubhanAllahi wa bihamdihi",
+            textTranslation: "Glory is to Allah and praise is to Him.",
+            source: "Muslim 4:2071", occasion: "100 times in evening — sins forgiven", repetitions: 100),
+
+        // MARK: Prayer
+        Dua(id: "p1", categoryId: "prayer", titleEnglish: "After Prayer Glorification",
+            textArabic: "سُبْحَانَ اللهِ ، وَالْحَمْدُ لِلَّهِ ، وَاللهُ أَكْبَرُ",
+            textTransliteration: "SubhanAllah, Alhamdulillah, Allahu Akbar",
+            textTranslation: "Glory be to Allah, All praise is due to Allah, Allah is the Greatest.",
+            source: "Muslim", occasion: "After each obligatory prayer", repetitions: 33),
+        Dua(id: "p2", categoryId: "prayer", titleEnglish: "Ayatul Kursi",
+            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
+            textTransliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum",
+            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining.",
+            source: "Bukhari", occasion: "After each obligatory prayer — whoever recites it will enter Paradise", repetitions: 1),
+
+        // MARK: Sleep
+        Dua(id: "s1", categoryId: "sleep", titleEnglish: "Before Sleeping",
+            textArabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+            textTransliteration: "Bismika Allahumma amootu wa ahya",
+            textTranslation: "In Your name O Allah, I die and I live.",
+            source: "Bukhari", occasion: "Said before going to sleep", repetitions: 1),
+        Dua(id: "s2", categoryId: "sleep", titleEnglish: "Surah Al-Mulk",
+            textArabic: "تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            textTransliteration: "Tabarakal-ladhi biyadihil-mulku wa Huwa 'ala kulli shay'in Qadeer",
+            textTranslation: "Blessed is He in whose hand is dominion, and He is over all things competent.",
+            source: "Tirmidhi", occasion: "Recite Surah Al-Mulk before sleep — it intercedes for its reader", repetitions: 1),
+
+        // MARK: Food & Drink
+        Dua(id: "f1", categoryId: "food", titleEnglish: "Before Eating",
+            textArabic: "بِسْمِ اللَّهِ",
+            textTransliteration: "Bismillah",
+            textTranslation: "In the name of Allah.",
+            source: "Tirmidhi 1858", occasion: "Said before eating", repetitions: 1),
+        Dua(id: "f2", categoryId: "food", titleEnglish: "After Eating",
+            textArabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
+            textTransliteration: "Alhamdu lillahil-ladhi at'amani hadha wa razaqaneehi min ghayri hawlin minni wa la quwwah",
+            textTranslation: "Praise be to Allah who fed me this and provided it for me without any might or power on my part.",
+            source: "Tirmidhi 3458", occasion: "Said after finishing a meal — past sins are forgiven", repetitions: 1),
+        Dua(id: "f3", categoryId: "food", titleEnglish: "Forgetting Bismillah",
+            textArabic: "بِسْمِ اللَّهِ أَوَّلَهُ وَآخِرَهُ",
+            textTransliteration: "Bismillahi awwalahu wa akhirah",
+            textTranslation: "In the name of Allah at the beginning and at the end.",
+            source: "Abu Dawud 3767", occasion: "If you forgot to say Bismillah before eating", repetitions: 1),
+        Dua(id: "f4", categoryId: "food", titleEnglish: "When Breaking Fast",
+            textArabic: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ",
+            textTransliteration: "Dhahaba ath-thama'u wab-tallat al-'urooqu wa thabat al-ajru in sha Allah",
+            textTranslation: "The thirst has gone, the veins are moistened and the reward is confirmed, if Allah wills.",
+            source: "Abu Dawud 2357", occasion: "When breaking the fast (Iftar)", repetitions: 1),
+        Dua(id: "f5", categoryId: "food", titleEnglish: "When Drinking Water",
+            textArabic: "الْحَمْدُ لِلَّهِ",
+            textTransliteration: "Alhamdulillah",
+            textTranslation: "All praise is due to Allah.",
+            source: "Ibn Majah", occasion: "After drinking water or any beverage", repetitions: 1),
+
+        // MARK: Protection
+        Dua(id: "pr1", categoryId: "protection", titleEnglish: "Seeking Refuge from Evil",
+            textArabic: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+            textTransliteration: "A'udhu bikalimatillahit-tammaati min sharri ma khalaq",
+            textTranslation: "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+            source: "Muslim 4:2080", repetitions: 3),
+
+        // MARK: Forgiveness
+        Dua(id: "fg1", categoryId: "forgiveness", titleEnglish: "Master of Seeking Forgiveness",
+            textArabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ",
+            textTransliteration: "Allahumma Anta Rabbi la ilaha illa Anta, khalaqtani wa ana 'abduk",
+            textTranslation: "O Allah, You are my Lord, there is no god but You. You created me and I am Your servant.",
+            source: "Bukhari", occasion: "Sayyidul Istighfar — whoever says this with conviction and dies that day enters Paradise", repetitions: 1),
+
+        // MARK: Anxiety
+        Dua(id: "ax1", categoryId: "anxiety", titleEnglish: "Relief from Distress",
+            textArabic: "لَا إِلَٰهَ إِلَّا اللَّهُ الْعَظِيمُ الْحَلِيمُ، لَا إِلَٰهَ إِلَّا اللَّهُ رَبُّ الْعَرْشِ الْعَظِيمِ",
+            textTransliteration: "La ilaha illallahul-'Adheemul-Haleem, la ilaha illallahu Rabbul-'Arshil-'Adheem",
+            textTranslation: "There is no god but Allah, the Mighty, the Forbearing. There is no god but Allah, Lord of the Mighty Throne.",
+            source: "Bukhari & Muslim", occasion: "When afflicted with grief or distress", repetitions: 1),
+
+        // MARK: Travel
+        Dua(id: "t1", categoryId: "travel", titleEnglish: "Travel Supplication",
+            textArabic: "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ",
+            textTransliteration: "Subhanal-ladhi sakh-khara lana hadha wa ma kunna lahu muqrineen",
+            textTranslation: "Glory to Him who has subjected this to us, for we could never have accomplished this by ourselves.",
+            source: "Muslim", occasion: "When starting a journey", repetitions: 1),
+
+        // MARK: Daily
+        Dua(id: "d1", categoryId: "daily", titleEnglish: "Entering the Home",
+            textArabic: "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى رَبِّنَا تَوَكَّلْنَا",
+            textTransliteration: "Bismillahi walajna, wa bismillahi kharajna, wa 'ala Rabbina tawakkalna",
+            textTranslation: "In the name of Allah we enter, in the name of Allah we leave, and upon our Lord we place our trust.",
+            source: "Abu Dawud 5096", occasion: "When entering the home", repetitions: 1),
+        Dua(id: "d2", categoryId: "daily", titleEnglish: "Leaving the Home",
+            textArabic: "بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+            textTransliteration: "Bismillahi tawakkaltu 'alAllah, la hawla wa la quwwata illa billah",
+            textTranslation: "In the name of Allah, I place my trust in Allah. There is no might or power except with Allah.",
+            source: "Abu Dawud 5095", occasion: "When leaving the home", repetitions: 1),
+    ]
 }
 
 // MARK: - Quick Access Button
@@ -215,7 +315,7 @@ struct QuickAccessButton: View {
 // MARK: - Category Row
 
 struct CategoryRow: View {
-    let category: DuaCategoryCollection
+    let category: DuaCategoryData
 
     var body: some View {
         HStack(spacing: 16) {
@@ -262,8 +362,11 @@ struct CategoryRow: View {
 // MARK: - Dua List View
 
 struct DuaListView: View {
-    let category: DuaCategoryCollection
-    @State private var duas: [Dua] = []
+    let category: DuaCategoryData
+
+    private var duas: [Dua] {
+        DuaData.allDuas.filter { $0.categoryId == category.id }
+    }
 
     var body: some View {
         ScrollView {
@@ -271,23 +374,20 @@ struct DuaListView: View {
                 ForEach(duas) { dua in
                     DuaCard(dua: dua)
                 }
+
+                if duas.isEmpty {
+                    ContentUnavailableView(
+                        "No Duas Yet",
+                        systemImage: "text.book.closed",
+                        description: Text("Duas for this category are coming soon.")
+                    )
+                }
             }
             .padding()
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle(category.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            loadDuas()
-        }
-    }
-
-    private func loadDuas() {
-        // Load sample duas for this category
-        duas = Dua.sampleDuas.filter { $0.categoryId == category.id || category.id == "morning_evening" }
-        if duas.isEmpty {
-            duas = Dua.sampleDuas
-        }
     }
 }
 
@@ -299,7 +399,6 @@ struct DuaCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Arabic text
             Text(dua.textArabic)
                 .font(.system(size: 24, weight: .regular, design: .serif))
                 .multilineTextAlignment(.trailing)
@@ -307,7 +406,6 @@ struct DuaCard: View {
                 .lineSpacing(12)
                 .environment(\.layoutDirection, .rightToLeft)
 
-            // Transliteration
             if !dua.textTransliteration.isEmpty {
                 Text(dua.textTransliteration)
                     .font(.subheadline)
@@ -315,11 +413,9 @@ struct DuaCard: View {
                     .foregroundColor(.secondary)
             }
 
-            // Translation
             Text(dua.textTranslation)
                 .font(.subheadline)
 
-            // Reference and repeat count
             HStack {
                 if let occasion = dua.occasion, isExpanded {
                     Text(occasion)
@@ -336,7 +432,6 @@ struct DuaCard: View {
                 }
             }
 
-            // Reference
             HStack {
                 Text(dua.source ?? "")
                     .font(.caption2)
@@ -345,9 +440,7 @@ struct DuaCard: View {
                 Spacer()
 
                 Button {
-                    withAnimation {
-                        isExpanded.toggle()
-                    }
+                    withAnimation { isExpanded.toggle() }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption)
@@ -361,67 +454,7 @@ struct DuaCard: View {
     }
 }
 
-// MARK: - Sample Duas
-
-extension Dua {
-    static let sampleDuas: [Dua] = [
-        Dua(
-            id: "1",
-            categoryId: "morning",
-            titleEnglish: "Morning Remembrance",
-            textArabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-            textTransliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la shareeka lah",
-            textTranslation: "We have reached the morning and at this very time the whole kingdom belongs to Allah. All praise is due to Allah.",
-            source: "Abu Dawud 4:317",
-            occasion: "Said upon waking in the morning",
-            repetitions: 1
-        ),
-        Dua(
-            id: "2",
-            categoryId: "morning",
-            titleEnglish: "Glorification",
-            textArabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-            textTransliteration: "SubhanAllahi wa bihamdihi",
-            textTranslation: "Glory is to Allah and praise is to Him.",
-            source: "Muslim 4:2071",
-            occasion: "Whoever says this 100 times in morning and evening will have their sins forgiven even if they were like the foam of the sea.",
-            repetitions: 100
-        ),
-        Dua(
-            id: "3",
-            categoryId: "evening",
-            titleEnglish: "Evening Remembrance",
-            textArabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
-            textTransliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah",
-            textTranslation: "We have reached the evening and the whole kingdom belongs to Allah.",
-            source: "Abu Dawud 4:317",
-            occasion: "Said in the evening",
-            repetitions: 1
-        ),
-        Dua(
-            id: "4",
-            categoryId: "sleep",
-            titleEnglish: "Before Sleeping",
-            textArabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
-            textTransliteration: "Bismika Allahumma amootu wa ahya",
-            textTranslation: "In Your name O Allah, I die and I live.",
-            source: "Bukhari",
-            occasion: "Said before going to sleep",
-            repetitions: 1
-        ),
-        Dua(
-            id: "5",
-            categoryId: "general",
-            titleEnglish: "Declaration of Faith",
-            textArabic: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-            textTransliteration: "La ilaha illallahu wahdahu la shareeka lah, lahul-mulku wa lahul-hamd, wa Huwa 'ala kulli shay'in Qadeer",
-            textTranslation: "None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent.",
-            source: "Bukhari & Muslim",
-            occasion: "Whoever says this 10 times will have the reward of freeing four slaves from the Children of Isma'il.",
-            repetitions: 10
-        )
-    ]
-}
+// MARK: - Preview
 
 #Preview {
     NavigationStack {
