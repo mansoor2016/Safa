@@ -1,9 +1,5 @@
-//
-//  SafaWidgetExtensionBundle.swift
-//  SafaWidgetExtension
-//
-//  Created by Mansoor Aman on 07/02/2026.
-//
+// MARK: - SafaWidgetExtensionBundle.swift
+// PURPOSE: Widget bundle registering all Safa widgets
 
 import WidgetKit
 import SwiftUI
@@ -11,8 +7,9 @@ import SwiftUI
 @main
 struct SafaWidgetExtensionBundle: WidgetBundle {
     var body: some Widget {
-        SafaWidgetExtension()
-        SafaWidgetExtensionControl()
-        SafaWidgetExtensionLiveActivity()
+        PrayerTimesWidget()
+        InteractivePrayerWidget()
+        TasbeehWidget()
+        StandByPrayerWidget()
     }
 }
