@@ -48,10 +48,10 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
 
 ### L10N.2 Xcode Localization Foundation (START HERE)
-- [ ] Audit hardcoded string count across all Views (grep for quoted strings to estimate scope)
-- [ ] Enable String Catalog (`.xcstrings`) workflow for Safa app target
+- [x] Audit hardcoded string count across all Views (~500 UI strings identified)
+- [x] Enable String Catalog (`Localizable.xcstrings`) workflow for Safa app target
 - [ ] Enable String Catalog for SafaWidgetExtension target (shared keys)
-- [ ] Add supported localizations in Xcode target settings for Phase 1 languages (`en`, `ar`, `id`, `ur`, `bn`)
+- [x] Add supported localizations in Xcode project for Phase 1 languages (`en`, `ar`, `id`, `ur`, `bn`)
 - [ ] Replace hardcoded user-facing strings in core screens with `String(localized:)` keys
 - [ ] Ensure widgets and Live Activities consume shared localized keys
 - [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
