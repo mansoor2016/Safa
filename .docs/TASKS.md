@@ -530,7 +530,7 @@ xcodebuild -scheme SafaWidget build
 ## Phase 9: Content & Polish
 
 ### 9.1 Hadith Feature
-- [ ] Populate full Hadith data (currently sample data only)
+- [x] Populate full Hadith data (34,178 hadiths from Kutub al-Sittah via hadith-json)
 
 ### 9.2 Dua & Adhkar Feature
 - [ ] Add audio pronunciations
@@ -783,7 +783,7 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ### Critical Gaps
 - **Quran data:** COMPLETE — Full 6,236 ayahs populated from tanzil.net, FTS5 search index built
-- **Hadith data:** `scripts/create_hadith_database.py` generates sample data only. **Full population needed** (~30,000 hadiths from sunnah.com)
+- **Hadith data:** COMPLETE — Full 34,178 hadiths from Kutub al-Sittah populated via hadith-json (sunnah.com data)
 - **Pronunciation audio**: Audio files not yet bundled
 - **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready. Feature disabled by default via FeatureFlags until implementation is complete.
 - **Widget extension target created** (`SafaWidgetExtensionExtension`). Intents extension target still missing.
@@ -803,7 +803,7 @@ The following features have complete implementations and are now enabled by defa
 |---------|--------|--------|
 | Quran Arabic | Tanzil.net (Uthmani) via quran-json | **Complete** — 6,236 ayahs |
 | Translation | Sahih International via quran-json | **Complete** — 6,236 ayahs |
-| Hadith | Sunnah.com | Schema ready, needs full data |
+| Hadith | Sunnah.com via hadith-json | **Complete** — 34,178 hadiths |
 | Audio | Everyayah.com + King Fahd | Not integrated |
 | Tafsir | Ibn Kathir (English) | Not integrated |
 | Duas/Adhkar | Hisnul Muslim | Sample data only |

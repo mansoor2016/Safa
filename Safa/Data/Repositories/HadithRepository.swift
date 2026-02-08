@@ -78,7 +78,17 @@ final class HadithRepository: HadithRepositoryProtocol {
     }
 
     func getHadith(collection collectionId: String, number hadithNumber: Int) async throws -> Hadith? {
-        // For now, use static data (would need specific query for single hadith)
+        // Try SQLite first
+        do {
+            let results = try sqlite.searchHadiths(query: "\(hadithNumber)")
+            if let match = results.first(where: { $0.collectionId == collectionId && $0.hadithNumber == hadithNumber }) {
+                return match
+            }
+        } catch {
+            // Fall through to static data
+        }
+
+        // Fallback to static data
         return Hadith.sampleHadiths.first { $0.collectionId == collectionId && $0.hadithNumber == hadithNumber }
     }
 
@@ -126,12 +136,40 @@ final class HadithRepository: HadithRepositoryProtocol {
 
     func getBookmarks() async throws -> [Hadith] {
         let bookmarkIds = getBookmarkIds()
-        return Hadith.sampleHadiths.filter { bookmarkIds.contains($0.id) }
-            .map { hadith in
-                var bookmarked = hadith
-                bookmarked.isBookmarked = true
-                return bookmarked
+        guard !bookmarkIds.isEmpty else { return [] }
+
+        // Try loading bookmarked hadiths from SQLite by searching each ID
+        var bookmarkedHadiths: [Hadith] = []
+        for id in bookmarkIds {
+            // IDs are formatted as "collection_chapter_number" - extract parts
+            let parts = id.split(separator: "_")
+            if parts.count >= 3,
+               let collectionId = parts.first.map(String.init) {
+                let hadiths = try await getHadiths(
+                    collection: collectionId,
+                    book: "\(collectionId)_\(parts[1])"
+                )
+                if let match = hadiths.first(where: { $0.id == id }) {
+                    var bookmarked = match
+                    bookmarked.isBookmarked = true
+                    bookmarkedHadiths.append(bookmarked)
+                }
             }
+        }
+
+        // Fallback: also check static data for any IDs not found in SQLite
+        if bookmarkedHadiths.count < bookmarkIds.count {
+            let foundIds = Set(bookmarkedHadiths.map { $0.id })
+            let missing = bookmarkIds.filter { !foundIds.contains($0) }
+            for id in missing {
+                if var hadith = Hadith.sampleHadiths.first(where: { $0.id == id }) {
+                    hadith.isBookmarked = true
+                    bookmarkedHadiths.append(hadith)
+                }
+            }
+        }
+
+        return bookmarkedHadiths
     }
 
     func addBookmark(_ hadith: Hadith) async throws {
