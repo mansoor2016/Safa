@@ -32,20 +32,21 @@ final class PrayerTimeCalculator {
         let sunDec = sunDeclination(jd: jd)
         let eqTime = equationOfTime(jd: jd)
 
-        // Calculate prayer times
-        let fajr = calculateFajr(
-            latitude: location.latitude,
-            longitude: location.longitude,
-            sunDeclination: sunDec,
-            equationOfTime: eqTime,
-            fajrAngle: method.fajrAngle
-        )
-
+        // Calculate prayer times (order matters — some depend on others)
         let sunrise = calculateSunrise(
             latitude: location.latitude,
             longitude: location.longitude,
             sunDeclination: sunDec,
             equationOfTime: eqTime
+        )
+
+        let fajr = calculateFajr(
+            latitude: location.latitude,
+            longitude: location.longitude,
+            sunDeclination: sunDec,
+            equationOfTime: eqTime,
+            fajrAngle: method.fajrAngle,
+            sunriseTime: sunrise
         )
 
         let dhuhr = calculateDhuhr(
@@ -86,7 +87,20 @@ final class PrayerTimeCalculator {
             PrayerTime(type: .isha, time: timeToDate(hours: isha, date: date)),
         ]
 
-        return prayerTimes
+        // SAFETY: Enforce monotonic ordering (each prayer must be after the previous)
+        // This catches any edge cases from high-latitude or angle-based calculation failures
+        var corrected = prayerTimes
+        for i in 1..<corrected.count {
+            if corrected[i].time <= corrected[i - 1].time {
+                // Push to 1 minute after previous prayer
+                corrected[i] = PrayerTime(
+                    type: corrected[i].type,
+                    time: corrected[i - 1].time.addingTimeInterval(60)
+                )
+            }
+        }
+
+        return corrected
     }
 
     // MARK: - Qibla Direction
@@ -115,7 +129,8 @@ final class PrayerTimeCalculator {
         longitude: Double,
         sunDeclination: Double,
         equationOfTime: Double,
-        fajrAngle: Double
+        fajrAngle: Double,
+        sunriseTime: Double
     ) -> Double {
         let t = calculateTimeForAngle(
             angle: fajrAngle,
@@ -123,8 +138,21 @@ final class PrayerTimeCalculator {
             sunDeclination: sunDeclination,
             rising: true
         )
+
+        // High-latitude fallback: if angle is impossible, use Sunrise - 90 min
+        if t == 0 {
+            return sunriseTime - 1.5
+        }
+
         let transit = 12 + (-longitude / 15) - (equationOfTime / 60)
-        return transit - (t / 15)
+        let fajr = transit - (t / 15)
+
+        // Safety: Fajr must always be before Sunrise
+        if fajr >= sunriseTime {
+            return sunriseTime - 1.5
+        }
+
+        return fajr
     }
 
     private func calculateSunrise(
@@ -192,14 +220,32 @@ final class PrayerTimeCalculator {
         ishaAngle: Double,
         maghribTime: Double
     ) -> Double {
+        // Makkah method: Isha = 90 minutes after Maghrib (ishaAngle is 0)
+        if ishaAngle == 0 || ishaAngle < 0.1 {
+            return maghribTime + 1.5 // 90 minutes = 1.5 hours
+        }
+
         let t = calculateTimeForAngle(
             angle: ishaAngle,
             latitude: latitude,
             sunDeclination: sunDeclination,
             rising: false
         )
+
+        // High-latitude fallback: if angle is impossible, use Maghrib + 90 min
+        if t == 0 {
+            return maghribTime + 1.5
+        }
+
         let transit = 12 + (-longitude / 15) - (equationOfTime / 60)
-        return transit + (t / 15)
+        let isha = transit + (t / 15)
+
+        // Safety: Isha must always be after Maghrib
+        if isha <= maghribTime {
+            return maghribTime + 1.5
+        }
+
+        return isha
     }
 
     private func calculateTimeForAngle(
