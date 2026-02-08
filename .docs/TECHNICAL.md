@@ -1741,13 +1741,20 @@ CREATE TABLE hadith_translations (
     text TEXT NOT NULL,
     PRIMARY KEY (hadith_id, language)
 );
+
+CREATE TABLE dua_translations (
+    dua_id TEXT NOT NULL,
+    language TEXT NOT NULL,
+    text TEXT NOT NULL,
+    PRIMARY KEY (dua_id, language)
+);
 ```
 This keeps the base install small (~90MB Quran + Hadith) and adds ~4-8MB per language pack downloaded on-demand.
 
 **Pluralization requirements:**
 - Arabic (`ar`): 6 plural forms (zero, one, two, few, many, other) — String Catalog handles via `.stringsdict` rules
 - Bengali (`bn`), Hindi (`hi`), Urdu (`ur`): 2 plural forms (one, other)
-- Indonesian (`id`), Malay (`ms`), Turkish (`tr`), Persian (`fa`), Chinese (`zh`): no grammatical plural — use `other` form only
+- Indonesian (`id`), Malay (`ms`), Turkish (`tr`), Persian (`fa`), Chinese Simplified (`zh-Hans`): no grammatical plural — use `other` form only
 - All plural-sensitive strings (e.g. "X days", "X prayers") must use String Catalog plural variants, not manual `if count == 1` checks
 
 **Observability (privacy-safe):**

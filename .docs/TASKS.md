@@ -71,6 +71,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ### L10N.5 Scoped Religious Content Translation
 - [ ] Create `ayah_translations` table (additive, separate from base ayahs table)
 - [ ] Create `hadith_translations` table (same pattern)
+- [ ] Create `dua_translations` table (same pattern)
 - [ ] Implement on-demand language pack download + local cache
 - [ ] Define content availability manifest (per feature, per language)
 - [ ] Add user-facing availability labels in Quran, Hadith, Dua, and AI surfaces
@@ -79,7 +80,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ### L10N.6 Validation and Release Gates
 - [ ] Add pseudo-localization UI test pass (string expansion and bidi edge cases)
 - [ ] Add screenshot coverage for Phase 1 languages on key flows
-- [ ] Verify pluralization rules for Arabic (6 forms), Bengali/Urdu (2 forms), Indonesian/Turkish (no plural)
+- [ ] Verify pluralization rules for Arabic (6 forms), Bengali/Hindi/Urdu (2 forms), Indonesian/Malay/Turkish/Persian/Chinese Simplified (no grammatical plural)
 - [ ] Track localization telemetry: missing-key rate and content-fallback rate
 - [ ] Block release if localization regression threshold is exceeded
 
@@ -96,7 +97,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [ ] **IT-L10N.2**: Select Arabic app language → navigation/layout mirrors correctly in key screens
 - [ ] **IT-L10N.3**: Select content language without Quran translation pack → explicit unavailable state shown
 - [ ] **IT-L10N.4**: Add widget in non-English app language → localized labels visible on Home/Lock screen
-- [ ] **IT-L10N.5**: Toggle between English and Urdu/Hindi/French → no crashes, no missing-key placeholders
+- [ ] **IT-L10N.5**: Toggle between Phase 1 languages (English/Arabic/Indonesian/Urdu/Bengali) → no crashes, no missing-key placeholders
 - [ ] **IT-L10N.6**: Verify "5 days" / "1 day" / "0 days" renders correct plural form in Arabic
 
 ### Localization Verification

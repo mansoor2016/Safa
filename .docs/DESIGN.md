@@ -1733,7 +1733,7 @@ A feature is "done" only when it satisfies:
 - [x] LLM strategy: **Apple Foundation Models (iOS 18.4+) with RAG for Islamic knowledge**
 - [x] Localization strategy: **Scoped multilingual rollout** (app shell/settings first, content packs staged)
 - [x] Phase 1 languages: **English, Arabic, Indonesian, Urdu, Bengali**
-- [x] Phase 2 languages: **French, Hindi, Turkish, Persian**
+- [x] Phase 2 languages: **Malay, French, Hindi, Turkish, Persian**
 - [x] Phase 3 language: **Chinese (Simplified)**
 - [x] Contextual intelligence: **Core differentiator**
 - [x] Gamification: **Duolingo-style with Hasanat points, streaks, levels**
