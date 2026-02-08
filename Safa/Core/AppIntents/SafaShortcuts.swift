@@ -172,8 +172,8 @@ final class TasbeehWidgetStorage {
     static let shared = TasbeehWidgetStorage()
 
     private let userDefaults: UserDefaults
-    private let countKey = "com.safa.tasbeeh.widgetCount"
-    private let dhikrKey = "com.safa.tasbeeh.dhikrType"
+    private let countKey = AppConstants.StorageKeys.tasbeehWidgetCount
+    private let dhikrKey = AppConstants.StorageKeys.tasbeehDhikrType
 
     var currentCount: Int {
         get { userDefaults.integer(forKey: countKey) }

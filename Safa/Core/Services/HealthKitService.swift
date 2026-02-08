@@ -53,9 +53,9 @@ final class HealthKitService {
     private(set) var isAuthorized: Bool = false
 
     // Storage Keys
-    private let syncEnabledKey = "com.safa.healthkit.syncEnabled"
-    private let hasPromptedKey = "com.safa.healthkit.hasPrompted"
-    private let fastingLogsKey = "com.safa.healthkit.fastingLogs"
+    private let syncEnabledKey = AppConstants.StorageKeys.healthKitSyncEnabled
+    private let hasPromptedKey = AppConstants.StorageKeys.healthKitHasPrompted
+    private let fastingLogsKey = AppConstants.StorageKeys.healthKitFastingLogs
 
     // Configuration
     var syncEnabled: Bool {
@@ -150,8 +150,8 @@ final class HealthKitService {
             end: end,
             metadata: [
                 HKMetadataKeyWasUserEntered: true,
-                "com.safa.fasting.type": type.rawValue,
-                "com.safa.fasting.source": "Safa App"
+                AppConstants.StorageKeys.fastingType: type.rawValue,
+                AppConstants.StorageKeys.fastingSource: "Safa App"
             ]
         )
 

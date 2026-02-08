@@ -22,7 +22,7 @@ final class NotificationScheduler {
     var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     // MARK: - Storage Keys
-    private let lastScheduledDateKey = "com.safa.notifications.lastScheduledDate"
+    private let lastScheduledDateKey = AppConstants.StorageKeys.notificationLastScheduled
 
     // MARK: - Initialization
 

@@ -11,8 +11,8 @@ final class QuranRepository: QuranRepositoryProtocol {
     private let sqlite = SQLiteService.shared
 
     // MARK: - Storage Keys
-    private let bookmarksKey = "com.safa.quran.bookmarks"
-    private let progressKey = "com.safa.quran.progress"
+    private let bookmarksKey = AppConstants.StorageKeys.quranBookmarks
+    private let progressKey = AppConstants.StorageKeys.quranProgress
 
     // MARK: - Cache
     private var cachedSurahs: [Surah]?

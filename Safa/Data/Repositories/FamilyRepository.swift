@@ -14,11 +14,11 @@ final class FamilyRepository: FamilyRepositoryProtocol {
     private let sharedDatabase: CKDatabase
 
     // MARK: - Storage Keys
-    private let familyCircleKey = "com.safa.family.circle"
-    private let familyMembersKey = "com.safa.family.members"
-    private let activityFeedKey = "com.safa.family.activity"
-    private let privacySettingsKey = "com.safa.family.privacy"
-    private let notificationsEnabledKey = "com.safa.family.notifications"
+    private let familyCircleKey = AppConstants.StorageKeys.familyCircle
+    private let familyMembersKey = AppConstants.StorageKeys.familyMembers
+    private let activityFeedKey = AppConstants.StorageKeys.familyActivity
+    private let privacySettingsKey = AppConstants.StorageKeys.familyPrivacy
+    private let notificationsEnabledKey = AppConstants.StorageKeys.familyNotifications
 
     // MARK: - CloudKit Record Types
     private let circleRecordType = "FamilyCircle"

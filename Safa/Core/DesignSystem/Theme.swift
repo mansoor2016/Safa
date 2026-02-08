@@ -13,8 +13,8 @@ final class ThemeManager {
     var accentColor: AccentColorOption
 
     // MARK: - Storage Keys
-    private let colorSchemeKey = "com.safa.theme.colorScheme"
-    private let accentColorKey = "com.safa.theme.accentColor"
+    private let colorSchemeKey = AppConstants.StorageKeys.themeColorScheme
+    private let accentColorKey = AppConstants.StorageKeys.themeAccentColor
 
     // MARK: - Init
     init() {

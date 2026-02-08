@@ -303,7 +303,7 @@ extension CoreDataStack {
 
 /// Tracks which model version the app is using
 struct ModelVersionTracker {
-    private static let currentVersionKey = "com.safa.coredata.modelVersion"
+    private static let currentVersionKey = AppConstants.StorageKeys.coreDataModelVersion
 
     /// Current model version
     static var currentVersion: String {

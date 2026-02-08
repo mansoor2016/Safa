@@ -92,10 +92,10 @@ final class StorageCleanupService {
     private let userDefaults = UserDefaults.standard
 
     // Storage Keys
-    private let metadataKey = "com.safa.storage.audioMetadata"
-    private let retentionPeriodKey = "com.safa.storage.retentionPeriod"
-    private let autoCleanupKey = "com.safa.storage.autoCleanup"
-    private let lastCleanupKey = "com.safa.storage.lastCleanup"
+    private let metadataKey = AppConstants.StorageKeys.storageAudioMetadata
+    private let retentionPeriodKey = AppConstants.StorageKeys.storageRetentionPeriod
+    private let autoCleanupKey = AppConstants.StorageKeys.storageAutoCleanup
+    private let lastCleanupKey = AppConstants.StorageKeys.storageLastCleanup
 
     // Configuration
     var retentionPeriod: RetentionPeriod {

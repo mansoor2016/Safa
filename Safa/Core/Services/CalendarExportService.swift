@@ -96,7 +96,7 @@ final class CalendarExportService {
     private(set) var safaCalendar: EKCalendar?
 
     private let calendarName = "Safa - Islamic Events"
-    private let calendarIdentifierKey = "com.safa.calendar.identifier"
+    private let calendarIdentifierKey = AppConstants.StorageKeys.calendarIdentifier
 
     // MARK: - Init
 

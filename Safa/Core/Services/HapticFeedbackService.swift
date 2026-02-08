@@ -39,7 +39,7 @@ final class HapticFeedbackService {
 
     // MARK: - Storage Keys
 
-    private let enabledKey = "com.safa.haptics.enabled"
+    private let enabledKey = AppConstants.StorageKeys.hapticsEnabled
 
     // MARK: - Initialization
 

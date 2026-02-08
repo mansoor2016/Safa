@@ -22,11 +22,11 @@ final class SleepFocusService {
 
     // MARK: - Storage Keys
 
-    private let bedtimeKey = "com.safa.sleep.bedtime"
-    private let wakeTimeKey = "com.safa.sleep.waketime"
-    private let fajrAlarmKey = "com.safa.sleep.fajrAlarm"
-    private let windDownReminderKey = "com.safa.sleep.windDownReminder"
-    private let windDownMinutesKey = "com.safa.sleep.windDownMinutes"
+    private let bedtimeKey = AppConstants.StorageKeys.windDownBedtime
+    private let wakeTimeKey = AppConstants.StorageKeys.windDownWakeTime
+    private let fajrAlarmKey = AppConstants.StorageKeys.windDownFajrAlarm
+    private let windDownReminderKey = AppConstants.StorageKeys.windDownReminder
+    private let windDownMinutesKey = AppConstants.StorageKeys.windDownMinutes
 
     // MARK: - Initialization
 

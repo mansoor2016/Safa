@@ -11,7 +11,7 @@ final class HadithRepository: HadithRepositoryProtocol {
     private let sqlite = SQLiteService.shared
 
     // MARK: - Storage Keys
-    private let bookmarksKey = "com.safa.hadith.bookmarks"
+    private let bookmarksKey = AppConstants.StorageKeys.hadithBookmarks
 
     // MARK: - Cache
     private var cachedCollections: [HadithCollection]?

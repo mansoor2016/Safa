@@ -19,8 +19,8 @@ final class IslamicEventService {
 
     // MARK: - Storage Keys
 
-    private let enabledEventsKey = "com.safa.events.enabled"
-    private let reminderDaysKey = "com.safa.events.reminderDays"
+    private let enabledEventsKey = AppConstants.StorageKeys.islamicEventsEnabled
+    private let reminderDaysKey = AppConstants.StorageKeys.islamicEventsReminderDays
 
     // MARK: - Settings
 

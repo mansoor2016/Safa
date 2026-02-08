@@ -23,9 +23,9 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
     }
 
     // Storage Keys
-    private let mosqueModeKey = "com.safa.notifications.mosqueMode"
-    private let vibrationOnlyKey = "com.safa.notifications.vibrationOnly"
-    private let travelTimeKey = "com.safa.notifications.travelTime"
+    private let mosqueModeKey = AppConstants.StorageKeys.notificationMosqueMode
+    private let vibrationOnlyKey = AppConstants.StorageKeys.notificationVibrationOnly
+    private let travelTimeKey = AppConstants.StorageKeys.notificationTravelTime
 
     // MARK: - Private Properties
     private let notificationCenter = UNUserNotificationCenter.current()

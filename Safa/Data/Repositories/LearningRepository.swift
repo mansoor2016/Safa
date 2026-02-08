@@ -10,9 +10,9 @@ final class LearningRepository: LearningRepositoryProtocol {
     private let coreData: CoreDataStack
 
     // MARK: - Storage Keys
-    private let progressKey = "com.safa.learning.progress"
-    private let completedLessonsKey = "com.safa.learning.completed"
-    private let pronunciationKey = "com.safa.learning.pronunciation"
+    private let progressKey = AppConstants.StorageKeys.learningProgress
+    private let completedLessonsKey = AppConstants.StorageKeys.learningCompleted
+    private let pronunciationKey = AppConstants.StorageKeys.learningPronunciation
 
     // MARK: - Init
     init(coreData: CoreDataStack) {

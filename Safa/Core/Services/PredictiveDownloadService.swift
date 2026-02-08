@@ -55,10 +55,10 @@ final class PredictiveDownloadService {
     private let userDefaults = UserDefaults.standard
 
     // Storage Keys
-    private let readingHistoryKey = "com.safa.predictive.readingHistory"
-    private let downloadQueueKey = "com.safa.predictive.downloadQueue"
-    private let enabledKey = "com.safa.predictive.enabled"
-    private let wifiOnlyKey = "com.safa.predictive.wifiOnly"
+    private let readingHistoryKey = AppConstants.StorageKeys.predictiveReadingHistory
+    private let downloadQueueKey = AppConstants.StorageKeys.predictiveDownloadQueue
+    private let enabledKey = AppConstants.StorageKeys.predictiveEnabled
+    private let wifiOnlyKey = AppConstants.StorageKeys.predictiveWifiOnly
 
     // Configuration
     var isEnabled: Bool {

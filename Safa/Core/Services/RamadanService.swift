@@ -27,14 +27,14 @@ final class RamadanService {
 
     // MARK: - Storage Keys
 
-    private let ramadanModeKey = "com.safa.ramadan.enabled"
-    private let suhoorReminderKey = "com.safa.ramadan.suhoorReminder"
-    private let iftarReminderKey = "com.safa.ramadan.iftarReminder"
-    private let taraweehReminderKey = "com.safa.ramadan.taraweehReminder"
-    private let suhoorMinutesKey = "com.safa.ramadan.suhoorMinutes"
-    private let iftarMinutesKey = "com.safa.ramadan.iftarMinutes"
-    private let fastingDaysKey = "com.safa.ramadan.fastingDays"
-    private let taraweehDaysKey = "com.safa.ramadan.taraweehDays"
+    private let ramadanModeKey = AppConstants.StorageKeys.ramadanEnabled
+    private let suhoorReminderKey = AppConstants.StorageKeys.ramadanSuhoorReminder
+    private let iftarReminderKey = AppConstants.StorageKeys.ramadanIftarReminder
+    private let taraweehReminderKey = AppConstants.StorageKeys.ramadanTaraweehReminder
+    private let suhoorMinutesKey = AppConstants.StorageKeys.ramadanSuhoorMinutes
+    private let iftarMinutesKey = AppConstants.StorageKeys.ramadanIftarMinutes
+    private let fastingDaysKey = AppConstants.StorageKeys.ramadanFastingDays
+    private let taraweehDaysKey = AppConstants.StorageKeys.ramadanTaraweehDays
 
     private let notificationCenter = UNUserNotificationCenter.current()
 

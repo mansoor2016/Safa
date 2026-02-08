@@ -25,9 +25,6 @@
     "%@" : {
 
     },
-    "%@ Dhikr" : {
-
-    },
     "%@ at %@%@" : {
       "localizations" : {
         "en" : {
@@ -37,6 +34,9 @@
           }
         }
       }
+    },
+    "%@ Dhikr" : {
+
     },
     "%@ in %lld minutes" : {
       "localizations" : {
@@ -731,9 +731,6 @@
 
     },
     "Dhikr" : {
-
-    },
-    "Dhikr & Dhikr" : {
 
     },
     "Dhikr Type" : {

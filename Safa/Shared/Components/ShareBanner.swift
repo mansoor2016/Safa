@@ -8,7 +8,7 @@ struct ShareBanner: View {
     let onDismiss: () -> Void
     @State private var showingShareSheet = false
 
-    private static let dismissedKey = "share_banner_dismissed"
+    private static let dismissedKey = AppConstants.StorageKeys.shareBannerDismissed
 
     static var isDismissed: Bool {
         UserDefaults.standard.bool(forKey: dismissedKey)

@@ -9,9 +9,9 @@ final class ChatRepository: ChatRepositoryProtocol {
     private let llmService: LLMService
 
     // MARK: - Storage Keys
-    private let conversationsKey = "com.safa.chat.conversations"
-    private let messagesKeyPrefix = "com.safa.chat.messages."
-    private let activeConversationKey = "com.safa.chat.active"
+    private let conversationsKey = AppConstants.StorageKeys.chatConversations
+    private let messagesKeyPrefix = AppConstants.StorageKeys.chatMessagesPrefix
+    private let activeConversationKey = AppConstants.StorageKeys.chatActiveConversation
 
     // MARK: - System Prompt
     private let systemPrompt = """

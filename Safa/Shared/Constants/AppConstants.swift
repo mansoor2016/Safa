@@ -38,14 +38,136 @@ enum AppConstants {
         static let settings = "settings"
     }
 
-    // MARK: - Storage Keys
+    // MARK: - Storage Keys (UserDefaults)
+    // All UserDefaults keys centralized here to prevent typos and aid discovery.
     enum StorageKeys {
+        // App State
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
         static let lastAppVersion = "lastAppVersion"
+        static let featureFlags = "com.safa.featureFlags"
+
+        // Prayer
         static let calculationMethod = "calculationMethod"
+        static let prayerLogs = "com.safa.prayerLogs"
+        static let prayerLogsMigrated = "com.safa.prayerLogsMigratedToAppGroup"
+
+        // Notifications
         static let notificationOffset = "notificationOffset"
-        static let selectedReciter = "selectedReciter"
+        static let notificationMosqueMode = "com.safa.notifications.mosqueMode"
+        static let notificationVibrationOnly = "com.safa.notifications.vibrationOnly"
+        static let notificationTravelTime = "com.safa.notifications.travelTime"
+        static let notificationLastScheduled = "com.safa.notifications.lastScheduledDate"
+
+        // Theme & Appearance
+        static let themeColorScheme = "com.safa.theme.colorScheme"
+        static let themeAccentColor = "com.safa.theme.accentColor"
+        static let hapticsEnabled = "com.safa.haptics.enabled"
+
+        // Quran
+        static let quranBookmarks = "com.safa.quran.bookmarks"
+        static let quranProgress = "com.safa.quran.progress"
         static let lastQuranPosition = "lastQuranPosition"
+        static let selectedReciter = "selectedReciter"
+
+        // Hadith
+        static let hadithBookmarks = "com.safa.hadith.bookmarks"
+
+        // Dua & Dhikr
+        static let duaFavorites = "com.safa.dua.favorites"
+        static let dhikrCompletion = "com.safa.dhikr.completion"
+        static let dhikrDate = "com.safa.dhikr.date"
+
+        // Chat
+        static let chatConversations = "com.safa.chat.conversations"
+        static let chatMessagesPrefix = "com.safa.chat.messages."
+        static let chatActiveConversation = "com.safa.chat.active"
+
+        // Family
+        static let familyCircle = "com.safa.family.circle"
+        static let familyMembers = "com.safa.family.members"
+        static let familyActivity = "com.safa.family.activity"
+        static let familyPrivacy = "com.safa.family.privacy"
+        static let familyNotifications = "com.safa.family.notifications"
+
+        // Learning
+        static let learningProgress = "com.safa.learning.progress"
+        static let learningCompleted = "com.safa.learning.completed"
+        static let learningPronunciation = "com.safa.learning.pronunciation"
+
+        // User State
+        static let userStats = "com.safa.user.stats"
+        static let userStreaks = "com.safa.user.streaks"
+        static let userAchievements = "com.safa.user.achievements"
+        static let userPreferences = "com.safa.user.preferences"
+
+        // Ramadan
+        static let ramadanEnabled = "com.safa.ramadan.enabled"
+        static let ramadanSuhoorReminder = "com.safa.ramadan.suhoorReminder"
+        static let ramadanIftarReminder = "com.safa.ramadan.iftarReminder"
+        static let ramadanTaraweehReminder = "com.safa.ramadan.taraweehReminder"
+        static let ramadanSuhoorMinutes = "com.safa.ramadan.suhoorMinutes"
+        static let ramadanIftarMinutes = "com.safa.ramadan.iftarMinutes"
+        static let ramadanFastingDays = "com.safa.ramadan.fastingDays"
+        static let ramadanTaraweehDays = "com.safa.ramadan.taraweehDays"
+
+        // Wind Down / Sleep
+        static let windDownBedtime = "com.safa.windDown.bedtime"
+        static let windDownWakeTime = "com.safa.windDown.wakeTime"
+        static let windDownFajrAlarm = "com.safa.windDown.fajrAlarm"
+        static let windDownReminder = "com.safa.windDown.reminder"
+        static let windDownMinutes = "com.safa.windDown.minutes"
+
+        // Islamic Events
+        static let islamicEventsEnabled = "com.safa.islamicEvents.enabled"
+        static let islamicEventsReminderDays = "com.safa.islamicEvents.reminderDays"
+
+        // Calendar
+        static let calendarIdentifier = "com.safa.calendarIdentifier"
+
+        // CloudKit
+        static let cloudKitChangeToken = "cloudKitServerChangeToken"
+        static let cloudKitPendingChanges = "pendingCloudKitChanges"
+
+        // Core Data
+        static let coreDataModelVersion = "com.safa.coredata.modelVersion"
+
+        // Share Banner
+        static let shareBannerDismissed = "share_banner_dismissed"
+
+        // Tasbeeh Widget
+        static let tasbeehWidgetCount = "com.safa.tasbeeh.widgetCount"
+        static let tasbeehDhikrType = "com.safa.tasbeeh.dhikrType"
+
+        // Predictive Download
+        static let predictiveReadingHistory = "com.safa.predictive.readingHistory"
+        static let predictiveDownloadQueue = "com.safa.predictive.downloadQueue"
+        static let predictiveEnabled = "com.safa.predictive.enabled"
+        static let predictiveWifiOnly = "com.safa.predictive.wifiOnly"
+
+        // HealthKit
+        static let healthKitSyncEnabled = "com.safa.healthkit.syncEnabled"
+        static let healthKitHasPrompted = "com.safa.healthkit.hasPrompted"
+        static let healthKitFastingLogs = "com.safa.healthkit.fastingLogs"
+
+        // Fasting
+        static let fastingSource = "com.safa.fasting.source"
+        static let fastingType = "com.safa.fasting.type"
+
+        // Invites
+        static let inviteCount = "com.safa.invite.count"
+        static let inviteHasanatAwarded = "com.safa.invite.hasanatAwarded"
+        static let inviteWasInvited = "com.safa.invite.wasInvited"
+
+        // Spotlight
+        static let spotlightIndexed = "com.safa.spotlight.indexed"
+        static let spotlightIndexDate = "com.safa.spotlight.indexDate"
+        static let spotlightIndexCount = "com.safa.spotlight.indexCount"
+
+        // Storage Cleanup
+        static let storageAudioMetadata = "com.safa.storage.audioMetadata"
+        static let storageAutoCleanup = "com.safa.storage.autoCleanup"
+        static let storageLastCleanup = "com.safa.storage.lastCleanup"
+        static let storageRetentionPeriod = "com.safa.storage.retentionPeriod"
     }
 
     // MARK: - Notification Categories

@@ -102,7 +102,7 @@ final class FeatureFlags {
     static let shared = FeatureFlags()
 
     private var overrides: [Feature: Bool] = [:]
-    private let storageKey = "com.safa.featureFlags"
+    private let storageKey = AppConstants.StorageKeys.featureFlags
 
     private init() {
         loadOverrides()

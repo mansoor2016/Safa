@@ -41,9 +41,9 @@ final class SpotlightIndexService {
     private let userDefaults = UserDefaults.standard
 
     // Storage Keys
-    private let indexedKey = "com.safa.spotlight.indexed"
-    private let indexDateKey = "com.safa.spotlight.indexDate"
-    private let indexCountKey = "com.safa.spotlight.indexCount"
+    private let indexedKey = AppConstants.StorageKeys.spotlightIndexed
+    private let indexDateKey = AppConstants.StorageKeys.spotlightIndexDate
+    private let indexCountKey = AppConstants.StorageKeys.spotlightIndexCount
 
     // MARK: - Init
 

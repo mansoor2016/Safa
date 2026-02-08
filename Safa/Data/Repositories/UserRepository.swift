@@ -10,10 +10,10 @@ final class UserRepository: UserRepositoryProtocol {
     private let coreData: CoreDataStack
 
     // MARK: - Storage Keys
-    private let userStatsKey = "com.safa.user.stats"
-    private let streaksKey = "com.safa.user.streaks"
-    private let achievementsKey = "com.safa.user.achievements"
-    private let preferencesKey = "com.safa.user.preferences"
+    private let userStatsKey = AppConstants.StorageKeys.userStats
+    private let streaksKey = AppConstants.StorageKeys.userStreaks
+    private let achievementsKey = AppConstants.StorageKeys.userAchievements
+    private let preferencesKey = AppConstants.StorageKeys.userPreferences
 
     // MARK: - Init
     init(coreData: CoreDataStack) {

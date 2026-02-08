@@ -10,9 +10,9 @@ final class DuaRepository: DuaRepositoryProtocol {
     private let coreData: CoreDataStack
 
     // MARK: - Storage Keys
-    private let favoritesKey = "com.safa.dua.favorites"
-    private let dhikrCompletionKey = "com.safa.dhikr.completion"
-    private let dhikrDateKey = "com.safa.dhikr.date"
+    private let favoritesKey = AppConstants.StorageKeys.duaFavorites
+    private let dhikrCompletionKey = AppConstants.StorageKeys.dhikrCompletion
+    private let dhikrDateKey = AppConstants.StorageKeys.dhikrDate
 
     // MARK: - Init
     init(coreData: CoreDataStack) {

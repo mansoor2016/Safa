@@ -16,9 +16,9 @@ final class InviteFriendsService {
     private let userDefaults = UserDefaults.standard
 
     // Storage Keys
-    private let inviteCountKey = "com.safa.invite.count"
-    private let wasInvitedKey = "com.safa.invite.wasInvited"
-    private let hasanatAwardedKey = "com.safa.invite.hasanatAwarded"
+    private let inviteCountKey = AppConstants.StorageKeys.inviteCount
+    private let wasInvitedKey = AppConstants.StorageKeys.inviteWasInvited
+    private let hasanatAwardedKey = AppConstants.StorageKeys.inviteHasanatAwarded
 
     // MARK: - Configuration
 

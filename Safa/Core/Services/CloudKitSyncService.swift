@@ -335,7 +335,7 @@ final class CloudKitSyncService {
         context.perform {
             // Store the pending change
             // Using UserDefaults for simplicity, but could use Core Data
-            var pendingChanges = UserDefaults.standard.array(forKey: "pendingCloudKitChanges") as? [[String: Any]] ?? []
+            var pendingChanges = UserDefaults.standard.array(forKey: AppConstants.StorageKeys.cloudKitPendingChanges) as? [[String: Any]] ?? []
 
             let changeData: [String: Any] = [
                 "recordType": record.recordType,
@@ -344,7 +344,7 @@ final class CloudKitSyncService {
             ]
 
             pendingChanges.append(changeData)
-            UserDefaults.standard.set(pendingChanges, forKey: "pendingCloudKitChanges")
+            UserDefaults.standard.set(pendingChanges, forKey: AppConstants.StorageKeys.cloudKitPendingChanges)
 
             DispatchQueue.main.async {
                 self.pendingChangesCount = pendingChanges.count
@@ -354,7 +354,7 @@ final class CloudKitSyncService {
 
     /// Process queued offline changes
     func processOfflineQueue() async throws {
-        let pendingChanges = UserDefaults.standard.array(forKey: "pendingCloudKitChanges") as? [[String: Any]] ?? []
+        let pendingChanges = UserDefaults.standard.array(forKey: AppConstants.StorageKeys.cloudKitPendingChanges) as? [[String: Any]] ?? []
 
         guard !pendingChanges.isEmpty else { return }
 
@@ -362,7 +362,7 @@ final class CloudKitSyncService {
         try await pushLocalChanges()
 
         // Clear queue on success
-        UserDefaults.standard.removeObject(forKey: "pendingCloudKitChanges")
+        UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.cloudKitPendingChanges)
         await MainActor.run {
             pendingChangesCount = 0
         }
@@ -402,7 +402,7 @@ final class CloudKitSyncService {
     }
 
     private func getServerChangeToken() -> CKServerChangeToken? {
-        guard let data = UserDefaults.standard.data(forKey: "cloudKitServerChangeToken") else {
+        guard let data = UserDefaults.standard.data(forKey: AppConstants.StorageKeys.cloudKitChangeToken) else {
             return nil
         }
         return try? NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: data)
@@ -410,7 +410,7 @@ final class CloudKitSyncService {
 
     private func saveServerChangeToken(_ token: CKServerChangeToken) {
         if let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true) {
-            UserDefaults.standard.set(data, forKey: "cloudKitServerChangeToken")
+            UserDefaults.standard.set(data, forKey: AppConstants.StorageKeys.cloudKitChangeToken)
         }
     }
 
