@@ -15,7 +15,7 @@ struct PrayerView: View {
             if let viewModel = viewModel {
                 PrayerContentView(viewModel: viewModel)
             } else {
-                LoadingView(message: "Loading prayer times...")
+                PrayerSkeletonView()
             }
         }
         .task {

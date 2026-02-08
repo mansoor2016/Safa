@@ -33,6 +33,9 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
+            if todayPrayers.isEmpty && hijriDate.isEmpty {
+                HomeSkeletonView()
+            } else {
             VStack(spacing: SafaSpacing.lg) {
                 // Header with date
                 dateHeader
@@ -71,6 +74,7 @@ struct HomeView: View {
                 }
             }
             .padding()
+            } // end else (skeleton)
         }
         .navigationTitle("Safa")
         .navigationBarTitleDisplayMode(.large)

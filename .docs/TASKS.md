@@ -647,7 +647,7 @@ xcodebuild -scheme SafaWidget build
 - [ ] Define motion tokens in design system (durations, curves, spring presets)
 - [ ] Define semantic elevation/surface tokens for card styles
 - [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
-- [ ] Add skeleton loaders for key screens
+- [x] Add skeleton loaders for key screens (Home, Prayer, Quran — shimmer-animated placeholders)
 - [ ] Smooth numeric transitions for counters and streaks
 
 ### 9.13 Search & Navigation Coherence

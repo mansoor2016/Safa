@@ -13,7 +13,7 @@ struct QuranView: View {
             if let viewModel = viewModel {
                 QuranContentView(viewModel: viewModel)
             } else {
-                LoadingView(message: "Loading Quran...")
+                QuranSkeletonView()
             }
         }
         .task {
