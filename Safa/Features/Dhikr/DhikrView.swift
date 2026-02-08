@@ -112,8 +112,7 @@ private struct DhikrQuickButton: View {
 
     var body: some View {
         Button(action: {
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
             action()
         }) {
             VStack(spacing: SafaSpacing.xs) {

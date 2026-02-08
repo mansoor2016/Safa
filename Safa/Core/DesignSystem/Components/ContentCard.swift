@@ -67,8 +67,7 @@ struct InteractiveCard<Content: View>: View {
 
     var body: some View {
         Button(action: {
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.tap)
             action()
         }) {
             ContentCard {

@@ -288,16 +288,13 @@ struct QiblaCompassView: View {
         switch currentZone {
         case .perfect:
             // Strong success haptic when perfectly aligned
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            HapticFeedbackService.shared.play(.qiblaPerfect)
         case .close:
             // Medium haptic when getting close
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
         case .near:
             // Light haptic when moderately close
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.qiblaLight)
         case .far:
             // No haptic when far away
             break

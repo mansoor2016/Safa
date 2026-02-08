@@ -184,8 +184,7 @@ struct AdhkarDetailSheet: View {
     private func handleCountTap() {
         if currentCount < adhkar.count {
             currentCount += 1
-            let impact = UIImpactFeedbackGenerator(style: .medium)
-            impact.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
         }
 
         if currentCount >= adhkar.count {

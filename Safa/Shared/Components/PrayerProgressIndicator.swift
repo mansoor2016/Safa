@@ -98,8 +98,7 @@ struct PrayerProgressIndicator: View {
 
         return Button {
             guard canTap else { return }
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
             onLogPrayer?(prayerType)
         } label: {
             ZStack {
@@ -183,8 +182,7 @@ struct PrayerProgressIndicator: View {
 
         return Button {
             guard canTap else { return }
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
             onLogPrayer?(prayerType)
         } label: {
             VStack(spacing: 6) {

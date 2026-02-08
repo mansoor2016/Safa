@@ -43,8 +43,7 @@ struct DisabledFeatureModifier: ViewModifier {
                     toastService.showComingSoon(feature.displayName)
                 }
 
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred()
+                HapticFeedbackService.shared.play(.tap)
             }
             .allowsHitTesting(true)
     }
@@ -84,8 +83,7 @@ struct SimpleDisabledModifier: ViewModifier {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     toastService.showComingSoon(featureName)
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
+                    HapticFeedbackService.shared.play(.tap)
                 }
                 .allowsHitTesting(true)
         } else {
@@ -193,8 +191,7 @@ struct DisabledFeatureRow: View {
         .onTapGesture {
             if isDisabled {
                 toastService.showComingSoon(feature.displayName)
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred()
+                HapticFeedbackService.shared.play(.tap)
             }
         }
     }

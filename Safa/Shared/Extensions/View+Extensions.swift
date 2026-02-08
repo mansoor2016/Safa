@@ -78,24 +78,6 @@ extension View {
     }
 }
 
-// MARK: - Haptic Feedback
-
-extension View {
-    func hapticFeedback(_ type: UIImpactFeedbackGenerator.FeedbackStyle = .medium) -> some View {
-        self.onTapGesture {
-            let generator = UIImpactFeedbackGenerator(style: type)
-            generator.impactOccurred()
-        }
-    }
-
-    func hapticOnChange<Value: Equatable>(of value: Value, type: UIImpactFeedbackGenerator.FeedbackStyle = .medium) -> some View {
-        self.onChange(of: value) { _, _ in
-            let generator = UIImpactFeedbackGenerator(style: type)
-            generator.impactOccurred()
-        }
-    }
-}
-
 // MARK: - Loading State
 
 struct LoadingModifier: ViewModifier {

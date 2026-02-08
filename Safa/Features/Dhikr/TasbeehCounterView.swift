@@ -177,8 +177,7 @@ struct TasbeehCounterView: View {
                 withAnimation {
                     count = 0
                 }
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
+                HapticFeedbackService.shared.play(.commit)
             } label: {
                 VStack(spacing: SafaSpacing.xxs) {
                     Image(systemName: "arrow.counterclockwise")
@@ -197,8 +196,7 @@ struct TasbeehCounterView: View {
                     withAnimation {
                         count -= 1
                     }
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
+                    HapticFeedbackService.shared.play(.tap)
                 }
             } label: {
                 VStack(spacing: SafaSpacing.xxs) {
@@ -260,13 +258,11 @@ struct TasbeehCounterView: View {
         }
 
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        HapticFeedbackService.shared.play(.tasbeehTap)
 
         // Check for completion
         if count >= targetCount {
-            let notificationGenerator = UINotificationFeedbackGenerator()
-            notificationGenerator.notificationOccurred(.success)
+            HapticFeedbackService.shared.play(.tasbeehMilestone)
             isComplete = true
         }
     }

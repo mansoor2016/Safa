@@ -13,8 +13,7 @@ struct PrimaryButton: View {
 
     var body: some View {
         Button(action: {
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.commit)
             action()
         }) {
             HStack(spacing: SafaSpacing.xs) {

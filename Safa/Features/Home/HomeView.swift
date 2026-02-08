@@ -536,8 +536,7 @@ private struct QuickActionCard: View {
 
     var body: some View {
         Button(action: {
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
+            HapticFeedbackService.shared.play(.tap)
             action()
         }) {
             VStack(alignment: .leading, spacing: SafaSpacing.sm) {
