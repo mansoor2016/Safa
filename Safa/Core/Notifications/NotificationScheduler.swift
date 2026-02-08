@@ -10,6 +10,9 @@ import UserNotifications
 @Observable
 final class NotificationScheduler {
 
+    // MARK: - Shared Instance
+    static let shared = NotificationScheduler()
+
     // MARK: - Properties
 
     private let center = UNUserNotificationCenter.current()
@@ -18,11 +21,97 @@ final class NotificationScheduler {
     var isAuthorized: Bool = false
     var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
+    // MARK: - Storage Keys
+    private let lastScheduledDateKey = "com.safa.notifications.lastScheduledDate"
+
     // MARK: - Initialization
 
     init() {
         Task {
             await checkAuthorizationStatus()
+        }
+    }
+
+    // MARK: - Daily Re-Scheduling (App Launch)
+
+    /// Call from SafaApp.task{} to ensure notifications are scheduled for today.
+    /// Skips if already scheduled today.
+    func scheduleIfNeeded() async {
+        await checkAuthorizationStatus()
+        guard isAuthorized else { return }
+
+        // Check if we already scheduled today
+        if let lastDate = UserDefaults.standard.object(forKey: lastScheduledDateKey) as? Date,
+           Calendar.current.isDateInToday(lastDate) {
+            return
+        }
+
+        await scheduleTodaysPrayerNotifications()
+    }
+
+    /// Force re-schedule (e.g. when calculation method changes)
+    func forceReschedule() async {
+        await checkAuthorizationStatus()
+        guard isAuthorized else { return }
+        await scheduleTodaysPrayerNotifications()
+    }
+
+    private func scheduleTodaysPrayerNotifications() async {
+        let prefs = await PreferencesManager.shared.getPreferences()
+        let enabledPrayers = Set(prefs.notificationEnabledPrayers.compactMap { PrayerType(rawValue: $0) })
+        guard !enabledPrayers.isEmpty else { return }
+
+        guard let coords = Dependencies.shared.locationService.coordinates else { return }
+
+        let method: CalculationMethod
+        if let raw = UserDefaults.standard.string(forKey: "calculationMethod"),
+           let saved = CalculationMethod(rawValue: raw) {
+            method = saved
+        } else {
+            method = AppDefaults.calculationMethod
+        }
+
+        do {
+            let prayers = try await Dependencies.shared.prayerRepository.getPrayers(
+                for: Date(),
+                location: coords,
+                method: method
+            )
+
+            await cancelPrayerNotifications()
+
+            let now = Date()
+            for prayer in prayers where prayer.type.isObligatory && enabledPrayers.contains(prayer.type) && prayer.time > now {
+                let content = UNMutableNotificationContent()
+                content.title = "\(prayer.type.displayName) Time"
+                content.body = "It's time for \(prayer.type.displayName) prayer"
+                content.sound = .default
+                content.interruptionLevel = .timeSensitive
+                content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
+                content.userInfo = ["prayerType": prayer.type.rawValue]
+
+                if prefs.adhanEnabled {
+                    let fileName = prayer.type == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+                    content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+                }
+
+                let components = Calendar.current.dateComponents(
+                    [.year, .month, .day, .hour, .minute],
+                    from: prayer.time
+                )
+                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+                let request = UNNotificationRequest(
+                    identifier: "prayer_at_\(prayer.type.rawValue)",
+                    content: content,
+                    trigger: trigger
+                )
+
+                try await center.add(request)
+            }
+
+            UserDefaults.standard.set(Date(), forKey: lastScheduledDateKey)
+        } catch {
+            // Silently fail — notifications are best-effort
         }
     }
 

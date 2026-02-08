@@ -13,7 +13,7 @@ struct OnboardingView: View {
     @State private var selectedMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
-    @State private var notificationsEnabled = false // Default OFF per spec
+    @State private var notificationsEnabled = AppDefaults.notificationsEnabled // Default ON
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
     // Location inference

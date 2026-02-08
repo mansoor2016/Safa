@@ -53,6 +53,11 @@ struct SafaApp: App {
                 if prefs.hasCompletedOnboarding && spotlightService.lastIndexDate == nil {
                     await spotlightService.indexAllContent()
                 }
+
+                // Re-schedule prayer notifications daily on app launch
+                if prefs.hasCompletedOnboarding {
+                    await NotificationScheduler.shared.scheduleIfNeeded()
+                }
             }
             .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
                 // Handle Spotlight search result tap

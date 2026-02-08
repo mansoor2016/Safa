@@ -313,6 +313,9 @@ final class PrayerViewModel {
         calculationMethod = method
         UserDefaults.standard.set(method.rawValue, forKey: "calculationMethod")
         await loadPrayerTimes()
+
+        // Re-schedule notifications with new prayer times
+        await NotificationScheduler.shared.forceReschedule()
     }
 
     func requestNotificationPermission() async {
