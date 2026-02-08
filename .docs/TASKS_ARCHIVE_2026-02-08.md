@@ -8,9 +8,9 @@ This document tracks all development tasks for the Safa iOS app. Each phase incl
 - **Integration tests** - User flow verification
 - **Milestone demo** - End-of-phase validation checkpoint
 
-**Compact Mode (February 8, 2026):**
-- This file prioritizes active backlog items (`[ ]`, `[~]`, `[!]`) and keeps completed work as condensed rollups.
-- Completed granular history is archived in `.docs/TASKS_ARCHIVE_2026-02-08.md`.
+**Compact Mode (February 7, 2026):**
+- This file now shows active backlog items only (`[ ]`, `[~]`, `[!]`).
+- Completed items were compacted and archived in `.docs/TASKS_ARCHIVE_2026-02-07.md`.
 
 **Legend:**
 - `[ ]` Not started
@@ -36,34 +36,23 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 
 ---
 
-## Completed Rollups (February 8, 2026)
-- [x] Localization foundation shipped: Phase language plan finalized, fallback policy defined, app String Catalog enabled, Phase 1 locales configured, and ~119 programmatic strings localized.
-- [x] Content data foundation shipped: full Quran dataset (6,236 ayahs) and full Hadith dataset (34,178 entries) populated with SQLite + FTS coverage and integrity checks.
-- [x] Platform baseline shipped: widget extension target, App Group prayer data sharing, lock-screen widget families, and streak widget implementation.
-- [x] UX quality systems shipped: centralized haptics system, degraded state banner pattern, and system status surfacing in Settings.
-- [x] Dark mode foundation shipped: theme wiring, appearance picker, semantic color tokens, and ThemeManager unit-test coverage.
-- [x] Observability baseline shipped: analytics schema, onboarding/core action instrumentation, degraded-state tracking, and privacy-safe logging rules.
-- [x] Data sovereignty baseline shipped: JSON export, CSV prayer-log export, and in-app transparency screen for user data visibility.
-- [x] Prayer time bug fixes shipped: Isha-before-Maghrib fix (Makkah method + high-latitude fallbacks + monotonic ordering), HomeView/RamadanView calculation method consistency, 21 monotonic regression tests.
-- [x] Notification reliability shipped: default ON in onboarding, daily re-scheduling on app launch via NotificationScheduler, force-reschedule on method change.
-- [x] Skeleton loaders shipped: shimmer-animated placeholders for Home, Prayer, and Quran screens replacing spinners.
-- [x] Code health shipped: UserPreferences extracted from Gamification.swift, orphaned SafaWidget/ folder removed (1,528 lines), localization plan amended with Malay, content pack schema, pluralization rules.
-
----
-
 ## Cross-Cutting Workstream: Localization & Internationalization (Scoped)
 
 **Dependency order:** L10N.1 (resolved) → L10N.2 (foundation) → L10N.4 (RTL, do early) → L10N.3 (settings) → L10N.5 (content packs) → L10N.6 (validation)
 
-### L10N.1 Product Scope and Language Rollout [MOSTLY RESOLVED]
-- [x] Finalize rollout and fallback baseline (Phase 1: `en/ar/id/ur/bn`, Phase 2: `ms/fr/hi/tr/fa`, Phase 3: `zh-Hans`; fallback `selected -> en -> Arabic/transliteration` for content)
+### L10N.1 Product Scope and Language Rollout [RESOLVED]
+- [x] Finalize Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
+- [x] Record Phase 2 UI languages: Malay (`ms`), French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
+- [x] Record Phase 3 UI language: Chinese Simplified (`zh-Hans`)
+- [x] Confirm fallback policy: UI (`selected → en`), content (`selected → en → Arabic/transliteration`)
 - [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
 
 ### L10N.2 Xcode Localization Foundation (START HERE)
-- [x] Audit hardcoded string volume and baseline scope
-- [x] Enable app target String Catalog workflow and localize core programmatic strings
-- [x] Configure Phase 1 project localizations in Xcode
+- [x] Audit hardcoded string count across all Views (~500 UI strings identified)
+- [x] Enable String Catalog (`Localizable.xcstrings`) workflow for Safa app target
 - [ ] Enable String Catalog for SafaWidgetExtension target (shared keys)
+- [x] Add supported localizations in Xcode project for Phase 1 languages (`en`, `ar`, `id`, `ur`, `bn`)
+- [x] Replace hardcoded user-facing strings with `String(localized:)` keys (~119 programmatic strings across 21 files: notifications, errors, event names, action titles)
 - [ ] Ensure widgets and Live Activities consume shared localized keys
 - [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
 
@@ -135,12 +124,15 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
 ### 0.2 Agent Guidance Documentation
 
 ### 0.3 Xcode Project Configuration
+- [x] Set deployment target to iOS 26 (confirmed in `Safa.xcodeproj/project.pbxproj`)
+- [x] Create Widget extension target in Xcode project (`SafaWidgetExtension`)
 - [ ] Create Intents extension target in Xcode project (`SafaIntents`)
 - [ ] [manual] Verify Apple Developer account/certificates/provisioning are valid for both `Mawj.Safa` and `Mawj.Safa.SafaWidgetExtension` by running on a physical iPhone
 
 ### 0.4 Core Directory Structure
 
 ### Phase 0 Acceptance Criteria
+- [x] **AC-0.4**: Widget extension target builds independently
 
 ### Phase 0 Verification
 ```bash
@@ -158,6 +150,7 @@ find Safa -type d -name "*.swift" | head -20
 **Demo Checklist:**
 - [ ] Fresh clone builds without errors
 - [ ] App launches to empty screen in simulator
+- [x] Widget extension compiles
 - [ ] All directories created per technical spec
 - [ ] Documentation files in place
 
@@ -266,6 +259,10 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 ## Phase 3: Quran Reader
 
 ### 3.1 Quran Data
+- [x] Populate full Quran data (6,236 ayahs, 114 surahs, 30 juz via tanzil.net JSON)
+- [x] Wire QuranSearchView to SQLite FTS instead of hardcoded sample data
+- [x] Add Quran data integrity tests (21 tests: surah counts, ayah counts, FTS search, juz boundaries)
+- [x] Verify translation accuracy (spot check 10 ayahs — QuranTranslationAccuracyTests)
 
 ### 3.2 Quran Repository
 
@@ -276,12 +273,6 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 ### 3.5 Predictive Audio Download
 
 ### 3.6 Smart Cleanup (Auto-Remove Unused Audio)
-
-### 3.7 Remaining Quran Backlog
-- [ ] Connect audio player UI to AVFoundation for actual playback
-- [ ] Implement audio download/caching for recitations
-- [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
-- [ ] Add transliteration data (quran.com API or similar)
 
 ### Phase 3 Acceptance Criteria
 
@@ -390,6 +381,7 @@ xcodebuild test -only-testing:SafaTests/StreakTests
 - [ ] Add track-level "Coming Soon" for incomplete tracks
 
 ### 5.6 Micro-Practice Sessions
+- [x] Define `PracticeSession` model (type, duration, content)
 - [ ] Build 1-ayah read + reflection prompt flow
 - [ ] Build 33-count dhikr quick session
 - [ ] Build 1-hadith/day with save/share
@@ -485,8 +477,19 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 ### 7.1 Widgets (Prioritized)
 
+- [x] Share prayer times from main app to widget via App Group UserDefaults (WidgetDataService)
+- [x] Widget reads real calculated prayer times from App Group (falls back to London defaults)
+- [x] Widget shows correct Hijri date from App Group
+- [x] InteractivePrayerWidget reads real times + logged prayer state from App Group
+- [x] StandByWidget reads next prayer + Fajr time from App Group
+- [x] PrayerRepository migrated to App Group UserDefaults (with one-time migration)
+- [x] Widget extension entitlements added for App Group access
+- [x] Add streak widget (StreakWidget: small + medium, reads from App Group, shows current/longest count)
 
 ### 7.1.1 Lock Screen Widgets
+- [x] Implement `.accessoryCircular` widget (next prayer countdown ring)
+- [x] Implement `.accessoryRectangular` widget (next prayer name + time + countdown)
+- [x] Implement `.accessoryInline` widget (next prayer name and time, single line)
 - [ ] Test Lock Screen widgets on device
 
 ### 7.1.2 Interactive Widgets
@@ -508,7 +511,7 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 ### Phase 7 Acceptance Criteria
 - [ ] **AC-7.1**: Small prayer widget shows next prayer name and time (code complete, needs device testing)
 - [ ] **AC-7.2**: Widget updates at each prayer time automatically (code complete, needs device testing)
-- [x] **AC-7.3**: Streak widget shows current daily streak count (StreakWidget: small + medium, reads from App Group)
+- [ ] **AC-7.3**: Streak widget shows current daily streak count (not implemented — no streak widget)
 - [ ] **AC-7.4**: Live Activity shows countdown to next prayer (Live Activity code exists in main app)
 - [ ] **AC-7.5**: Dynamic Island shows prayer name and time remaining (Live Activity code exists)
 - [ ] **AC-7.6**: Tapping Live Activity opens app to prayer screen (needs device testing)
@@ -607,6 +610,7 @@ xcodebuild -scheme SafaWidget build
 ## Phase 9: Content & Polish
 
 ### 9.1 Hadith Feature
+- [x] Populate full Hadith data (34,178 hadiths from Kutub al-Sittah via hadith-json)
 
 ### 9.2 Dua & Adhkar Feature
 - [ ] Add audio pronunciations
@@ -631,8 +635,18 @@ xcodebuild -scheme SafaWidget build
 ### 9.8 Home Screen
 
 ### 9.9 Haptic System Unification
+- [x] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
+- [x] Create event-to-style mapping in `HapticFeedbackService` (`play(_:)` dispatcher)
+- [x] Replace all direct `UIImpactFeedbackGenerator` calls in feature views with service calls (20 locations across 13 files)
+- [x] Add Haptics settings section (On/Off toggle wired to service + Test button)
+- [x] Gate haptics on `UIAccessibility.isReduceMotionEnabled` (in `play(_:)` dispatcher)
+- [x] Unit tests for event mapping and preference gating (22 tests in HapticFeedbackServiceTests)
 
 ### 9.10 Degraded State Banners
+- [x] Create shared `DegradedStateBanner` component (icon + message + optional action)
+- [x] Apply to: Location fallback, Compass accuracy, Offline mode, Audio failure, Sync paused (5 standard variants)
+- [x] Replace ad-hoc inline indicators with consistent banner component (PrayerView updated)
+- [x] Add "System Status" sheet in Settings (location, notifications, sync, storage, network)
 
 ### 9.11 Home Intent Resolver
 - [ ] Build `HomeIntentResolver` service (returns 1-3 prioritised actions based on time + streak + recency)
@@ -643,12 +657,20 @@ xcodebuild -scheme SafaWidget build
 - [ ] Define motion tokens in design system (durations, curves, spring presets)
 - [ ] Define semantic elevation/surface tokens for card styles
 - [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
+- [x] Add skeleton loaders for key screens (Home, Prayer, Quran — shimmer-animated placeholders)
 - [ ] Smooth numeric transitions for counters and streaks
 
 ### 9.13 Search & Navigation Coherence
 - [ ] Unify search UI pattern across Quran/Hadith/Calendar
+- [x] Restructure "More" tab: Daily Practice, Knowledge & Tools, Progress, Settings
+- [x] Normalise screen entry points through AppRouter destinations (deep links use selectedTab for quran/prayer/learn)
 
 ### 9.14 Dark Mode Implementation
+- [x] Wire existing ThemeManager into SafaApp (.safaTheme() modifier, .preferredColorScheme())
+- [x] Add System/Light/Dark appearance picker in Settings > Appearance
+- [x] Wire accent color changes through ThemeManager
+- [x] Add ThemeManager unit tests (16 tests: persistence, enum mapping, options)
+- [x] Define semantic color tokens with light/dark parity (13 colorsets: 6 prayer + 4 status + 3 primary)
 - [ ] Tune Quran reading surface for night comfort (low-glare, no pure-black + harsh-white)
 - [ ] Dark mode pass: Home, Prayer, Qibla
 - [ ] Dark mode pass: Quran reader and search
@@ -662,6 +684,11 @@ xcodebuild -scheme SafaWidget build
 - [ ] Improve invite flow with clear post-share confirmation states
 
 ### 9.16 Observability Instrumentation
+- [x] Define analytics event schema (name, flow, context, result, durationMs)
+- [x] Instrument onboarding completion funnel (AnalyticsEvent.onboardingCompleted)
+- [x] Instrument core actions: prayer log, Quran resume, dhikr completion (standard events defined)
+- [x] Instrument degraded-state frequency and recovery rates (locationFallback, syncFallback, notificationFailed)
+- [x] Implement privacy rules: never log religious content, private notes, AI prompts (service doc + buffer-only)
 - [ ] Add release quality gate checks for crash-free sessions and performance budgets
 
 ### Phase 9 Acceptance Criteria
@@ -725,6 +752,7 @@ xcodebuild -scheme SafaWidget build
 #### 10.2.3 Feature Verification
 - [ ] Dynamic Island displays correctly (Pro models)
 - [ ] Live Activities work
+- [x] AI Companion disabled via FeatureFlags (shows "Coming Soon" on home and More tab)
 
 #### 10.2.4 Test Coverage
 - [ ] Achieve 90%+ unit test coverage for Domain layer
@@ -741,7 +769,7 @@ xcodebuild -scheme SafaWidget build
 ### 10.3 Performance Optimization
 - [ ] Profile app launch time (target: p50 < 1s, p95 < 2s)
 - [ ] Profile memory usage (target: < 200MB baseline)
-- [x] Add skeleton loading states for Home, Prayer, Quran screens
+- [ ] Add skeleton loading states for Home, Prayer, Quran screens
 - [ ] Precompute and cache home context for instant rendering
 - [ ] Optimize Core Data fetch requests
 - [ ] Optimize LLM inference memory
@@ -769,6 +797,7 @@ xcodebuild -scheme SafaWidget build
 - [ ] Incorporate top feedback items
 
 ### 10.5 App Store Submission
+- [x] **Verify deployment target is iOS 26** (confirmed in project.pbxproj)
 - [ ] Create App Store screenshots (6.9", 6.7", 6.1", 5.5" - all supported sizes)
 - [ ] Write App Store description (highlight device compatibility)
 - [ ] Create 30-second app preview video
@@ -813,15 +842,118 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ---
 
-## Deferred Backlog (Unscheduled)
+## Progress Summary
 
-Historical progress logs, completed granular tasks, and previous change summaries were moved to `.docs/TASKS_ARCHIVE_2026-02-08.md`.
+### Active Snapshot (Updated February 8, 2026)
+- **Version:** 1.1 (auto build number from git commit count)
+- **Commits since v1.1:** 22
+- **Tests passing:** 1,700+ (all green)
+- Blocked tasks: 0
 
-### Current Cross-Cutting Gaps
-- [ ] Bundle pronunciation audio files
-- [ ] Create Intents extension target in Xcode project (`SafaIntents`)
-- [ ] Run on-device validation for widgets, Siri, Focus mode, and Live Activities
-- [ ] Complete QA pass for dark mode, accessibility, and performance budgets
+### Project Reality Checks
+- Xcode targets currently configured: `Safa`, `SafaTests`, `SafaUITests`, `SafaWidgetExtensionExtension` (intents extension target not yet created)
+- Deployment target in project build settings: iOS 26.2
+- Device family in app target: `1,2` (iPhone + iPad)
+- **Widgets:** 5 registered (PrayerTimes, Interactive, Tasbeeh, StandBy, Streak)
+
+### File Statistics
+- **Swift Files:** 205+ (135 app + 67 unit tests + 2 UI tests + 5 widget files)
+- **JSON Data Files:** 5 (SampleQuranData, SampleHadithData, SampleDuaData, SampleLearningData, NamesOfAllahData)
+- **SQLite Databases:** 2 (quran.sqlite at 4.2MB, hadith.sqlite at 85MB — both with FTS5 index)
+- **Asset Catalog Colorsets:** 13 (6 prayer + 4 status + 3 primary, all with light/dark variants)
+- **Unit Test Files:** 67 (in SafaTests/) + 2 UI test files (in SafaUITests/)
+- **`func test` inventory:** 1,680+
+
+### Critical Gaps
+- **Quran data:** COMPLETE — Full 6,236 ayahs populated from tanzil.net, FTS5 search index built
+- **Hadith data:** COMPLETE — Full 34,178 hadiths from Kutub al-Sittah populated via hadith-json (sunnah.com data)
+- **Pronunciation audio**: Audio files not yet bundled
+- **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready. Feature disabled by default via FeatureFlags until implementation is complete.
+- **Widget extension target created** (`SafaWidgetExtensionExtension`). Intents extension target still missing.
+- **Old `SafaWidget/` folder** is orphaned (code ported to `SafaWidgetExtension/`). Can be removed after verification.
+
+### Recently Enabled Features
+The following features have complete implementations and are now enabled by default:
+- **Spotlight Search** - iOS Spotlight integration for surahs, ayahs, duas, hadith
+- **Calendar Export** - Export Islamic events to Apple Calendar or .ics file
+- **Prayer Calendar Export** - Export prayer times to calendar
+- **HealthKit Sync** - Log Ramadan fasts to Apple Health
+- **Predictive Download** - Auto-download next surah audio
+- **Smart Cleanup** - Auto-remove unused audio after retention period
+
+### Content Sources (Resolved)
+| Content | Source | Status |
+|---------|--------|--------|
+| Quran Arabic | Tanzil.net (Uthmani) via quran-json | **Complete** — 6,236 ayahs |
+| Translation | Sahih International via quran-json | **Complete** — 6,236 ayahs |
+| Hadith | Sunnah.com via hadith-json | **Complete** — 34,178 hadiths |
+| Audio | Everyayah.com + King Fahd | Not integrated |
+| Tafsir | Ibn Kathir (English) | Not integrated |
+| Duas/Adhkar | Hisnul Muslim | Sample data only |
+
+---
+
+## Milestone Video Archive
+
+| Milestone | Status | Video Link |
+|-----------|--------|------------|
+| M0: Project Skeleton | Pending | - |
+| M1: Core Infrastructure | Pending | - |
+| M2: Prayer Features | Pending | - |
+| M3: Quran Reader | Pending | - |
+| M4: Gamification | Pending | - |
+| M5: Learning | Pending | - |
+| M6: AI Companion | Pending | - |
+| M7: Platform Features | Pending | - |
+| M8: Social Features | Pending | - |
+| M9: Content & Polish | Pending | - |
+| M10: Launch Ready | Pending | - |
+
+---
+
+### Recent Changes (February 8, 2026)
+
+Features implemented in the latest session (17 commits):
+
+- **Hadith Data Population**: Full 34,178 hadiths from Kutub al-Sittah (85MB SQLite with FTS5 index)
+- **Dark Mode Color Tokens**: 13 asset catalog colorsets with light/dark variants for prayer, status, and primary colors
+- **Streak Widget**: New StreakWidget (small + medium) showing daily prayer streak from App Group
+- **Haptic System Unification**: Replaced 20 direct UIKit haptic calls with HapticFeedbackService across 13 files
+- **Haptics Settings**: On/Off toggle wired to service + test button in Settings
+- **Translation Accuracy**: 10 spot-check tests verifying known Quran ayahs
+- **HadithRepository Fixes**: getHadith() and getBookmarks() now query SQLite instead of static data
+- **Skeleton Loaders**: Shimmer-animated placeholders for Home, Prayer, Quran screens
+- **Orphaned SafaWidget Cleanup**: Removed 1,528 lines of duplicate widget code
+- **Localization Plan Amendments**: Dependency ordering, Malay added, content pack schema, pluralization rules
+- **Bug Fix: Isha-before-Maghrib**: Fixed Makkah method (Isha=Maghrib+90min), high-latitude fallbacks, monotonic ordering enforcement, HomeView/RamadanView hardcoded .isna → user's saved method
+- **Bug Fix: Notifications**: Default ON in onboarding, daily re-scheduling on app launch via NotificationScheduler
+- **Prayer Time Monotonic Tests**: 21 test methods (7 methods × 11 cities, seasonal, Makkah-specific, Feb sweep)
+
+### Previous Changes (February 7, 2026)
+
+- **Quran Data Population**: Full 6,236 ayahs from tanzil.net data (4.2MB SQLite with FTS5 index)
+- **QuranSearchView**: Wired to SQLite FTS with filter modes (All, Arabic, Translation, Surah Name)
+- **App Group Widget Data Sharing**: Real prayer times shared to all widgets via WidgetDataService
+- **Dark Mode**: ThemeManager wired into SafaApp; System/Light/Dark picker in Settings
+- **Version 1.1**: Bumped version, auto build number from git commit count
+- **xcode-build Skill**: Two-step approach with linker/signing error fallback
+
+### Previous Changes (February 6, 2026)
+
+- **Prayer Progress Indicator**, **Adhan Sound System**, **Share Banner**, **Settings Overhaul**
+- **Collapsible Ramadan Banner**, **Prayer Times Page**, **Tab Navigation**
+- **Location Fallback**, **Build/Test Tooling**
+
+### DONE: Quran Data Population (Completed February 7, 2026)
+
+All 6,236 ayahs populated from quran-json (tanzil.net data). Database: 4.2MB with FTS5 index.
+QuranSearchView wired to repository FTS. 21 data integrity tests + 30 search VM tests passing.
+
+**Remaining Quran work:**
+- [ ] Connect audio player UI to AVFoundation for actual playback
+- [ ] Implement audio download/caching for recitations
+- [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
+- [ ] Add transliteration data (quran.com API or similar)
 
 ### TODO: Graceful Degradation & Resilience
 
@@ -841,7 +973,6 @@ Historical progress logs, completed granular tasks, and previous change summarie
 
 **Priority: MEDIUM — Enhance existing RamadanView**
 
-- [ ] Implement Ramadan page enhancement set (hero iftar/suhoor countdown, compact prayer progress, adhan controls, and fasting-focused quick actions)
 
 ### TODO: Smart Adhan (Location-Aware Notification Sounds)
 
@@ -880,7 +1011,9 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Test standalone mode (without iPhone)
 
 #### Data Sovereignty & Export
-- [x] Baseline shipped: JSON export, CSV prayer-log export, and "View All My Data" transparency screen
+- [x] Implement JSON export of all user data (preferences, stats, streaks, achievements, bookmarks, progress)
+- [x] Implement CSV export for prayer logs (last 30 days)
+- [x] Build "View All My Data" transparency screen (DataExportView with export descriptions)
 - [ ] Implement manual backup/restore
 - [ ] Add per-category data deletion
 
@@ -901,4 +1034,4 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Test with Switch Control and Voice Control
 
 *Last Updated: February 8, 2026*
-*Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*
+*Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-07.md`*
