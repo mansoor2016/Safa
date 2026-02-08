@@ -39,6 +39,7 @@ final class UserStateManager {
             userStats = try await userRepository.getUserStats()
             streaks = try await userRepository.getStreaks()
             achievements = try await userRepository.getAchievements()
+            syncStreakToWidget()
         } catch {
             self.error = error
         }
@@ -77,6 +78,9 @@ final class UserStateManager {
 
             // Check for streak achievements
             await checkStreakAchievements()
+
+            // Sync streak to widget
+            syncStreakToWidget()
         } catch {
             self.error = error
         }
@@ -173,5 +177,16 @@ final class UserStateManager {
 
     var totalAchievementCount: Int {
         achievements.count
+    }
+
+    // MARK: - Widget Sync
+
+    private func syncStreakToWidget() {
+        let streak = dailyStreak ?? prayerStreak
+        WidgetDataService.shared.writeStreakData(
+            currentCount: streak?.currentCount ?? 0,
+            longestCount: streak?.longestCount ?? 0,
+            isActiveToday: streak?.isActiveToday ?? false
+        )
     }
 }

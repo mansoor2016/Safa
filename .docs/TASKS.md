@@ -404,7 +404,7 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 - [x] StandByWidget reads next prayer + Fajr time from App Group
 - [x] PrayerRepository migrated to App Group UserDefaults (with one-time migration)
 - [x] Widget extension entitlements added for App Group access
-- [ ] Add streak widget (AC-7.3 — not implemented)
+- [x] Add streak widget (StreakWidget: small + medium, reads from App Group, shows current/longest count)
 
 ### 7.1.1 Lock Screen Widgets
 - [x] Implement `.accessoryCircular` widget (next prayer countdown ring)
@@ -590,7 +590,7 @@ xcodebuild -scheme SafaWidget build
 - [x] Add System/Light/Dark appearance picker in Settings > Appearance
 - [x] Wire accent color changes through ThemeManager
 - [x] Add ThemeManager unit tests (16 tests: persistence, enum mapping, options)
-- [ ] Define semantic color tokens with light/dark parity (Background, Card, Text tiers, Accent, Status)
+- [x] Define semantic color tokens with light/dark parity (13 colorsets: 6 prayer + 4 status + 3 primary)
 - [ ] Tune Quran reading surface for night comfort (low-glare, no pure-black + harsh-white)
 - [ ] Dark mode pass: Home, Prayer, Qibla
 - [ ] Dark mode pass: Quran reader and search

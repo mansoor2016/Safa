@@ -21,6 +21,9 @@ final class WidgetDataService {
         static let nextPrayerTime = "nextPrayerTime"
         static let hijriDate = "hijriDate"
         static let lastUpdated = "widgetDataLastUpdated"
+        static let streakCurrentCount = "streakCurrentCount"
+        static let streakLongestCount = "streakLongestCount"
+        static let streakIsActiveToday = "streakIsActiveToday"
 
         static func loggedPrayersKey(for date: Date) -> String {
             let formatter = DateFormatter()
@@ -84,6 +87,29 @@ final class WidgetDataService {
         defaults.synchronize()
 
         reloadWidgets()
+    }
+
+    // MARK: - Write Streak Data
+
+    /// Writes streak data to App Group so the streak widget can display it
+    func writeStreakData(currentCount: Int, longestCount: Int, isActiveToday: Bool) {
+        guard let defaults else { return }
+        defaults.set(currentCount, forKey: Keys.streakCurrentCount)
+        defaults.set(longestCount, forKey: Keys.streakLongestCount)
+        defaults.set(isActiveToday, forKey: Keys.streakIsActiveToday)
+        defaults.synchronize()
+
+        reloadWidgets()
+    }
+
+    /// Reads streak data from App Group (used by widgets)
+    func readStreakData() -> (currentCount: Int, longestCount: Int, isActiveToday: Bool) {
+        guard let defaults else { return (0, 0, false) }
+        return (
+            defaults.integer(forKey: Keys.streakCurrentCount),
+            defaults.integer(forKey: Keys.streakLongestCount),
+            defaults.bool(forKey: Keys.streakIsActiveToday)
+        )
     }
 
     // MARK: - Read (for testing / widget-side)

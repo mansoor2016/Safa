@@ -11,5 +11,6 @@ struct SafaWidgetExtensionBundle: WidgetBundle {
         InteractivePrayerWidget()
         TasbeehWidget()
         StandByPrayerWidget()
+        StreakWidget()
     }
 }

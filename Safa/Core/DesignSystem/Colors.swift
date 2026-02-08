@@ -125,12 +125,12 @@ extension Color {
 extension PrayerType {
     var color: Color {
         switch self {
-        case .fajr: return SafaColors.Fallback.fajr
-        case .sunrise: return SafaColors.Fallback.sunrise
-        case .dhuhr: return SafaColors.Fallback.dhuhr
-        case .asr: return SafaColors.Fallback.asr
-        case .maghrib: return SafaColors.Fallback.maghrib
-        case .isha: return SafaColors.Fallback.isha
+        case .fajr: return SafaColors.fajr
+        case .sunrise: return SafaColors.sunrise
+        case .dhuhr: return SafaColors.dhuhr
+        case .asr: return SafaColors.asr
+        case .maghrib: return SafaColors.maghrib
+        case .isha: return SafaColors.isha
         }
     }
 }

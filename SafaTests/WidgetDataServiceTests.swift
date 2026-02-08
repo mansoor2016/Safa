@@ -209,6 +209,42 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertEqual(stored["Fajr"], newFajrTime)
     }
 
+    // MARK: - Streak Data Tests
+
+    func test_writeStreakData_storesValues() {
+        sut.writeStreakData(currentCount: 7, longestCount: 14, isActiveToday: true)
+
+        let data = sut.readStreakData()
+        XCTAssertEqual(data.currentCount, 7)
+        XCTAssertEqual(data.longestCount, 14)
+        XCTAssertTrue(data.isActiveToday)
+    }
+
+    func test_writeStreakData_zeroValues() {
+        sut.writeStreakData(currentCount: 0, longestCount: 0, isActiveToday: false)
+
+        let data = sut.readStreakData()
+        XCTAssertEqual(data.currentCount, 0)
+        XCTAssertEqual(data.longestCount, 0)
+        XCTAssertFalse(data.isActiveToday)
+    }
+
+    func test_writeStreakData_overwrites() {
+        sut.writeStreakData(currentCount: 5, longestCount: 10, isActiveToday: true)
+        sut.writeStreakData(currentCount: 6, longestCount: 10, isActiveToday: false)
+
+        let data = sut.readStreakData()
+        XCTAssertEqual(data.currentCount, 6)
+        XCTAssertFalse(data.isActiveToday)
+    }
+
+    func test_readStreakData_defaultsToZero() {
+        let data = sut.readStreakData()
+        XCTAssertEqual(data.currentCount, 0)
+        XCTAssertEqual(data.longestCount, 0)
+        XCTAssertFalse(data.isActiveToday)
+    }
+
     // MARK: - Helpers
 
     private func makeSamplePrayers() -> [PrayerTime] {
