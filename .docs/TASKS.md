@@ -182,7 +182,7 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 - [x] Populate full Quran data (6,236 ayahs, 114 surahs, 30 juz via tanzil.net JSON)
 - [x] Wire QuranSearchView to SQLite FTS instead of hardcoded sample data
 - [x] Add Quran data integrity tests (21 tests: surah counts, ayah counts, FTS search, juz boundaries)
-- [ ] Verify translation accuracy (spot check 10 ayahs)
+- [x] Verify translation accuracy (spot check 10 ayahs — QuranTranslationAccuracyTests)
 
 ### 3.2 Quran Repository
 
