@@ -406,11 +406,11 @@ enum CalendarExportError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .authorizationDenied:
-            return "Calendar access was denied. Please enable access in Settings."
+            return String(localized: "Calendar access was denied. Please enable access in Settings.")
         case .calendarNotFound:
-            return "Could not find or create calendar."
+            return String(localized: "Could not find or create calendar.")
         case .exportFailed(let error):
-            return "Export failed: \(error.localizedDescription)"
+            return String(localized: "Export failed: \(error.localizedDescription)")
         }
     }
 }

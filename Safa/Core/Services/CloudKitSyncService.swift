@@ -31,19 +31,19 @@ enum SyncError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAuthenticated:
-            return "Please sign in to iCloud to sync your data."
+            return String(localized: "Please sign in to iCloud to sync your data.")
         case .networkUnavailable:
-            return "No internet connection. Changes will sync when online."
+            return String(localized: "No internet connection. Changes will sync when online.")
         case .quotaExceeded:
-            return "iCloud storage is full. Please free up space."
+            return String(localized: "iCloud storage is full. Please free up space.")
         case .serverError(let message):
-            return "Server error: \(message)"
+            return String(localized: "Server error: \(message)")
         case .conflictDetected:
-            return "A sync conflict was detected and resolved."
+            return String(localized: "A sync conflict was detected and resolved.")
         case .recordNotFound:
-            return "The requested record was not found."
+            return String(localized: "The requested record was not found.")
         case .permissionDenied:
-            return "Permission denied to access this data."
+            return String(localized: "Permission denied to access this data.")
         }
     }
 }

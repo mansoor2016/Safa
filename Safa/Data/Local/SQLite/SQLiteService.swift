@@ -15,13 +15,13 @@ enum SQLiteError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .databaseNotFound(let name):
-            return "Database '\(name)' not found in bundle"
+            return String(localized: "Database '\(name)' not found in bundle")
         case .openFailed(let reason):
-            return "Failed to open database: \(reason)"
+            return String(localized: "Failed to open database: \(reason)")
         case .queryFailed(let reason):
-            return "Query failed: \(reason)"
+            return String(localized: "Query failed: \(reason)")
         case .prepareFailed(let reason):
-            return "Failed to prepare statement: \(reason)"
+            return String(localized: "Failed to prepare statement: \(reason)")
         }
     }
 }

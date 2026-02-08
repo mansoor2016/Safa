@@ -211,8 +211,8 @@ final class PrayerViewModel {
               prayer.time > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "\(prayerType.displayName) Time"
-        content.body = "It's time for \(prayerType.displayName) prayer"
+        content.title = String(localized: "\(prayerType.displayName) Time")
+        content.body = String(localized: "It's time for \(prayerType.displayName) prayer")
         content.interruptionLevel = .timeSensitive
 
         // Select notification sound based on preferences

@@ -290,13 +290,13 @@ enum FamilyError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noCircle:
-            return "You are not part of a family circle."
+            return String(localized: "You are not part of a family circle.")
         case .invalidInviteCode:
-            return "The invite code is invalid or expired."
+            return String(localized: "The invite code is invalid or expired.")
         case .notOwner:
-            return "Only the circle owner can perform this action."
+            return String(localized: "Only the circle owner can perform this action.")
         case .alreadyMember:
-            return "You are already a member of this circle."
+            return String(localized: "You are already a member of this circle.")
         }
     }
 }

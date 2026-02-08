@@ -83,8 +83,8 @@ final class NotificationScheduler {
             let now = Date()
             for prayer in prayers where prayer.type.isObligatory && enabledPrayers.contains(prayer.type) && prayer.time > now {
                 let content = UNMutableNotificationContent()
-                content.title = "\(prayer.type.displayName) Time"
-                content.body = "It's time for \(prayer.type.displayName) prayer"
+                content.title = String(localized: "\(prayer.type.displayName) Time")
+                content.body = String(localized: "It's time for \(prayer.type.displayName) prayer")
                 content.sound = .default
                 content.interruptionLevel = .timeSensitive
                 content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
@@ -256,7 +256,7 @@ final class NotificationScheduler {
     /// Show achievement unlocked notification
     func showAchievementUnlocked(achievement: Achievement) async throws {
         let content = UNMutableNotificationContent()
-        content.title = "Achievement Unlocked!"
+        content.title = String(localized: "Achievement Unlocked!")
         content.body = achievement.title
         content.categoryIdentifier = FocusModeService.NotificationCategory.achievementUnlocked.rawValue
         content.interruptionLevel = .passive // Silent notification

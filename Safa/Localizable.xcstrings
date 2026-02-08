@@ -1,7 +1,1853 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "--:--" : {
 
+    },
+    "..." : {
+
+    },
+    "\"%@\"" : {
+
+    },
+    "(%lld days from now)" : {
+
+    },
+    "(You)" : {
+
+    },
+    "#%lld" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ Adhkar" : {
+
+    },
+    "%@ at %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@%3$@"
+          }
+        }
+      }
+    },
+    "%@: 0 min" : {
+
+    },
+    "%@:%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@:%2$lld"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld / %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@"
+          }
+        }
+      }
+    },
+    "%lld ayahs" : {
+
+    },
+    "%lld Ayahs" : {
+
+    },
+    "%lld day streak" : {
+
+    },
+    "%lld days" : {
+
+    },
+    "%lld days until Ramadan begins" : {
+
+    },
+    "%lld hadith" : {
+
+    },
+    "%lld Hasanat" : {
+
+    },
+    "%lld khatm" : {
+
+    },
+    "%lld lessons" : {
+
+    },
+    "%lld lessons completed" : {
+
+    },
+    "%lld messages" : {
+
+    },
+    "%lld min" : {
+
+    },
+    "%lld min • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld min • %2$@"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "%lld of 5 prayers completed" : {
+
+    },
+    "%lld results" : {
+
+    },
+    "%lld results found" : {
+
+    },
+    "%lld to Level %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld to Level %2$lld"
+          }
+        }
+      }
+    },
+    "%lld Unlocked" : {
+
+    },
+    "%lld." : {
+
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "%lld/%lld completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld completed"
+          }
+        }
+      }
+    },
+    "%lld/%lld Correct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld Correct"
+          }
+        }
+      }
+    },
+    "%lld/5" : {
+
+    },
+    "%lld/7" : {
+
+    },
+    "%lld%%" : {
+
+    },
+    "%lld%% Complete" : {
+
+    },
+    "%lld° from North" : {
+
+    },
+    "%lldx" : {
+
+    },
+    "•" : {
+
+    },
+    "• Double-tap and hold on the tasbeeh button for rapid counting" : {
+
+    },
+    "• Enable \"Speak Screen\" to have the Quran read aloud" : {
+
+    },
+    "• Prayer log history" : {
+
+    },
+    "• Preferences and settings" : {
+
+    },
+    "• Quran bookmarks and reading progress" : {
+
+    },
+    "• Streaks and achievements" : {
+
+    },
+    "• Three-finger swipe to navigate between pages" : {
+
+    },
+    "• Use rotor to navigate between headings and buttons" : {
+
+    },
+    "• User statistics" : {
+
+    },
+    "+%lld" : {
+
+    },
+    "+%lld Hasanat" : {
+
+    },
+    "+%lld Hasanat bonus" : {
+
+    },
+    "+15 Hasanat" : {
+
+    },
+    "×%lld" : {
+
+    },
+    "~%lld min" : {
+
+    },
+    "0" : {
+
+    },
+    "0 min" : {
+
+    },
+    "0.0.1" : {
+
+    },
+    "0.5x" : {
+
+    },
+    "1.5x" : {
+
+    },
+    "1x" : {
+
+    },
+    "5/30" : {
+
+    },
+    "9 minutes" : {
+
+    },
+    "14 days" : {
+
+    },
+    "99 Names of Allah" : {
+
+    },
+    "About" : {
+
+    },
+    "About Zakat" : {
+
+    },
+    "Above Nisab threshold" : {
+
+    },
+    "Accent Color" : {
+
+    },
+    "Accessibility" : {
+
+    },
+    "Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update." : {
+
+    },
+    "Accessibility Tips" : {
+
+    },
+    "Achieved with صفا" : {
+
+    },
+    "Achievement" : {
+
+    },
+    "Achievement Unlocked!" : {
+
+    },
+    "Achievements" : {
+
+    },
+    "Acknowledgements" : {
+
+    },
+    "Activity" : {
+
+    },
+    "Add any notes..." : {
+
+    },
+    "Add one to the tasbeeh counter" : {
+
+    },
+    "Add to Apple Calendar" : {
+
+    },
+    "Add to Calendar" : {
+
+    },
+    "Adhan" : {
+
+    },
+    "Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan." : {
+
+    },
+    "Adjustments" : {
+
+    },
+    "AI Companion" : {
+
+    },
+    "Alarm Options" : {
+
+    },
+    "Alarm Time" : {
+
+    },
+    "All prayer times" : {
+
+    },
+    "Allah has ninety-nine Names, one-hundred less one; and he who memorizes them all by heart will enter Paradise." : {
+
+    },
+    "Appearance" : {
+
+    },
+    "Apple Health" : {
+
+    },
+    "Apple Health not available on this device" : {
+
+    },
+    "Apply All Recommendations" : {
+
+    },
+    "Arabic" : {
+
+    },
+    "Arabic, Tajweed, and Islamic studies lessons are coming soon." : {
+
+    },
+    "Ask a question..." : {
+
+    },
+    "Ask Safa" : {
+
+    },
+    "Ask Safa an Islamic question" : {
+
+    },
+    "Assalamu Alaikum!" : {
+
+    },
+    "Auto-silence during prayer times" : {
+
+    },
+    "Auto-Update Content" : {
+
+    },
+    "Available" : {
+
+    },
+    "Ayah %lld" : {
+
+    },
+    "Ayah %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ayah %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "Back" : {
+
+    },
+    "Below Nisab threshold" : {
+
+    },
+    "Bengali" : {
+
+    },
+    "Best" : {
+
+    },
+    "Best!" : {
+
+    },
+    "Beta testers and early users" : {
+
+    },
+    "Bookmarks" : {
+
+    },
+    "By using Safa, you agree to these terms. If you disagree, please do not use the app." : {
+
+    },
+    "Calculate Your Zakat" : {
+
+    },
+    "Calculation Method" : {
+
+    },
+    "Calendar" : {
+
+    },
+    "Calming Recitation" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Categories" : {
+
+    },
+    "Category" : {
+
+    },
+    "Circle name" : {
+
+    },
+    "Circle Settings" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clear All" : {
+
+    },
+    "Coming Soon" : {
+
+    },
+    "Common: 8 or 20 rak'ahs" : {
+
+    },
+    "Complete" : {
+
+    },
+    "Complete the Quran this Ramadan" : {
+
+    },
+    "Complete your nightly adhkar and set your Fajr alarm" : {
+
+    },
+    "Complete!" : {
+
+    },
+    "Completed" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Continue Reading" : {
+
+    },
+    "Continue reading %@ from ayah %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Continue reading %1$@ from ayah %2$lld"
+          }
+        }
+      }
+    },
+    "Coordinates" : {
+
+    },
+    "Copied" : {
+
+    },
+    "Copy" : {
+
+    },
+    "Copy Code" : {
+
+    },
+    "Core Location" : {
+
+    },
+    "Core ML" : {
+
+    },
+    "Create Family Circle" : {
+
+    },
+    "Create or join a family circle to share your spiritual journey with loved ones." : {
+
+    },
+    "Current: %@" : {
+
+    },
+    "Customize" : {
+
+    },
+    "Customize Settings" : {
+
+    },
+    "Daily Hadith" : {
+
+    },
+    "Daily Practice" : {
+
+    },
+    "Daily Prayer Times" : {
+
+    },
+    "Daily Verse" : {
+
+    },
+    "Data & Privacy" : {
+
+    },
+    "Data Sources" : {
+
+    },
+    "Date" : {
+
+    },
+    "Day %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Day %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "day streak" : {
+
+    },
+    "Day Streak" : {
+
+    },
+    "Debug options only visible in development builds." : {
+
+    },
+    "Deductible Liabilities" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete All" : {
+
+    },
+    "Delete All Data" : {
+
+    },
+    "Delete All Data?" : {
+
+    },
+    "Delete All Downloads" : {
+
+    },
+    "Delete All Downloads?" : {
+
+    },
+    "Delete bookmark" : {
+
+    },
+    "Delete Download?" : {
+
+    },
+    "Description" : {
+
+    },
+    "Developer" : {
+
+    },
+    "Dhikr" : {
+
+    },
+    "Dhikr & Adhkar" : {
+
+    },
+    "Dhikr Type" : {
+
+    },
+    "Direction to Kaaba in Makkah" : {
+
+    },
+    "Done" : {
+
+    },
+    "Double tap to count one %@" : {
+
+    },
+    "Double tap to go to this ayah" : {
+
+    },
+    "Double tap to open %@" : {
+
+    },
+    "Double tap to read this juz" : {
+
+    },
+    "Double tap to read this surah" : {
+
+    },
+    "Double tap to remove this bookmark" : {
+
+    },
+    "Double tap to reset the counter to zero" : {
+
+    },
+    "Double tap to resume reading" : {
+
+    },
+    "Double tap to subtract one from the counter" : {
+
+    },
+    "Double tap to toggle notification" : {
+
+    },
+    "Download on Wi-Fi Only" : {
+
+    },
+    "Downloads" : {
+
+    },
+    "Duas" : {
+
+    },
+    "Duas for this category are coming soon." : {
+
+    },
+    "Each prayer time is announced with the prayer name, time, and completion status. The log button describes its function." : {
+
+    },
+    "Each surah is announced with its number, name, revelation type, and verse count. Arabic text uses proper right-to-left reading." : {
+
+    },
+    "Eid al-Fitr & Eid al-Adha" : {
+
+    },
+    "Eid Mubarak! 🎉" : {
+
+    },
+    "Eid Prayer: %@" : {
+
+    },
+    "Email address" : {
+
+    },
+    "Enable Fajr Alarm" : {
+
+    },
+    "Enable location for accurate prayer times" : {
+
+    },
+    "Enable Smart Cleanup to automatically remove audio files you haven't listened to in a while." : {
+
+    },
+    "Enabled" : {
+
+    },
+    "End of %@" : {
+
+    },
+    "English - Sahih International" : {
+
+    },
+    "Enjoying Safa?" : {
+
+    },
+    "Enter their email to send an invite" : {
+
+    },
+    "Enter your assets and liabilities to calculate the Zakat due" : {
+
+    },
+    "Evening" : {
+
+    },
+    "Event Details" : {
+
+    },
+    "Events to Export" : {
+
+    },
+    "Exit" : {
+
+    },
+    "Explanation" : {
+
+    },
+    "Export" : {
+
+    },
+    "Export All Data (JSON)" : {
+
+    },
+    "Export as .ics File" : {
+
+    },
+    "Export Calendar" : {
+
+    },
+    "Export Data" : {
+
+    },
+    "Export Prayer Logs (CSV)" : {
+
+    },
+    "Export To" : {
+
+    },
+    "Fajr Alarm" : {
+
+    },
+    "Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\"." : {
+
+    },
+    "Family" : {
+
+    },
+    "Family Circle" : {
+
+    },
+    "Fasted today" : {
+
+    },
+    "Fasting complete for today" : {
+
+    },
+    "Feedback" : {
+
+    },
+    "Font Settings" : {
+
+    },
+    "Force Ramadan Mode" : {
+
+    },
+    "French" : {
+
+    },
+    "Get Daily Verse" : {
+
+    },
+    "Get Next Prayer" : {
+
+    },
+    "Get notified at prayer times" : {
+
+    },
+    "Get Prayer Times" : {
+
+    },
+    "Get Qibla Direction" : {
+
+    },
+    "Get Started" : {
+
+    },
+    "Get the next prayer time" : {
+
+    },
+    "Get the Qibla direction from your location" : {
+
+    },
+    "Get today's prayer times for your location" : {
+
+    },
+    "Get today's verse of the day" : {
+
+    },
+    "Give your family circle a name" : {
+
+    },
+    "hadith" : {
+
+    },
+    "Hadith" : {
+
+    },
+    "Hadith #%lld" : {
+
+    },
+    "Hadith from Sunnah.com" : {
+
+    },
+    "Haptic Feedback" : {
+
+    },
+    "Hasanat" : {
+
+    },
+    "Help & Support" : {
+
+    },
+    "Help others discover Safa by sharing it with friends and family." : {
+
+    },
+    "High Contrast" : {
+
+    },
+    "History" : {
+
+    },
+    "Holiday" : {
+
+    },
+    "I was invited by a friend" : {
+
+    },
+    "I'm your Islamic knowledge companion. Ask me about:" : {
+
+    },
+    "Iftar" : {
+
+    },
+    "Iftar Duas" : {
+
+    },
+    "Iftar in" : {
+
+    },
+    "Iftar Reminder" : {
+
+    },
+    "In the meantime, explore:" : {
+
+    },
+    "In the name of Allah, the Most Gracious, the Most Merciful" : {
+
+    },
+    "Increment counter" : {
+
+    },
+    "Increment Tasbeeh" : {
+
+    },
+    "Indonesian" : {
+
+    },
+    "Invite" : {
+
+    },
+    "Invite Family Member" : {
+
+    },
+    "Invite Friends" : {
+
+    },
+    "Invite Friends to Download" : {
+
+    },
+    "Invite Friends to Safa" : {
+
+    },
+    "Invite Member" : {
+
+    },
+    "Invite Sent!" : {
+
+    },
+    "Islamic Calendar" : {
+
+    },
+    "Islamic Holidays" : {
+
+    },
+    "Juz" : {
+
+    },
+    "Juz %lld" : {
+
+    },
+    "Juz %lld, from Surah %lld ayah %lld to Surah %lld ayah %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Juz %1$lld, from Surah %2$lld ayah %3$lld to Surah %4$lld ayah %5$lld"
+          }
+        }
+      }
+    },
+    "Kaaba" : {
+
+    },
+    "Keep going to unlock this achievement!" : {
+
+    },
+    "Know someone who'd love Safa?" : {
+
+    },
+    "Knowledge & Tools" : {
+
+    },
+    "Larger Arabic Text" : {
+
+    },
+    "Last 10 Nights" : {
+
+    },
+    "Last read: %lld:%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Last read: %1$lld:%2$lld"
+          }
+        }
+      }
+    },
+    "Last updated: February 2026" : {
+
+    },
+    "Laylatul Qadr Duas" : {
+
+    },
+    "Learn" : {
+
+    },
+    "Lesson" : {
+
+    },
+    "Lesson Complete!" : {
+
+    },
+    "Lesson: %@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Lesson: %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "Level %lld" : {
+
+    },
+    "Location" : {
+
+    },
+    "Locked" : {
+
+    },
+    "Log" : {
+
+    },
+    "Log %@" : {
+
+    },
+    "Log ${prayer} prayer" : {
+
+    },
+    "Log fasting hours automatically" : {
+
+    },
+    "Log Prayer" : {
+
+    },
+    "Log that you've completed a prayer" : {
+
+    },
+    "Logged %@ prayer. +10 Hasanat earned!" : {
+
+    },
+    "Lv.%lld" : {
+
+    },
+    "Made with love for the Ummah" : {
+
+    },
+    "Madhab (Asr Time)" : {
+
+    },
+    "Madhab (Asr)" : {
+
+    },
+    "Mark Complete" : {
+
+    },
+    "Mark Incomplete" : {
+
+    },
+    "Mark today as fasted" : {
+
+    },
+    "May Allah accept your Zakat" : {
+
+    },
+    "May your journey with Safa be blessed" : {
+
+    },
+    "Meaning" : {
+
+    },
+    "Members" : {
+
+    },
+    "More" : {
+
+    },
+    "Morning" : {
+
+    },
+    "Mosque Mode" : {
+
+    },
+    "My Progress" : {
+
+    },
+    "Name Detail" : {
+
+    },
+    "Narrator" : {
+
+    },
+    "Network" : {
+
+    },
+    "New Chat" : {
+
+    },
+    "New Circle" : {
+
+    },
+    "Next" : {
+
+    },
+    "Next occurrence: %@" : {
+
+    },
+    "Next Prayer" : {
+
+    },
+    "Nisab is the minimum amount of wealth a Muslim must possess before they become eligible to pay Zakat. It is calculated based on the value of either 85 grams of gold or 595 grams of silver." : {
+
+    },
+    "Nisab Threshold" : {
+
+    },
+    "No ayahs found for \"%@\".\nTry a different search term." : {
+
+    },
+    "No Duas Yet" : {
+
+    },
+    "No Family Circle" : {
+
+    },
+    "No Prayer History" : {
+
+    },
+    "No recent activity" : {
+
+    },
+    "No Results" : {
+
+    },
+    "No Zakat Due" : {
+
+    },
+    "Normal" : {
+
+    },
+    "Note: For complex religious rulings, please consult a qualified scholar." : {
+
+    },
+    "Note: This calculator provides an estimate. For complex financial situations, please consult a qualified Islamic scholar." : {
+
+    },
+    "Notes (Optional)" : {
+
+    },
+    "Notification off for %@" : {
+
+    },
+    "Notification on for %@" : {
+
+    },
+    "Notifications" : {
+
+    },
+    "Observance" : {
+
+    },
+    "of %lld" : {
+
+    },
+    "of %lld total" : {
+
+    },
+    "OK" : {
+
+    },
+    "Open iOS Accessibility Settings" : {
+
+    },
+    "Open Quran" : {
+
+    },
+    "Open Source" : {
+
+    },
+    "Open the Quran reader" : {
+
+    },
+    "Open the tasbeeh counter" : {
+
+    },
+    "Play Adhan" : {
+
+    },
+    "Playback Speed" : {
+
+    },
+    "Please provide as much detail as possible so we can understand your feedback." : {
+
+    },
+    "Please read these terms carefully before using Safa." : {
+
+    },
+    "Point the top of your phone towards the arrow to face the Qibla" : {
+
+    },
+    "Popular Searches" : {
+
+    },
+    "Prayer" : {
+
+    },
+    "Prayer Breakdown" : {
+
+    },
+    "Prayer Calculation" : {
+
+    },
+    "Prayer Consistency" : {
+
+    },
+    "Prayer Location" : {
+
+    },
+    "Prayer Log" : {
+
+    },
+    "Prayer Notifications" : {
+
+    },
+    "Prayer Reminders" : {
+
+    },
+    "Prayer Settings" : {
+
+    },
+    "Prayer Streak" : {
+
+    },
+    "Prayer Time Adjustments" : {
+
+    },
+    "Prayer time calculations from PrayTimes.org" : {
+
+    },
+    "Prayer Times" : {
+
+    },
+    "Prayers for %@" : {
+
+    },
+    "Prepare for Restful Sleep" : {
+
+    },
+    "Privacy Policy" : {
+
+    },
+    "Progress" : {
+
+    },
+    "Qibla" : {
+
+    },
+    "Qibla Compass" : {
+
+    },
+    "Qibla Direction" : {
+
+    },
+    "Qibla direction is %lld degrees from North" : {
+
+    },
+    "Quality" : {
+
+    },
+    "Question" : {
+
+    },
+    "Questions? Email us at legal@safaapp.com" : {
+
+    },
+    "Questions? Email us at privacy@safaapp.com" : {
+
+    },
+    "Quick Access" : {
+
+    },
+    "Quran" : {
+
+    },
+    "Quran Khatm Goal" : {
+
+    },
+    "Quran Reader" : {
+
+    },
+    "Quran text from Tanzil.net" : {
+
+    },
+    "Rak'ahs Prayed" : {
+
+    },
+    "Ramadan" : {
+
+    },
+    "Ramadan (Start & Laylatul Qadr)" : {
+
+    },
+    "Ramadan Duas" : {
+
+    },
+    "Ramadan fasts logged" : {
+
+    },
+    "Ramadan is coming!" : {
+
+    },
+    "Ramadan Mode" : {
+
+    },
+    "Ramadan Mubarak" : {
+
+    },
+    "Ramadan Quran" : {
+
+    },
+    "Ramadan Settings" : {
+
+    },
+    "Rate on App Store" : {
+
+    },
+    "Read 1 Juz per day to complete on time" : {
+
+    },
+    "Ready to Begin" : {
+
+    },
+    "Recent Searches" : {
+
+    },
+    "Recommendations" : {
+
+    },
+    "Recommended for %@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recommended for %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Recommended Settings" : {
+
+    },
+    "Recommended translation for %@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recommended translation for %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Recommended: %@" : {
+
+    },
+    "Reduce Motion" : {
+
+    },
+    "Reference" : {
+
+    },
+    "Remove Log" : {
+
+    },
+    "Reset" : {
+
+    },
+    "Reset Calculator" : {
+
+    },
+    "Reset counter" : {
+
+    },
+    "Reset Tasbeeh" : {
+
+    },
+    "Reset the tasbeeh counter to zero" : {
+
+    },
+    "Retention Period" : {
+
+    },
+    "Rotate your device to align with the Qibla direction" : {
+
+    },
+    "Safa" : {
+
+    },
+    "Safa is built with privacy at its core. We believe your spiritual journey is personal and should stay that way." : {
+
+    },
+    "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
+
+    },
+    "safaapp.com" : {
+
+    },
+    "Save" : {
+
+    },
+    "Schedule" : {
+
+    },
+    "Search ayahs..." : {
+
+    },
+    "Search duas..." : {
+
+    },
+    "Search hadith..." : {
+
+    },
+    "Search names..." : {
+
+    },
+    "Search Quran" : {
+
+    },
+    "Search Quran..." : {
+
+    },
+    "Searching..." : {
+
+    },
+    "Section" : {
+
+    },
+    "Select Date" : {
+
+    },
+    "Select Reciter" : {
+
+    },
+    "Select the calculation method used by your local mosque for accurate prayer times." : {
+
+    },
+    "Select which Islamic events to add to your calendar." : {
+
+    },
+    "Send Feedback" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Share" : {
+
+    },
+    "Share Safa" : {
+
+    },
+    "Share Safa with Friends & Family" : {
+
+    },
+    "Share the app with friends and family" : {
+
+    },
+    "Share this code:" : {
+
+    },
+    "Share your spiritual journey with family members." : {
+
+    },
+    "Shared via صفا" : {
+
+    },
+    "Show Arabic Text" : {
+
+    },
+    "Show less" : {
+
+    },
+    "Show more" : {
+
+    },
+    "Show Ramadan Banner" : {
+
+    },
+    "Show Translation" : {
+
+    },
+    "Show Transliteration" : {
+
+    },
+    "Shows time until next prayer" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Sleep" : {
+
+    },
+    "Sleep Adhkar" : {
+
+    },
+    "Smart Adhan" : {
+
+    },
+    "Smart Cleanup" : {
+
+    },
+    "Smart settings applied" : {
+
+    },
+    "Snooze" : {
+
+    },
+    "Sound" : {
+
+    },
+    "Source: %@" : {
+
+    },
+    "Special Thanks" : {
+
+    },
+    "Spread the Word" : {
+
+    },
+    "Start logging your prayers to see your history here" : {
+
+    },
+    "Start Tasbeeh" : {
+
+    },
+    "Stats" : {
+
+    },
+    "Stay connected to your prayers" : {
+
+    },
+    "Stop" : {
+
+    },
+    "Storage" : {
+
+    },
+    "Storage Used" : {
+
+    },
+    "Streaks" : {
+
+    },
+    "Suhoor Ends" : {
+
+    },
+    "Suhoor ends in" : {
+
+    },
+    "Suhoor Reminder" : {
+
+    },
+    "Supplications & Remembrances" : {
+
+    },
+    "Support" : {
+
+    },
+    "Surah" : {
+
+    },
+    "Surah %lld" : {
+
+    },
+    "Surah %lld, %@, %@, %lld verses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Surah %1$lld, %2$@, %3$@, %4$lld verses"
+          }
+        }
+      }
+    },
+    "Surah %lld:%lld - %lld:%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Surah %1$lld:%2$lld - %3$lld:%4$lld"
+          }
+        }
+      }
+    },
+    "Surah Number" : {
+
+    },
+    "Surahs" : {
+
+    },
+    "SwiftUI" : {
+
+    },
+    "Sync" : {
+
+    },
+    "Sync to Apple Health" : {
+
+    },
+    "System Accessibility" : {
+
+    },
+    "System Status" : {
+
+    },
+    "Tap to Count" : {
+
+    },
+    "Tap to log" : {
+
+    },
+    "Tap to Record" : {
+
+    },
+    "Tap to set up" : {
+
+    },
+    "Taraweeh" : {
+
+    },
+    "Taraweeh Tonight" : {
+
+    },
+    "Target Count" : {
+
+    },
+    "Tasbeeh" : {
+
+    },
+    "Tasbeeh Counter" : {
+
+    },
+    "Tasbeeh counter reset" : {
+
+    },
+    "Terms of Service" : {
+
+    },
+    "Test Haptics" : {
+
+    },
+    "The alarm will be set based on Fajr prayer time for your location. You can adjust the offset if needed." : {
+
+    },
+    "The counter announces the current count, target, and percentage complete. The main button describes the dhikr being counted." : {
+
+    },
+    "The Most Beautiful Names" : {
+
+    },
+    "The Muslim developer community" : {
+
+    },
+    "These recommendations are based on common practices in your region. You can always customize these settings to match your preference or local mosque." : {
+
+    },
+    "This Week" : {
+
+    },
+    "This will permanently delete all your progress, bookmarks, and chat history. This action cannot be undone." : {
+
+    },
+    "This will remove %@ from your device. You can download it again later." : {
+
+    },
+    "This will remove all downloaded content (%@). You can download content again later." : {
+
+    },
+    "Time Range" : {
+
+    },
+    "Time until Iftar" : {
+
+    },
+    "Time until next prayer" : {
+
+    },
+    "Time until Suhoor ends" : {
+
+    },
+    "Tips" : {
+
+    },
+    "Title" : {
+
+    },
+    "Today" : {
+
+    },
+    "Today's Times" : {
+
+    },
+    "Tonight is the %@ - an odd night" : {
+
+    },
+    "Tonight's Progress" : {
+
+    },
+    "Total fasting hours" : {
+
+    },
+    "Total Hasanat" : {
+
+    },
+    "Track your fasting" : {
+
+    },
+    "Track your journey with صفا" : {
+
+    },
+    "Translation" : {
+
+    },
+    "Translation Language" : {
+
+    },
+    "Transliteration" : {
+
+    },
+    "Turkish" : {
+
+    },
+    "Type" : {
+
+    },
+    "Unable to determine direction" : {
+
+    },
+    "Unable to load surah" : {
+
+    },
+    "Undo" : {
+
+    },
+    "Undo last count" : {
+
+    },
+    "Unlocked!" : {
+
+    },
+    "Update Location" : {
+
+    },
+    "Urdu - Ahmed Ali" : {
+
+    },
+    "Use Adhan Sound" : {
+
+    },
+    "Version" : {
+
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "View" : {
+
+    },
+    "View All" : {
+
+    },
+    "View Recommended Settings" : {
+
+    },
+    "VoiceOver announces the direction to turn and tells you when you're facing the Qibla." : {
+
+    },
+    "VoiceOver Support" : {
+
+    },
+    "We do not sell, trade, or share your personal information with anyone. Period." : {
+
+    },
+    "Well Done!" : {
+
+    },
+    "What's included in JSON export:" : {
+
+    },
+    "When enabled, your fasting periods will be logged to Apple Health so you can track your Ramadan wellness journey." : {
+
+    },
+    "Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi." : {
+
+    },
+    "Wind Down" : {
+
+    },
+    "You can customize calculation methods and more in Settings anytime" : {
+
+    },
+    "You can deduct immediate debts and expenses that are due within the year from your total assets." : {
+
+    },
+    "You've completed %lld %@!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You've completed %1$lld %2$@!"
+          }
+        }
+      }
+    },
+    "You've completed your nightly adhkar. May Allah grant you peaceful sleep and an easy awakening for Fajr." : {
+
+    },
+    "You've shared %lld time%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You've shared %1$lld time%2$@"
+          }
+        }
+      }
+    },
+    "Your answer..." : {
+
+    },
+    "Your data is exported as a file you can save or share. JSON includes all data; CSV is a spreadsheet of prayer logs." : {
+
+    },
+    "Your data is stored locally and synced via iCloud. Safa does not collect or share personal data." : {
+
+    },
+    "Your Islamic Companion" : {
+
+    },
+    "Your Journey" : {
+
+    },
+    "Your location is used to calculate accurate prayer times and recommend regional settings." : {
+
+    },
+    "Your Privacy Matters" : {
+
+    },
+    "Your Progress" : {
+
+    },
+    "Your wealth is below the Nisab threshold. Zakat is not obligatory, but voluntary charity (Sadaqah) is always encouraged." : {
+
+    },
+    "Zakat Calculator" : {
+
+    },
+    "Zakat Due (2.5%)" : {
+
+    },
+    "Zakat is obligatory on every adult Muslim who possesses wealth above the Nisab threshold for a full lunar year (Hawl)." : {
+
+    },
+    "Zakat is one of the Five Pillars of Islam. It is a mandatory charitable contribution, typically 2.5% of a Muslim's total savings and wealth above a minimum amount known as Nisab." : {
+
+    },
+    "أدعية وأذكار" : {
+
+    },
+    "أسماء الله الحسنى" : {
+
+    },
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" : {
+
+    },
+    "تَقَبَّلَ اللهُ مِنَّا وَمِنْكُمْ" : {
+
+    },
+    "رمضان مبارك" : {
+
+    },
+    "صفا" : {
+
+    }
   },
   "version" : "1.0"
 }

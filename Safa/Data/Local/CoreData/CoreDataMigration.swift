@@ -266,11 +266,11 @@ enum MigrationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingModel:
-            return "The data model could not be found."
+            return String(localized: "The data model could not be found.")
         case .mappingModelNotFound:
-            return "No mapping model found for migration."
+            return String(localized: "No mapping model found for migration.")
         case .migrationFailed(let reason):
-            return "Migration failed: \(reason)"
+            return String(localized: "Migration failed: \(reason)")
         }
     }
 }

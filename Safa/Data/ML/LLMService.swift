@@ -337,9 +337,9 @@ enum LLMError: LocalizedError {
         case .unavailable(let message):
             return message
         case .modelLoadFailed:
-            return "Failed to load the AI model. Please try again."
+            return String(localized: "Failed to load the AI model. Please try again.")
         case .generationFailed(let reason):
-            return "Failed to generate response: \(reason)"
+            return String(localized: "Failed to generate response: \(reason)")
         }
     }
 }

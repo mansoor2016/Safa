@@ -130,12 +130,12 @@ final class FocusModeService {
         let prayerTimeActions = [
             UNNotificationAction(
                 identifier: "LOG_PRAYER",
-                title: "Mark as Prayed",
+                title: String(localized: "Mark as Prayed"),
                 options: []
             ),
             UNNotificationAction(
                 identifier: "OPEN_QIBLA",
-                title: "Open Qibla",
+                title: String(localized: "Open Qibla"),
                 options: [.foreground]
             )
         ]
@@ -161,7 +161,7 @@ final class FocusModeService {
         let quranActions = [
             UNNotificationAction(
                 identifier: "OPEN_QURAN",
-                title: "Continue Reading",
+                title: String(localized: "Continue Reading"),
                 options: [.foreground]
             )
         ]
@@ -178,7 +178,7 @@ final class FocusModeService {
         let streakActions = [
             UNNotificationAction(
                 identifier: "OPEN_APP",
-                title: "Open Safa",
+                title: String(localized: "Open Safa"),
                 options: [.foreground]
             )
         ]
@@ -348,18 +348,18 @@ extension FocusModeService {
     /// Get user-facing text for Focus Mode setup
     var setupInstructions: [String] {
         [
-            "1. Open Settings on your iPhone",
-            "2. Tap Focus",
-            "3. Create a new Focus or edit an existing one",
-            "4. Under 'Allowed Notifications', add Safa",
-            "5. Choose which Safa notification types to allow",
-            "6. Optional: Schedule the Focus for prayer times"
+            String(localized: "1. Open Settings on your iPhone"),
+            String(localized: "2. Tap Focus"),
+            String(localized: "3. Create a new Focus or edit an existing one"),
+            String(localized: "4. Under 'Allowed Notifications', add Safa"),
+            String(localized: "5. Choose which Safa notification types to allow"),
+            String(localized: "6. Optional: Schedule the Focus for prayer times")
         ]
     }
 
     /// Generate a Focus Mode configuration summary
     func getConfigurationSummary() -> String {
-        """
+        String(localized: """
         Safa Focus Mode Configuration:
 
         Prayer Notifications: Time Sensitive
@@ -376,6 +376,6 @@ extension FocusModeService {
 
         To customize, go to:
         Settings > Focus > [Your Focus] > Apps > Safa
-        """
+        """)
     }
 }

@@ -222,11 +222,11 @@ enum PronunciationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAuthorized:
-            return "Microphone permission is required for pronunciation checking."
+            return String(localized: "Microphone permission is required for pronunciation checking.")
         case .recognitionUnavailable:
-            return "Speech recognition is not available."
+            return String(localized: "Speech recognition is not available.")
         case .recordingFailed:
-            return "Failed to start recording."
+            return String(localized: "Failed to start recording.")
         }
     }
 }

@@ -77,13 +77,13 @@ enum ChatError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .modelNotLoaded:
-            return "The AI model is not loaded. Please wait."
+            return String(localized: "The AI model is not loaded. Please wait.")
         case .generationFailed(let reason):
-            return "Failed to generate response: \(reason)"
+            return String(localized: "Failed to generate response: \(reason)")
         case .conversationNotFound:
-            return "Conversation not found."
+            return String(localized: "Conversation not found.")
         case .messageTooLong:
-            return "Message is too long. Please shorten it."
+            return String(localized: "Message is too long. Please shorten it.")
         }
     }
 }

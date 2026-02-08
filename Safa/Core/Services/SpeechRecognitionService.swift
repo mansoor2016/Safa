@@ -311,15 +311,15 @@ enum SpeechError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAuthorized:
-            return "Speech recognition is not authorized. Please enable it in Settings."
+            return String(localized: "Speech recognition is not authorized. Please enable it in Settings.")
         case .recognizerNotAvailable:
-            return "Speech recognition is not available on this device."
+            return String(localized: "Speech recognition is not available on this device.")
         case .requestCreationFailed:
-            return "Failed to create speech recognition request."
+            return String(localized: "Failed to create speech recognition request.")
         case .recognitionFailed(let message):
-            return "Recognition failed: \(message)"
+            return String(localized: "Recognition failed: \(message)")
         case .audioSessionError(let message):
-            return "Audio session error: \(message)"
+            return String(localized: "Audio session error: \(message)")
         }
     }
 }

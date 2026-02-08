@@ -96,8 +96,8 @@ final class SleepFocusService {
         guard let windDownTime = windDownTime, windDownTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Time to Wind Down"
-        content.body = "Start your evening adhkar and prepare for a restful night."
+        content.title = String(localized: "Time to Wind Down")
+        content.body = String(localized: "Start your evening adhkar and prepare for a restful night.")
         content.categoryIdentifier = "WIND_DOWN"
         content.sound = UNNotificationSound(named: UNNotificationSoundName("soft_chime.wav"))
         content.interruptionLevel = .timeSensitive
@@ -138,8 +138,8 @@ final class SleepFocusService {
         }
 
         let content = UNMutableNotificationContent()
-        content.title = "Fajr Prayer Soon"
-        content.body = "Wake up for Fajr prayer. May Allah accept your worship."
+        content.title = String(localized: "Fajr Prayer Soon")
+        content.body = String(localized: "Wake up for Fajr prayer. May Allah accept your worship.")
         content.categoryIdentifier = "FAJR_ALARM"
         content.sound = UNNotificationSound.default
         content.interruptionLevel = .timeSensitive
@@ -147,12 +147,12 @@ final class SleepFocusService {
         // Add action buttons
         let openQiblaAction = UNNotificationAction(
             identifier: "OPEN_QIBLA",
-            title: "Open Qibla",
+            title: String(localized: "Open Qibla"),
             options: .foreground
         )
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE",
-            title: "Snooze 5 min",
+            title: String(localized: "Snooze 5 min"),
             options: []
         )
 
@@ -196,12 +196,12 @@ final class SleepFocusService {
         // Wind Down actions
         let startWindDownAction = UNNotificationAction(
             identifier: "START_WIND_DOWN",
-            title: "Start Wind Down",
+            title: String(localized: "Start Wind Down"),
             options: .foreground
         )
         let dismissAction = UNNotificationAction(
             identifier: "DISMISS",
-            title: "Dismiss",
+            title: String(localized: "Dismiss"),
             options: .destructive
         )
 
@@ -215,17 +215,17 @@ final class SleepFocusService {
         // Fajr alarm actions
         let openPrayerAction = UNNotificationAction(
             identifier: "OPEN_PRAYER",
-            title: "Open Prayer",
+            title: String(localized: "Open Prayer"),
             options: .foreground
         )
         let openQiblaAction = UNNotificationAction(
             identifier: "OPEN_QIBLA",
-            title: "Open Qibla",
+            title: String(localized: "Open Qibla"),
             options: .foreground
         )
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE",
-            title: "Snooze 5 min",
+            title: String(localized: "Snooze 5 min"),
             options: []
         )
 
@@ -309,16 +309,16 @@ final class SleepFocusService {
 
     func getFormattedSleepDuration() -> String {
         guard let duration = getSleepDuration() else {
-            return "Not set"
+            return String(localized: "Not set")
         }
 
         let hours = Int(duration) / 3600
         let minutes = (Int(duration) % 3600) / 60
 
         if minutes == 0 {
-            return "\(hours) hours"
+            return String(localized: "\(hours) hours")
         }
-        return "\(hours)h \(minutes)m"
+        return String(localized: "\(hours)h \(minutes)m")
     }
 }
 

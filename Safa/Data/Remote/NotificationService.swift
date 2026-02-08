@@ -69,19 +69,19 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
         offsetMinutes: Int = 0
     ) async throws {
         let content = UNMutableNotificationContent()
-        content.title = "Prayer Time"
+        content.title = String(localized: "Prayer Time")
 
         // Calculate effective offset including mosque mode travel time
         let effectiveOffset = mosqueModeEnabled ? offsetMinutes + travelTimeMinutes : offsetMinutes
 
         if effectiveOffset > 0 {
             if mosqueModeEnabled {
-                content.body = "\(prayer.displayName) in \(effectiveOffset) minutes. Time to head to the mosque!"
+                content.body = String(localized: "\(prayer.displayName) in \(effectiveOffset) minutes. Time to head to the mosque!")
             } else {
-                content.body = "\(prayer.displayName) in \(effectiveOffset) minutes"
+                content.body = String(localized: "\(prayer.displayName) in \(effectiveOffset) minutes")
             }
         } else {
-            content.body = "It's time for \(prayer.displayName)"
+            content.body = String(localized: "It's time for \(prayer.displayName)")
         }
 
         // Use vibration only (no sound) by default
@@ -200,8 +200,8 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
 
     func showAchievementNotification(achievement: Achievement) async throws {
         let content = UNMutableNotificationContent()
-        content.title = "Achievement Unlocked! 🏆"
-        content.body = "\(achievement.title): \(achievement.description)"
+        content.title = String(localized: "Achievement Unlocked! 🏆")
+        content.body = String(localized: "\(achievement.title): \(achievement.description)")
         content.sound = UNNotificationSound.default
         content.categoryIdentifier = "ACHIEVEMENT_UNLOCKED"
 
@@ -323,17 +323,17 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
             actions: [
                 UNNotificationAction(
                     identifier: "DONE_PRAYER",
-                    title: "Done \u{2713}",
+                    title: String(localized: "Done \u{2713}"),
                     options: [] // Does not open app - logs prayer silently
                 ),
                 UNNotificationAction(
                     identifier: "SNOOZE",
-                    title: "Remind in 10 min",
+                    title: String(localized: "Remind in 10 min"),
                     options: []
                 ),
                 UNNotificationAction(
                     identifier: "VIEW_TIMES",
-                    title: "View Times",
+                    title: String(localized: "View Times"),
                     options: [.foreground]
                 )
             ],
@@ -346,7 +346,7 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
             actions: [
                 UNNotificationAction(
                     identifier: "VIEW_ACHIEVEMENT",
-                    title: "View",
+                    title: String(localized: "View"),
                     options: [.foreground]
                 )
             ],
@@ -359,7 +359,7 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
             actions: [
                 UNNotificationAction(
                     identifier: "LOG_FAST",
-                    title: "Log Fast",
+                    title: String(localized: "Log Fast"),
                     options: [.foreground]
                 )
             ],
@@ -372,12 +372,12 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
             actions: [
                 UNNotificationAction(
                     identifier: "VIEW_CALENDAR",
-                    title: "View Calendar",
+                    title: String(localized: "View Calendar"),
                     options: [.foreground]
                 ),
                 UNNotificationAction(
                     identifier: "DISMISS",
-                    title: "Dismiss",
+                    title: String(localized: "Dismiss"),
                     options: []
                 )
             ],
@@ -447,42 +447,42 @@ final class NotificationService: ObservableObject, NotificationServiceProtocol {
 extension IslamicCalendarEvent.IslamicEventType {
     var notificationTitle: String {
         switch self {
-        case .eidAlFitr: return "Eid al-Fitr"
-        case .eidAlAdha: return "Eid al-Adha"
-        case .ramadan: return "Ramadan"
-        case .islamicNewYear: return "Islamic New Year"
-        case .ashura: return "Day of Ashura"
-        case .mawlidAlNabi: return "Mawlid al-Nabi"
-        case .isra: return "Isra and Mi'raj"
-        case .shaban: return "Mid-Sha'ban"
-        case .prayerTime: return "Prayer Time"
+        case .eidAlFitr: return String(localized: "Eid al-Fitr")
+        case .eidAlAdha: return String(localized: "Eid al-Adha")
+        case .ramadan: return String(localized: "Ramadan")
+        case .islamicNewYear: return String(localized: "Islamic New Year")
+        case .ashura: return String(localized: "Day of Ashura")
+        case .mawlidAlNabi: return String(localized: "Mawlid al-Nabi")
+        case .isra: return String(localized: "Isra and Mi'raj")
+        case .shaban: return String(localized: "Mid-Sha'ban")
+        case .prayerTime: return String(localized: "Prayer Time")
         }
     }
 
     func notificationBody(daysBefore: Int) -> String {
         if daysBefore == 0 {
             switch self {
-            case .eidAlFitr: return "Eid Mubarak! May Allah accept your worship."
-            case .eidAlAdha: return "Eid Mubarak! May Allah accept your sacrifice."
-            case .ramadan: return "Ramadan Mubarak! The blessed month begins today."
-            case .islamicNewYear: return "Happy Islamic New Year! May this year bring blessings."
-            case .ashura: return "Today is the Day of Ashura. Fasting is recommended."
-            case .mawlidAlNabi: return "Today we celebrate the birth of Prophet Muhammad (PBUH)."
-            case .isra: return "Tonight is the Night Journey and Ascension."
-            case .shaban: return "Tonight is the Night of Mid-Sha'ban."
-            case .prayerTime: return "It's prayer time."
+            case .eidAlFitr: return String(localized: "Eid Mubarak! May Allah accept your worship.")
+            case .eidAlAdha: return String(localized: "Eid Mubarak! May Allah accept your sacrifice.")
+            case .ramadan: return String(localized: "Ramadan Mubarak! The blessed month begins today.")
+            case .islamicNewYear: return String(localized: "Happy Islamic New Year! May this year bring blessings.")
+            case .ashura: return String(localized: "Today is the Day of Ashura. Fasting is recommended.")
+            case .mawlidAlNabi: return String(localized: "Today we celebrate the birth of Prophet Muhammad (PBUH).")
+            case .isra: return String(localized: "Tonight is the Night Journey and Ascension.")
+            case .shaban: return String(localized: "Tonight is the Night of Mid-Sha'ban.")
+            case .prayerTime: return String(localized: "It's prayer time.")
             }
         } else {
             switch self {
-            case .eidAlFitr: return "Eid al-Fitr is tomorrow! Prepare your Eid prayers."
-            case .eidAlAdha: return "Eid al-Adha is tomorrow! Prepare for the celebration."
-            case .ramadan: return "Ramadan begins tomorrow! Prepare for the blessed month."
-            case .islamicNewYear: return "Islamic New Year is tomorrow."
-            case .ashura: return "The Day of Ashura is tomorrow. Consider fasting."
-            case .mawlidAlNabi: return "Mawlid al-Nabi is tomorrow."
-            case .isra: return "Isra and Mi'raj is tomorrow night."
-            case .shaban: return "Mid-Sha'ban is tomorrow night."
-            case .prayerTime: return "Prayer reminder."
+            case .eidAlFitr: return String(localized: "Eid al-Fitr is tomorrow! Prepare your Eid prayers.")
+            case .eidAlAdha: return String(localized: "Eid al-Adha is tomorrow! Prepare for the celebration.")
+            case .ramadan: return String(localized: "Ramadan begins tomorrow! Prepare for the blessed month.")
+            case .islamicNewYear: return String(localized: "Islamic New Year is tomorrow.")
+            case .ashura: return String(localized: "The Day of Ashura is tomorrow. Consider fasting.")
+            case .mawlidAlNabi: return String(localized: "Mawlid al-Nabi is tomorrow.")
+            case .isra: return String(localized: "Isra and Mi'raj is tomorrow night.")
+            case .shaban: return String(localized: "Mid-Sha'ban is tomorrow night.")
+            case .prayerTime: return String(localized: "Prayer reminder.")
             }
         }
     }

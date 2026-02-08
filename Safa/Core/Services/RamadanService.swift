@@ -176,8 +176,8 @@ final class RamadanService {
         guard reminderTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Suhoor Time"
-        content.body = "Time for pre-dawn meal. Fajr is in \(suhoorReminderMinutesBefore) minutes. May your fast be accepted."
+        content.title = String(localized: "Suhoor Time")
+        content.body = String(localized: "Time for pre-dawn meal. Fajr is in \(suhoorReminderMinutesBefore) minutes. May your fast be accepted.")
         content.categoryIdentifier = "SUHOOR"
         content.sound = UNNotificationSound.default
         content.interruptionLevel = .timeSensitive
@@ -218,8 +218,8 @@ final class RamadanService {
         guard duaTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Suhoor Dua"
-        content.body = "وَبِصَوْمِ غَدٍ نَّوَيْتُ مِنْ شَهْرِ رَمَضَانَ\n\"I intend to fast tomorrow for the month of Ramadan\""
+        content.title = String(localized: "Suhoor Dua")
+        content.body = "وَبِصَوْمِ غَدٍ نَّوَيْتُ مِنْ شَهْرِ رَمَضَانَ\n" + String(localized: "\"I intend to fast tomorrow for the month of Ramadan\"")
         content.categoryIdentifier = "SUHOOR_DUA"
         content.sound = nil
         content.interruptionLevel = .passive
@@ -258,8 +258,8 @@ final class RamadanService {
         guard reminderTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Iftar in \(iftarReminderMinutesBefore) minutes"
-        content.body = "Prepare to break your fast. May Allah accept your worship."
+        content.title = String(localized: "Iftar in \(iftarReminderMinutesBefore) minutes")
+        content.body = String(localized: "Prepare to break your fast. May Allah accept your worship.")
         content.categoryIdentifier = "IFTAR"
         content.sound = UNNotificationSound.default
         content.interruptionLevel = .timeSensitive
@@ -293,8 +293,8 @@ final class RamadanService {
         guard maghribTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Iftar Time!"
-        content.body = "اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ\nBismillah! Time to break your fast."
+        content.title = String(localized: "Iftar Time!")
+        content.body = "اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ\n" + String(localized: "Bismillah! Time to break your fast.")
         content.categoryIdentifier = "IFTAR_TIME"
         content.sound = UNNotificationSound(named: UNNotificationSoundName("iftar_athan.wav"))
         content.interruptionLevel = .timeSensitive
@@ -333,8 +333,8 @@ final class RamadanService {
         guard reminderTime > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Taraweeh Time"
-        content.body = "Don't forget your Taraweeh prayers tonight. May your worship be accepted."
+        content.title = String(localized: "Taraweeh Time")
+        content.body = String(localized: "Don't forget your Taraweeh prayers tonight. May your worship be accepted.")
         content.categoryIdentifier = "TARAWEEH"
         content.sound = .default
         content.interruptionLevel = .active
@@ -362,8 +362,8 @@ final class RamadanService {
 
     private func sendRamadanActivationNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Ramadan Mubarak! 🌙"
-        content.body = "Ramadan mode is now active. May this blessed month bring you peace and blessings."
+        content.title = String(localized: "Ramadan Mubarak! 🌙")
+        content.body = String(localized: "Ramadan mode is now active. May this blessed month bring you peace and blessings.")
         content.sound = .default
 
         let request = UNNotificationRequest(
@@ -377,8 +377,8 @@ final class RamadanService {
 
     private func sendEidNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Eid Mubarak! 🎉"
-        content.body = "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you."
+        content.title = String(localized: "Eid Mubarak! 🎉")
+        content.body = String(localized: "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you.")
         content.sound = .default
 
         let request = UNNotificationRequest(
@@ -416,8 +416,8 @@ final class RamadanService {
 
         // Schedule at Maghrib time (would need prayer times)
         let content = UNMutableNotificationContent()
-        content.title = "Laylat al-Qadr - Night \(night)"
-        content.body = "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي"
+        content.title = String(localized: "Laylat al-Qadr - Night \(night)")
+        content.body = String(localized: "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي")
         content.categoryIdentifier = "LAYLAT_AL_QADR"
         content.sound = .default
         content.interruptionLevel = .timeSensitive

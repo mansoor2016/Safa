@@ -227,13 +227,13 @@ enum HealthKitError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "Apple Health is not available on this device."
+            return String(localized: "Apple Health is not available on this device.")
         case .authorizationDenied:
-            return "Apple Health access was denied. Please enable access in Settings."
+            return String(localized: "Apple Health access was denied. Please enable access in Settings.")
         case .typeNotAvailable:
-            return "The required health data type is not available."
+            return String(localized: "The required health data type is not available.")
         case .saveFailed(let error):
-            return "Failed to save to Apple Health: \(error.localizedDescription)"
+            return String(localized: "Failed to save to Apple Health: \(error.localizedDescription)")
         }
     }
 }

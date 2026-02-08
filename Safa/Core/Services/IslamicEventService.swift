@@ -124,8 +124,8 @@ final class IslamicEventService {
             content.title = event.name
             content.body = event.description
         } else {
-            content.title = "Upcoming: \(event.name)"
-            content.body = "\(event.name) is in \(reminderDaysBefore) day(s). \(event.description)"
+            content.title = String(localized: "Upcoming: \(event.name)")
+            content.body = String(localized: "\(event.name) is in \(reminderDaysBefore) day(s). \(event.description)")
         }
 
         content.categoryIdentifier = "ISLAMIC_EVENT"
@@ -167,63 +167,63 @@ final class IslamicEventService {
         switch event.type {
         case .ramadanStart, .ramadanEnd:
             return [
-                EventAction(title: "View Fasting Guide", action: .openFastingGuide),
-                EventAction(title: "Set Suhoor Reminder", action: .setSuhoorReminder),
-                EventAction(title: "Set Iftar Reminder", action: .setIftarReminder)
+                EventAction(title: String(localized: "View Fasting Guide"), action: .openFastingGuide),
+                EventAction(title: String(localized: "Set Suhoor Reminder"), action: .setSuhoorReminder),
+                EventAction(title: String(localized: "Set Iftar Reminder"), action: .setIftarReminder)
             ]
 
         case .eidAlFitr, .eidAlAdha:
             return [
-                EventAction(title: "View Eid Prayers", action: .openEidPrayers),
-                EventAction(title: "Share Eid Greeting", action: .shareGreeting),
-                EventAction(title: "Zakat Calculator", action: .openZakatCalculator)
+                EventAction(title: String(localized: "View Eid Prayers"), action: .openEidPrayers),
+                EventAction(title: String(localized: "Share Eid Greeting"), action: .shareGreeting),
+                EventAction(title: String(localized: "Zakat Calculator"), action: .openZakatCalculator)
             ]
 
         case .ashura:
             return [
-                EventAction(title: "Learn About Ashura", action: .openLearning),
-                EventAction(title: "Fasting Sunnah", action: .openFastingGuide)
+                EventAction(title: String(localized: "Learn About Ashura"), action: .openLearning),
+                EventAction(title: String(localized: "Fasting Sunnah"), action: .openFastingGuide)
             ]
 
         case .mawlidAlNabi:
             return [
-                EventAction(title: "Read Seerah", action: .openSeerah),
-                EventAction(title: "Send Salawat", action: .openDhikr)
+                EventAction(title: String(localized: "Read Seerah"), action: .openSeerah),
+                EventAction(title: String(localized: "Send Salawat"), action: .openDhikr)
             ]
 
         case .isra, .miraj:
             return [
-                EventAction(title: "Learn About Isra & Mi'raj", action: .openLearning),
-                EventAction(title: "Night Prayers", action: .openNightPrayers)
+                EventAction(title: String(localized: "Learn About Isra & Mi'raj"), action: .openLearning),
+                EventAction(title: String(localized: "Night Prayers"), action: .openNightPrayers)
             ]
 
         case .laylatAlQadr:
             return [
-                EventAction(title: "Laylat al-Qadr Duas", action: .openLaylatAlQadrDuas),
-                EventAction(title: "Night of Power Guide", action: .openLearning)
+                EventAction(title: String(localized: "Laylat al-Qadr Duas"), action: .openLaylatAlQadrDuas),
+                EventAction(title: String(localized: "Night of Power Guide"), action: .openLearning)
             ]
 
         case .arafah:
             return [
-                EventAction(title: "Day of Arafah Duas", action: .openArafahDuas),
-                EventAction(title: "Fasting Sunnah", action: .openFastingGuide)
+                EventAction(title: String(localized: "Day of Arafah Duas"), action: .openArafahDuas),
+                EventAction(title: String(localized: "Fasting Sunnah"), action: .openFastingGuide)
             ]
 
         case .hijriNewYear:
             return [
-                EventAction(title: "Reflect on the Year", action: .openReflection),
-                EventAction(title: "Set Islamic Goals", action: .openGoals)
+                EventAction(title: String(localized: "Reflect on the Year"), action: .openReflection),
+                EventAction(title: String(localized: "Set Islamic Goals"), action: .openGoals)
             ]
 
         case .whiteDays:
             return [
-                EventAction(title: "White Days Fasting", action: .openFastingGuide)
+                EventAction(title: String(localized: "White Days Fasting"), action: .openFastingGuide)
             ]
 
         case .jumuah:
             return [
-                EventAction(title: "Surah Al-Kahf", action: .openSurahKahf),
-                EventAction(title: "Friday Duas", action: .openFridayDuas)
+                EventAction(title: String(localized: "Surah Al-Kahf"), action: .openSurahKahf),
+                EventAction(title: String(localized: "Friday Duas"), action: .openFridayDuas)
             ]
         }
     }
@@ -290,19 +290,19 @@ enum IslamicEventType: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .ramadanStart: return "Ramadan Begins"
-        case .ramadanEnd: return "Ramadan Ends"
-        case .eidAlFitr: return "Eid al-Fitr"
-        case .eidAlAdha: return "Eid al-Adha"
-        case .ashura: return "Ashura"
-        case .mawlidAlNabi: return "Mawlid al-Nabi"
-        case .isra: return "Isra"
-        case .miraj: return "Mi'raj"
-        case .laylatAlQadr: return "Laylat al-Qadr"
-        case .arafah: return "Day of Arafah"
-        case .hijriNewYear: return "Islamic New Year"
-        case .whiteDays: return "White Days"
-        case .jumuah: return "Jumu'ah"
+        case .ramadanStart: return String(localized: "Ramadan Begins")
+        case .ramadanEnd: return String(localized: "Ramadan Ends")
+        case .eidAlFitr: return String(localized: "Eid al-Fitr")
+        case .eidAlAdha: return String(localized: "Eid al-Adha")
+        case .ashura: return String(localized: "Ashura")
+        case .mawlidAlNabi: return String(localized: "Mawlid al-Nabi")
+        case .isra: return String(localized: "Isra")
+        case .miraj: return String(localized: "Mi'raj")
+        case .laylatAlQadr: return String(localized: "Laylat al-Qadr")
+        case .arafah: return String(localized: "Day of Arafah")
+        case .hijriNewYear: return String(localized: "Islamic New Year")
+        case .whiteDays: return String(localized: "White Days")
+        case .jumuah: return String(localized: "Jumu'ah")
         }
     }
 
@@ -355,81 +355,81 @@ extension IslamicEvent {
     static let allEvents: [IslamicEvent] = [
         IslamicEvent(
             id: "ramadan_start",
-            name: "Ramadan Begins",
+            name: String(localized: "Ramadan Begins"),
             nameArabic: "بداية رمضان",
-            description: "The blessed month of fasting begins.",
+            description: String(localized: "The blessed month of fasting begins."),
             type: .ramadanStart,
             hijriMonth: 9,
             hijriDay: 1
         ),
         IslamicEvent(
             id: "laylat_al_qadr",
-            name: "Laylat al-Qadr",
+            name: String(localized: "Laylat al-Qadr"),
             nameArabic: "ليلة القدر",
-            description: "The Night of Power, better than a thousand months.",
+            description: String(localized: "The Night of Power, better than a thousand months."),
             type: .laylatAlQadr,
             hijriMonth: 9,
             hijriDay: 27
         ),
         IslamicEvent(
             id: "eid_al_fitr",
-            name: "Eid al-Fitr",
+            name: String(localized: "Eid al-Fitr"),
             nameArabic: "عيد الفطر",
-            description: "Festival of Breaking the Fast. Taqabbal Allahu minna wa minkum.",
+            description: String(localized: "Festival of Breaking the Fast. Taqabbal Allahu minna wa minkum."),
             type: .eidAlFitr,
             hijriMonth: 10,
             hijriDay: 1
         ),
         IslamicEvent(
             id: "arafah",
-            name: "Day of Arafah",
+            name: String(localized: "Day of Arafah"),
             nameArabic: "يوم عرفة",
-            description: "The best day on which the sun rises. Fasting is highly recommended.",
+            description: String(localized: "The best day on which the sun rises. Fasting is highly recommended."),
             type: .arafah,
             hijriMonth: 12,
             hijriDay: 9
         ),
         IslamicEvent(
             id: "eid_al_adha",
-            name: "Eid al-Adha",
+            name: String(localized: "Eid al-Adha"),
             nameArabic: "عيد الأضحى",
-            description: "Festival of Sacrifice. Eid Mubarak!",
+            description: String(localized: "Festival of Sacrifice. Eid Mubarak!"),
             type: .eidAlAdha,
             hijriMonth: 12,
             hijriDay: 10
         ),
         IslamicEvent(
             id: "hijri_new_year",
-            name: "Islamic New Year",
+            name: String(localized: "Islamic New Year"),
             nameArabic: "رأس السنة الهجرية",
-            description: "The beginning of a new Islamic year.",
+            description: String(localized: "The beginning of a new Islamic year."),
             type: .hijriNewYear,
             hijriMonth: 1,
             hijriDay: 1
         ),
         IslamicEvent(
             id: "ashura",
-            name: "Ashura",
+            name: String(localized: "Ashura"),
             nameArabic: "عاشوراء",
-            description: "The 10th of Muharram. Fasting this day expiates sins of the previous year.",
+            description: String(localized: "The 10th of Muharram. Fasting this day expiates sins of the previous year."),
             type: .ashura,
             hijriMonth: 1,
             hijriDay: 10
         ),
         IslamicEvent(
             id: "mawlid",
-            name: "Mawlid al-Nabi",
+            name: String(localized: "Mawlid al-Nabi"),
             nameArabic: "المولد النبوي",
-            description: "Birth of Prophet Muhammad ﷺ",
+            description: String(localized: "Birth of Prophet Muhammad ﷺ"),
             type: .mawlidAlNabi,
             hijriMonth: 3,
             hijriDay: 12
         ),
         IslamicEvent(
             id: "isra_miraj",
-            name: "Isra and Mi'raj",
+            name: String(localized: "Isra and Mi'raj"),
             nameArabic: "الإسراء والمعراج",
-            description: "The Night Journey and Ascension of Prophet Muhammad ﷺ",
+            description: String(localized: "The Night Journey and Ascension of Prophet Muhammad ﷺ"),
             type: .isra,
             hijriMonth: 7,
             hijriDay: 27

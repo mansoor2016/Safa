@@ -218,11 +218,11 @@ enum AudioError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return "Audio file not found."
+            return String(localized: "Audio file not found.")
         case .playbackFailed:
-            return "Failed to play audio."
+            return String(localized: "Failed to play audio.")
         case .downloadFailed:
-            return "Failed to download audio."
+            return String(localized: "Failed to download audio.")
         }
     }
 }

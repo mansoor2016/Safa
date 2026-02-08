@@ -320,9 +320,9 @@ final class AudioDownloadManager {
         var errorDescription: String? {
             switch self {
             case .wifiRequired:
-                return "WiFi connection required for downloads"
+                return String(localized: "WiFi connection required for downloads")
             case .downloadFailed:
-                return "Download failed"
+                return String(localized: "Download failed")
             }
         }
     }
