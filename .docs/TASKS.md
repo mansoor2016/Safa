@@ -36,6 +36,76 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 
 ---
 
+## Cross-Cutting Workstream: Localization & Internationalization (Scoped)
+
+### L10N.1 Product Scope and Language Rollout
+- [ ] Finalize Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
+- [ ] Record Phase 2 UI languages: French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
+- [ ] Record Phase 3 UI language: Chinese Simplified (`zh-Hans`)
+- [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
+- [ ] Confirm fallback policy copy for missing content translation states
+
+### L10N.2 Xcode Localization Foundation
+- [ ] Enable and verify String Catalog workflow for app + widget extension targets
+- [ ] Add supported localizations in Xcode target settings for Phase 1 languages
+- [ ] Replace hardcoded user-facing strings in core screens with localization keys
+- [ ] Ensure widgets and Live Activities consume shared localized keys
+- [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
+
+### L10N.3 Language Settings and Runtime Behavior
+- [ ] Add `Settings > Language` section with separate `App Language` and `Content Language`
+- [ ] Persist language preferences in shared preferences store
+- [ ] Implement runtime fallback chain: UI (`selected -> en`), content (`selected -> en -> arabic/transliteration label`)
+- [ ] Show explicit "not available in selected language" states for untranslated content
+
+### L10N.4 RTL Readiness
+- [ ] Audit major screens for semantic layout (`leading`/`trailing`) and mirrored icons
+- [ ] Validate Arabic UI flow in onboarding, home, prayer, Quran shell, and settings
+- [ ] Validate mixed-script rendering (Arabic + Latin + numerals) with Dynamic Type
+- [ ] Fix truncation/overlap defects for compact devices (iPhone SE class)
+
+### L10N.5 Scoped Religious Content Translation
+- [ ] Keep Quran/Hadith/Dua translation expansion as language-pack releases, not implicit UI localization
+- [ ] Define content availability manifest (per feature, per language)
+- [ ] Add user-facing availability labels in Quran, Hadith, Dua, and AI surfaces
+- [ ] Define acceptance criteria for enabling each new content language pack
+
+### L10N.6 Validation and Release Gates
+- [ ] Add pseudo-localization UI test pass (string expansion and bidi edge cases)
+- [ ] Add screenshot coverage for Phase 1 languages on key flows
+- [ ] Track localization telemetry: missing-key rate and content-fallback rate
+- [ ] Block release if localization regression threshold is exceeded
+
+### Localization Acceptance Criteria
+- [ ] **AC-L10N.1**: App shell and settings fully localized for all Phase 1 languages
+- [ ] **AC-L10N.2**: Arabic UI renders RTL correctly across key flows with no blocking layout defects
+- [ ] **AC-L10N.3**: Missing content translations show clear user-facing state (never silent fallback)
+- [ ] **AC-L10N.4**: Widgets and Live Activities display localized labels for selected app language
+- [ ] **AC-L10N.5**: Localization CI checks run and fail on missing critical keys
+
+### Localization Integration Tests
+- [ ] **IT-L10N.1**: Change app language in Settings → relaunch target screen → all shell strings updated
+- [ ] **IT-L10N.2**: Select Arabic app language → navigation/layout mirrors correctly in key screens
+- [ ] **IT-L10N.3**: Select content language without Quran translation pack → explicit unavailable state shown
+- [ ] **IT-L10N.4**: Add widget in non-English app language → localized labels visible on Home/Lock screen
+- [ ] **IT-L10N.5**: Toggle between English and Urdu/Hindi/French → no crashes, no missing-key placeholders
+
+### Localization Verification
+```bash
+# Build in default locale
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' build
+
+# Run localization-sensitive tests (to be created)
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:SafaTests/LocalizationTests test
+
+# Run UI localization tests (to be created)
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:SafaUITests/SafaLocalizationUITests test
+```
+
+---
+
 ## Phase 0: Project Foundation
 
 ### 0.1 Repository & Git Setup

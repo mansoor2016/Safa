@@ -187,13 +187,12 @@ Features that are included in the codebase but not yet implemented follow a cons
 |---------|------------|-------|
 | VoiceOver | ✅ Labels on all controls | Critical screens fully labeled |
 | Dynamic Type | ✅ Full support | All text scales with system settings |
-| RTL Arabic | ✅ Content only | Arabic text displays RTL, UI remains English |
+| RTL Arabic | ✅ Full layout support for localized screens | App shell supports RTL where language is Arabic; content availability is feature-dependent |
 | Color Contrast | ✅ WCAG AA | 4.5:1 minimum ratio |
 | Reduce Motion | ✅ Respected | Animations disabled when preference set |
 | Qibla Feedback | ✅ Haptics | Vibration pulses indicate direction |
 
 **Not in v1 (planned for v1.1):**
-- Full Arabic UI localization (RTL layout flip)
 - Audio directional feedback for Qibla
 - Voice Control optimization
 
@@ -480,7 +479,8 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 
 ### 4.2 Quran
 - Full Quran with Arabic text (multiple scripts: Uthmani, IndoPak)
-- English translation (initial release)
+- English translation (initial release baseline)
+- Additional translations added as separate language content packs (not guaranteed for every UI language in v1)
 - Audio recitations from renowned Qaris (Mishary, Sudais, Husary, etc.)
 - Bookmarking and progress tracking
 - Search by surah, ayah, or keyword
@@ -1580,30 +1580,54 @@ The AI will decline to:
 
 ## 10. Localization Strategy
 
-### 10.1 Initial Release
-- **English only** (full app)
-- Arabic script for Quranic text and duas (always present)
-- Transliteration provided for all Arabic content
+### 10.1 Product Goal (Scoped)
+Support multiple languages across the majority of the app experience without overpromising full religious-content translation coverage in v1.
 
-### 10.2 Expansion Roadmap (Priority Order)
-Based on global Muslim population and app store demand:
+**Scope for localization-first rollout:**
+- App shell and settings must be localized (navigation, onboarding, preferences, notifications, system messages)
+- Major feature UI should be localized where strings are product-owned
+- Content-heavy translation surfaces (Quran/Hadith/Dua bodies, AI responses) expand only when verified language datasets exist
+- Every feature must clearly communicate when content is unavailable in the selected language
 
-| Priority | Language | Estimated Users |
-|----------|----------|-----------------|
-| 1 | Arabic | 300M+ |
-| 2 | Urdu | 200M+ |
-| 3 | Indonesian/Malay | 250M+ |
-| 4 | Turkish | 80M+ |
-| 5 | French | 50M+ (North/West Africa) |
-| 6 | Bengali | 150M+ |
-| 7 | Farsi | 80M+ |
+### 10.2 Language Prioritization (Population-Weighted + Practical)
+Based on concentration of Muslim populations, script requirements, and launch feasibility:
 
-### 10.3 Localization Scope
-- UI strings
-- Quran translations (per language)
-- Dua translations
-- Hadith translations (where available)
-- AI companion responses (requires per-language fine-tuning)
+| Phase | Language | Why |
+|-------|----------|-----|
+| 1 | English | Global fallback, product default, broad diaspora usage |
+| 1 | Arabic | Core Muslim language + required RTL support |
+| 1 | Indonesian | Indonesia is the largest Muslim-majority country |
+| 1 | Urdu | High coverage for Pakistan + South Asian diaspora |
+| 1 | Bengali | High coverage for Bangladesh + regional users |
+| 2 | French | Strong utility in North/West Africa + Europe |
+| 2 | Hindi | India coverage beyond Urdu speakers |
+| 2 | Turkish | Turkey and Turkish diaspora coverage |
+| 2 | Persian (Farsi) | Iran/Afghanistan/Tajik user segment |
+| 3 | Chinese (Simplified) | Important long-term expansion, lower initial Muslim coverage than Phase 1 languages |
+
+### 10.3 Scope Boundaries (What v1 Localizes vs Defers)
+
+**Localized in v1 language rollout:**
+- UI strings (all major app surfaces)
+- Settings and configuration flows
+- Onboarding and permission rationale copy
+- Empty/error/loading states
+- Notification titles and static bodies
+- Widget labels and Live Activity labels
+
+**Deferred or staged after v1 (language-by-language):**
+- Quran translation bodies
+- Hadith translation bodies
+- Dua translation bodies
+- AI companion multilingual response quality
+- Tafsir/word-by-word expansions
+
+### 10.4 UX Rules for Partial Language Coverage
+- Never silently fall back for content: show explicit "Not yet available in <Language>" copy
+- Keep app shell language and content language separately selectable when needed
+- Preserve Arabic script rendering quality independently of app language
+- Default fallback chain: selected language -> English -> Arabic label/transliteration where relevant
+- Ensure all RTL/LTR transitions use semantic layout primitives (leading/trailing, mirrored icons as needed)
 
 ---
 
@@ -1701,7 +1725,10 @@ A feature is "done" only when it satisfies:
 - [x] Accent colors: **User-configurable** (gold default)
 - [x] Scope: **Full feature set in v1** (no MVP split)
 - [x] LLM strategy: **Apple Foundation Models (iOS 18.4+) with RAG for Islamic knowledge**
-- [x] Initial language: **English only**
+- [x] Localization strategy: **Scoped multilingual rollout** (app shell/settings first, content packs staged)
+- [x] Phase 1 languages: **English, Arabic, Indonesian, Urdu, Bengali**
+- [x] Phase 2 languages: **French, Hindi, Turkish, Persian**
+- [x] Phase 3 language: **Chinese (Simplified)**
 - [x] Contextual intelligence: **Core differentiator**
 - [x] Gamification: **Duolingo-style with Hasanat points, streaks, levels**
 - [x] iOS Widgets: **Included in v1**
@@ -1722,7 +1749,8 @@ A feature is "done" only when it satisfies:
 - [x] Prayer notification: **15 min before (default)**, vibration only, athan off by default
 - [x] Notification acknowledgment: **Logs prayer automatically** toward achievements
 - [x] Accessibility: **Best effort v1**, full support v1.1 (VoiceOver, Dynamic Type, haptics)
-- [x] Arabic localization: **Content only** for v1, full UI RTL in v1.1
+- [x] RTL support: **Required for Arabic localized UI** (not content-only)
+- [x] Content translation policy: **Quran/Hadith/Dua translation expansion is staged by verified datasets**
 - [x] Feature requests: **In Settings** - users can suggest features
 - [x] Widgets v1: **Prayer (S), Prayer Times (M), Dashboard (L)** - Streak (S) if time permits
 - [x] Onboarding: **3 pages** (Welcome+Location, Quick Setup, Done) - trust smart defaults
@@ -1879,5 +1907,5 @@ All content sourced from free, high-quality sources for zero-cost launch:
 ---
 
 *Document Version: 1.0*
-*Last Updated: February 6, 2026*
+*Last Updated: February 8, 2026*
 *Status: Pre-Production*

@@ -737,6 +737,7 @@ BAD Task:  "Implement prayer feature"
 | Quran text & translations | Bundled SQLite + Core Data | Large dataset, read-heavy |
 | Hadith collections | Bundled SQLite + Core Data | Large dataset, searchable |
 | Dua & Adhkar | Bundled JSON → Core Data | Static content |
+| Localization metadata | Bundled JSON + UserDefaults | Language availability manifest + user language/content preferences |
 | Audio files (recitations) | Async download over WiFi + FileManager | Large files, cached |
 | LLM model | Bundled in app | Required for offline |
 
@@ -754,7 +755,7 @@ The app is designed for comprehensive offline functionality with aggressive size
 
 **Downloaded On-Demand (WiFi preferred):**
 - Audio recitations (Quran + Duas)
-- Additional translations (when localization added)
+- Additional content language packs (Quran/Hadith/Dua where available)
 
 **Audio Download Strategy:**
 - On-demand: Download when user first plays a surah
@@ -1648,10 +1649,85 @@ class QiblaHapticService {
 ```
 
 **v1.1 Accessibility Roadmap:**
-- Full Arabic UI localization (RTL layout)
 - Audio directional feedback for Qibla
 - Voice Control optimization
 - Screen reader-optimized Quran reading mode
+
+### 6.7.1 Localization & Internationalization Architecture (Scoped)
+
+The product supports multi-language UI for most app surfaces while religious-content translation expands independently by verified datasets.
+
+**Language rollout:**
+- Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
+- Phase 2 UI languages: French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
+- Phase 3 UI language: Chinese Simplified (`zh-Hans`)
+
+**What Apple/Xcode localization handles directly:**
+- String extraction and management with String Catalogs (`.xcstrings`)
+- Localized app metadata/assets in Xcode targets
+- System locale formatting (date/time/number/plural rules)
+- Per-app language selection behavior in iOS settings
+- RTL/LTR layout direction via locale and semantic layout APIs
+
+**What must be implemented by app/backend/content pipeline:**
+- Quran/Hadith/Dua translation datasets per language
+- Availability matrix for content by feature + language
+- Content-language fallback logic and user messaging for missing translations
+- AI response language quality controls and safety evaluation per language
+
+**Hard scope boundary (v1):**
+- Localize app shell + settings comprehensively
+- Do not promise full Quran/Hadith/Dua translation parity across all UI languages
+- Treat content translations as explicit language packs with release gates
+
+```swift
+// MARK: - Localization domain separation
+enum LocalizationDomain {
+    case localizableUI
+    case localizedContent
+}
+
+struct LanguageSupportMatrix {
+    let uiLanguages: Set<String>
+    let quranTranslationLanguages: Set<String>
+    let hadithTranslationLanguages: Set<String>
+    let duaTranslationLanguages: Set<String>
+}
+```
+
+```swift
+// MARK: - Fallback policy
+// UI fallback: selected UI language -> English
+// Content fallback: selected content language -> English -> Arabic/transliteration label if available
+```
+
+**String and locale implementation requirements:**
+- All user-facing UI text must use String Catalog keys (no hardcoded literals in SwiftUI views)
+- Use semantic layout (`leading`/`trailing`) and locale-aware icons for RTL compatibility
+- Keep numeric/date formatting locale-driven (`FormatStyle`, `Locale.current` or selected app locale)
+
+**Language preference model:**
+- `uiLanguageCode`: app shell language
+- `contentLanguageCode`: preferred language for translation bodies
+- `autoInferLanguage`: optional bootstrap from location inference, always user-overridable
+
+```swift
+struct LanguagePreferences: Codable {
+    var uiLanguageCode: String        // e.g. "en", "ar", "fr"
+    var contentLanguageCode: String   // e.g. "en", "ur"
+    var autoInferLanguage: Bool
+}
+```
+
+**Extension target requirements:**
+- Widgets/Live Activities must use same localized string keys as main app
+- Shared localization resources must be available in extension targets
+- If a string key is missing in selected locale, fallback to English and log a non-fatal localization event
+
+**Observability (privacy-safe):**
+- Track missing-key rate by locale and screen
+- Track fallback usage rate for missing content translations
+- Never log religious text bodies, prompts, or translated passage payloads
 
 ### 6.8 Spotlight Search (CoreSpotlight)
 
@@ -2657,6 +2733,7 @@ struct AnalyticsEvent {
 | Knowledge grounding | **RAG** - retrieve from local Quran/Hadith DB, inject into context |
 | Authentication | **None** - frictionless, iCloud handles sync |
 | Disabled features | **Greyed out** with "Coming soon" message |
+| Localization strategy | **Scoped multilingual UI** with staged content language packs |
 | Invite friends | **App Store link via Share Sheet** - privacy-first, honor system |
 | Calendar integration | **EventKit + .ics export** - native + universal compatibility |
 | Health integration | **HealthKit** - Ramadan fasting hours (write-only, opt-in) |
@@ -2778,5 +2855,5 @@ struct DataExportService {
 ---
 
 *Document Version: 1.0*
-*Last Updated: February 6, 2026*
+*Last Updated: February 8, 2026*
 *Status: Pre-Production*
