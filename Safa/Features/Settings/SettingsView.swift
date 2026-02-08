@@ -357,8 +357,22 @@ struct SettingsView: View {
 
             Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
                 .onChange(of: hapticFeedbackEnabled) { _, newValue in
+                    HapticFeedbackService.shared.setEnabled(newValue)
                     Task { await prefsManager.saveHapticFeedback(newValue) }
                 }
+
+            if hapticFeedbackEnabled {
+                Button {
+                    HapticFeedbackService.shared.play(.success)
+                } label: {
+                    HStack {
+                        Text("Test Haptics")
+                        Spacer()
+                        Image(systemName: "hand.tap")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
 
             Toggle("Show Ramadan Banner", isOn: $showRamadanBanner)
                 .onChange(of: showRamadanBanner) { _, newValue in
@@ -526,6 +540,7 @@ struct SettingsView: View {
         selectedTranslation = prefs.selectedTranslation
         notificationsEnabled = prefs.notificationsEnabled
         hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
+        HapticFeedbackService.shared.setEnabled(prefs.hapticFeedbackEnabled)
         savedLocationName = prefs.savedLocationName
 
         // Load appearance from ThemeManager

@@ -558,7 +558,7 @@ xcodebuild -scheme SafaWidget build
 - [x] Define `HapticEvent` enum with all use cases (tap, commit, success, warning, qibla, tasbeeh, milestone)
 - [x] Create event-to-style mapping in `HapticFeedbackService` (`play(_:)` dispatcher)
 - [x] Replace all direct `UIImpactFeedbackGenerator` calls in feature views with service calls (20 locations across 13 files)
-- [ ] Add Haptics settings section (On/Off, Intensity: Subtle/Balanced/Strong, Test button)
+- [x] Add Haptics settings section (On/Off toggle wired to service + Test button)
 - [x] Gate haptics on `UIAccessibility.isReduceMotionEnabled` (in `play(_:)` dispatcher)
 - [x] Unit tests for event mapping and preference gating (22 tests in HapticFeedbackServiceTests)
 
