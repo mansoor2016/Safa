@@ -38,34 +38,40 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 
 ## Cross-Cutting Workstream: Localization & Internationalization (Scoped)
 
-### L10N.1 Product Scope and Language Rollout
-- [ ] Finalize Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
-- [ ] Record Phase 2 UI languages: French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
-- [ ] Record Phase 3 UI language: Chinese Simplified (`zh-Hans`)
-- [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
-- [ ] Confirm fallback policy copy for missing content translation states
+**Dependency order:** L10N.1 (resolved) → L10N.2 (foundation) → L10N.4 (RTL, do early) → L10N.3 (settings) → L10N.5 (content packs) → L10N.6 (validation)
 
-### L10N.2 Xcode Localization Foundation
-- [ ] Enable and verify String Catalog workflow for app + widget extension targets
-- [ ] Add supported localizations in Xcode target settings for Phase 1 languages
-- [ ] Replace hardcoded user-facing strings in core screens with localization keys
+### L10N.1 Product Scope and Language Rollout [RESOLVED]
+- [x] Finalize Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
+- [x] Record Phase 2 UI languages: Malay (`ms`), French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
+- [x] Record Phase 3 UI language: Chinese Simplified (`zh-Hans`)
+- [x] Confirm fallback policy: UI (`selected → en`), content (`selected → en → Arabic/transliteration`)
+- [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
+
+### L10N.2 Xcode Localization Foundation (START HERE)
+- [ ] Audit hardcoded string count across all Views (grep for quoted strings to estimate scope)
+- [ ] Enable String Catalog (`.xcstrings`) workflow for Safa app target
+- [ ] Enable String Catalog for SafaWidgetExtension target (shared keys)
+- [ ] Add supported localizations in Xcode target settings for Phase 1 languages (`en`, `ar`, `id`, `ur`, `bn`)
+- [ ] Replace hardcoded user-facing strings in core screens with `String(localized:)` keys
 - [ ] Ensure widgets and Live Activities consume shared localized keys
 - [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
 
-### L10N.3 Language Settings and Runtime Behavior
-- [ ] Add `Settings > Language` section with separate `App Language` and `Content Language`
-- [ ] Persist language preferences in shared preferences store
-- [ ] Implement runtime fallback chain: UI (`selected -> en`), content (`selected -> en -> arabic/transliteration label`)
-- [ ] Show explicit "not available in selected language" states for untranslated content
-
-### L10N.4 RTL Readiness
+### L10N.4 RTL Readiness (DO EARLY — architectural, harder to fix late)
 - [ ] Audit major screens for semantic layout (`leading`/`trailing`) and mirrored icons
 - [ ] Validate Arabic UI flow in onboarding, home, prayer, Quran shell, and settings
 - [ ] Validate mixed-script rendering (Arabic + Latin + numerals) with Dynamic Type
 - [ ] Fix truncation/overlap defects for compact devices (iPhone SE class)
 
+### L10N.3 Language Settings and Runtime Behavior
+- [ ] Add `Settings > Language` section with separate `App Language` and `Content Language`
+- [ ] Persist language preferences in shared preferences store (LanguagePreferences model)
+- [ ] Implement runtime fallback chain: UI (`selected → en`), content (`selected → en → Arabic/transliteration`)
+- [ ] Show explicit "Not available in <Language>" states for untranslated content
+
 ### L10N.5 Scoped Religious Content Translation
-- [ ] Keep Quran/Hadith/Dua translation expansion as language-pack releases, not implicit UI localization
+- [ ] Create `ayah_translations` table (additive, separate from base ayahs table)
+- [ ] Create `hadith_translations` table (same pattern)
+- [ ] Implement on-demand language pack download + local cache
 - [ ] Define content availability manifest (per feature, per language)
 - [ ] Add user-facing availability labels in Quran, Hadith, Dua, and AI surfaces
 - [ ] Define acceptance criteria for enabling each new content language pack
@@ -73,6 +79,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 ### L10N.6 Validation and Release Gates
 - [ ] Add pseudo-localization UI test pass (string expansion and bidi edge cases)
 - [ ] Add screenshot coverage for Phase 1 languages on key flows
+- [ ] Verify pluralization rules for Arabic (6 forms), Bengali/Urdu (2 forms), Indonesian/Turkish (no plural)
 - [ ] Track localization telemetry: missing-key rate and content-fallback rate
 - [ ] Block release if localization regression threshold is exceeded
 
@@ -82,6 +89,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [ ] **AC-L10N.3**: Missing content translations show clear user-facing state (never silent fallback)
 - [ ] **AC-L10N.4**: Widgets and Live Activities display localized labels for selected app language
 - [ ] **AC-L10N.5**: Localization CI checks run and fail on missing critical keys
+- [ ] **AC-L10N.6**: Plural-sensitive strings use String Catalog plural variants for all Phase 1 languages
 
 ### Localization Integration Tests
 - [ ] **IT-L10N.1**: Change app language in Settings → relaunch target screen → all shell strings updated
@@ -89,6 +97,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [ ] **IT-L10N.3**: Select content language without Quran translation pack → explicit unavailable state shown
 - [ ] **IT-L10N.4**: Add widget in non-English app language → localized labels visible on Home/Lock screen
 - [ ] **IT-L10N.5**: Toggle between English and Urdu/Hindi/French → no crashes, no missing-key placeholders
+- [ ] **IT-L10N.6**: Verify "5 days" / "1 day" / "0 days" renders correct plural form in Arabic
 
 ### Localization Verification
 ```bash

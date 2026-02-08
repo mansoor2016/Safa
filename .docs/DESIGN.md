@@ -1599,6 +1599,7 @@ Based on concentration of Muslim populations, script requirements, and launch fe
 | 1 | Indonesian | Indonesia is the largest Muslim-majority country |
 | 1 | Urdu | High coverage for Pakistan + South Asian diaspora |
 | 1 | Bengali | High coverage for Bangladesh + regional users |
+| 2 | Malay | Malaysia coverage, ~80% vocabulary overlap with Indonesian (low-effort) |
 | 2 | French | Strong utility in North/West Africa + Europe |
 | 2 | Hindi | India coverage beyond Urdu speakers |
 | 2 | Turkish | Turkey and Turkish diaspora coverage |
@@ -1616,11 +1617,16 @@ Based on concentration of Muslim populations, script requirements, and launch fe
 - Widget labels and Live Activity labels
 
 **Deferred or staged after v1 (language-by-language):**
-- Quran translation bodies
-- Hadith translation bodies
-- Dua translation bodies
+- Quran translation bodies (delivered as downloadable language packs via separate translation table)
+- Hadith translation bodies (same language pack mechanism)
+- Dua translation bodies (same language pack mechanism)
 - AI companion multilingual response quality
 - Tafsir/word-by-word expansions
+
+**Content language pack delivery:**
+- Religious content translations stored in a separate `ayah_translations(ayah_id, language, text)` table (additive, doesn't bloat base install)
+- Same pattern for hadith and dua translations
+- Packs downloaded on-demand per language selection, cached locally
 
 ### 10.4 UX Rules for Partial Language Coverage
 - Never silently fall back for content: show explicit "Not yet available in <Language>" copy

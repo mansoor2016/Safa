@@ -1659,7 +1659,7 @@ The product supports multi-language UI for most app surfaces while religious-con
 
 **Language rollout:**
 - Phase 1 UI languages: English (`en`), Arabic (`ar`), Indonesian (`id`), Urdu (`ur`), Bengali (`bn`)
-- Phase 2 UI languages: French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
+- Phase 2 UI languages: Malay (`ms`), French (`fr`), Hindi (`hi`), Turkish (`tr`), Persian (`fa`)
 - Phase 3 UI language: Chinese Simplified (`zh-Hans`)
 
 **What Apple/Xcode localization handles directly:**
@@ -1723,6 +1723,32 @@ struct LanguagePreferences: Codable {
 - Widgets/Live Activities must use same localized string keys as main app
 - Shared localization resources must be available in extension targets
 - If a string key is missing in selected locale, fallback to English and log a non-fatal localization event
+
+**Content language pack storage (separate translation table pattern):**
+```sql
+-- Additive table — doesn't modify base ayahs/hadiths tables
+CREATE TABLE ayah_translations (
+    ayah_id TEXT NOT NULL,       -- FK to ayahs table (e.g. "1:1")
+    language TEXT NOT NULL,       -- ISO 639-1 code (e.g. "ur", "id", "fr")
+    text TEXT NOT NULL,
+    PRIMARY KEY (ayah_id, language)
+);
+
+-- Same pattern for hadith and dua translations
+CREATE TABLE hadith_translations (
+    hadith_id TEXT NOT NULL,
+    language TEXT NOT NULL,
+    text TEXT NOT NULL,
+    PRIMARY KEY (hadith_id, language)
+);
+```
+This keeps the base install small (~90MB Quran + Hadith) and adds ~4-8MB per language pack downloaded on-demand.
+
+**Pluralization requirements:**
+- Arabic (`ar`): 6 plural forms (zero, one, two, few, many, other) — String Catalog handles via `.stringsdict` rules
+- Bengali (`bn`), Hindi (`hi`), Urdu (`ur`): 2 plural forms (one, other)
+- Indonesian (`id`), Malay (`ms`), Turkish (`tr`), Persian (`fa`), Chinese (`zh`): no grammatical plural — use `other` form only
+- All plural-sensitive strings (e.g. "X days", "X prayers") must use String Catalog plural variants, not manual `if count == 1` checks
 
 **Observability (privacy-safe):**
 - Track missing-key rate by locale and screen
