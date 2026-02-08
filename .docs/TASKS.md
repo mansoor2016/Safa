@@ -179,8 +179,10 @@ xcodebuild test -only-testing:SafaTests/PrayerTests
 ## Phase 3: Quran Reader
 
 ### 3.1 Quran Data
+- [x] Populate full Quran data (6,236 ayahs, 114 surahs, 30 juz via tanzil.net JSON)
+- [x] Wire QuranSearchView to SQLite FTS instead of hardcoded sample data
+- [x] Add Quran data integrity tests (21 tests: surah counts, ayah counts, FTS search, juz boundaries)
 - [ ] Verify translation accuracy (spot check 10 ayahs)
-- [ ] Populate full Quran data (currently sample data only)
 
 ### 3.2 Quran Repository
 
@@ -395,13 +397,13 @@ xcodebuild test -only-testing:SafaTests/LearningTests
 
 ### 7.1 Widgets (Prioritized)
 
-**Known limitation:** Widget prayer times are hardcoded London seasonal approximations.
-Proper fix requires App Group data sharing from main app (needs paid developer account).
-See `SafaWidgetExtension/PrayerTimesWidget.swift` TECH DEBT comment.
-
-- [ ] Share prayer times from main app to widget via App Group UserDefaults
-- [ ] Widget reads user's actual location and calculation method
-- [ ] Widget shows correct Hijri date (currently hardcoded)
+- [x] Share prayer times from main app to widget via App Group UserDefaults (WidgetDataService)
+- [x] Widget reads real calculated prayer times from App Group (falls back to London defaults)
+- [x] Widget shows correct Hijri date from App Group
+- [x] InteractivePrayerWidget reads real times + logged prayer state from App Group
+- [x] StandByWidget reads next prayer + Fajr time from App Group
+- [x] PrayerRepository migrated to App Group UserDefaults (with one-time migration)
+- [x] Widget extension entitlements added for App Group access
 - [ ] Add streak widget (AC-7.3 — not implemented)
 
 ### 7.1.1 Lock Screen Widgets
@@ -584,8 +586,11 @@ xcodebuild -scheme SafaWidget build
 - [x] Normalise screen entry points through AppRouter destinations (deep links use selectedTab for quran/prayer/learn)
 
 ### 9.14 Dark Mode Implementation
+- [x] Wire existing ThemeManager into SafaApp (.safaTheme() modifier, .preferredColorScheme())
+- [x] Add System/Light/Dark appearance picker in Settings > Appearance
+- [x] Wire accent color changes through ThemeManager
+- [x] Add ThemeManager unit tests (16 tests: persistence, enum mapping, options)
 - [ ] Define semantic color tokens with light/dark parity (Background, Card, Text tiers, Accent, Status)
-- [ ] Add theme mode selector in Settings: System (default), Light, Dark
 - [ ] Tune Quran reading surface for night comfort (low-glare, no pure-black + harsh-white)
 - [ ] Dark mode pass: Home, Prayer, Qibla
 - [ ] Dark mode pass: Quran reader and search
@@ -759,9 +764,9 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ## Progress Summary
 
-### Active Snapshot (Verified February 7, 2026)
-- Open tasks: 257
-- In progress tasks: 3
+### Active Snapshot (Updated February 7, 2026)
+- **Version:** 1.1 (auto build number from git commit count)
+- **Tests passing:** 1,616+ (all green)
 - Blocked tasks: 0
 
 ### Project Reality Checks
@@ -770,17 +775,17 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 - Device family in app target: `1,2` (iPhone + iPad)
 
 ### File Statistics
-- **Swift Files:** 198 (132 app + 60 unit tests + 2 UI tests + 4 widget files on disk)
+- **Swift Files:** 200+ (134 app + 63 unit tests + 2 UI tests + 4 widget files on disk)
 - **JSON Data Files:** 5 (SampleQuranData, SampleHadithData, SampleDuaData, SampleLearningData, NamesOfAllahData)
-- **SQLite Databases:** 2 (quran.sqlite, hadith.sqlite)
-- **Unit Test Files:** 60 (in SafaTests/) + 2 UI test files (in SafaUITests/)
-- **`func test` inventory (static scan):** 1,546
+- **SQLite Databases:** 2 (quran.sqlite at 4.2MB with full data, hadith.sqlite)
+- **Unit Test Files:** 63 (in SafaTests/) + 2 UI test files (in SafaUITests/)
+- **`func test` inventory:** 1,616+
 
 ### Critical Gaps
-- **SQLite database schemas created**: `scripts/create_quran_database.py` and `scripts/create_hadith_database.py` generate databases with sample data. **Full data population needed** (6,236 ayahs from tanzil.net, ~30,000 hadiths from sunnah.com)
+- **Quran data:** COMPLETE — Full 6,236 ayahs populated from tanzil.net, FTS5 search index built
+- **Hadith data:** `scripts/create_hadith_database.py` generates sample data only. **Full population needed** (~30,000 hadiths from sunnah.com)
 - **Pronunciation audio**: Audio files not yet bundled
 - **AI Companion**: RAG system implemented (RAGService.swift), Apple Foundation Models placeholder ready. Feature disabled by default via FeatureFlags until implementation is complete.
-- **Acceptance criteria counts need recalculation** after compacting and re-verification
 - **Widget extension target created** (`SafaWidgetExtensionExtension`). Intents extension target still missing.
 - **Old `SafaWidget/` folder** is orphaned (code ported to `SafaWidgetExtension/`). Can be removed after verification.
 
@@ -796,8 +801,8 @@ The following features have complete implementations and are now enabled by defa
 ### Content Sources (Resolved)
 | Content | Source | Status |
 |---------|--------|--------|
-| Quran Arabic | Tanzil.net (Uthmani) | Schema ready, needs full data |
-| Translation | Sahih International | Schema ready, needs full data |
+| Quran Arabic | Tanzil.net (Uthmani) via quran-json | **Complete** — 6,236 ayahs |
+| Translation | Sahih International via quran-json | **Complete** — 6,236 ayahs |
 | Hadith | Sunnah.com | Schema ready, needs full data |
 | Audio | Everyayah.com + King Fahd | Not integrated |
 | Tafsir | Ibn Kathir (English) | Not integrated |
@@ -823,9 +828,22 @@ The following features have complete implementations and are now enabled by defa
 
 ---
 
-### Recent Changes (February 6, 2026)
+### Recent Changes (February 7, 2026)
 
 Features implemented in the latest session:
+
+- **Quran Data Population**: Full 6,236 ayahs from tanzil.net data (4.2MB SQLite with FTS5 index)
+- **QuranSearchView**: Wired to SQLite FTS instead of hardcoded sample data, with filter modes (All, Arabic, Translation, Surah Name)
+- **Quran Data Integrity Tests**: 21 tests verifying 114 surahs, 6,236 ayahs, FTS search, juz boundaries
+- **App Group Widget Data Sharing**: WidgetDataService writes real prayer times to shared container; all widgets now show accurate data instead of hardcoded London times
+- **Widget Entitlements**: SafaWidgetExtension App Group entitlements for reading shared data
+- **PrayerRepository Migration**: Moved from UserDefaults.standard to App Group UserDefaults with one-time migration
+- **Dark Mode**: Wired existing ThemeManager into SafaApp; System/Light/Dark appearance picker in Settings
+- **Version 1.1**: Bumped version, added auto build number from git commit count since last version tag
+- **xcode-build Skill**: Rewritten with two-step approach to avoid false positives; added linker/signing error fallback
+- **Duas Quick Links**: Reordered to Morning → After Prayer → Food & Drink → Sleep
+
+### Previous Changes (February 6, 2026)
 
 - **Prayer Progress Indicator**: Compact (home) and expanded (prayer page) with tappable dots to log/unlog prayers
 - **Adhan Sound System**: 11 reciters in CAF format, per-prayer notification sounds, full-length playback, Fajr-specific adhan
@@ -835,51 +853,18 @@ Features implemented in the latest session:
 - **Prayer Times Page**: Removed redundant checkboxes, added per-prayer bell notification icons, play/stop adhan button, removed Today's Prayers timeline from home
 - **Tab Navigation**: "See All" and Next Prayer switch to Prayer tab via AppRouter.selectedTab (not push)
 - **Location Fallback**: Default to London, UK when GPS unavailable
-- **Qibla Compass**: Simulator fallback (assume North) with debug banner
-- **"Maghrib (Sunset)"** label in prayer table, full names in progress dots
-- **"Time until next prayer"** header above countdown timers
 - **Build/Test Tooling**: `/build` and `/test` commands, `xcode-build` skill for filtered Xcode output
-- **Test Coverage**: AdhanSound, ShareBanner, prayer toggle, notification persistence, tab selection tests
 
-### TODO: Quran Data Population
+### DONE: Quran Data Population (Completed February 7, 2026)
 
-**Priority: HIGH — Quran tab is non-functional without complete data**
+All 6,236 ayahs populated from quran-json (tanzil.net data). Database: 4.2MB with FTS5 index.
+QuranSearchView wired to repository FTS. 21 data integrity tests + 30 search VM tests passing.
 
-The Quran UI, repository, and SQLite database structure are all in place but the database only has sample ayahs for ~10 surahs. Full population is needed.
-
-**Steps:**
-1. [ ] Download Arabic text (Uthmani script) from [tanzil.net/download](https://tanzil.net/download/) — plain text format
-2. [ ] Download Sahih International English translation from tanzil.net — plain text format
-3. [ ] Optionally source transliteration data (quran.com API or similar)
-4. [ ] Update `scripts/create_quran_database.py` to import the downloaded text files
-5. [ ] Regenerate `Resources/Data/Database/quran.sqlite` with all 6,236 ayahs
-6. [ ] Verify correct page numbers (604 pages) and juz boundaries (30 juz)
-7. [ ] Test QuranView loads all 114 surahs with full ayah content
-8. [ ] Test AyahReaderView displays Arabic + translation for each surah
-9. [ ] Test full-text search works across complete dataset
-10. [ ] Wire QuranSearchView to use SQLite FTS instead of hardcoded sample data
-
-**Data format expected per ayah (SQLite `ayahs` table):**
-
-| Column | Type | Example |
-|--------|------|---------|
-| `surah_number` | INTEGER | 2 |
-| `ayah_number` | INTEGER | 255 |
-| `text_arabic` | TEXT | بِسْمِ اللَّهِ... |
-| `text_translation` | TEXT | "In the name of Allah..." |
-| `text_transliteration` | TEXT | "Bismillahi..." (optional) |
-| `juz_number` | INTEGER | 3 |
-| `page_number` | INTEGER | 42 |
-
-**Data sources:**
-- Arabic + translation: tanzil.net (free, authoritative, pipe-delimited text)
-- Transliteration: quran.com API (optional, can be added later)
-- Page/juz mappings: tanzil.net metadata
-
-**Remaining Quran work beyond data:**
+**Remaining Quran work:**
 - [ ] Connect audio player UI to AVFoundation for actual playback
 - [ ] Implement audio download/caching for recitations
 - [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
+- [ ] Add transliteration data (quran.com API or similar)
 
 ### TODO: Graceful Degradation & Resilience
 
@@ -959,5 +944,5 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Implement single-button tasbeeh
 - [ ] Test with Switch Control and Voice Control
 
-*Last Updated: February 7, 2026*
+*Last Updated: February 8, 2026*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-07.md`*
