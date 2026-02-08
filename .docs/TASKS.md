@@ -52,7 +52,7 @@ xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
 - [x] Enable String Catalog (`Localizable.xcstrings`) workflow for Safa app target
 - [ ] Enable String Catalog for SafaWidgetExtension target (shared keys)
 - [x] Add supported localizations in Xcode project for Phase 1 languages (`en`, `ar`, `id`, `ur`, `bn`)
-- [ ] Replace hardcoded user-facing strings in core screens with `String(localized:)` keys
+- [x] Replace hardcoded user-facing strings with `String(localized:)` keys (~119 programmatic strings across 21 files: notifications, errors, event names, action titles)
 - [ ] Ensure widgets and Live Activities consume shared localized keys
 - [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
 
@@ -846,7 +846,7 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ### Active Snapshot (Updated February 8, 2026)
 - **Version:** 1.1 (auto build number from git commit count)
-- **Commits since v1.1:** 17
+- **Commits since v1.1:** 22
 - **Tests passing:** 1,700+ (all green)
 - Blocked tasks: 0
 
