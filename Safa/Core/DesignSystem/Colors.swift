@@ -8,9 +8,9 @@ import SwiftUI
 
 enum SafaColors {
     // MARK: - Primary Colors
-    static let primary = Color("Primary", bundle: .main)
-    static let primaryLight = Color("PrimaryLight", bundle: .main)
-    static let primaryDark = Color("PrimaryDark", bundle: .main)
+    static let primary = Color("SafaPrimary", bundle: .main)
+    static let primaryLight = Color("SafaPrimaryLight", bundle: .main)
+    static let primaryDark = Color("SafaPrimaryDark", bundle: .main)
 
     // MARK: - Accent Colors (User Configurable)
     static let accent = Color.accentColor

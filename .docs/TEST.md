@@ -14,7 +14,7 @@ This document defines the testing strategy for Safa, including automated tests, 
 ## 1. Automated Testing
 
 ### 1.1 Unit Tests
-**Current:** 588 tests | **Target:** 90%+ domain coverage
+**Current:** 1,700+ tests | **Target:** 90%+ domain coverage
 
 ```bash
 # Run all unit tests
