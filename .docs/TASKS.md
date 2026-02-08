@@ -764,22 +764,25 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ## Progress Summary
 
-### Active Snapshot (Updated February 7, 2026)
+### Active Snapshot (Updated February 8, 2026)
 - **Version:** 1.1 (auto build number from git commit count)
-- **Tests passing:** 1,616+ (all green)
+- **Commits since v1.1:** 13
+- **Tests passing:** 1,680+ (all green)
 - Blocked tasks: 0
 
 ### Project Reality Checks
 - Xcode targets currently configured: `Safa`, `SafaTests`, `SafaUITests`, `SafaWidgetExtensionExtension` (intents extension target not yet created)
 - Deployment target in project build settings: iOS 26.2
 - Device family in app target: `1,2` (iPhone + iPad)
+- **Widgets:** 5 registered (PrayerTimes, Interactive, Tasbeeh, StandBy, Streak)
 
 ### File Statistics
-- **Swift Files:** 200+ (134 app + 63 unit tests + 2 UI tests + 4 widget files on disk)
+- **Swift Files:** 205+ (135 app + 67 unit tests + 2 UI tests + 5 widget files)
 - **JSON Data Files:** 5 (SampleQuranData, SampleHadithData, SampleDuaData, SampleLearningData, NamesOfAllahData)
-- **SQLite Databases:** 2 (quran.sqlite at 4.2MB with full data, hadith.sqlite)
-- **Unit Test Files:** 63 (in SafaTests/) + 2 UI test files (in SafaUITests/)
-- **`func test` inventory:** 1,616+
+- **SQLite Databases:** 2 (quran.sqlite at 4.2MB, hadith.sqlite at 85MB — both with FTS5 index)
+- **Asset Catalog Colorsets:** 13 (6 prayer + 4 status + 3 primary, all with light/dark variants)
+- **Unit Test Files:** 67 (in SafaTests/) + 2 UI test files (in SafaUITests/)
+- **`func test` inventory:** 1,680+
 
 ### Critical Gaps
 - **Quran data:** COMPLETE — Full 6,236 ayahs populated from tanzil.net, FTS5 search index built
@@ -828,32 +831,32 @@ The following features have complete implementations and are now enabled by defa
 
 ---
 
-### Recent Changes (February 7, 2026)
+### Recent Changes (February 8, 2026)
 
-Features implemented in the latest session:
+Features implemented in the latest session (13 commits):
+
+- **Hadith Data Population**: Full 34,178 hadiths from Kutub al-Sittah (85MB SQLite with FTS5 index)
+- **Dark Mode Color Tokens**: 13 asset catalog colorsets with light/dark variants for prayer, status, and primary colors
+- **Streak Widget**: New StreakWidget (small + medium) showing daily prayer streak from App Group
+- **Haptic System Unification**: Replaced 20 direct UIKit haptic calls with HapticFeedbackService across 13 files
+- **Haptics Settings**: On/Off toggle wired to service + test button in Settings
+- **Translation Accuracy**: 10 spot-check tests verifying known Quran ayahs
+- **HadithRepository Fixes**: getHadith() and getBookmarks() now query SQLite instead of static data
+
+### Previous Changes (February 7, 2026)
 
 - **Quran Data Population**: Full 6,236 ayahs from tanzil.net data (4.2MB SQLite with FTS5 index)
-- **QuranSearchView**: Wired to SQLite FTS instead of hardcoded sample data, with filter modes (All, Arabic, Translation, Surah Name)
-- **Quran Data Integrity Tests**: 21 tests verifying 114 surahs, 6,236 ayahs, FTS search, juz boundaries
-- **App Group Widget Data Sharing**: WidgetDataService writes real prayer times to shared container; all widgets now show accurate data instead of hardcoded London times
-- **Widget Entitlements**: SafaWidgetExtension App Group entitlements for reading shared data
-- **PrayerRepository Migration**: Moved from UserDefaults.standard to App Group UserDefaults with one-time migration
-- **Dark Mode**: Wired existing ThemeManager into SafaApp; System/Light/Dark appearance picker in Settings
-- **Version 1.1**: Bumped version, added auto build number from git commit count since last version tag
-- **xcode-build Skill**: Rewritten with two-step approach to avoid false positives; added linker/signing error fallback
-- **Duas Quick Links**: Reordered to Morning → After Prayer → Food & Drink → Sleep
+- **QuranSearchView**: Wired to SQLite FTS with filter modes (All, Arabic, Translation, Surah Name)
+- **App Group Widget Data Sharing**: Real prayer times shared to all widgets via WidgetDataService
+- **Dark Mode**: ThemeManager wired into SafaApp; System/Light/Dark picker in Settings
+- **Version 1.1**: Bumped version, auto build number from git commit count
+- **xcode-build Skill**: Two-step approach with linker/signing error fallback
 
 ### Previous Changes (February 6, 2026)
 
-- **Prayer Progress Indicator**: Compact (home) and expanded (prayer page) with tappable dots to log/unlog prayers
-- **Adhan Sound System**: 11 reciters in CAF format, per-prayer notification sounds, full-length playback, Fajr-specific adhan
-- **Share Banner**: Card on home page, permanently dismisses after sharing
-- **Settings Overhaul**: Unified feedback form, share section at top, adhan picker, Ramadan banner toggle, accessibility marked as not yet functional
-- **Collapsible Ramadan Banner**: Repositioned between quick actions and daily verse, collapsed by default (expanded during Ramadan), shows 30 days before
-- **Prayer Times Page**: Removed redundant checkboxes, added per-prayer bell notification icons, play/stop adhan button, removed Today's Prayers timeline from home
-- **Tab Navigation**: "See All" and Next Prayer switch to Prayer tab via AppRouter.selectedTab (not push)
-- **Location Fallback**: Default to London, UK when GPS unavailable
-- **Build/Test Tooling**: `/build` and `/test` commands, `xcode-build` skill for filtered Xcode output
+- **Prayer Progress Indicator**, **Adhan Sound System**, **Share Banner**, **Settings Overhaul**
+- **Collapsible Ramadan Banner**, **Prayer Times Page**, **Tab Navigation**
+- **Location Fallback**, **Build/Test Tooling**
 
 ### DONE: Quran Data Population (Completed February 7, 2026)
 
