@@ -845,8 +845,8 @@ xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
 
 ### Active Snapshot (Updated February 8, 2026)
 - **Version:** 1.1 (auto build number from git commit count)
-- **Commits since v1.1:** 13
-- **Tests passing:** 1,680+ (all green)
+- **Commits since v1.1:** 17
+- **Tests passing:** 1,700+ (all green)
 - Blocked tasks: 0
 
 ### Project Reality Checks
@@ -912,7 +912,7 @@ The following features have complete implementations and are now enabled by defa
 
 ### Recent Changes (February 8, 2026)
 
-Features implemented in the latest session (13 commits):
+Features implemented in the latest session (17 commits):
 
 - **Hadith Data Population**: Full 34,178 hadiths from Kutub al-Sittah (85MB SQLite with FTS5 index)
 - **Dark Mode Color Tokens**: 13 asset catalog colorsets with light/dark variants for prayer, status, and primary colors
@@ -921,6 +921,12 @@ Features implemented in the latest session (13 commits):
 - **Haptics Settings**: On/Off toggle wired to service + test button in Settings
 - **Translation Accuracy**: 10 spot-check tests verifying known Quran ayahs
 - **HadithRepository Fixes**: getHadith() and getBookmarks() now query SQLite instead of static data
+- **Skeleton Loaders**: Shimmer-animated placeholders for Home, Prayer, Quran screens
+- **Orphaned SafaWidget Cleanup**: Removed 1,528 lines of duplicate widget code
+- **Localization Plan Amendments**: Dependency ordering, Malay added, content pack schema, pluralization rules
+- **Bug Fix: Isha-before-Maghrib**: Fixed Makkah method (Isha=Maghrib+90min), high-latitude fallbacks, monotonic ordering enforcement, HomeView/RamadanView hardcoded .isna → user's saved method
+- **Bug Fix: Notifications**: Default ON in onboarding, daily re-scheduling on app launch via NotificationScheduler
+- **Prayer Time Monotonic Tests**: 21 test methods (7 methods × 11 cities, seasonal, Makkah-specific, Feb sweep)
 
 ### Previous Changes (February 7, 2026)
 
