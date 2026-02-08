@@ -295,7 +295,7 @@ final class SpotlightIndexService {
             ("dua_waking_up", "Dua When Waking Up", "Alhamdulillah - Thanks for giving us life", ["morning", "waking", "life"]),
             ("dua_istikhara", "Dua for Istikhara", "Seeking Allah's guidance in decisions", ["guidance", "decision", "istikhara", "choice"]),
             ("dua_anxiety", "Dua for Anxiety", "Seeking relief from worry and sadness", ["anxiety", "worry", "stress", "sadness"]),
-            ("dua_protection", "Dua for Protection", "Morning and evening protection duas", ["protection", "morning", "evening", "adhkar"]),
+            ("dua_protection", "Dua for Protection", "Morning and evening protection duas", ["protection", "morning", "evening", "dhikr"]),
             ("dua_forgiveness", "Dua for Forgiveness", "Seeking Allah's forgiveness", ["forgiveness", "tawbah", "repentance", "sins"])
         ]
 

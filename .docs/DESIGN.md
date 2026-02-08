@@ -209,7 +209,7 @@ This is the heart of what makes Safa different. The app is aware of time, date, 
 ### 3.1 Contextual Engine
 
 The app maintains awareness of:
-- **Current time** (for prayer timing, morning/evening adhkar)
+- **Current time** (for prayer timing, morning/evening dhikr)
 - **Hijri date** (for Islamic events and seasons)
 - **User location** (for accurate prayer times, smart defaults)
 - **User behavior** (prayer logging, Quran progress, streaks)
@@ -264,8 +264,8 @@ When the user opens the app, Safa displays contextual reminders as a dismissible
 |---------|----------|
 | 30-10 min before prayer | "Dhuhr begins in 25 minutes. Time to prepare for prayer." |
 | Prayer time has entered | "It's time for Asr prayer." with quick link to Qibla |
-| Morning (Fajr to Dhuhr) | "Have you completed your morning adhkar?" |
-| Evening (Maghrib to Isha) | "Time for evening adhkar" |
+| Morning (Fajr to Dhuhr) | "Have you completed your morning dhikr?" |
+| Evening (Maghrib to Isha) | "Time for evening dhikr" |
 | Friday before Dhuhr | "Jumu'ah Mubarak! Don't forget Surah Al-Kahf" |
 | User hasn't opened Quran in 3+ days | "Continue your Quran journey? You left off at Surah X" |
 | Approaching Islamic event | "Ashura is in 3 days" |
@@ -366,10 +366,10 @@ The app automatically adapts its interface and features based on the Islamic cal
 | Time Period | Behavior |
 |-------------|----------|
 | Pre-Fajr | Tahajjud reminder if user enabled |
-| Fajr to Sunrise | Morning adhkar prominent |
+| Fajr to Sunrise | Morning dhikr prominent |
 | Duha time | Optional Duha prayer reminder |
 | Pre-Dhuhr | Jumu'ah prep on Fridays |
-| Maghrib to Isha | Evening adhkar prominent |
+| Maghrib to Isha | Evening dhikr prominent |
 | After Isha | Wind-down, sleep duas accessible |
 
 ### 3.5 Notification Philosophy
@@ -505,7 +505,7 @@ Notifications only for genuinely useful, time-sensitive Islamic events:
 - Automatic activation during Ramadan (with manual override)
 - Suhoor and Iftar time notifications
 - Fasting tracker (days completed, days remaining)
-- Ramadan-specific duas and adhkar
+- Ramadan-specific duas and dhikr
 - Taraweeh prayer tracking (8 or 20 rakat options)
 - Quran khatm (completion) progress tracker with daily goals
 - Charity/Zakat calculator (Nisab thresholds, categories)
@@ -555,8 +555,8 @@ Ramadan → Fasting Tracker
 ### 4.5 Dhikr & Duas
 - Tasbeeh counter (digital beads with haptic feedback)
 - Multiple counter modes (33, 99, 100, custom)
-- Morning adhkar (Adhkar al-Sabah)
-- Evening adhkar (Adhkar al-Masa)
+- Morning dhikr (Dhikr al-Sabah)
+- Evening dhikr (Dhikr al-Masa)
 - Curated dua collections by category:
   - Daily (eating, sleeping, traveling, etc.)
   - Salah-related
@@ -632,7 +632,7 @@ A dedicated mode for the end of the day to help users wind down spiritually.
 
 **Features:**
 - Bedtime duas with audio
-- Sleep adhkar checklist
+- Sleep dhikr checklist
 - Calming Quran recitation (select surahs: Al-Mulk, As-Sajdah, Ayatul Kursi)
 - Ambient background sounds (optional: rain, nature)
 - Screen dims to warm, low-light mode
@@ -773,8 +773,8 @@ The Learn section consolidates all educational features into a Duolingo-style ga
 - Memorization mode with spaced repetition
 
 **Track 4: Dhikr & Dua Mastery**
-- Learn proper pronunciation of common adhkar
-- Morning/evening adhkar completion challenges
+- Learn proper pronunciation of common dhikr
+- Morning/evening dhikr completion challenges
 - Tasbeeh sessions with goals
 - Dua memorization with audio
 
@@ -985,7 +985,7 @@ Voice-activated features for hands-free use.
 
 **Pre-built Shortcuts:**
 - "Hey Siri, what time is the next prayer?"
-- "Hey Siri, start my morning adhkar"
+- "Hey Siri, start my morning dhikr"
 - "Hey Siri, open Qibla compass"
 - "Hey Siri, how long until Iftar?" (Ramadan)
 - "Hey Siri, log my Fajr prayer"
@@ -1054,8 +1054,8 @@ The gamification system is designed to encourage consistent worship and learning
 | Pass a pronunciation check | +5 |
 | Complete a Tajweed module | +20 |
 | **Dhikr** | |
-| Complete morning adhkar | +15 |
-| Complete evening adhkar | +15 |
+| Complete morning dhikr | +15 |
+| Complete evening dhikr | +15 |
 | Tasbeeh session (100 count) | +10 |
 | Custom dhikr goal met | +10 |
 | **Engagement** | |
@@ -1080,7 +1080,7 @@ Streaks encourage daily consistency:
 | **Daily Streak** | Open app and complete any activity |
 | **Prayer Streak** | Log all 5 prayers |
 | **Quran Streak** | Read any amount of Quran |
-| **Dhikr Streak** | Complete morning OR evening adhkar |
+| **Dhikr Streak** | Complete morning OR evening dhikr |
 | **Learning Streak** | Complete at least one lesson |
 
 **Streak Protection**:
@@ -1135,8 +1135,8 @@ Achievements recognize specific milestones:
 
 **Dhikr Achievements**
 - 📿 First Tasbeeh - Complete your first session
-- 🌅 Morning Person - 7-day morning adhkar streak
-- 🌙 Evening Devotee - 7-day evening adhkar streak
+- 🌅 Morning Person - 7-day morning dhikr streak
+- 🌙 Evening Devotee - 7-day evening dhikr streak
 - ♾️ 10,000 Count - Lifetime tasbeeh count
 
 **Ramadan Achievements**
@@ -1157,7 +1157,7 @@ Users can set personalized daily goals:
 │  ☐ Read 5 pages of Quran       │
 │     ██████░░░░  3/5 pages      │
 │                                 │
-│  ☐ Complete morning adhkar     │
+│  ☐ Complete morning dhikr     │
 │     ████████░░  80%            │
 │                                 │
 │  ☐ 1 learning lesson           │
@@ -1172,9 +1172,9 @@ Users can set personalized daily goals:
 ```
 
 **Goal Presets**:
-- Light (15 min/day): 2 pages Quran, adhkar, 1 lesson
-- Moderate (30 min/day): 5 pages, adhkar, 2 lessons, tasbeeh
-- Dedicated (1 hr/day): 10 pages, adhkar, 3 lessons, extended dhikr
+- Light (15 min/day): 2 pages Quran, dhikr, 1 lesson
+- Moderate (30 min/day): 5 pages, dhikr, 2 lessons, tasbeeh
+- Dedicated (1 hr/day): 10 pages, dhikr, 3 lessons, extended dhikr
 - Custom: User sets own targets
 
 ### 6.6 Weekly Challenges
@@ -1182,7 +1182,7 @@ Users can set personalized daily goals:
 Optional weekly challenges for extra engagement:
 
 - "Memorize Surah Al-Fatiha pronunciation perfectly"
-- "Complete morning adhkar every day this week"
+- "Complete morning dhikr every day this week"
 - "Read Surah Al-Kahf on Friday"
 - "Learn 5 new Tajweed rules"
 - "Reach 500 Hasanat this week"
@@ -1343,8 +1343,8 @@ Ramadan mode maintains minimalism while surfacing essential fasting information.
 
 ┌─────────────────────────────────┐
 │ 🌅 Good morning! Have you      │
-│    read your morning adhkar?   │
-│    [Open Adhkar]          [✕]  │
+│    read your morning dhikr?   │
+│    [Open Dhikr]          [✕]  │
 └─────────────────────────────────┘
 
 ┌─────────────────────────────────┐
@@ -1398,8 +1398,8 @@ Safa
 │
 ├── Dhikr & Dua
 │   ├── Tasbeeh Counter
-│   ├── Morning Adhkar
-│   ├── Evening Adhkar
+│   ├── Morning Dhikr
+│   ├── Evening Dhikr
 │   ├── Dua Categories
 │   │   ├── Daily Life
 │   │   ├── Salah
@@ -1452,7 +1452,7 @@ Safa
 │   └── Privacy Settings
 │
 ├── Wind Down (after Isha)
-│   ├── Sleep Adhkar Checklist
+│   ├── Sleep Dhikr Checklist
 │   ├── Calming Recitation
 │   ├── Fajr Alarm Setup
 │   └── Reflection Journal
@@ -1871,7 +1871,7 @@ Mid-term improvements to elevate from "feature-complete" to "experience-complete
 **Phase A — High impact, low risk:**
 - **Haptic system unification**: Central `HapticEvent` enum replacing scattered `UIImpactFeedbackGenerator` calls. Consistent haptic language: tap (light), commit (medium), success (notification), milestone (celebration pattern). Settings for intensity.
 - **Degraded state banners**: Shared `DegradedStateBanner` component for all failure modes (location fallback, offline, compass accuracy, sync paused). Replace silent failures with subtle inline feedback.
-- **Home intent resolver**: Context-aware service returning 1-3 prioritised actions (next prayer, continue Quran, morning adhkar). "Quick Resume" cards for last surah, last lesson, last dhikr routine.
+- **Home intent resolver**: Context-aware service returning 1-3 prioritised actions (next prayer, continue Quran, morning dhikr). "Quick Resume" cards for last surah, last lesson, last dhikr routine.
 
 **Phase B — Experience quality:**
 - **Motion tokens**: Standardised durations, curves, spring presets in the design system. Semantic elevation tokens for card styles. Skeleton loaders for key screens.
@@ -1897,7 +1897,7 @@ All content sourced from free, high-quality sources for zero-cost launch:
 | Hadith | Sunnah.com | Free (non-commercial) |
 | Audio Recitation | Everyayah.com + King Fahd Complex | Free for Islamic apps |
 | Tafsir | Ibn Kathir (English abridged) | Free |
-| Duas/Adhkar | Hisnul Muslim (Fortress of Muslim) | Public domain |
+| Duas/Dhikr | Hisnul Muslim (Fortress of Muslim) | Public domain |
 
 **Upgrade path**: License premium translations (The Clear Quran) and additional Qaris post-launch if donations support it.
 

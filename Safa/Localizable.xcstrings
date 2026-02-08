@@ -10,6 +10,9 @@
     "\"%@\"" : {
 
     },
+    "\"I intend to fast tomorrow for the month of Ramadan\"" : {
+
+    },
     "(%lld days from now)" : {
 
     },
@@ -22,7 +25,7 @@
     "%@" : {
 
     },
-    "%@ Adhkar" : {
+    "%@ Dhikr" : {
 
     },
     "%@ at %@%@" : {
@@ -31,6 +34,49 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ at %2$@%3$@"
+          }
+        }
+      }
+    },
+    "%@ in %lld minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in %2$lld minutes"
+          }
+        }
+      }
+    },
+    "%@ in %lld minutes. Time to head to the mosque!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in %2$lld minutes. Time to head to the mosque!"
+          }
+        }
+      }
+    },
+    "%@ is in %lld day(s). %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ is in %2$lld day(s). %3$@"
+          }
+        }
+      }
+    },
+    "%@ Time" : {
+
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
           }
         }
       }
@@ -90,6 +136,9 @@
 
     },
     "%lld Hasanat" : {
+
+    },
+    "%lld hours" : {
 
     },
     "%lld khatm" : {
@@ -197,6 +246,16 @@
     "%lld° from North" : {
 
     },
+    "%lldh %lldm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lldh %2$lldm"
+          }
+        }
+      }
+    },
     "%lldx" : {
 
     },
@@ -260,13 +319,31 @@
     "0.5x" : {
 
     },
+    "1. Open Settings on your iPhone" : {
+
+    },
     "1.5x" : {
 
     },
     "1x" : {
 
     },
+    "2. Tap Focus" : {
+
+    },
+    "3. Create a new Focus or edit an existing one" : {
+
+    },
+    "4. Under 'Allowed Notifications', add Safa" : {
+
+    },
+    "5. Choose which Safa notification types to allow" : {
+
+    },
     "5/30" : {
+
+    },
+    "6. Optional: Schedule the Focus for prayer times" : {
 
     },
     "9 minutes" : {
@@ -276,6 +353,9 @@
 
     },
     "99 Names of Allah" : {
+
+    },
+    "A sync conflict was detected and resolved." : {
 
     },
     "About" : {
@@ -306,6 +386,9 @@
 
     },
     "Achievement Unlocked!" : {
+
+    },
+    "Achievement Unlocked! 🏆" : {
 
     },
     "Achievements" : {
@@ -359,6 +442,12 @@
     "Apple Health" : {
 
     },
+    "Apple Health access was denied. Please enable access in Settings." : {
+
+    },
+    "Apple Health is not available on this device." : {
+
+    },
     "Apple Health not available on this device" : {
 
     },
@@ -371,6 +460,9 @@
     "Arabic, Tajweed, and Islamic studies lessons are coming soon." : {
 
     },
+    "Ashura" : {
+
+    },
     "Ask a question..." : {
 
     },
@@ -381,6 +473,12 @@
 
     },
     "Assalamu Alaikum!" : {
+
+    },
+    "Audio file not found." : {
+
+    },
+    "Audio session error: %@" : {
 
     },
     "Auto-silence during prayer times" : {
@@ -423,6 +521,12 @@
     "Beta testers and early users" : {
 
     },
+    "Birth of Prophet Muhammad ﷺ" : {
+
+    },
+    "Bismillah! Time to break your fast." : {
+
+    },
     "Bookmarks" : {
 
     },
@@ -436,6 +540,9 @@
 
     },
     "Calendar" : {
+
+    },
+    "Calendar access was denied. Please enable access in Settings." : {
 
     },
     "Calming Recitation" : {
@@ -474,7 +581,7 @@
     "Complete the Quran this Ramadan" : {
 
     },
-    "Complete your nightly adhkar and set your Fajr alarm" : {
+    "Complete your nightly dhikr and set your Fajr alarm" : {
 
     },
     "Complete!" : {
@@ -499,6 +606,9 @@
         }
       }
     },
+    "Conversation not found." : {
+
+    },
     "Coordinates" : {
 
     },
@@ -515,6 +625,9 @@
 
     },
     "Core ML" : {
+
+    },
+    "Could not find or create calendar." : {
 
     },
     "Create Family Circle" : {
@@ -550,6 +663,9 @@
     "Data Sources" : {
 
     },
+    "Database '%@' not found in bundle" : {
+
+    },
     "Date" : {
 
     },
@@ -562,6 +678,15 @@
           }
         }
       }
+    },
+    "Day of Arafah" : {
+
+    },
+    "Day of Arafah Duas" : {
+
+    },
+    "Day of Ashura" : {
+
     },
     "day streak" : {
 
@@ -608,7 +733,7 @@
     "Dhikr" : {
 
     },
-    "Dhikr & Adhkar" : {
+    "Dhikr & Dhikr" : {
 
     },
     "Dhikr Type" : {
@@ -617,7 +742,16 @@
     "Direction to Kaaba in Makkah" : {
 
     },
+    "Dismiss" : {
+
+    },
+    "Don't forget your Taraweeh prayers tonight. May your worship be accepted." : {
+
+    },
     "Done" : {
+
+    },
+    "Done ✓" : {
 
     },
     "Double tap to count one %@" : {
@@ -650,6 +784,9 @@
     "Double tap to toggle notification" : {
 
     },
+    "Download failed" : {
+
+    },
     "Download on Wi-Fi Only" : {
 
     },
@@ -668,10 +805,28 @@
     "Each surah is announced with its number, name, revelation type, and verse count. Arabic text uses proper right-to-left reading." : {
 
     },
+    "Eid al-Adha" : {
+
+    },
+    "Eid al-Adha is tomorrow! Prepare for the celebration." : {
+
+    },
+    "Eid al-Fitr" : {
+
+    },
     "Eid al-Fitr & Eid al-Adha" : {
 
     },
+    "Eid al-Fitr is tomorrow! Prepare your Eid prayers." : {
+
+    },
     "Eid Mubarak! 🎉" : {
+
+    },
+    "Eid Mubarak! May Allah accept your sacrifice." : {
+
+    },
+    "Eid Mubarak! May Allah accept your worship." : {
 
     },
     "Eid Prayer: %@" : {
@@ -737,13 +892,46 @@
     "Export Data" : {
 
     },
+    "Export failed: %@" : {
+
+    },
     "Export Prayer Logs (CSV)" : {
 
     },
     "Export To" : {
 
     },
+    "Failed to create speech recognition request." : {
+
+    },
+    "Failed to download audio." : {
+
+    },
+    "Failed to generate response: %@" : {
+
+    },
+    "Failed to load the AI model. Please try again." : {
+
+    },
+    "Failed to open database: %@" : {
+
+    },
+    "Failed to play audio." : {
+
+    },
+    "Failed to prepare statement: %@" : {
+
+    },
+    "Failed to save to Apple Health: %@" : {
+
+    },
+    "Failed to start recording." : {
+
+    },
     "Fajr Alarm" : {
+
+    },
+    "Fajr Prayer Soon" : {
 
     },
     "Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\"." : {
@@ -761,7 +949,16 @@
     "Fasting complete for today" : {
 
     },
+    "Fasting Sunnah" : {
+
+    },
     "Feedback" : {
+
+    },
+    "Festival of Breaking the Fast. Taqabbal Allahu minna wa minkum." : {
+
+    },
+    "Festival of Sacrifice. Eid Mubarak!" : {
 
     },
     "Font Settings" : {
@@ -771,6 +968,9 @@
 
     },
     "French" : {
+
+    },
+    "Friday Duas" : {
 
     },
     "Get Daily Verse" : {
@@ -818,6 +1018,9 @@
     "Hadith from Sunnah.com" : {
 
     },
+    "Happy Islamic New Year! May this year bring blessings." : {
+
+    },
     "Haptic Feedback" : {
 
     },
@@ -845,6 +1048,9 @@
     "I'm your Islamic knowledge companion. Ask me about:" : {
 
     },
+    "iCloud storage is full. Please free up space." : {
+
+    },
     "Iftar" : {
 
     },
@@ -854,7 +1060,13 @@
     "Iftar in" : {
 
     },
+    "Iftar in %lld minutes" : {
+
+    },
     "Iftar Reminder" : {
+
+    },
+    "Iftar Time!" : {
 
     },
     "In the meantime, explore:" : {
@@ -897,6 +1109,33 @@
 
     },
     "Islamic Holidays" : {
+
+    },
+    "Islamic New Year" : {
+
+    },
+    "Islamic New Year is tomorrow." : {
+
+    },
+    "Isra" : {
+
+    },
+    "Isra and Mi'raj" : {
+
+    },
+    "Isra and Mi'raj is tomorrow night." : {
+
+    },
+    "It's prayer time." : {
+
+    },
+    "It's time for %@" : {
+
+    },
+    "It's time for %@ prayer" : {
+
+    },
+    "Jumu'ah" : {
 
     },
     "Juz" : {
@@ -946,10 +1185,25 @@
     "Last updated: February 2026" : {
 
     },
+    "Laylat al-Qadr" : {
+
+    },
+    "Laylat al-Qadr - Night %lld" : {
+
+    },
+    "Laylat al-Qadr Duas" : {
+
+    },
     "Laylatul Qadr Duas" : {
 
     },
     "Learn" : {
+
+    },
+    "Learn About Ashura" : {
+
+    },
+    "Learn About Isra & Mi'raj" : {
 
     },
     "Lesson" : {
@@ -974,6 +1228,12 @@
     "Location" : {
 
     },
+    "Location permission was denied. Please enable in Settings." : {
+
+    },
+    "Location request timed out." : {
+
+    },
     "Locked" : {
 
     },
@@ -984,6 +1244,9 @@
 
     },
     "Log ${prayer} prayer" : {
+
+    },
+    "Log Fast" : {
 
     },
     "Log fasting hours automatically" : {
@@ -1010,6 +1273,9 @@
     "Madhab (Asr)" : {
 
     },
+    "Mark as Prayed" : {
+
+    },
     "Mark Complete" : {
 
     },
@@ -1017,6 +1283,12 @@
 
     },
     "Mark today as fasted" : {
+
+    },
+    "Mawlid al-Nabi" : {
+
+    },
+    "Mawlid al-Nabi is tomorrow." : {
 
     },
     "May Allah accept your Zakat" : {
@@ -1029,6 +1301,24 @@
 
     },
     "Members" : {
+
+    },
+    "Message is too long. Please shorten it." : {
+
+    },
+    "Mi'raj" : {
+
+    },
+    "Microphone permission is required for pronunciation checking." : {
+
+    },
+    "Mid-Sha'ban" : {
+
+    },
+    "Mid-Sha'ban is tomorrow night." : {
+
+    },
+    "Migration failed: %@" : {
 
     },
     "More" : {
@@ -1067,6 +1357,12 @@
     "Next Prayer" : {
 
     },
+    "Night of Power Guide" : {
+
+    },
+    "Night Prayers" : {
+
+    },
     "Nisab is the minimum amount of wealth a Muslim must possess before they become eligible to pay Zakat. It is calculated based on the value of either 85 grams of gold or 595 grams of silver." : {
 
     },
@@ -1082,6 +1378,12 @@
     "No Family Circle" : {
 
     },
+    "No internet connection. Changes will sync when online." : {
+
+    },
+    "No mapping model found for migration." : {
+
+    },
     "No Prayer History" : {
 
     },
@@ -1095,6 +1397,9 @@
 
     },
     "Normal" : {
+
+    },
+    "Not set" : {
 
     },
     "Note: For complex religious rulings, please consult a qualified scholar." : {
@@ -1127,10 +1432,22 @@
     "OK" : {
 
     },
+    "Only the circle owner can perform this action." : {
+
+    },
     "Open iOS Accessibility Settings" : {
 
     },
+    "Open Prayer" : {
+
+    },
+    "Open Qibla" : {
+
+    },
     "Open Quran" : {
+
+    },
+    "Open Safa" : {
 
     },
     "Open Source" : {
@@ -1140,6 +1457,9 @@
 
     },
     "Open the tasbeeh counter" : {
+
+    },
+    "Permission denied to access this data." : {
 
     },
     "Play Adhan" : {
@@ -1152,6 +1472,9 @@
 
     },
     "Please read these terms carefully before using Safa." : {
+
+    },
+    "Please sign in to iCloud to sync your data." : {
 
     },
     "Point the top of your phone towards the arrow to face the Qibla" : {
@@ -1181,6 +1504,9 @@
     "Prayer Notifications" : {
 
     },
+    "Prayer reminder." : {
+
+    },
     "Prayer Reminders" : {
 
     },
@@ -1188,6 +1514,9 @@
 
     },
     "Prayer Streak" : {
+
+    },
+    "Prayer Time" : {
 
     },
     "Prayer Time Adjustments" : {
@@ -1203,6 +1532,9 @@
 
     },
     "Prepare for Restful Sleep" : {
+
+    },
+    "Prepare to break your fast. May Allah accept your worship." : {
 
     },
     "Privacy Policy" : {
@@ -1224,6 +1556,9 @@
 
     },
     "Quality" : {
+
+    },
+    "Query failed: %@" : {
 
     },
     "Question" : {
@@ -1259,7 +1594,16 @@
     "Ramadan (Start & Laylatul Qadr)" : {
 
     },
+    "Ramadan Begins" : {
+
+    },
+    "Ramadan begins tomorrow! Prepare for the blessed month." : {
+
+    },
     "Ramadan Duas" : {
+
+    },
+    "Ramadan Ends" : {
 
     },
     "Ramadan fasts logged" : {
@@ -1271,7 +1615,16 @@
     "Ramadan Mode" : {
 
     },
+    "Ramadan mode is now active. May this blessed month bring you peace and blessings." : {
+
+    },
     "Ramadan Mubarak" : {
+
+    },
+    "Ramadan Mubarak! 🌙" : {
+
+    },
+    "Ramadan Mubarak! The blessed month begins today." : {
 
     },
     "Ramadan Quran" : {
@@ -1286,10 +1639,16 @@
     "Read 1 Juz per day to complete on time" : {
 
     },
+    "Read Seerah" : {
+
+    },
     "Ready to Begin" : {
 
     },
     "Recent Searches" : {
+
+    },
+    "Recognition failed: %@" : {
 
     },
     "Recommendations" : {
@@ -1327,6 +1686,12 @@
     "Reference" : {
 
     },
+    "Reflect on the Year" : {
+
+    },
+    "Remind in 10 min" : {
+
+    },
     "Remove Log" : {
 
     },
@@ -1352,6 +1717,9 @@
 
     },
     "Safa" : {
+
+    },
+    "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nAchievement Notifications: Passive\n- Low priority, silent\n- Shown in Notification Center only\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa" : {
 
     },
     "Safa is built with privacy at its core. We believe your spiritual journey is personal and should stay that way." : {
@@ -1408,10 +1776,28 @@
     "Send Feedback" : {
 
     },
+    "Send Salawat" : {
+
+    },
+    "Server error: %@" : {
+
+    },
+    "Set Iftar Reminder" : {
+
+    },
+    "Set Islamic Goals" : {
+
+    },
+    "Set Suhoor Reminder" : {
+
+    },
     "Settings" : {
 
     },
     "Share" : {
+
+    },
+    "Share Eid Greeting" : {
 
     },
     "Share Safa" : {
@@ -1459,7 +1845,7 @@
     "Sleep" : {
 
     },
-    "Sleep Adhkar" : {
+    "Sleep Dhikr" : {
 
     },
     "Smart Adhan" : {
@@ -1474,6 +1860,9 @@
     "Snooze" : {
 
     },
+    "Snooze 5 min" : {
+
+    },
     "Sound" : {
 
     },
@@ -1483,6 +1872,15 @@
     "Special Thanks" : {
 
     },
+    "Speech recognition is not authorized. Please enable it in Settings." : {
+
+    },
+    "Speech recognition is not available on this device." : {
+
+    },
+    "Speech recognition is not available." : {
+
+    },
     "Spread the Word" : {
 
     },
@@ -1490,6 +1888,12 @@
 
     },
     "Start Tasbeeh" : {
+
+    },
+    "Start Wind Down" : {
+
+    },
+    "Start your evening dhikr and prepare for a restful night." : {
 
     },
     "Stats" : {
@@ -1510,6 +1914,9 @@
     "Streaks" : {
 
     },
+    "Suhoor Dua" : {
+
+    },
     "Suhoor Ends" : {
 
     },
@@ -1517,6 +1924,9 @@
 
     },
     "Suhoor Reminder" : {
+
+    },
+    "Suhoor Time" : {
 
     },
     "Supplications & Remembrances" : {
@@ -1551,6 +1961,9 @@
         }
       }
     },
+    "Surah Al-Kahf" : {
+
+    },
     "Surah Number" : {
 
     },
@@ -1584,7 +1997,13 @@
     "Tap to set up" : {
 
     },
+    "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you." : {
+
+    },
     "Taraweeh" : {
+
+    },
+    "Taraweeh Time" : {
 
     },
     "Taraweeh Tonight" : {
@@ -1608,10 +2027,34 @@
     "Test Haptics" : {
 
     },
+    "The 10th of Muharram. Fasting this day expiates sins of the previous year." : {
+
+    },
+    "The AI model is not loaded. Please wait." : {
+
+    },
     "The alarm will be set based on Fajr prayer time for your location. You can adjust the offset if needed." : {
 
     },
+    "The beginning of a new Islamic year." : {
+
+    },
+    "The best day on which the sun rises. Fasting is highly recommended." : {
+
+    },
+    "The blessed month of fasting begins." : {
+
+    },
     "The counter announces the current count, target, and percentage complete. The main button describes the dhikr being counted." : {
+
+    },
+    "The data model could not be found." : {
+
+    },
+    "The Day of Ashura is tomorrow. Consider fasting." : {
+
+    },
+    "The invite code is invalid or expired." : {
 
     },
     "The Most Beautiful Names" : {
@@ -1620,7 +2063,22 @@
     "The Muslim developer community" : {
 
     },
+    "The Night Journey and Ascension of Prophet Muhammad ﷺ" : {
+
+    },
+    "The Night of Power, better than a thousand months." : {
+
+    },
+    "The requested record was not found." : {
+
+    },
+    "The required health data type is not available." : {
+
+    },
     "These recommendations are based on common practices in your region. You can always customize these settings to match your preference or local mosque." : {
+
+    },
+    "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي" : {
 
     },
     "This Week" : {
@@ -1635,7 +2093,13 @@
     "This will remove all downloaded content (%@). You can download content again later." : {
 
     },
+    "Time for pre-dawn meal. Fajr is in %lld minutes. May your fast be accepted." : {
+
+    },
     "Time Range" : {
+
+    },
+    "Time to Wind Down" : {
 
     },
     "Time until Iftar" : {
@@ -1656,10 +2120,22 @@
     "Today" : {
 
     },
+    "Today is the Day of Ashura. Fasting is recommended." : {
+
+    },
+    "Today we celebrate the birth of Prophet Muhammad (PBUH)." : {
+
+    },
     "Today's Times" : {
 
     },
     "Tonight is the %@ - an odd night" : {
+
+    },
+    "Tonight is the Night Journey and Ascension." : {
+
+    },
+    "Tonight is the Night of Mid-Sha'ban." : {
 
     },
     "Tonight's Progress" : {
@@ -1695,6 +2171,9 @@
     "Unable to determine direction" : {
 
     },
+    "Unable to determine your location." : {
+
+    },
     "Unable to load surah" : {
 
     },
@@ -1705,6 +2184,9 @@
 
     },
     "Unlocked!" : {
+
+    },
+    "Upcoming: %@" : {
 
     },
     "Update Location" : {
@@ -1735,13 +2217,28 @@
     "View All" : {
 
     },
+    "View Calendar" : {
+
+    },
+    "View Eid Prayers" : {
+
+    },
+    "View Fasting Guide" : {
+
+    },
     "View Recommended Settings" : {
+
+    },
+    "View Times" : {
 
     },
     "VoiceOver announces the direction to turn and tells you when you're facing the Qibla." : {
 
     },
     "VoiceOver Support" : {
+
+    },
+    "Wake up for Fajr prayer. May Allah accept your worship." : {
 
     },
     "We do not sell, trade, or share your personal information with anyone. Period." : {
@@ -1756,10 +2253,25 @@
     "When enabled, your fasting periods will be logged to Apple Health so you can track your Ramadan wellness journey." : {
 
     },
+    "White Days" : {
+
+    },
+    "White Days Fasting" : {
+
+    },
     "Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi." : {
 
     },
+    "WiFi connection required for downloads" : {
+
+    },
     "Wind Down" : {
+
+    },
+    "You are already a member of this circle." : {
+
+    },
+    "You are not part of a family circle." : {
 
     },
     "You can customize calculation methods and more in Settings anytime" : {
@@ -1778,7 +2290,7 @@
         }
       }
     },
-    "You've completed your nightly adhkar. May Allah grant you peaceful sleep and an easy awakening for Fajr." : {
+    "You've completed your nightly dhikr. May Allah grant you peaceful sleep and an easy awakening for Fajr." : {
 
     },
     "You've shared %lld time%@" : {

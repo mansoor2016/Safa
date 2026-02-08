@@ -28,9 +28,9 @@ struct ContextualReminder: Identifiable, Equatable {
 
 enum ReminderActionType: Equatable {
     case prayer(PrayerType)
-    case morningAdhkar
-    case eveningAdhkar
-    case sleepAdhkar
+    case morningDhikr
+    case eveningDhikr
+    case sleepDhikr
     case quranReading
     case fridayPreparation
     case tahajjud
@@ -120,14 +120,14 @@ final class ContextualReminderService {
             ))
         }
 
-        // Morning adhkar time (after Fajr until sunrise)
+        // Morning dhikr time (after Fajr until sunrise)
         if hour >= 5 && hour < 8 {
             reminders.append(ContextualReminder(
-                id: "morning_adhkar",
-                title: "Morning Adhkar",
+                id: "morning_dhikr",
+                title: "Morning Dhikr",
                 subtitle: "Start your day with remembrance of Allah",
                 iconName: "sunrise.fill",
-                actionType: .morningAdhkar,
+                actionType: .morningDhikr,
                 priority: .high
             ))
         }
@@ -156,26 +156,26 @@ final class ContextualReminderService {
             ))
         }
 
-        // Evening adhkar time (after Asr until Maghrib)
+        // Evening dhikr time (after Asr until Maghrib)
         if hour >= 16 && hour < 19 {
             reminders.append(ContextualReminder(
-                id: "evening_adhkar",
-                title: "Evening Adhkar",
+                id: "evening_dhikr",
+                title: "Evening Dhikr",
                 subtitle: "End your day with remembrance",
                 iconName: "sunset.fill",
-                actionType: .eveningAdhkar,
+                actionType: .eveningDhikr,
                 priority: .high
             ))
         }
 
-        // Sleep adhkar time (night)
+        // Sleep dhikr time (night)
         if hour >= 21 || hour < 1 {
             reminders.append(ContextualReminder(
-                id: "sleep_adhkar",
-                title: "Sleep Adhkar",
-                subtitle: "Prepare for restful sleep with adhkar",
+                id: "sleep_dhikr",
+                title: "Sleep Dhikr",
+                subtitle: "Prepare for restful sleep with dhikr",
                 iconName: "moon.zzz.fill",
-                actionType: .sleepAdhkar,
+                actionType: .sleepDhikr,
                 priority: .medium
             ))
         }

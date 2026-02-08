@@ -94,7 +94,7 @@ final class RAGService {
         .fasting: ["fast", "fasting", "sawm", "siyam", "suhoor", "sehri", "iftar", "ramadan", "break fast", "exempt", "kaffarah", "fidyah"],
         .zakat: ["zakat", "zakah", "charity", "sadaqah", "nisab", "wealth", "poor", "needy", "2.5%"],
         .hajj: ["hajj", "umrah", "pilgrimage", "mecca", "makkah", "kaaba", "tawaf", "sai", "ihram", "arafat", "mina", "muzdalifah", "jamarat"],
-        .dua: ["dua", "supplication", "prayer", "asking", "request", "dhikr", "remembrance", "tasbih", "istighfar", "morning adhkar", "evening adhkar"],
+        .dua: ["dua", "supplication", "prayer", "asking", "request", "dhikr", "remembrance", "tasbih", "istighfar", "morning dhikr", "evening dhikr"],
         .wudu: ["wudu", "wudhu", "ablution", "purification", "ghusl", "tayammum", "wash", "ritual purity", "break wudu"],
         .quran: ["quran", "ayah", "verse", "surah", "chapter", "recitation", "tajweed", "tafsir", "meaning", "revelation"],
         .hadith: ["hadith", "prophet", "messenger", "sunnah", "sahih", "bukhari", "muslim", "tirmidhi", "abu dawud", "narrator"],

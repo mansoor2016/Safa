@@ -134,8 +134,8 @@ final class UserStatsTests: XCTestCase {
         XCTAssertEqual(HasanatAward.quranSurah.points, 15)
         XCTAssertEqual(HasanatAward.quranJuz.points, 50)
         XCTAssertEqual(HasanatAward.lessonComplete.points, 10)
-        XCTAssertEqual(HasanatAward.morningAdhkar.points, 15)
-        XCTAssertEqual(HasanatAward.eveningAdhkar.points, 15)
+        XCTAssertEqual(HasanatAward.morningDhikr.points, 15)
+        XCTAssertEqual(HasanatAward.eveningDhikr.points, 15)
     }
 
     // MARK: - User Preferences Tests

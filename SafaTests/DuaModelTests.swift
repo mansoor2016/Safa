@@ -168,25 +168,25 @@ final class DuaModelTests: XCTestCase {
         XCTAssertEqual(session.progress, 1.0, accuracy: 0.001)
     }
 
-    // MARK: - AdhkarType Tests
+    // MARK: - DhikrType Tests
 
-    func testAdhkarTypeAllCases() {
-        XCTAssertEqual(AdhkarType.allCases.count, 3)
-        XCTAssertTrue(AdhkarType.allCases.contains(.morning))
-        XCTAssertTrue(AdhkarType.allCases.contains(.evening))
-        XCTAssertTrue(AdhkarType.allCases.contains(.sleep))
+    func testDhikrTypeAllCases() {
+        XCTAssertEqual(DhikrType.allCases.count, 3)
+        XCTAssertTrue(DhikrType.allCases.contains(.morning))
+        XCTAssertTrue(DhikrType.allCases.contains(.evening))
+        XCTAssertTrue(DhikrType.allCases.contains(.sleep))
     }
 
-    func testAdhkarTypeDisplayNames() {
-        XCTAssertEqual(AdhkarType.morning.displayName, "Morning Adhkar")
-        XCTAssertEqual(AdhkarType.evening.displayName, "Evening Adhkar")
-        XCTAssertEqual(AdhkarType.sleep.displayName, "Sleep Adhkar")
+    func testDhikrTypeDisplayNames() {
+        XCTAssertEqual(DhikrType.morning.displayName, "Morning Dhikr")
+        XCTAssertEqual(DhikrType.evening.displayName, "Evening Dhikr")
+        XCTAssertEqual(DhikrType.sleep.displayName, "Sleep Dhikr")
     }
 
-    func testAdhkarTypeRawValues() {
-        XCTAssertEqual(AdhkarType.morning.rawValue, "morning")
-        XCTAssertEqual(AdhkarType.evening.rawValue, "evening")
-        XCTAssertEqual(AdhkarType.sleep.rawValue, "sleep")
+    func testDhikrTypeRawValues() {
+        XCTAssertEqual(DhikrType.morning.rawValue, "morning")
+        XCTAssertEqual(DhikrType.evening.rawValue, "evening")
+        XCTAssertEqual(DhikrType.sleep.rawValue, "sleep")
     }
 
     // MARK: - DuaCategoryEnum Tests

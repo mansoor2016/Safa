@@ -21,8 +21,8 @@ final class WindDownViewModelTests: XCTestCase {
 
     // MARK: - Initial State Tests
 
-    func testInitialCompletedAdhkarIsEmpty() {
-        XCTAssertTrue(sut.completedAdhkar.isEmpty)
+    func testInitialCompletedDhikrIsEmpty() {
+        XCTAssertTrue(sut.completedDhikr.isEmpty)
     }
 
     func testInitialIsPlayingRecitationIsFalse() {
@@ -45,63 +45,63 @@ final class WindDownViewModelTests: XCTestCase {
         XCTAssertEqual(sut.selectedSurah, "Surah Al-Mulk")
     }
 
-    // MARK: - Sleep Adhkar Data Tests
+    // MARK: - Sleep Dhikr Data Tests
 
-    func testSleepAdhkarIsNotEmpty() {
-        XCTAssertFalse(sut.sleepAdhkar.isEmpty)
+    func testSleepDhikrIsNotEmpty() {
+        XCTAssertFalse(sut.sleepDhikr.isEmpty)
     }
 
-    func testSleepAdhkarCount() {
-        // Should have 9 adhkar items
-        XCTAssertEqual(sut.sleepAdhkar.count, 9)
+    func testSleepDhikrCount() {
+        // Should have 9 dhikr items
+        XCTAssertEqual(sut.sleepDhikr.count, 9)
     }
 
-    func testSleepAdhkarHasUniqueIds() {
-        let ids = sut.sleepAdhkar.map { $0.id }
+    func testSleepDhikrHasUniqueIds() {
+        let ids = sut.sleepDhikr.map { $0.id }
         let uniqueIds = Set(ids)
         XCTAssertEqual(ids.count, uniqueIds.count)
     }
 
-    func testSleepAdhkarContainsAyatulKursi() {
-        let hasAyatulKursi = sut.sleepAdhkar.contains { $0.id == "ayat-kursi" }
+    func testSleepDhikrContainsAyatulKursi() {
+        let hasAyatulKursi = sut.sleepDhikr.contains { $0.id == "ayat-kursi" }
         XCTAssertTrue(hasAyatulKursi)
     }
 
-    func testSleepAdhkarContainsThreeQuls() {
-        let hasIkhlas = sut.sleepAdhkar.contains { $0.id == "surah-ikhlas" }
-        let hasFalaq = sut.sleepAdhkar.contains { $0.id == "surah-falaq" }
-        let hasNas = sut.sleepAdhkar.contains { $0.id == "surah-nas" }
+    func testSleepDhikrContainsThreeQuls() {
+        let hasIkhlas = sut.sleepDhikr.contains { $0.id == "surah-ikhlas" }
+        let hasFalaq = sut.sleepDhikr.contains { $0.id == "surah-falaq" }
+        let hasNas = sut.sleepDhikr.contains { $0.id == "surah-nas" }
 
         XCTAssertTrue(hasIkhlas)
         XCTAssertTrue(hasFalaq)
         XCTAssertTrue(hasNas)
     }
 
-    func testSleepAdhkarContainsTasbih() {
-        let hasSubhanAllah = sut.sleepAdhkar.contains { $0.id == "tasbih-33" }
-        let hasAlhamdulillah = sut.sleepAdhkar.contains { $0.id == "hamd-33" }
-        let hasTakbir = sut.sleepAdhkar.contains { $0.id == "takbir-34" }
+    func testSleepDhikrContainsTasbih() {
+        let hasSubhanAllah = sut.sleepDhikr.contains { $0.id == "tasbih-33" }
+        let hasAlhamdulillah = sut.sleepDhikr.contains { $0.id == "hamd-33" }
+        let hasTakbir = sut.sleepDhikr.contains { $0.id == "takbir-34" }
 
         XCTAssertTrue(hasSubhanAllah)
         XCTAssertTrue(hasAlhamdulillah)
         XCTAssertTrue(hasTakbir)
     }
 
-    func testSleepAdhkarHasRequiredFields() {
-        for adhkar in sut.sleepAdhkar {
-            XCTAssertFalse(adhkar.id.isEmpty, "ID should not be empty")
-            XCTAssertFalse(adhkar.title.isEmpty, "Title should not be empty")
-            XCTAssertFalse(adhkar.arabic.isEmpty, "Arabic should not be empty")
-            XCTAssertFalse(adhkar.translation.isEmpty, "Translation should not be empty")
-            XCTAssertFalse(adhkar.transliteration.isEmpty, "Transliteration should not be empty")
-            XCTAssertGreaterThan(adhkar.count, 0, "Count should be positive")
+    func testSleepDhikrHasRequiredFields() {
+        for dhikr in sut.sleepDhikr {
+            XCTAssertFalse(dhikr.id.isEmpty, "ID should not be empty")
+            XCTAssertFalse(dhikr.title.isEmpty, "Title should not be empty")
+            XCTAssertFalse(dhikr.arabic.isEmpty, "Arabic should not be empty")
+            XCTAssertFalse(dhikr.translation.isEmpty, "Translation should not be empty")
+            XCTAssertFalse(dhikr.transliteration.isEmpty, "Transliteration should not be empty")
+            XCTAssertGreaterThan(dhikr.count, 0, "Count should be positive")
         }
     }
 
     func testTasbihCountsAreCorrect() {
-        let subhanAllah = sut.sleepAdhkar.first { $0.id == "tasbih-33" }
-        let alhamdulillah = sut.sleepAdhkar.first { $0.id == "hamd-33" }
-        let allahuAkbar = sut.sleepAdhkar.first { $0.id == "takbir-34" }
+        let subhanAllah = sut.sleepDhikr.first { $0.id == "tasbih-33" }
+        let alhamdulillah = sut.sleepDhikr.first { $0.id == "hamd-33" }
+        let allahuAkbar = sut.sleepDhikr.first { $0.id == "takbir-34" }
 
         XCTAssertEqual(subhanAllah?.count, 33)
         XCTAssertEqual(alhamdulillah?.count, 33)
@@ -140,44 +140,44 @@ final class WindDownViewModelTests: XCTestCase {
         XCTAssertTrue(sut.reciters.contains("Abdul Rahman Al-Sudais"))
     }
 
-    // MARK: - Toggle Adhkar Tests
+    // MARK: - Toggle Dhikr Tests
 
-    func testToggleAdhkarAddsToCompleted() {
-        let adhkarId = "ayat-kursi"
-        XCTAssertFalse(sut.completedAdhkar.contains(adhkarId))
+    func testToggleDhikrAddsToCompleted() {
+        let dhikrId = "ayat-kursi"
+        XCTAssertFalse(sut.completedDhikr.contains(dhikrId))
 
-        sut.toggleAdhkar(adhkarId)
+        sut.toggleDhikr(dhikrId)
 
-        XCTAssertTrue(sut.completedAdhkar.contains(adhkarId))
+        XCTAssertTrue(sut.completedDhikr.contains(dhikrId))
     }
 
-    func testToggleAdhkarRemovesFromCompleted() {
-        let adhkarId = "ayat-kursi"
-        sut.completedAdhkar.insert(adhkarId)
+    func testToggleDhikrRemovesFromCompleted() {
+        let dhikrId = "ayat-kursi"
+        sut.completedDhikr.insert(dhikrId)
 
-        sut.toggleAdhkar(adhkarId)
+        sut.toggleDhikr(dhikrId)
 
-        XCTAssertFalse(sut.completedAdhkar.contains(adhkarId))
+        XCTAssertFalse(sut.completedDhikr.contains(dhikrId))
     }
 
-    func testToggleAdhkarTwiceReturnsToOriginal() {
-        let adhkarId = "surah-ikhlas"
+    func testToggleDhikrTwiceReturnsToOriginal() {
+        let dhikrId = "surah-ikhlas"
 
-        sut.toggleAdhkar(adhkarId)
-        sut.toggleAdhkar(adhkarId)
+        sut.toggleDhikr(dhikrId)
+        sut.toggleDhikr(dhikrId)
 
-        XCTAssertFalse(sut.completedAdhkar.contains(adhkarId))
+        XCTAssertFalse(sut.completedDhikr.contains(dhikrId))
     }
 
-    func testToggleMultipleAdhkar() {
-        sut.toggleAdhkar("ayat-kursi")
-        sut.toggleAdhkar("surah-ikhlas")
-        sut.toggleAdhkar("sleep-dua")
+    func testToggleMultipleDhikr() {
+        sut.toggleDhikr("ayat-kursi")
+        sut.toggleDhikr("surah-ikhlas")
+        sut.toggleDhikr("sleep-dua")
 
-        XCTAssertEqual(sut.completedAdhkar.count, 3)
-        XCTAssertTrue(sut.completedAdhkar.contains("ayat-kursi"))
-        XCTAssertTrue(sut.completedAdhkar.contains("surah-ikhlas"))
-        XCTAssertTrue(sut.completedAdhkar.contains("sleep-dua"))
+        XCTAssertEqual(sut.completedDhikr.count, 3)
+        XCTAssertTrue(sut.completedDhikr.contains("ayat-kursi"))
+        XCTAssertTrue(sut.completedDhikr.contains("surah-ikhlas"))
+        XCTAssertTrue(sut.completedDhikr.contains("sleep-dua"))
     }
 
     // MARK: - Toggle Recitation Tests
@@ -204,74 +204,74 @@ final class WindDownViewModelTests: XCTestCase {
         XCTAssertEqual(sut.completionPercentage, 0.0)
     }
 
-    func testCompletionPercentageAfterOneAdhkar() {
-        sut.toggleAdhkar("ayat-kursi")
+    func testCompletionPercentageAfterOneDhikr() {
+        sut.toggleDhikr("ayat-kursi")
 
-        let expectedPercentage = (1.0 / Double(sut.sleepAdhkar.count)) * 100
+        let expectedPercentage = (1.0 / Double(sut.sleepDhikr.count)) * 100
         XCTAssertEqual(sut.completionPercentage, expectedPercentage, accuracy: 0.01)
     }
 
-    func testCompletionPercentageAfterHalfAdhkar() {
-        let halfCount = sut.sleepAdhkar.count / 2
+    func testCompletionPercentageAfterHalfDhikr() {
+        let halfCount = sut.sleepDhikr.count / 2
         for i in 0..<halfCount {
-            sut.toggleAdhkar(sut.sleepAdhkar[i].id)
+            sut.toggleDhikr(sut.sleepDhikr[i].id)
         }
 
-        let expectedPercentage = (Double(halfCount) / Double(sut.sleepAdhkar.count)) * 100
+        let expectedPercentage = (Double(halfCount) / Double(sut.sleepDhikr.count)) * 100
         XCTAssertEqual(sut.completionPercentage, expectedPercentage, accuracy: 0.01)
     }
 
-    func testCompletionPercentageAfterAllAdhkar() {
-        for adhkar in sut.sleepAdhkar {
-            sut.toggleAdhkar(adhkar.id)
+    func testCompletionPercentageAfterAllDhikr() {
+        for dhikr in sut.sleepDhikr {
+            sut.toggleDhikr(dhikr.id)
         }
 
         XCTAssertEqual(sut.completionPercentage, 100.0, accuracy: 0.01)
     }
 
-    // MARK: - All Adhkar Completed Tests
+    // MARK: - All Dhikr Completed Tests
 
-    func testAllAdhkarCompletedInitiallyFalse() {
-        XCTAssertFalse(sut.allAdhkarCompleted)
+    func testAllDhikrCompletedInitiallyFalse() {
+        XCTAssertFalse(sut.allDhikrCompleted)
     }
 
-    func testAllAdhkarCompletedAfterPartialCompletion() {
-        sut.toggleAdhkar("ayat-kursi")
-        sut.toggleAdhkar("surah-ikhlas")
+    func testAllDhikrCompletedAfterPartialCompletion() {
+        sut.toggleDhikr("ayat-kursi")
+        sut.toggleDhikr("surah-ikhlas")
 
-        XCTAssertFalse(sut.allAdhkarCompleted)
+        XCTAssertFalse(sut.allDhikrCompleted)
     }
 
-    func testAllAdhkarCompletedAfterFullCompletion() {
-        for adhkar in sut.sleepAdhkar {
-            sut.toggleAdhkar(adhkar.id)
+    func testAllDhikrCompletedAfterFullCompletion() {
+        for dhikr in sut.sleepDhikr {
+            sut.toggleDhikr(dhikr.id)
         }
 
-        XCTAssertTrue(sut.allAdhkarCompleted)
+        XCTAssertTrue(sut.allDhikrCompleted)
     }
 
-    func testAllAdhkarCompletedFalseAfterUnchecking() {
+    func testAllDhikrCompletedFalseAfterUnchecking() {
         // Complete all
-        for adhkar in sut.sleepAdhkar {
-            sut.toggleAdhkar(adhkar.id)
+        for dhikr in sut.sleepDhikr {
+            sut.toggleDhikr(dhikr.id)
         }
-        XCTAssertTrue(sut.allAdhkarCompleted)
+        XCTAssertTrue(sut.allDhikrCompleted)
 
         // Uncheck one
-        sut.toggleAdhkar(sut.sleepAdhkar[0].id)
-        XCTAssertFalse(sut.allAdhkarCompleted)
+        sut.toggleDhikr(sut.sleepDhikr[0].id)
+        XCTAssertFalse(sut.allDhikrCompleted)
     }
 
     // MARK: - Reset Progress Tests
 
-    func testResetProgressClearsCompletedAdhkar() {
-        sut.toggleAdhkar("ayat-kursi")
-        sut.toggleAdhkar("surah-ikhlas")
-        XCTAssertFalse(sut.completedAdhkar.isEmpty)
+    func testResetProgressClearsCompletedDhikr() {
+        sut.toggleDhikr("ayat-kursi")
+        sut.toggleDhikr("surah-ikhlas")
+        XCTAssertFalse(sut.completedDhikr.isEmpty)
 
         sut.resetProgress()
 
-        XCTAssertTrue(sut.completedAdhkar.isEmpty)
+        XCTAssertTrue(sut.completedDhikr.isEmpty)
     }
 
     func testResetProgressStopsRecitation() {
@@ -292,29 +292,29 @@ final class WindDownViewModelTests: XCTestCase {
 
     func testResetProgressAfterFullCompletion() {
         // Complete everything
-        for adhkar in sut.sleepAdhkar {
-            sut.toggleAdhkar(adhkar.id)
+        for dhikr in sut.sleepDhikr {
+            sut.toggleDhikr(dhikr.id)
         }
         sut.isPlayingRecitation = true
         sut.playbackProgress = 1.0
 
         sut.resetProgress()
 
-        XCTAssertTrue(sut.completedAdhkar.isEmpty)
+        XCTAssertTrue(sut.completedDhikr.isEmpty)
         XCTAssertFalse(sut.isPlayingRecitation)
         XCTAssertEqual(sut.playbackProgress, 0.0)
-        XCTAssertFalse(sut.allAdhkarCompleted)
+        XCTAssertFalse(sut.allDhikrCompleted)
         XCTAssertEqual(sut.completionPercentage, 0.0)
     }
 }
 
-// MARK: - SleepAdhkar Model Tests
+// MARK: - SleepDhikr Model Tests
 
-final class SleepAdhkarTests: XCTestCase {
+final class SleepDhikrTests: XCTestCase {
 
-    func testSleepAdhkarInitialization() {
-        let adhkar = SleepAdhkar(
-            id: "test-adhkar",
+    func testSleepDhikrInitialization() {
+        let dhikr = SleepDhikr(
+            id: "test-dhikr",
             title: "Test Title",
             arabic: "عربي",
             transliteration: "Transliteration",
@@ -323,18 +323,18 @@ final class SleepAdhkarTests: XCTestCase {
             count: 3
         )
 
-        XCTAssertEqual(adhkar.id, "test-adhkar")
-        XCTAssertEqual(adhkar.title, "Test Title")
-        XCTAssertEqual(adhkar.arabic, "عربي")
-        XCTAssertEqual(adhkar.transliteration, "Transliteration")
-        XCTAssertEqual(adhkar.translation, "Translation")
-        XCTAssertEqual(adhkar.benefit, "Test benefit")
-        XCTAssertEqual(adhkar.count, 3)
+        XCTAssertEqual(dhikr.id, "test-dhikr")
+        XCTAssertEqual(dhikr.title, "Test Title")
+        XCTAssertEqual(dhikr.arabic, "عربي")
+        XCTAssertEqual(dhikr.transliteration, "Transliteration")
+        XCTAssertEqual(dhikr.translation, "Translation")
+        XCTAssertEqual(dhikr.benefit, "Test benefit")
+        XCTAssertEqual(dhikr.count, 3)
     }
 
-    func testSleepAdhkarIdentifiable() {
-        let adhkar1 = SleepAdhkar(
-            id: "adhkar-1",
+    func testSleepDhikrIdentifiable() {
+        let dhikr1 = SleepDhikr(
+            id: "dhikr-1",
             title: "Title",
             arabic: "عربي",
             transliteration: "Trans",
@@ -343,8 +343,8 @@ final class SleepAdhkarTests: XCTestCase {
             count: 1
         )
 
-        let adhkar2 = SleepAdhkar(
-            id: "adhkar-2",
+        let dhikr2 = SleepDhikr(
+            id: "dhikr-2",
             title: "Title",
             arabic: "عربي",
             transliteration: "Trans",
@@ -353,12 +353,12 @@ final class SleepAdhkarTests: XCTestCase {
             count: 1
         )
 
-        XCTAssertNotEqual(adhkar1.id, adhkar2.id)
+        XCTAssertNotEqual(dhikr1.id, dhikr2.id)
     }
 
-    func testSleepAdhkarCountVariations() {
-        // Single count adhkar
-        let singleCount = SleepAdhkar(
+    func testSleepDhikrCountVariations() {
+        // Single count dhikr
+        let singleCount = SleepDhikr(
             id: "single",
             title: "Single",
             arabic: "أ",
@@ -369,8 +369,8 @@ final class SleepAdhkarTests: XCTestCase {
         )
         XCTAssertEqual(singleCount.count, 1)
 
-        // Multiple count adhkar (like tasbih)
-        let multipleCount = SleepAdhkar(
+        // Multiple count dhikr (like tasbih)
+        let multipleCount = SleepDhikr(
             id: "multiple",
             title: "Multiple",
             arabic: "أ",

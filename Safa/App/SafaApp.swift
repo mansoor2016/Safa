@@ -250,7 +250,7 @@ struct MoreView: View {
                 NavigationLink {
                     DhikrView()
                 } label: {
-                    Label("Dhikr & Adhkar", systemImage: "hands.sparkles")
+                    Label("Dhikr", systemImage: "hands.sparkles")
                 }
 
                 NavigationLink {

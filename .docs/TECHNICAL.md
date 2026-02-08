@@ -63,7 +63,7 @@
 | **ActivityKit** | Live Activities & Dynamic Island |
 | **CoreLocation** | Prayer time calculation, Qibla direction |
 | **CoreMotion** | Compass heading for Qibla |
-| **AVFoundation** | Audio playback (Quran recitation, adhkar) |
+| **AVFoundation** | Audio playback (Quran recitation, dhikr) |
 | **Speech** | Speech recognition for pronunciation |
 | **CoreML** | On-device LLM inference |
 | **CoreData** | Local persistence |
@@ -278,7 +278,7 @@ Safa/
 │   │   ├── DhikrViewModel.swift
 │   │   ├── Views/
 │   │   │   ├── TasbeehCounterView.swift
-│   │   │   ├── AdhkarListView.swift
+│   │   │   ├── DhikrListView.swift
 │   │   │   └── DuaCategoryView.swift
 │   │   └── Components/
 │   │       ├── CounterButton.swift
@@ -311,7 +311,7 @@ Safa/
 │   │   ├── WindDownView.swift
 │   │   ├── WindDownViewModel.swift
 │   │   └── Components/
-│   │       └── SleepAdhkarChecklist.swift
+│   │       └── SleepDhikrChecklist.swift
 │   ├── Settings/
 │   │   ├── SettingsView.swift
 │   │   ├── SettingsViewModel.swift
@@ -736,7 +736,7 @@ BAD Task:  "Implement prayer feature"
 | User progress, streaks, logs | Core Data | Relational, queryable |
 | Quran text & translations | Bundled SQLite + Core Data | Large dataset, read-heavy |
 | Hadith collections | Bundled SQLite + Core Data | Large dataset, searchable |
-| Dua & Adhkar | Bundled JSON → Core Data | Static content |
+| Dua & Dhikr | Bundled JSON → Core Data | Static content |
 | Localization metadata | Bundled JSON + UserDefaults | Language availability manifest + user language/content preferences |
 | Audio files (recitations) | Async download over WiFi + FileManager | Large files, cached |
 | LLM model | Bundled in app | Required for offline |
@@ -748,7 +748,7 @@ The app is designed for comprehensive offline functionality with aggressive size
 **Bundled at Install (<100MB target):**
 - Quran text (Arabic + Sahih International translation) - compressed SQLite ~5MB
 - Hadith collections - compressed SQLite ~15MB
-- Duas and Adhkar - JSON ~1MB
+- Duas and Dhikr - JSON ~1MB
 - Prayer calculation algorithms
 - UI assets ~10MB
 - *Note: AI uses Apple Foundation Models (ships with iOS, no bundle impact)*
@@ -1026,8 +1026,8 @@ Entity: FamilyMember
 - Riyad as-Salihin (topical compilation)
 - Metadata: book, chapter, grading, narrator chain
 
-**Dua & Adhkar** (bundled JSON):
-- Morning/evening adhkar (complete sets)
+**Dua & Dhikr** (bundled JSON):
+- Morning/evening dhikr (complete sets)
 - Daily duas (categorized)
 - Arabic text + transliteration + translation
 - Audio file references
@@ -2613,7 +2613,7 @@ var isOnWiFi: Bool {
 | App binary | ~15 MB | Dead code stripping |
 | Quran data | ~5 MB | Compressed SQLite (zstd) |
 | Hadith collections | ~15 MB | Compressed SQLite (zstd) |
-| Dua/Adhkar data | ~1 MB | JSON |
+| Dua/Dhikr data | ~1 MB | JSON |
 | UI assets | ~10 MB | Asset catalog optimization |
 | LLM model | **0 MB** | Uses Apple Foundation Models (ships with iOS) |
 | **Initial Download** | **<80 MB** | Target for App Store |

@@ -171,20 +171,20 @@ enum AchievementDefinitions {
             requirement: "10,000 total tasbeeh"
         ),
         Achievement(
-            id: "morning_adhkar",
+            id: "morning_dhikr",
             title: "Morning Light",
-            description: "Complete morning adhkar",
+            description: "Complete morning dhikr",
             iconName: "sunrise.fill",
             category: .dhikr,
-            requirement: "Complete morning adhkar"
+            requirement: "Complete morning dhikr"
         ),
         Achievement(
-            id: "evening_adhkar",
+            id: "evening_dhikr",
             title: "Evening Peace",
-            description: "Complete evening adhkar",
+            description: "Complete evening dhikr",
             iconName: "sunset.fill",
             category: .dhikr,
-            requirement: "Complete evening adhkar"
+            requirement: "Complete evening dhikr"
         )
     ]
 

@@ -318,7 +318,7 @@ final class LLMService {
         - Quran verses and their explanations
         - Authentic hadith with proper citations
         - Fiqh rulings from the major madhabs
-        - Duas and adhkar with Arabic, transliteration, and translation
+        - Duas and dhikr with Arabic, transliteration, and translation
 
         **Note:** For complex religious rulings (fatawa), I recommend consulting a qualified scholar.
         """ + citations

@@ -47,7 +47,7 @@ struct LearningTrack: Identifiable, Codable, Hashable {
         id: "dhikr_mastery",
         titleEnglish: "Dhikr & Dua Mastery",
         titleArabic: "إتقان الذكر والدعاء",
-        description: "Learn proper pronunciation of common adhkar and duas",
+        description: "Learn proper pronunciation of common dhikr and duas",
         iconName: "heart",
         lessonCount: 15,
         estimatedMinutes: 90

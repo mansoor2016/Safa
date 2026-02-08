@@ -1,5 +1,5 @@
 // MARK: - DuaRepository.swift
-// PURPOSE: Implementation of Dua and Adhkar data access
+// PURPOSE: Implementation of Dua and Dhikr data access
 // DEPENDENCIES: CoreData, DuaRepositoryProtocol
 
 import Foundation
@@ -11,8 +11,8 @@ final class DuaRepository: DuaRepositoryProtocol {
 
     // MARK: - Storage Keys
     private let favoritesKey = "com.safa.dua.favorites"
-    private let adhkarCompletionKey = "com.safa.adhkar.completion"
-    private let adhkarDateKey = "com.safa.adhkar.date"
+    private let dhikrCompletionKey = "com.safa.dhikr.completion"
+    private let dhikrDateKey = "com.safa.dhikr.date"
 
     // MARK: - Init
     init(coreData: CoreDataStack) {
@@ -35,21 +35,21 @@ final class DuaRepository: DuaRepositoryProtocol {
         return Dua.allDuas.first { $0.id == id }
     }
 
-    // MARK: - Adhkar
+    // MARK: - Dhikr
 
-    func getMorningAdhkar() async throws -> [Dua] {
+    func getMorningDhikr() async throws -> [Dua] {
         // TODO: Load from bundled JSON
-        return Dua.morningAdhkar
+        return Dua.morningDhikr
     }
 
-    func getEveningAdhkar() async throws -> [Dua] {
+    func getEveningDhikr() async throws -> [Dua] {
         // TODO: Load from bundled JSON
-        return Dua.eveningAdhkar
+        return Dua.eveningDhikr
     }
 
-    func getSleepAdhkar() async throws -> [Dua] {
+    func getSleepDhikr() async throws -> [Dua] {
         // TODO: Load from bundled JSON
-        return Dua.sleepAdhkar
+        return Dua.sleepDhikr
     }
 
     // MARK: - Favorites
@@ -87,30 +87,30 @@ final class DuaRepository: DuaRepositoryProtocol {
         }
     }
 
-    // MARK: - Adhkar Completion
+    // MARK: - Dhikr Completion
 
-    func markAdhkarCompleted(_ dua: Dua, type: AdhkarType) async throws {
+    func markDhikrCompleted(_ dua: Dua, type: DhikrType) async throws {
         checkAndResetIfNewDay()
 
-        var completion = getAdhkarCompletion()
+        var completion = getDhikrCompletion()
         var typeCompletion = completion[type.rawValue] ?? []
 
         guard !typeCompletion.contains(dua.id) else { return }
         typeCompletion.append(dua.id)
         completion[type.rawValue] = typeCompletion
 
-        saveAdhkarCompletion(completion)
+        saveDhikrCompletion(completion)
     }
 
-    func getAdhkarCompletionStatus(for type: AdhkarType) async throws -> [String] {
+    func getDhikrCompletionStatus(for type: DhikrType) async throws -> [String] {
         checkAndResetIfNewDay()
-        let completion = getAdhkarCompletion()
+        let completion = getDhikrCompletion()
         return completion[type.rawValue] ?? []
     }
 
-    func resetAdhkarCompletion() async throws {
-        UserDefaults.standard.removeObject(forKey: adhkarCompletionKey)
-        UserDefaults.standard.set(Date(), forKey: adhkarDateKey)
+    func resetDhikrCompletion() async throws {
+        UserDefaults.standard.removeObject(forKey: dhikrCompletionKey)
+        UserDefaults.standard.set(Date(), forKey: dhikrDateKey)
     }
 
     // MARK: - Private Helpers
@@ -123,28 +123,28 @@ final class DuaRepository: DuaRepositoryProtocol {
         UserDefaults.standard.set(ids, forKey: favoritesKey)
     }
 
-    private func getAdhkarCompletion() -> [String: [String]] {
-        guard let data = UserDefaults.standard.data(forKey: adhkarCompletionKey),
+    private func getDhikrCompletion() -> [String: [String]] {
+        guard let data = UserDefaults.standard.data(forKey: dhikrCompletionKey),
               let completion = try? JSONDecoder().decode([String: [String]].self, from: data) else {
             return [:]
         }
         return completion
     }
 
-    private func saveAdhkarCompletion(_ completion: [String: [String]]) {
+    private func saveDhikrCompletion(_ completion: [String: [String]]) {
         guard let data = try? JSONEncoder().encode(completion) else { return }
-        UserDefaults.standard.set(data, forKey: adhkarCompletionKey)
+        UserDefaults.standard.set(data, forKey: dhikrCompletionKey)
     }
 
     private func checkAndResetIfNewDay() {
-        guard let lastDate = UserDefaults.standard.object(forKey: adhkarDateKey) as? Date else {
-            UserDefaults.standard.set(Date(), forKey: adhkarDateKey)
+        guard let lastDate = UserDefaults.standard.object(forKey: dhikrDateKey) as? Date else {
+            UserDefaults.standard.set(Date(), forKey: dhikrDateKey)
             return
         }
 
         if !Calendar.current.isDateInToday(lastDate) {
-            UserDefaults.standard.removeObject(forKey: adhkarCompletionKey)
-            UserDefaults.standard.set(Date(), forKey: adhkarDateKey)
+            UserDefaults.standard.removeObject(forKey: dhikrCompletionKey)
+            UserDefaults.standard.set(Date(), forKey: dhikrDateKey)
         }
     }
 }
@@ -165,9 +165,9 @@ extension DuaCategory {
 }
 
 extension Dua {
-    static let allDuas: [Dua] = morningAdhkar + eveningAdhkar + sleepAdhkar + dailyDuas
+    static let allDuas: [Dua] = morningDhikr + eveningDhikr + sleepDhikr + dailyDuas
 
-    static let morningAdhkar: [Dua] = [
+    static let morningDhikr: [Dua] = [
         Dua(
             id: "morning_1",
             categoryId: "morning",
@@ -206,7 +206,7 @@ extension Dua {
         ),
     ]
 
-    static let eveningAdhkar: [Dua] = [
+    static let eveningDhikr: [Dua] = [
         Dua(
             id: "evening_1",
             categoryId: "evening",
@@ -233,7 +233,7 @@ extension Dua {
         ),
     ]
 
-    static let sleepAdhkar: [Dua] = [
+    static let sleepDhikr: [Dua] = [
         Dua(
             id: "sleep_1",
             categoryId: "sleep",

@@ -29,7 +29,7 @@ enum StreakType: String, Codable, CaseIterable, Identifiable {
         case .daily: return "Open app and complete any activity"
         case .prayer: return "Log all 5 prayers"
         case .quran: return "Read any amount of Quran"
-        case .dhikr: return "Complete morning or evening adhkar"
+        case .dhikr: return "Complete morning or evening dhikr"
         case .learning: return "Complete at least one lesson"
         }
     }
@@ -164,8 +164,8 @@ struct Achievement: Identifiable, Codable, Hashable {
 
         // Dhikr
         Achievement(id: "dhikr_first", category: .dhikr, title: "First Tasbeeh", description: "Complete your first session", iconName: "circle", isUnlocked: false),
-        Achievement(id: "dhikr_morning", category: .dhikr, title: "Morning Person", description: "7-day morning adhkar streak", iconName: "sunrise.fill", isUnlocked: false),
-        Achievement(id: "dhikr_evening", category: .dhikr, title: "Evening Devotee", description: "7-day evening adhkar streak", iconName: "sunset.fill", isUnlocked: false),
+        Achievement(id: "dhikr_morning", category: .dhikr, title: "Morning Person", description: "7-day morning dhikr streak", iconName: "sunrise.fill", isUnlocked: false),
+        Achievement(id: "dhikr_evening", category: .dhikr, title: "Evening Devotee", description: "7-day evening dhikr streak", iconName: "sunset.fill", isUnlocked: false),
         Achievement(id: "dhikr_10k", category: .dhikr, title: "10,000 Count", description: "Lifetime tasbeeh count", iconName: "infinity", isUnlocked: false),
 
         // Ramadan
@@ -269,8 +269,8 @@ enum HasanatAward {
     case lessonPerfect
     case pronunciationPass
     case tajweedModule
-    case morningAdhkar
-    case eveningAdhkar
+    case morningDhikr
+    case eveningDhikr
     case tasbeehSession
     case dailyOpen
     case dailyVerse
@@ -292,8 +292,8 @@ enum HasanatAward {
         case .lessonPerfect: return 5
         case .pronunciationPass: return 5
         case .tajweedModule: return 20
-        case .morningAdhkar: return 15
-        case .eveningAdhkar: return 15
+        case .morningDhikr: return 15
+        case .eveningDhikr: return 15
         case .tasbeehSession: return 10
         case .dailyOpen: return 5
         case .dailyVerse: return 3

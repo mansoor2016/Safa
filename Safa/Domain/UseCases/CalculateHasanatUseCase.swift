@@ -27,8 +27,8 @@ enum HasanatAction: Equatable {
     case perfectPronunciation
 
     // Dhikr Actions
-    case morningAdhkarCompleted
-    case eveningAdhkarCompleted
+    case morningDhikrCompleted
+    case eveningDhikrCompleted
     case tasbeeh(count: Int)
     case duaRecited
 
@@ -82,8 +82,8 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
         "perfectPronunciation": 5,
 
         // Dhikr
-        "morningAdhkar": 15,
-        "eveningAdhkar": 15,
+        "morningDhikr": 15,
+        "eveningDhikr": 15,
         "tasbeeh33": 10,
         "tasbeeh100": 20,
         "duaRecited": 5,
@@ -152,11 +152,11 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
         case .perfectPronunciation:
             return basePoints["perfectPronunciation"] ?? 5
 
-        case .morningAdhkarCompleted:
-            return basePoints["morningAdhkar"] ?? 15
+        case .morningDhikrCompleted:
+            return basePoints["morningDhikr"] ?? 15
 
-        case .eveningAdhkarCompleted:
-            return basePoints["eveningAdhkar"] ?? 15
+        case .eveningDhikrCompleted:
+            return basePoints["eveningDhikr"] ?? 15
 
         case .tasbeeh(let count):
             return calculateTasbeehPoints(count: count)
@@ -270,7 +270,7 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
     private func isEligibleForFridayBonus(_ action: HasanatAction) -> Bool {
         switch action {
         case .prayerLogged, .quranPageRead, .quranSurahCompleted,
-             .duaRecited, .morningAdhkarCompleted, .eveningAdhkarCompleted:
+             .duaRecited, .morningDhikrCompleted, .eveningDhikrCompleted:
             return true
         default:
             return false
@@ -364,14 +364,14 @@ extension HasanatAward {
             return .lessonCompleted
         case .tajweedModule:
             return .lessonCompleted
-        case .morningAdhkar:
-            return .morningAdhkarCompleted
-        case .eveningAdhkar:
-            return .eveningAdhkarCompleted
+        case .morningDhikr:
+            return .morningDhikrCompleted
+        case .eveningDhikr:
+            return .eveningDhikrCompleted
         case .tasbeehSession:
             return .tasbeeh(count: 33)
         case .dailyOpen:
-            return .morningAdhkarCompleted
+            return .morningDhikrCompleted
         case .dailyVerse:
             return .quranPageRead
         case .dailyHadith:
@@ -383,7 +383,7 @@ extension HasanatAward {
         case .familyJoined:
             return .friendJoined
         case .fastingDay:
-            return .morningAdhkarCompleted
+            return .morningDhikrCompleted
         case .taraweeh:
             return .prayerLogged(.isha)
         }

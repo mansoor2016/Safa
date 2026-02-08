@@ -608,7 +608,7 @@ xcodebuild -scheme SafaWidget build
 
 ### 9.1 Hadith Feature
 
-### 9.2 Dua & Adhkar Feature
+### 9.2 Dua & Dhikr Feature
 - [ ] Add audio pronunciations
 
 ### 9.3 Islamic Calendar
@@ -680,7 +680,7 @@ xcodebuild -scheme SafaWidget build
 - [ ] Home shows contextual reminder
 - [ ] Browse and search Hadith
 - [ ] Use tasbeeh counter with haptics
-- [ ] Complete morning adhkar checklist
+- [ ] Complete morning dhikr checklist
 - [ ] View Islamic calendar with Hijri dates
 - [ ] Enable Ramadan mode, see transformed home
 - [ ] Calculate Zakat

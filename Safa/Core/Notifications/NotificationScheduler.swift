@@ -225,13 +225,13 @@ final class NotificationScheduler {
         )
     }
 
-    // MARK: - Adhkar Reminders
+    // MARK: - Dhikr Reminders
 
-    /// Schedule morning adhkar reminder
-    func scheduleMorningAdhkarReminder(at date: Date) async throws {
+    /// Schedule morning dhikr reminder
+    func scheduleMorningDhikrReminder(at date: Date) async throws {
         try await scheduleNotification(
-            identifier: "morning_adhkar_reminder",
-            title: "Morning Adhkar",
+            identifier: "morning_dhikr_reminder",
+            title: "Morning Dhikr",
             body: "Start your day with remembrance of Allah",
             date: date,
             category: .generalReminder,
@@ -239,11 +239,11 @@ final class NotificationScheduler {
         )
     }
 
-    /// Schedule evening adhkar reminder
-    func scheduleEveningAdhkarReminder(at date: Date) async throws {
+    /// Schedule evening dhikr reminder
+    func scheduleEveningDhikrReminder(at date: Date) async throws {
         try await scheduleNotification(
-            identifier: "evening_adhkar_reminder",
-            title: "Evening Adhkar",
+            identifier: "evening_dhikr_reminder",
+            title: "Evening Dhikr",
             body: "End your day with remembrance of Allah",
             date: date,
             category: .generalReminder,

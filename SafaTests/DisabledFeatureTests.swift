@@ -165,7 +165,7 @@ final class DisabledFeatureTests: XCTestCase {
             .qiblaCompass,
             .quranReader,
             .hadithCollection,
-            .duaAdhkar,
+            .duaDhikr,
             .tasbeehCounter,
             .islamicCalendar,
             .gamification,

@@ -4,9 +4,9 @@
 
 import Foundation
 
-// MARK: - Sleep Adhkar Model
+// MARK: - Sleep Dhikr Model
 
-struct SleepAdhkar: Identifiable {
+struct SleepDhikr: Identifiable {
     let id: String
     let title: String
     let arabic: String
@@ -23,7 +23,7 @@ final class WindDownViewModel {
 
     // MARK: - State
 
-    var completedAdhkar: Set<String> = []
+    var completedDhikr: Set<String> = []
     var isPlayingRecitation: Bool = false
     var selectedReciter: String = "Mishary Rashid Alafasy"
     var fajrAlarmEnabled: Bool = false
@@ -33,7 +33,7 @@ final class WindDownViewModel {
 
     // MARK: - Static Data
 
-    let sleepAdhkar: [SleepAdhkar] = SleepAdhkarData.allAdhkar
+    let sleepDhikr: [SleepDhikr] = SleepDhikrData.allDhikr
 
     let calmingSurahs: [String] = [
         "Surah Al-Mulk",
@@ -54,21 +54,21 @@ final class WindDownViewModel {
     // MARK: - Computed Properties
 
     var completionPercentage: Double {
-        guard !sleepAdhkar.isEmpty else { return 0 }
-        return Double(completedAdhkar.count) / Double(sleepAdhkar.count) * 100
+        guard !sleepDhikr.isEmpty else { return 0 }
+        return Double(completedDhikr.count) / Double(sleepDhikr.count) * 100
     }
 
-    var allAdhkarCompleted: Bool {
-        completedAdhkar.count == sleepAdhkar.count
+    var allDhikrCompleted: Bool {
+        completedDhikr.count == sleepDhikr.count
     }
 
     // MARK: - Methods
 
-    func toggleAdhkar(_ id: String) {
-        if completedAdhkar.contains(id) {
-            completedAdhkar.remove(id)
+    func toggleDhikr(_ id: String) {
+        if completedDhikr.contains(id) {
+            completedDhikr.remove(id)
         } else {
-            completedAdhkar.insert(id)
+            completedDhikr.insert(id)
         }
     }
 
@@ -77,17 +77,17 @@ final class WindDownViewModel {
     }
 
     func resetProgress() {
-        completedAdhkar.removeAll()
+        completedDhikr.removeAll()
         isPlayingRecitation = false
         playbackProgress = 0.0
     }
 }
 
-// MARK: - Sleep Adhkar Data
+// MARK: - Sleep Dhikr Data
 
-enum SleepAdhkarData {
-    static let allAdhkar: [SleepAdhkar] = [
-        SleepAdhkar(
+enum SleepDhikrData {
+    static let allDhikr: [SleepDhikr] = [
+        SleepDhikr(
             id: "ayat-kursi",
             title: "Ayatul Kursi",
             arabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...",
@@ -96,7 +96,7 @@ enum SleepAdhkarData {
             benefit: "Protection throughout the night",
             count: 1
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "surah-ikhlas",
             title: "Surah Al-Ikhlas",
             arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ...",
@@ -105,7 +105,7 @@ enum SleepAdhkarData {
             benefit: "Equal to one-third of the Quran",
             count: 3
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "surah-falaq",
             title: "Surah Al-Falaq",
             arabic: "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ...",
@@ -114,7 +114,7 @@ enum SleepAdhkarData {
             benefit: "Protection from evil",
             count: 3
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "surah-nas",
             title: "Surah An-Nas",
             arabic: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ...",
@@ -123,7 +123,7 @@ enum SleepAdhkarData {
             benefit: "Protection from whispers of Satan",
             count: 3
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "sleep-dua",
             title: "Dua Before Sleep",
             arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
@@ -132,7 +132,7 @@ enum SleepAdhkarData {
             benefit: "Sunnah of the Prophet ﷺ",
             count: 1
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "hands-blow",
             title: "Blowing into Hands",
             arabic: "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
@@ -141,7 +141,7 @@ enum SleepAdhkarData {
             benefit: "Recite and wipe over body",
             count: 1
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "tasbih-33",
             title: "SubhanAllah",
             arabic: "سُبْحَانَ اللَّهِ",
@@ -150,7 +150,7 @@ enum SleepAdhkarData {
             benefit: "33 times before sleep",
             count: 33
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "hamd-33",
             title: "Alhamdulillah",
             arabic: "الْحَمْدُ لِلَّهِ",
@@ -159,7 +159,7 @@ enum SleepAdhkarData {
             benefit: "33 times before sleep",
             count: 33
         ),
-        SleepAdhkar(
+        SleepDhikr(
             id: "takbir-34",
             title: "Allahu Akbar",
             arabic: "اللَّهُ أَكْبَرُ",

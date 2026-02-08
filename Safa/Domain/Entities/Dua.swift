@@ -1,5 +1,5 @@
 // MARK: - Dua.swift
-// PURPOSE: Domain entities for Duas, Adhkar, and categories
+// PURPOSE: Domain entities for Duas, Dhikr, and categories
 
 import Foundation
 
@@ -130,17 +130,17 @@ struct TasbeehSession: Identifiable, Codable, Hashable {
     }
 }
 
-// MARK: - Adhkar Type
-enum AdhkarType: String, Codable, CaseIterable {
+// MARK: - Dhikr Type
+enum DhikrType: String, Codable, CaseIterable {
     case morning
     case evening
     case sleep
 
     var displayName: String {
         switch self {
-        case .morning: return "Morning Adhkar"
-        case .evening: return "Evening Adhkar"
-        case .sleep: return "Sleep Adhkar"
+        case .morning: return "Morning Dhikr"
+        case .evening: return "Evening Dhikr"
+        case .sleep: return "Sleep Dhikr"
         }
     }
 }

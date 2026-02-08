@@ -370,8 +370,8 @@ struct RamadanView: View {
                 DailyGoalRow(icon: "checkmark.circle", title: "5 Daily Prayers", isCompleted: true)
                 DailyGoalRow(icon: "moon.stars", title: "Taraweeh", isCompleted: false)
                 DailyGoalRow(icon: "book", title: "Read 1 Juz", isCompleted: false)
-                DailyGoalRow(icon: "text.quote", title: "Morning Adhkar", isCompleted: true)
-                DailyGoalRow(icon: "text.quote", title: "Evening Adhkar", isCompleted: false)
+                DailyGoalRow(icon: "text.quote", title: "Morning Dhikr", isCompleted: true)
+                DailyGoalRow(icon: "text.quote", title: "Evening Dhikr", isCompleted: false)
             }
         }
     }

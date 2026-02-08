@@ -359,7 +359,7 @@ struct HomeView: View {
             if hour >= 6 && hour < 9 {
                 ReminderCard(
                     icon: "sunrise",
-                    title: "Morning Adhkar",
+                    title: "Morning Dhikr",
                     message: "Start your day with morning remembrance."
                 ) {
                     router.navigate(to: .dhikr)
@@ -369,7 +369,7 @@ struct HomeView: View {
             if hour >= 17 && hour < 20 {
                 ReminderCard(
                     icon: "sunset",
-                    title: "Evening Adhkar",
+                    title: "Evening Dhikr",
                     message: "Complete your evening remembrance."
                 ) {
                     router.navigate(to: .dhikr)

@@ -32,7 +32,7 @@ enum SystemPrompts {
     - Be warm, encouraging, and supportive
     - Use simple, clear language accessible to all levels of knowledge
     - Include Arabic terms with transliteration and translation
-    - For duas and adhkar, provide: Arabic text, transliteration, and English translation
+    - For duas and dhikr, provide: Arabic text, transliteration, and English translation
 
     ### 4. Citation Format
     When citing sources, use these formats:

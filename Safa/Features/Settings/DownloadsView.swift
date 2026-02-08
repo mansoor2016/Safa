@@ -18,14 +18,14 @@ struct DownloadItem: Identifiable {
 
 enum DownloadCategory: String, CaseIterable {
     case quranAudio = "Quran Audio"
-    case adhkarAudio = "Adhkar Audio"
+    case dhikrAudio = "Dhikr Audio"
     case learningContent = "Learning Content"
     case aiModel = "AI Model"
 
     var iconName: String {
         switch self {
         case .quranAudio: return "book.fill"
-        case .adhkarAudio: return "waveform"
+        case .dhikrAudio: return "waveform"
         case .learningContent: return "graduationcap.fill"
         case .aiModel: return "cpu"
         }
@@ -34,7 +34,7 @@ enum DownloadCategory: String, CaseIterable {
     var color: Color {
         switch self {
         case .quranAudio: return .green
-        case .adhkarAudio: return .purple
+        case .dhikrAudio: return .purple
         case .learningContent: return .blue
         case .aiModel: return .orange
         }
@@ -127,30 +127,30 @@ final class DownloadsViewModel {
                 progress: 0
             ),
 
-            // Adhkar Audio
+            // Dhikr Audio
             DownloadItem(
-                id: "adhkar-morning",
-                title: "Morning Adhkar",
+                id: "dhikr-morning",
+                title: "Morning Dhikr",
                 subtitle: "Audio with text",
-                category: .adhkarAudio,
+                category: .dhikrAudio,
                 size: 25_000_000,
                 status: .downloaded,
                 progress: 1.0
             ),
             DownloadItem(
-                id: "adhkar-evening",
-                title: "Evening Adhkar",
+                id: "dhikr-evening",
+                title: "Evening Dhikr",
                 subtitle: "Audio with text",
-                category: .adhkarAudio,
+                category: .dhikrAudio,
                 size: 25_000_000,
                 status: .downloaded,
                 progress: 1.0
             ),
             DownloadItem(
-                id: "adhkar-sleep",
-                title: "Sleep Adhkar",
+                id: "dhikr-sleep",
+                title: "Sleep Dhikr",
                 subtitle: "Audio with text",
-                category: .adhkarAudio,
+                category: .dhikrAudio,
                 size: 15_000_000,
                 status: .notDownloaded,
                 progress: 0

@@ -600,12 +600,12 @@ final class DuaRepositoryTests: XCTestCase {
         XCTAssertFalse(categories.isEmpty)
     }
 
-    func testMockGetMorningAdhkar() async throws {
+    func testMockGetMorningDhikr() async throws {
         let mockRepo = MockDuaRepository()
 
-        let adhkar = try await mockRepo.getMorningAdhkar()
+        let dhikr = try await mockRepo.getMorningDhikr()
 
-        XCTAssertFalse(adhkar.isEmpty)
+        XCTAssertFalse(dhikr.isEmpty)
     }
 }
 
@@ -613,7 +613,7 @@ final class DuaRepositoryTests: XCTestCase {
 
 final class MockDuaRepository: DuaRepositoryProtocol {
     private var favorites: [Dua] = []
-    private var completedAdhkar: [AdhkarType: [String]] = [:]
+    private var completedDhikr: [DhikrType: [String]] = [:]
 
     func getCategories() async throws -> [DuaCategory] {
         return [
@@ -658,7 +658,7 @@ final class MockDuaRepository: DuaRepositoryProtocol {
         )
     }
 
-    func getMorningAdhkar() async throws -> [Dua] {
+    func getMorningDhikr() async throws -> [Dua] {
         return [
             Dua(
                 id: "morning_1",
@@ -671,7 +671,7 @@ final class MockDuaRepository: DuaRepositoryProtocol {
         ]
     }
 
-    func getEveningAdhkar() async throws -> [Dua] {
+    func getEveningDhikr() async throws -> [Dua] {
         return [
             Dua(
                 id: "evening_1",
@@ -684,7 +684,7 @@ final class MockDuaRepository: DuaRepositoryProtocol {
         ]
     }
 
-    func getSleepAdhkar() async throws -> [Dua] {
+    func getSleepDhikr() async throws -> [Dua] {
         return []
     }
 
@@ -704,18 +704,18 @@ final class MockDuaRepository: DuaRepositoryProtocol {
         return []
     }
 
-    func markAdhkarCompleted(_ dua: Dua, type: AdhkarType) async throws {
-        var completed = completedAdhkar[type] ?? []
+    func markDhikrCompleted(_ dua: Dua, type: DhikrType) async throws {
+        var completed = completedDhikr[type] ?? []
         completed.append(dua.id)
-        completedAdhkar[type] = completed
+        completedDhikr[type] = completed
     }
 
-    func getAdhkarCompletionStatus(for type: AdhkarType) async throws -> [String] {
-        return completedAdhkar[type] ?? []
+    func getDhikrCompletionStatus(for type: DhikrType) async throws -> [String] {
+        return completedDhikr[type] ?? []
     }
 
-    func resetAdhkarCompletion() async throws {
-        completedAdhkar = [:]
+    func resetDhikrCompletion() async throws {
+        completedDhikr = [:]
     }
 }
 

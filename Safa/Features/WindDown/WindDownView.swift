@@ -9,7 +9,7 @@ import SwiftUI
 struct WindDownView: View {
     @State private var viewModel = WindDownViewModel()
     @State private var showingFajrAlarm = false
-    @State private var selectedAdhkar: SleepAdhkar?
+    @State private var selectedDhikr: SleepDhikr?
 
     var body: some View {
         NavigationStack {
@@ -18,10 +18,10 @@ struct WindDownView: View {
                     headerSection
                     progressSection
                     recitationPlayerSection
-                    adhkarChecklistSection
+                    dhikrChecklistSection
                     fajrAlarmSection
 
-                    if viewModel.allAdhkarCompleted {
+                    if viewModel.allDhikrCompleted {
                         completionSection
                     }
                 }
@@ -37,8 +37,8 @@ struct WindDownView: View {
                     }
                 }
             }
-            .sheet(item: $selectedAdhkar) { adhkar in
-                AdhkarDetailSheet(adhkar: adhkar, viewModel: viewModel)
+            .sheet(item: $selectedDhikr) { dhikr in
+                DhikrDetailSheet(dhikr: dhikr, viewModel: viewModel)
             }
             .sheet(isPresented: $showingFajrAlarm) {
                 FajrAlarmSheet(viewModel: viewModel)
@@ -57,7 +57,7 @@ struct WindDownView: View {
             Text("Prepare for Restful Sleep")
                 .font(.title2.weight(.semibold))
 
-            Text("Complete your nightly adhkar and set your Fajr alarm")
+            Text("Complete your nightly dhikr and set your Fajr alarm")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -73,7 +73,7 @@ struct WindDownView: View {
                 Text("Tonight's Progress")
                     .font(.headline)
                 Spacer()
-                Text("\(viewModel.completedAdhkar.count)/\(viewModel.sleepAdhkar.count)")
+                Text("\(viewModel.completedDhikr.count)/\(viewModel.sleepDhikr.count)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -207,27 +207,27 @@ struct WindDownView: View {
         .frame(height: 4)
     }
 
-    // MARK: - Adhkar Checklist Section
+    // MARK: - Dhikr Checklist Section
 
-    private var adhkarChecklistSection: some View {
+    private var dhikrChecklistSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "checkmark.circle")
                     .font(.title2)
                     .foregroundStyle(.indigo)
 
-                Text("Sleep Adhkar")
+                Text("Sleep Dhikr")
                     .font(.headline)
 
                 Spacer()
             }
 
-            ForEach(viewModel.sleepAdhkar) { adhkar in
-                SleepAdhkarRow(
-                    adhkar: adhkar,
-                    isCompleted: viewModel.completedAdhkar.contains(adhkar.id),
-                    onTap: { selectedAdhkar = adhkar },
-                    onToggle: { viewModel.toggleAdhkar(adhkar.id) }
+            ForEach(viewModel.sleepDhikr) { dhikr in
+                SleepDhikrRow(
+                    dhikr: dhikr,
+                    isCompleted: viewModel.completedDhikr.contains(dhikr.id),
+                    onTap: { selectedDhikr = dhikr },
+                    onToggle: { viewModel.toggleDhikr(dhikr.id) }
                 )
             }
         }
@@ -286,7 +286,7 @@ struct WindDownView: View {
             Text("Well Done!")
                 .font(.title2.weight(.semibold))
 
-            Text("You've completed your nightly adhkar. May Allah grant you peaceful sleep and an easy awakening for Fajr.")
+            Text("You've completed your nightly dhikr. May Allah grant you peaceful sleep and an easy awakening for Fajr.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

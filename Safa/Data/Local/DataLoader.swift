@@ -112,7 +112,7 @@ final class DataLoader {
     struct DuaDataFile: Codable {
         let categories: [CategoryData]
         let duas: [DuaData]
-        let adhkar: AdhkarData
+        let dhikr: DhikrData
 
         struct CategoryData: Codable {
             let id: String
@@ -133,7 +133,7 @@ final class DataLoader {
             let benefit: String?
         }
 
-        struct AdhkarData: Codable {
+        struct DhikrData: Codable {
             let morning: [String]
             let evening: [String]
             let sleep: [String]

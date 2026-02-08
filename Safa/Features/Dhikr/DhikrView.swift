@@ -25,9 +25,9 @@ struct DhikrView: View {
             // Content
             TabView(selection: $selectedTab) {
                 tasbeehView.tag(0)
-                adhkarListView(type: .morning).tag(1)
-                adhkarListView(type: .evening).tag(2)
-                adhkarListView(type: .sleep).tag(3)
+                dhikrListView(type: .morning).tag(1)
+                dhikrListView(type: .evening).tag(2)
+                dhikrListView(type: .sleep).tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
@@ -96,10 +96,10 @@ struct DhikrView: View {
         }
     }
 
-    // MARK: - Adhkar List View
+    // MARK: - Dhikr List View
 
-    private func adhkarListView(type: AdhkarType) -> some View {
-        AdhkarListView(type: type)
+    private func dhikrListView(type: DhikrType) -> some View {
+        DhikrListView(type: type)
             .environment(dependencies)
     }
 }
@@ -169,13 +169,13 @@ private struct AfterPrayerRow: View {
     }
 }
 
-// MARK: - Adhkar List View
+// MARK: - Dhikr List View
 
-private struct AdhkarListView: View {
+private struct DhikrListView: View {
     @Environment(Dependencies.self) private var dependencies
 
-    let type: AdhkarType
-    @State private var adhkar: [Dua] = []
+    let type: DhikrType
+    @State private var dhikr: [Dua] = []
     @State private var completedIds: Set<String> = []
     @State private var isLoading = true
 
@@ -183,11 +183,11 @@ private struct AdhkarListView: View {
         Group {
             if isLoading {
                 LoadingView()
-            } else if adhkar.isEmpty {
+            } else if dhikr.isEmpty {
                 EmptyStateView(
                     icon: "text.book.closed",
-                    title: "No Adhkar",
-                    message: "Adhkar content is being prepared."
+                    title: "No Dhikr",
+                    message: "Dhikr content is being prepared."
                 )
             } else {
                 ScrollView {
@@ -195,8 +195,8 @@ private struct AdhkarListView: View {
                         // Progress
                         progressHeader
 
-                        ForEach(adhkar) { dua in
-                            AdhkarRow(
+                        ForEach(dhikr) { dua in
+                            DhikrRow(
                                 dua: dua,
                                 isCompleted: completedIds.contains(dua.id)
                             ) {
@@ -209,7 +209,7 @@ private struct AdhkarListView: View {
             }
         }
         .task {
-            await loadAdhkar()
+            await loadDhikr()
         }
     }
 
@@ -217,10 +217,10 @@ private struct AdhkarListView: View {
         ContentCard {
             HStack {
                 VStack(alignment: .leading) {
-                    Text("\(type.rawValue.capitalized) Adhkar")
+                    Text("\(type.rawValue.capitalized) Dhikr")
                         .font(SafaTypography.titleMedium)
 
-                    Text("\(completedIds.count)/\(adhkar.count) completed")
+                    Text("\(completedIds.count)/\(dhikr.count) completed")
                         .font(SafaTypography.bodySmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
@@ -228,24 +228,24 @@ private struct AdhkarListView: View {
                 Spacer()
 
                 CircularProgressView(
-                    progress: adhkar.isEmpty ? 0 : Double(completedIds.count) / Double(adhkar.count)
+                    progress: dhikr.isEmpty ? 0 : Double(completedIds.count) / Double(dhikr.count)
                 )
             }
         }
     }
 
-    private func loadAdhkar() async {
+    private func loadDhikr() async {
         do {
             switch type {
             case .morning:
-                adhkar = try await dependencies.duaRepository.getMorningAdhkar()
+                dhikr = try await dependencies.duaRepository.getMorningDhikr()
             case .evening:
-                adhkar = try await dependencies.duaRepository.getEveningAdhkar()
+                dhikr = try await dependencies.duaRepository.getEveningDhikr()
             case .sleep:
-                adhkar = try await dependencies.duaRepository.getSleepAdhkar()
+                dhikr = try await dependencies.duaRepository.getSleepDhikr()
             }
 
-            let completed = try await dependencies.duaRepository.getAdhkarCompletionStatus(for: type)
+            let completed = try await dependencies.duaRepository.getDhikrCompletionStatus(for: type)
             completedIds = Set(completed)
 
             isLoading = false
@@ -256,15 +256,15 @@ private struct AdhkarListView: View {
 
     private func markCompleted(_ dua: Dua) async {
         do {
-            try await dependencies.duaRepository.markAdhkarCompleted(dua, type: type)
+            try await dependencies.duaRepository.markDhikrCompleted(dua, type: type)
             completedIds.insert(dua.id)
 
             // Award Hasanat if all completed
-            if completedIds.count == adhkar.count {
+            if completedIds.count == dhikr.count {
                 if type == .morning {
-                    await dependencies.userState.awardHasanat(.morningAdhkar)
+                    await dependencies.userState.awardHasanat(.morningDhikr)
                 } else if type == .evening {
-                    await dependencies.userState.awardHasanat(.eveningAdhkar)
+                    await dependencies.userState.awardHasanat(.eveningDhikr)
                 }
                 await dependencies.userState.recordActivity(type: .dhikr)
             }
@@ -274,9 +274,9 @@ private struct AdhkarListView: View {
     }
 }
 
-// MARK: - Adhkar Row
+// MARK: - Dhikr Row
 
-private struct AdhkarRow: View {
+private struct DhikrRow: View {
     let dua: Dua
     let isCompleted: Bool
     let onComplete: () -> Void

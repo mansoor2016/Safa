@@ -4,10 +4,10 @@
 
 import SwiftUI
 
-// MARK: - Sleep Adhkar Row
+// MARK: - Sleep Dhikr Row
 
-struct SleepAdhkarRow: View {
-    let adhkar: SleepAdhkar
+struct SleepDhikrRow: View {
+    let dhikr: SleepDhikr
     let isCompleted: Bool
     let onTap: () -> Void
     let onToggle: () -> Void
@@ -27,13 +27,13 @@ struct SleepAdhkarRow: View {
             } label: {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(adhkar.title)
+                        Text(dhikr.title)
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(isCompleted ? .secondary : .primary)
                             .strikethrough(isCompleted)
 
-                        if adhkar.count > 1 {
-                            Text("×\(adhkar.count)")
+                        if dhikr.count > 1 {
+                            Text("×\(dhikr.count)")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.indigo)
                                 .padding(.horizontal, 6)
@@ -43,7 +43,7 @@ struct SleepAdhkarRow: View {
                         }
                     }
 
-                    Text(adhkar.benefit)
+                    Text(dhikr.benefit)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -60,10 +60,10 @@ struct SleepAdhkarRow: View {
     }
 }
 
-// MARK: - Adhkar Detail Sheet
+// MARK: - Dhikr Detail Sheet
 
-struct AdhkarDetailSheet: View {
-    let adhkar: SleepAdhkar
+struct DhikrDetailSheet: View {
+    let dhikr: SleepDhikr
     let viewModel: WindDownViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var currentCount: Int = 0
@@ -80,7 +80,7 @@ struct AdhkarDetailSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(adhkar.title)
+            .navigationTitle(dhikr.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -93,7 +93,7 @@ struct AdhkarDetailSheet: View {
     // MARK: - Subviews
 
     private var arabicSection: some View {
-        Text(adhkar.arabic)
+        Text(dhikr.arabic)
             .font(.system(size: 32, weight: .medium, design: .serif))
             .multilineTextAlignment(.center)
             .padding()
@@ -108,7 +108,7 @@ struct AdhkarDetailSheet: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Text(adhkar.transliteration)
+            Text(dhikr.transliteration)
                 .font(.body)
                 .italic()
         }
@@ -121,7 +121,7 @@ struct AdhkarDetailSheet: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Text(adhkar.translation)
+            Text(dhikr.translation)
                 .font(.body)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -132,7 +132,7 @@ struct AdhkarDetailSheet: View {
             Image(systemName: "sparkles")
                 .foregroundStyle(.indigo)
 
-            Text(adhkar.benefit)
+            Text(dhikr.benefit)
                 .font(.subheadline)
         }
         .padding()
@@ -143,52 +143,52 @@ struct AdhkarDetailSheet: View {
 
     @ViewBuilder
     private var counterSection: some View {
-        if adhkar.count > 1 {
+        if dhikr.count > 1 {
             VStack(spacing: 16) {
-                Text("\(currentCount) / \(adhkar.count)")
+                Text("\(currentCount) / \(dhikr.count)")
                     .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundStyle(currentCount >= adhkar.count ? .green : .primary)
+                    .foregroundStyle(currentCount >= dhikr.count ? .green : .primary)
 
                 Button {
                     handleCountTap()
                 } label: {
-                    Text(currentCount >= adhkar.count ? "Completed" : "Tap to Count")
+                    Text(currentCount >= dhikr.count ? "Completed" : "Tap to Count")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(currentCount >= adhkar.count ? Color.green : Color.indigo)
+                        .background(currentCount >= dhikr.count ? Color.green : Color.indigo)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .disabled(currentCount >= adhkar.count)
+                .disabled(currentCount >= dhikr.count)
             }
             .padding()
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16))
         } else {
             Button {
-                viewModel.toggleAdhkar(adhkar.id)
+                viewModel.toggleDhikr(dhikr.id)
                 dismiss()
             } label: {
-                Text(viewModel.completedAdhkar.contains(adhkar.id) ? "Mark Incomplete" : "Mark Complete")
+                Text(viewModel.completedDhikr.contains(dhikr.id) ? "Mark Incomplete" : "Mark Complete")
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.completedAdhkar.contains(adhkar.id) ? Color.gray : Color.indigo)
+                    .background(viewModel.completedDhikr.contains(dhikr.id) ? Color.gray : Color.indigo)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
     }
 
     private func handleCountTap() {
-        if currentCount < adhkar.count {
+        if currentCount < dhikr.count {
             currentCount += 1
             HapticFeedbackService.shared.play(.commit)
         }
 
-        if currentCount >= adhkar.count {
-            viewModel.toggleAdhkar(adhkar.id)
+        if currentCount >= dhikr.count {
+            viewModel.toggleDhikr(dhikr.id)
         }
     }
 }

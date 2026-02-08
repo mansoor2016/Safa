@@ -97,7 +97,7 @@ final class SleepFocusService {
 
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Time to Wind Down")
-        content.body = String(localized: "Start your evening adhkar and prepare for a restful night.")
+        content.body = String(localized: "Start your evening dhikr and prepare for a restful night.")
         content.categoryIdentifier = "WIND_DOWN"
         content.sound = UNNotificationSound(named: UNNotificationSoundName("soft_chime.wav"))
         content.interruptionLevel = .timeSensitive

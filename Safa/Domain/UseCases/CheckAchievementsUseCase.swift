@@ -39,7 +39,7 @@ enum AchievementRequirement {
     case allTracksCompleted
     case familySize(members: Int)
     case shareCount(count: Int)
-    case adhkarCompleted(type: AdhkarType, count: Int)
+    case dhikrCompleted(type: DhikrType, count: Int)
     case tasbeehCount(total: Int)
     case ramadanComplete
     case perfectWeek
@@ -188,8 +188,8 @@ final class CheckAchievementsUseCase: CheckAchievementsUseCaseProtocol {
         case .familySize, .shareCount:
             return false // Would need tracking data
 
-        case .adhkarCompleted:
-            return false // Would need adhkar tracking
+        case .dhikrCompleted:
+            return false // Would need dhikr tracking
 
         case .tasbeehCount(let total):
             return stats.totalTasbeehCount >= total
@@ -252,7 +252,7 @@ final class CheckAchievementsUseCase: CheckAchievementsUseCaseProtocol {
         case .shareCount(let count):
             return (0, count)
 
-        case .adhkarCompleted(_, let count):
+        case .dhikrCompleted(_, let count):
             return (0, count)
 
         case .tasbeehCount(let total):

@@ -170,8 +170,8 @@ final class ModelIntegrationTests: XCTestCase {
         XCTAssertGreaterThan(HasanatAward.prayerAllFive.points, 0)
         XCTAssertGreaterThan(HasanatAward.quranPage.points, 0)
         XCTAssertGreaterThan(HasanatAward.lessonComplete.points, 0)
-        XCTAssertGreaterThan(HasanatAward.morningAdhkar.points, 0)
-        XCTAssertGreaterThan(HasanatAward.eveningAdhkar.points, 0)
+        XCTAssertGreaterThan(HasanatAward.morningDhikr.points, 0)
+        XCTAssertGreaterThan(HasanatAward.eveningDhikr.points, 0)
 
         // Verify all five prayers bonus is greater than single prayer
         XCTAssertGreaterThan(HasanatAward.prayerAllFive.points, HasanatAward.prayerLogged.points)

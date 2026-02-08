@@ -48,9 +48,9 @@ final class DownloadsViewModelTests: XCTestCase {
         XCTAssertFalse(quranAudio.isEmpty)
     }
 
-    func test_downloads_containsAdhkarAudio() {
-        let adhkarAudio = sut.downloads.filter { $0.category == .adhkarAudio }
-        XCTAssertFalse(adhkarAudio.isEmpty)
+    func test_downloads_containsDhikrAudio() {
+        let dhikrAudio = sut.downloads.filter { $0.category == .dhikrAudio }
+        XCTAssertFalse(dhikrAudio.isEmpty)
     }
 
     func test_downloads_containsLearningContent() {
@@ -231,7 +231,7 @@ final class DownloadsViewModelTests: XCTestCase {
             id: "test",
             title: "Test Title",
             subtitle: "Test Subtitle",
-            category: .adhkarAudio,
+            category: .dhikrAudio,
             size: 50_000_000,
             status: .downloaded,
             progress: 1.0
@@ -240,7 +240,7 @@ final class DownloadsViewModelTests: XCTestCase {
         XCTAssertEqual(item.id, "test")
         XCTAssertEqual(item.title, "Test Title")
         XCTAssertEqual(item.subtitle, "Test Subtitle")
-        XCTAssertEqual(item.category, .adhkarAudio)
+        XCTAssertEqual(item.category, .dhikrAudio)
         XCTAssertEqual(item.size, 50_000_000)
         XCTAssertEqual(item.status, .downloaded)
         XCTAssertEqual(item.progress, 1.0)
@@ -251,21 +251,21 @@ final class DownloadsViewModelTests: XCTestCase {
     func test_downloadCategory_allCases() {
         XCTAssertEqual(DownloadCategory.allCases.count, 4)
         XCTAssertTrue(DownloadCategory.allCases.contains(.quranAudio))
-        XCTAssertTrue(DownloadCategory.allCases.contains(.adhkarAudio))
+        XCTAssertTrue(DownloadCategory.allCases.contains(.dhikrAudio))
         XCTAssertTrue(DownloadCategory.allCases.contains(.learningContent))
         XCTAssertTrue(DownloadCategory.allCases.contains(.aiModel))
     }
 
     func test_downloadCategory_rawValues() {
         XCTAssertEqual(DownloadCategory.quranAudio.rawValue, "Quran Audio")
-        XCTAssertEqual(DownloadCategory.adhkarAudio.rawValue, "Adhkar Audio")
+        XCTAssertEqual(DownloadCategory.dhikrAudio.rawValue, "Dhikr Audio")
         XCTAssertEqual(DownloadCategory.learningContent.rawValue, "Learning Content")
         XCTAssertEqual(DownloadCategory.aiModel.rawValue, "AI Model")
     }
 
     func test_downloadCategory_iconNames() {
         XCTAssertEqual(DownloadCategory.quranAudio.iconName, "book.fill")
-        XCTAssertEqual(DownloadCategory.adhkarAudio.iconName, "waveform")
+        XCTAssertEqual(DownloadCategory.dhikrAudio.iconName, "waveform")
         XCTAssertEqual(DownloadCategory.learningContent.iconName, "graduationcap.fill")
         XCTAssertEqual(DownloadCategory.aiModel.iconName, "cpu")
     }

@@ -1,5 +1,5 @@
 // MARK: - DuaRepositoryProtocol.swift
-// PURPOSE: Defines contract for Dua and Adhkar data access
+// PURPOSE: Defines contract for Dua and Dhikr data access
 
 import Foundation
 
@@ -18,17 +18,17 @@ protocol DuaRepositoryProtocol {
     /// - Returns: The dua if found
     func getDua(id: String) async throws -> Dua?
 
-    /// Fetches morning adhkar
-    /// - Returns: Array of morning adhkar
-    func getMorningAdhkar() async throws -> [Dua]
+    /// Fetches morning dhikr
+    /// - Returns: Array of morning dhikr
+    func getMorningDhikr() async throws -> [Dua]
 
-    /// Fetches evening adhkar
-    /// - Returns: Array of evening adhkar
-    func getEveningAdhkar() async throws -> [Dua]
+    /// Fetches evening dhikr
+    /// - Returns: Array of evening dhikr
+    func getEveningDhikr() async throws -> [Dua]
 
-    /// Fetches sleep adhkar
-    /// - Returns: Array of sleep adhkar
-    func getSleepAdhkar() async throws -> [Dua]
+    /// Fetches sleep dhikr
+    /// - Returns: Array of sleep dhikr
+    func getSleepDhikr() async throws -> [Dua]
 
     /// Fetches favorite duas
     /// - Returns: Array of favorited duas
@@ -47,16 +47,16 @@ protocol DuaRepositoryProtocol {
     /// - Returns: Array of matching duas
     func searchDuas(query: String) async throws -> [Dua]
 
-    /// Marks an adhkar item as completed for today
-    /// - Parameter dua: The adhkar dua
+    /// Marks an dhikr item as completed for today
+    /// - Parameter dua: The dhikr dua
     /// - Parameter type: Morning, evening, or sleep
-    func markAdhkarCompleted(_ dua: Dua, type: AdhkarType) async throws
+    func markDhikrCompleted(_ dua: Dua, type: DhikrType) async throws
 
-    /// Gets completion status for adhkar today
+    /// Gets completion status for dhikr today
     /// - Parameter type: Morning, evening, or sleep
     /// - Returns: Array of completed dua IDs
-    func getAdhkarCompletionStatus(for type: AdhkarType) async throws -> [String]
+    func getDhikrCompletionStatus(for type: DhikrType) async throws -> [String]
 
-    /// Resets adhkar completion for a new day
-    func resetAdhkarCompletion() async throws
+    /// Resets dhikr completion for a new day
+    func resetDhikrCompletion() async throws
 }

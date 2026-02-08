@@ -95,13 +95,13 @@ final class CalculateHasanatUseCaseTests: XCTestCase {
 
     // MARK: - Dhikr Actions
 
-    func testMorningAdhkarPoints() {
-        let points = sut.calculatePoints(for: .morningAdhkarCompleted)
+    func testMorningDhikrPoints() {
+        let points = sut.calculatePoints(for: .morningDhikrCompleted)
         XCTAssertEqual(points, 15)
     }
 
-    func testEveningAdhkarPoints() {
-        let points = sut.calculatePoints(for: .eveningAdhkarCompleted)
+    func testEveningDhikrPoints() {
+        let points = sut.calculatePoints(for: .eveningDhikrCompleted)
         XCTAssertEqual(points, 15)
     }
 

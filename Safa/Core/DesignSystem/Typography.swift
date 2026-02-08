@@ -17,7 +17,7 @@ enum FontConfig {
     static let quranFontName: String? = nil  // nil = use system Arabic
 
     // MARK: - General Arabic
-    // Used for: Duas, Adhkar, Hadith Arabic text, UI labels
+    // Used for: Duas, Dhikr, Hadith Arabic text, UI labels
     // Options: "NotoNaskhArabic", "Amiri", nil (system SF Arabic)
     static let arabicFontName: String? = nil  // nil = use system Arabic
 
