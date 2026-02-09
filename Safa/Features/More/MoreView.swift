@@ -80,12 +80,6 @@ struct MoreView: View {
                     Label("Zakat Calculator", systemImage: "dollarsign.circle")
                 }
 
-                NavigationLink {
-                    ChatView()
-                } label: {
-                    Label("Ask Safa", systemImage: "sparkles")
-                }
-                .disabledFeature(.aiCompanion)
             }
 
             // Progress
