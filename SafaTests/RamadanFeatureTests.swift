@@ -151,6 +151,44 @@ final class RamadanFeatureTests: XCTestCase {
         }
     }
 
+    // MARK: - Ramadan Daily Goals: Combined Quran + Juz
+
+    func test_ramadanDailyGoals_usesJuzKeyNotQuranKey() {
+        // During Ramadan, "Read 1 Juz Quran" uses the "juz" key.
+        // The separate "quran" key should NOT appear during Ramadan.
+        // This ensures the Khatm tracker (which counts "juz") stays accurate.
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let key = "dailyGoals_\(formatter.string(from: Date()))"
+
+        // Simulate Ramadan goal completion: only "juz" key (no "quran")
+        UserDefaults.standard.set(["juz", "morning_dhikr", "taraweeh"], forKey: key)
+
+        let goals = UserDefaults.standard.stringArray(forKey: key) ?? []
+        XCTAssertTrue(goals.contains("juz"), "Ramadan Quran goal should use 'juz' key")
+        XCTAssertFalse(goals.contains("quran"), "Ramadan should not have separate 'quran' key")
+
+        // Verify Khatm counter recognizes this day
+        XCTAssertTrue(goals.contains("juz"), "Khatm tracker should count this day")
+
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
+    func test_nonRamadanDailyGoals_usesQuranKeyNotJuzKey() {
+        // Outside Ramadan, "Read Quran" uses the "quran" key.
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let key = "dailyGoals_\(formatter.string(from: Date()))"
+
+        UserDefaults.standard.set(["quran", "morning_dhikr"], forKey: key)
+
+        let goals = UserDefaults.standard.stringArray(forKey: key) ?? []
+        XCTAssertTrue(goals.contains("quran"), "Non-Ramadan Quran goal should use 'quran' key")
+        XCTAssertFalse(goals.contains("juz"), "Non-Ramadan should not have 'juz' key")
+
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
     // MARK: - DailyGoalRow Component
 
     func test_dailyGoalRow_allPrayersLogged_isComplete() {

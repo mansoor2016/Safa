@@ -32,14 +32,18 @@ struct DailyGoalsCard: View {
                 )
 
                 // Manually toggleable goals
-                goalRow("quran", icon: "book", title: "Read Quran")
+                if isRamadan {
+                    // Ramadan: combined Quran + Juz goal (key "juz" for Khatm tracker)
+                    goalRow("juz", icon: "book.fill", title: "Read 1 Juz Quran")
+                } else {
+                    goalRow("quran", icon: "book", title: "Read Quran")
+                }
                 goalRow("morning_dhikr", icon: "hands.sparkles", title: "Morning Dhikr")
                 goalRow("evening_dhikr", icon: "hands.sparkles", title: "Evening Dhikr")
 
                 // Ramadan-only goals
                 if isRamadan {
                     goalRow("taraweeh", icon: "moon.stars", title: "Taraweeh")
-                    goalRow("juz", icon: "book.fill", title: "Read 1 Juz")
                 }
             }
         }
