@@ -12,26 +12,7 @@ struct MoreView: View {
 
     var body: some View {
         List {
-            // Ramadan section (shown during Ramadan)
-            if hijriConverter.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode) {
-                Section {
-                    NavigationLink {
-                        RamadanView()
-                    } label: {
-                        Label {
-                            VStack(alignment: .leading) {
-                                Text("Ramadan Mode")
-                                Text("Track your fasting")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        } icon: {
-                            Image(systemName: "moon.stars.fill")
-                                .foregroundColor(.purple)
-                        }
-                    }
-                }
-            }
+            // Ramadan is now shown via the Prayer tab during Ramadan month
 
             // Daily Practice
             Section("Daily Practice") {

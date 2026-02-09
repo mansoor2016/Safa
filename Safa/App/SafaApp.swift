@@ -146,9 +146,13 @@ struct MainTabView: View {
             }
             .tag(Tab.quran)
 
-            // Prayer Tab
+            // Prayer Tab (swaps to Ramadan view during Ramadan)
             NavigationStack {
-                PrayerView()
+                if HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode) {
+                    RamadanView()
+                } else {
+                    PrayerView()
+                }
             }
             .tabItem {
                 Label(Tab.prayer.title, systemImage: router.selectedTab == Tab.prayer.rawValue ? Tab.prayer.selectedIcon : Tab.prayer.icon)
