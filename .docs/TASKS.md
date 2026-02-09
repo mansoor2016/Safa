@@ -883,11 +883,15 @@ Code complete but needs physical device or manual testing to confirm:
 - [x] Ramadan page restructured: iftar/suhoor countdown platter, full-width prayer progress, adhan/qibla buttons, interactive daily goals, fasting tracker, Quran Khatm goal, Prayer tab auto-swap during Ramadan
 - [x] Combined duplicate daily goals: "Read Quran" + "Read 1 Juz" → single "Read 1 Juz Quran" during Ramadan (key "juz" preserved for Khatm tracker)
 
-### DONE: Notification Deduplication (February 9, 2026)
-- [x] Fixed duplicate prayer notifications: three independent systems (PrayerViewModel `prayer_fajr`, NotificationService `prayer_fajr_<timestamp>`, NotificationScheduler `prayer_at_fajr`) consolidated into single NotificationScheduler
-- [x] Removed 117 lines of duplicate scheduling code from PrayerViewModel
-- [x] Legacy identifier cleanup: cancelPrayerNotifications() now removes all three identifier formats
+### DONE: Notification Architecture Consolidation (February 9, 2026)
+- [x] Fixed duplicate prayer notifications: three independent systems consolidated into single `NotificationScheduler`
+- [x] Deleted `NotificationService.swift` (496 lines) and `NotificationServiceProtocol.swift` — all callers now use `NotificationScheduler.shared`
+- [x] Removed `notificationService` from `Dependencies` container and `PrayerViewModel` init
+- [x] `AchievementManager` switched from concrete `NotificationService` to `NotificationScheduler.shared.showAchievementUnlocked()`
+- [x] `OnboardingView` switched to `NotificationScheduler.shared.requestAuthorization()`
+- [x] Legacy identifier cleanup: `cancelPrayerNotifications()` removes all three old formats (`prayer_*`, `prayer_at_*`, `prayer_*_<timestamp>`)
 - [x] `scheduleIfNeeded()` (cached, skips if already done today) for normal loads; `forceReschedule()` only for preference changes
+- [x] Virtual walkthrough verified 17 scenarios: all correct, one filter bug found and fixed
 
 ### DONE: Premium UI Polish (February 9, 2026)
 - [x] Nav bar material morph: transparent → frosted ultraThinMaterial on scroll (Home, Prayer, Ramadan)
