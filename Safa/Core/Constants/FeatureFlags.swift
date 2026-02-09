@@ -37,6 +37,9 @@ enum Feature: String, CaseIterable {
     case predictiveDownload = "predictive_download"
     case smartCleanup = "smart_cleanup"
 
+    // UX Variants (toggle to switch between home header layouts)
+    case basicInlineHeader = "basic_inline_header"  // ON = basic inline header, OFF = modern scroll-collapsing (default)
+
     // Coming Soon Features (Disabled - requires iOS 18.4 or Widget extension)
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
@@ -65,6 +68,7 @@ enum Feature: String, CaseIterable {
         case .aiCompanion: return "AI Companion"
         case .interactiveWidgets: return "Interactive Widgets"
         case .standByMode: return "StandBy Mode"
+        case .basicInlineHeader: return "Basic Inline Header"
         case .spotlightSearch: return "Spotlight Search"
         case .calendarExport: return "Calendar Export"
         case .prayerCalendarExport: return "Prayer Time Calendar"
@@ -88,6 +92,9 @@ enum Feature: String, CaseIterable {
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets,
              .standByMode:
+            return false
+        // UX variant: OFF = modern scroll-collapsing, ON = basic inline
+        case .basicInlineHeader:
             return false
         default:
             return true

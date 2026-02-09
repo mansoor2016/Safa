@@ -37,6 +37,11 @@ struct HomeView: View {
                 HomeSkeletonView()
             } else {
             VStack(spacing: SafaSpacing.lg) {
+                // Date subheader (Option 4: visible below large title, scrolls away)
+                if !useBasicInlineHeader {
+                    dateSubheader
+                }
+
                 // Next prayer card
                 if let prayer = nextPrayer {
                     NextPrayerHomeCard(prayer: prayer) {
@@ -73,23 +78,28 @@ struct HomeView: View {
             .padding()
             } // end else (skeleton)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(useBasicInlineHeader ? "" : "Safa")
+        .navigationBarTitleDisplayMode(useBasicInlineHeader ? .inline : .large)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    router.navigate(to: .settings)
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.body)
+            if useBasicInlineHeader {
+                // Option 1: Compact inline header
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { router.navigate(to: .settings) } label: {
+                        Image(systemName: "gearshape").font(.body)
+                    }
                 }
-            }
-            ToolbarItem(placement: .principal) {
-                VStack(spacing: 0) {
-                    Text("Safa")
-                        .font(.headline)
-                    Text(compactDateLine)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 0) {
+                        Text("Safa").font(.headline)
+                        Text(compactDateLine).font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                // Option 4: Large collapsing title with gear on right
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { router.navigate(to: .settings) } label: {
+                        Image(systemName: "gearshape")
+                    }
                 }
             }
         }
@@ -223,6 +233,31 @@ struct HomeView: View {
         withAnimation {
             UserDefaults.standard.set(true, forKey: bannerDismissKey)
             showRamadanBanner = false
+        }
+    }
+
+    // MARK: - Header Layout
+
+    private var useBasicInlineHeader: Bool {
+        FeatureFlags.shared.isEnabled(.basicInlineHeader)
+    }
+
+    /// Option 4: Date line below large title (scrolls away with content)
+    private var dateSubheader: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Date().formatted(date: .complete, time: .omitted))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text(hijriDate)
+                    .font(.subheadline.weight(.medium))
+            }
+            Spacer()
+            if isRamadan {
+                Label("Ramadan", systemImage: "moon.stars.fill")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.purple)
+            }
         }
     }
 
