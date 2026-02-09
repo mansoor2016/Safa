@@ -206,15 +206,17 @@ final class NotificationScheduler {
 
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
 
-        // Legacy timestamp-based format: prayer_fajr_<timestamp>
-        // These have unpredictable identifiers, so find and cancel by prefix
+        // Legacy timestamp-based format: prayer_fajr_1707234000.123
+        // These have unpredictable identifiers, so find and cancel by scanning pending
         let pending = await center.pendingNotificationRequests()
         let timestampIDs = pending
             .map { $0.identifier }
             .filter { id in
+                // Match prayer_<type>_<digits> but NOT prayer_at_* or prayer_before_*
                 id.starts(with: "prayer_") &&
-                id.contains("_") &&
-                id.split(separator: "_").count >= 3 // e.g. prayer_fajr_1707234000
+                !id.starts(with: "prayer_at_") &&
+                !id.starts(with: "prayer_before_") &&
+                !identifiers.contains(id) // not already handled above
             }
         if !timestampIDs.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: timestampIDs)
