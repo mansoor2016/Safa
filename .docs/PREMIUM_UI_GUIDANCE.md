@@ -97,17 +97,100 @@ Capture the highest-impact premium UI enhancements to build on the current Home 
 - Make filter rail appear after initial scroll or when search is active.
 - Preserve state across tab switches and deep links.
 
+## Core Interaction Behaviors
+
+### Screen State Transitions (Required)
+Every primary surface should define explicit visual states and transitions:
+- `loading`
+- `ready`
+- `degraded`
+- `offline`
+- `success/committed action`
+
+**Best surfaces:**
+- Home
+- Prayer
+- Quran reader
+- Settings status surfaces
+
+**Implementation notes:**
+- Transition states with consistent motion tokens and timing.
+- Never jump-cut between incompatible states unless there is an error boundary.
+- Pair degraded/offline states with immediate recovery action.
+
+---
+
+### Bottom Sheet Behavior Standards
+Use bottom sheets as a first-class interaction surface, not ad-hoc modals.
+
+**Best surfaces:**
+- Home quick actions
+- Prayer detail actions
+- Share composer
+- Filter/configuration controls
+
+**Implementation notes:**
+- Standardize detents and drag behavior across screens.
+- Keep handle, corner radius, and background treatment consistent.
+- Use sheets for focused, short tasks; escalate to full screen for long-form flows.
+
+---
+
+### Adaptive Tab Bar and Chrome Visibility
+Navigation chrome should respond to intent while staying predictable.
+
+**Best surfaces:**
+- Home feed-like scroll surfaces
+- Quran/Hadith list surfaces
+
+**Implementation notes:**
+- Hide tab bar only on deliberate downward reading scroll.
+- Reveal tab bar immediately on upward intent or interaction pause.
+- Do not oscillate visibility on tiny scroll deltas.
+
+---
+
+### Optimistic Actions with Undo
+Immediate feedback should be the default for low-risk actions.
+
+**Best surfaces:**
+- Prayer log toggles
+- Bookmarks/favorites
+- Save/share confirmations
+
+**Implementation notes:**
+- Commit UI instantly, sync in background, and expose lightweight undo.
+- Show failure reconciliation only if sync actually fails.
+- Keep toasts/snackbars brief and non-blocking.
+
+---
+
+### Zero-State and Resume Quality
+Empty surfaces should always teach the next action and reduce time-to-value.
+
+**Best surfaces:**
+- Learn tracks
+- Bookmarks/history
+- Family/social sections
+
+**Implementation notes:**
+- Provide one clear primary action on every zero state.
+- Avoid decorative empties with no clear path forward.
+- Prioritize "resume where you left off" rails on Home for Quran, Learn, and Dhikr.
+
 ## Global Guardrails
 - Prioritize readability over effect intensity.
 - Use semantic layout for RTL compatibility.
 - Keep animations tokenized (duration/curve) and consistent across screens.
 - Respect accessibility settings (`Reduce Motion`, Dynamic Type, contrast).
 - Avoid heavy effects in Quran reading mode; comfort first.
+- Keep trust cues explicit in sensitive surfaces (privacy-safe AI, local-first data, export transparency).
+- Avoid engagement patterns that feel manipulative; nudge gently and purposefully.
 
 ## Suggested Rollout Order
-1. Navigation Bar Material Morph (Home + Prayer)
+1. Navigation Bar Material Morph + Screen State Transition Standards (Home + Prayer)
 2. Hero Compression + Sticky Context Chip (Home)
-3. Numeric Text Transitions (Home + Prayer + Dhikr)
+3. Numeric Text Transitions + Optimistic Action Feedback (Home + Prayer + Dhikr)
 4. Matched-Geometry Transition (Quran list -> reader)
-5. Contextual Actions + Sticky Filter Rail (Quran/Hadith)
-
+5. Contextual Actions + Sticky Filter Rail + Bottom Sheet Standards (Quran/Hadith/Calendar)
+6. Adaptive Tab Bar Behavior + Zero-State/Resume Quality pass (cross-app polish)

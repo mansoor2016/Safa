@@ -129,6 +129,31 @@ Settings → Appearance → Theme Color
 - **Intent-driven home**: Home should be a strict intent launcher — next prayer, continue Quran, quick dhikr. Most daily actions should complete in ≤2 taps.
 - **Performance as a feature**: Speed is not a Phase 10 polish item — it is a design requirement from day one. Every screen must feel instant. Targets: cold launch < 2s, screen transitions < 200ms, search results < 500ms, no spinner visible for more than 1s on any common path. Ship skeleton loaders for async data, precompute expensive layouts, compress bundled data, cache aggressively, and measure continuously. A slow Islamic app is an unused Islamic app.
 
+### 2.4.1 Premium Interaction Quality
+
+**High-level intent:** The app should feel crafted and intentional at every interaction point — like a premium Apple first-party app, not a utility. Every transition, state change, and numeric update should feel deliberate and smooth.
+
+**Core behaviors (required across all primary surfaces):**
+- **Numeric text transitions**: All changing numbers (countdowns, streaks, counters) use `.contentTransition(.numericText())` for smooth digit animation instead of abrupt value swaps.
+- **Screen state transitions**: Every primary surface defines explicit visual states (`loading`, `ready`, `degraded`, `offline`, `success`) with consistent motion tokens. Never jump-cut between incompatible states.
+- **Optimistic actions with undo**: Low-risk actions (prayer log, bookmark, save) commit UI instantly, sync in background, and expose lightweight undo on failure.
+- **Zero-state quality**: Empty surfaces always teach the next action. Provide "resume where you left off" rails on Home for Quran, Learn, and Dhikr.
+
+**Premium polish enhancements (progressive rollout):**
+1. **Navigation bar material morph**: Start transparent at scroll origin, transition to subtle blur + hairline divider as content scrolls. Best on Home, Prayer, Learn.
+2. **Hero card compression + sticky context chip**: Compress the next-prayer hero card into a compact pinned chip after scrolling past it. Use `matchedGeometryEffect` for smooth identity transition.
+3. **Matched-geometry card-to-detail**: Animate list card elements into their destination on push navigation (Quran list → reader, Hadith list → detail). Scope to high-frequency flows only.
+4. **Contextual navigation actions + sticky filter rail**: Show filter pills only when relevant (after scroll or search activation). Keep action count minimal (1-2 primary).
+5. **Bottom sheet standards**: Standardize detents, drag behavior, handle, corner radius across all sheets. Use sheets for focused short tasks; full screen for long-form flows.
+6. **Adaptive tab bar visibility**: Hide tab bar on deliberate downward reading scroll, reveal on upward intent or interaction pause. Never oscillate on tiny deltas.
+
+**Guardrails:**
+- Respect `Reduce Motion` — simplify or disable all animations when set
+- Prioritize readability over effect intensity
+- Keep animations tokenized (duration/curve) and consistent
+- Avoid heavy effects in Quran reading mode — comfort first
+- No manipulative engagement patterns — nudge gently and purposefully
+
 ### 2.4.2 Graceful Degradation Principles
 
 The app must handle sensor failures, network loss, and resource constraints without crashing or silently dropping functionality. The user should always know what's happening.

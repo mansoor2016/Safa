@@ -216,6 +216,7 @@ private struct NextPrayerCard: View {
                     .font(SafaTypography.counterMedium)
                     .foregroundColor(SafaColors.Fallback.text)
                     .monospacedDigit()
+                    .contentTransition(.numericText())
 
                 Text(prayer.time.formatted(date: .omitted, time: .shortened))
                     .font(SafaTypography.bodyMedium)

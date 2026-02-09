@@ -171,6 +171,7 @@ struct TaraweehTrackerSheet: View {
                 Text("\(rakahsPrayed)")
                     .font(SafaTypography.counterLarge)
                     .frame(width: 80)
+                    .contentTransition(.numericText())
 
                 Button {
                     if rakahsPrayed < 20 { rakahsPrayed += 2 }

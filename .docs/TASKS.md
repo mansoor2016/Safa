@@ -639,11 +639,34 @@ xcodebuild -scheme SafaWidget build
 - [ ] Create reusable `ResumeCard` component (last surah, last lesson, last dhikr)
 - [ ] Update HomeView with context-aware quick actions
 
-### 9.12 Motion & Spacing Tokens
+### 9.12 Motion & Interaction Polish
+- [x] Add `.contentTransition(.numericText())` to all live counters (prayer countdown, iftar timer, tasbeeh, taraweeh)
 - [ ] Define motion tokens in design system (durations, curves, spring presets)
 - [ ] Define semantic elevation/surface tokens for card styles
 - [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
-- [ ] Smooth numeric transitions for counters and streaks
+
+### 9.12.1 Premium UI Enhancements (Progressive Rollout)
+See `.docs/PREMIUM_UI_GUIDANCE.md` for full specification.
+
+**Wave 1 — Foundation polish (Home + Prayer):**
+- [ ] Navigation bar material morph (transparent → blur on scroll)
+- [ ] Formalize screen state transitions (loading/ready/degraded/offline/success)
+
+**Wave 2 — Hero interactions (Home):**
+- [ ] Hero card compression + sticky context chip (matchedGeometryEffect)
+- [ ] Optimistic action feedback with undo rail for prayer logging
+
+**Wave 3 — Transitions + counters (Quran + Dhikr):**
+- [ ] Matched-geometry card-to-detail transition (Quran list → reader)
+
+**Wave 4 — Navigation + filters (Quran/Hadith/Calendar):**
+- [ ] Contextual navigation actions + sticky filter rail
+- [ ] Bottom sheet behavior standards (detents, drag, consistent chrome)
+- [ ] Adaptive tab bar visibility (hide on read scroll, reveal on upward intent)
+
+**Wave 5 — Zero-state + resume (cross-app):**
+- [ ] Zero-state quality pass (teach next action on every empty surface)
+- [ ] Resume-where-you-left-off rails on Home (Quran, Learn, Dhikr)
 
 ### 9.13 Search & Navigation Coherence
 - [ ] Unify search UI pattern across Quran/Hadith/Calendar

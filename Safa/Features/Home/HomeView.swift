@@ -550,6 +550,7 @@ private struct NextPrayerHomeCard: View {
                         .font(SafaTypography.counterSmall)
                         .foregroundColor(SafaColors.Fallback.text)
                         .monospacedDigit()
+                        .contentTransition(.numericText())
                 }
             }
         }
