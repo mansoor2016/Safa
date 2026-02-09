@@ -65,17 +65,17 @@ struct MoreView: View {
 
             // Progress
             Section("Progress") {
-                NavigationLink {
-                    ProgressDashboardView()
-                } label: {
-                    Label("Your Journey", systemImage: "chart.line.uptrend.xyaxis")
-                }
+                DisabledFeatureRow(
+                    title: "Your Journey",
+                    icon: "chart.line.uptrend.xyaxis",
+                    feature: .progressDashboard
+                )
 
-                NavigationLink {
-                    AchievementsView()
-                } label: {
-                    Label("Achievements", systemImage: "trophy")
-                }
+                DisabledFeatureRow(
+                    title: "Achievements",
+                    icon: "trophy",
+                    feature: .progressDashboard
+                )
             }
 
             // Settings

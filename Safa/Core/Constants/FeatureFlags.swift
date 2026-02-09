@@ -40,7 +40,8 @@ enum Feature: String, CaseIterable {
     // UX Variants (toggle to switch between home header layouts)
     case basicInlineHeader = "basic_inline_header"  // ON = basic inline header, OFF = modern scroll-collapsing (default)
 
-    // Coming Soon Features (Disabled - requires iOS 18.4 or Widget extension)
+    // Coming Soon Features (Disabled - partially implemented or requires additional work)
+    case progressDashboard = "progress_dashboard"
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
     case standByMode = "standby_mode"
@@ -65,6 +66,7 @@ enum Feature: String, CaseIterable {
         case .liveActivities: return "Live Activities"
         case .siriShortcuts: return "Siri Shortcuts"
         case .focusMode: return "Focus Mode"
+        case .progressDashboard: return "Progress Dashboard"
         case .aiCompanion: return "AI Companion"
         case .interactiveWidgets: return "Interactive Widgets"
         case .standByMode: return "StandBy Mode"
@@ -81,7 +83,8 @@ enum Feature: String, CaseIterable {
     var isEnabledByDefault: Bool {
         switch self {
         // Requires iOS 18.4+ for Apple Foundation Models
-        case .aiCompanion:
+        case .aiCompanion,
+             .progressDashboard:
             return false
         // Content not yet ready
         case .learning:
