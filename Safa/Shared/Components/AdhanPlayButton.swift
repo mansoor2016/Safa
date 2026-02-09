@@ -37,7 +37,7 @@ struct AdhanPlayButton: View {
             VStack(spacing: SafaSpacing.xs) {
                 Image(systemName: isPlaying ? "stop.fill" : "speaker.wave.2.fill")
                     .font(.title2)
-                Text(isPlaying ? "Stop" : "Adhan")
+                Text(isPlaying ? "Stop Adhan" : "Adhan")
                     .font(SafaTypography.labelSmall)
             }
             .frame(maxWidth: .infinity)
@@ -58,7 +58,7 @@ struct AdhanPlayButton: View {
                 Image(systemName: isPlaying ? "stop.fill" : "speaker.wave.2.fill")
                     .font(.body)
                     .foregroundColor(.white)
-                Text(isPlaying ? "Stop" : "Adhan")
+                Text(isPlaying ? "Stop Adhan" : "Adhan")
                     .font(SafaTypography.labelSmall)
                     .foregroundColor(.white.opacity(0.8))
             }
