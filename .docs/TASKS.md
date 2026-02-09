@@ -883,6 +883,17 @@ Code complete but needs physical device or manual testing to confirm:
 - [x] Ramadan page restructured: iftar/suhoor countdown platter, full-width prayer progress, adhan/qibla buttons, interactive daily goals, fasting tracker, Quran Khatm goal, Prayer tab auto-swap during Ramadan
 - [x] Combined duplicate daily goals: "Read Quran" + "Read 1 Juz" → single "Read 1 Juz Quran" during Ramadan (key "juz" preserved for Khatm tracker)
 
+### DONE: Notification Deduplication (February 9, 2026)
+- [x] Fixed duplicate prayer notifications: three independent systems (PrayerViewModel `prayer_fajr`, NotificationService `prayer_fajr_<timestamp>`, NotificationScheduler `prayer_at_fajr`) consolidated into single NotificationScheduler
+- [x] Removed 117 lines of duplicate scheduling code from PrayerViewModel
+- [x] Legacy identifier cleanup: cancelPrayerNotifications() now removes all three identifier formats
+- [x] `scheduleIfNeeded()` (cached, skips if already done today) for normal loads; `forceReschedule()` only for preference changes
+
+### DONE: Premium UI Polish (February 9, 2026)
+- [x] Nav bar material morph: transparent → frosted ultraThinMaterial on scroll (Home, Prayer, Ramadan)
+- [x] Bottom sheet standards: 25 sheets standardized with .compactSheet() / .fullSheet() modifiers (drag indicator, 16pt corner radius, consistent detents)
+- [x] Progress section marked coming soon in More tab (partially implemented)
+
 ### TODO: Smart Adhan (Location-Aware Notification Sounds)
 
 **Priority: MEDIUM — v1 enhancement to existing notification system**
@@ -963,5 +974,5 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Implement single-button tasbeeh
 - [ ] Test with Switch Control and Voice Control
 
-*Last Updated: February 9, 2026*
+*Last Updated: February 9, 2026 (evening)*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*

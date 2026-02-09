@@ -194,12 +194,31 @@ final class NotificationScheduler {
         }
     }
 
-    /// Cancel all prayer notifications
+    /// Cancel all prayer notifications (current + legacy identifier formats)
     func cancelPrayerNotifications() async {
-        let identifiers = PrayerType.allCases.flatMap { type in
+        // Current format: prayer_at_fajr, prayer_before_fajr
+        var identifiers = PrayerType.allCases.flatMap { type in
             ["prayer_at_\(type.rawValue)", "prayer_before_\(type.rawValue)"]
         }
+
+        // Legacy format from old PrayerViewModel: prayer_fajr
+        identifiers += PrayerType.allCases.map { "prayer_\($0.rawValue)" }
+
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
+
+        // Legacy timestamp-based format: prayer_fajr_<timestamp>
+        // These have unpredictable identifiers, so find and cancel by prefix
+        let pending = await center.pendingNotificationRequests()
+        let timestampIDs = pending
+            .map { $0.identifier }
+            .filter { id in
+                id.starts(with: "prayer_") &&
+                id.contains("_") &&
+                id.split(separator: "_").count >= 3 // e.g. prayer_fajr_1707234000
+            }
+        if !timestampIDs.isEmpty {
+            center.removePendingNotificationRequests(withIdentifiers: timestampIDs)
+        }
     }
 
     // MARK: - Streak Reminders
