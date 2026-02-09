@@ -881,6 +881,7 @@ Code complete but needs physical device or manual testing to confirm:
 
 ### DONE: Ramadan Page Enhancement
 - [x] Ramadan page restructured: iftar/suhoor countdown platter, full-width prayer progress, adhan/qibla buttons, interactive daily goals, fasting tracker, Quran Khatm goal, Prayer tab auto-swap during Ramadan
+- [x] Combined duplicate daily goals: "Read Quran" + "Read 1 Juz" → single "Read 1 Juz Quran" during Ramadan (key "juz" preserved for Khatm tracker)
 
 ### TODO: Smart Adhan (Location-Aware Notification Sounds)
 
@@ -921,11 +922,34 @@ Design: One toggle, two automatic modes. No settings explosion.
 #### Data Sovereignty & Export
 - [x] Baseline shipped: JSON export, CSV prayer-log export, and "View All My Data" transparency screen
 - [ ] Implement manual backup/restore
-- [ ] Add per-category data deletion
+- [x] Per-category data deletion shipped: 6 categories (Prayer History, Quran Progress, Hadith Bookmarks, Chat History, Streaks & Achievements, Ramadan Data), granular UI with confirmation alerts, cross-category isolation verified in 20+ tests
+
+#### Hasanat Tracking Overhaul (February 9, 2026)
+- [x] Created HasanatTracker dedup layer (awardOnce date-scoped, awardOnceEver permanent, pruneOldEntries on launch)
+- [x] Fixed prayer log-unlog-relog double-award bug across PrayerViewModel, HomeView, RamadanView, SafaShortcuts
+- [x] Added prayerAllFive bonus check to HomeView and RamadanView (was only in PrayerViewModel)
+- [x] Deduped lesson completion awards (awardOnceEver keyed by lesson ID)
+- [x] Rewired ShareService from ephemeral HasanatService to persistent UserStateManager
+- [x] Wired invite notification listener in UserStateManager (was posted but never received)
+- [x] Wired 4 previously unused awards: fastingDay, taraweeh, dailyVerse, dailyHadith
+- [x] Fixed daily streak never recorded — added recordActivity(.daily) on app launch
+- [x] Fixed totalPrayersLogged never incremented — added incrementPrayersLogged() to all prayer logging sites
+- [x] Wrapped dailyOpen hasanat with HasanatTracker dedup (multiple app launches = one award)
+- [x] 37 new tests: HasanatTracker unit tests + HasanatIntegrationTests with tracking mock
+
+#### Test Suite Consolidation (February 9, 2026)
+- [x] Created SharedMocks.swift with unified MockUserRepository, MockPrayerRepository, MockLocationService, MockNotificationService
+- [x] Removed 25 duplicate tests across GamificationTests, UserStatsTests, IntegrationTests, RepositoryTests
+- [x] Eliminated 6 inline MockUserRepository copies → 1 shared mock with call tracking
+- [x] Net: -415 lines of duplicate test code, 0 coverage loss
 
 #### Apple Intelligence (App Intents)
-- [ ] Define Prayer, Surah, Hadith as AppEntities
-- [ ] Implement GetNextPrayerIntent for Siri
+- [x] Define Prayer, Surah, Hadith as AppEntities (PrayerTypeEntity, DhikrEntity)
+- [x] Implement GetNextPrayerIntent with real prayer time calculation (location + method + next prayer detection)
+- [x] Implement GetPrayerTimesIntent with all 6 daily prayers + user location
+- [x] Implement GetQiblaDirectionIntent with bearing calculation + cardinal direction
+- [x] Implement GetDailyVerseIntent with curated 31-verse rotation + fallback
+- [x] Implement LogPrayerIntent with hasanat award + streak recording + deduplication
 - [ ] Implement PlayAdhanIntent
 - [ ] Implement OpenSurahIntent
 - [ ] Implement StartTasbeehIntent
@@ -939,5 +963,5 @@ Design: One toggle, two automatic modes. No settings explosion.
 - [ ] Implement single-button tasbeeh
 - [ ] Test with Switch Control and Voice Control
 
-*Last Updated: February 8, 2026*
+*Last Updated: February 9, 2026*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*
