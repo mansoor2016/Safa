@@ -38,26 +38,6 @@
     "%@ Dhikr" : {
 
     },
-    "%@ in %lld minutes" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ in %2$lld minutes"
-          }
-        }
-      }
-    },
-    "%@ in %lld minutes. Time to head to the mosque!" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ in %2$lld minutes. Time to head to the mosque!"
-          }
-        }
-      }
-    },
     "%@ is in %lld day(s). %@" : {
       "localizations" : {
         "en" : {
@@ -73,16 +53,6 @@
     },
     "%@ Time" : {
 
-    },
-    "%@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@: %2$@"
-          }
-        }
-      }
     },
     "%@: 0 min" : {
 
@@ -391,9 +361,6 @@
     "Achievement Unlocked!" : {
 
     },
-    "Achievement Unlocked! 🏆" : {
-
-    },
     "Achievements" : {
 
     },
@@ -700,9 +667,6 @@
     "Day of Arafah Duas" : {
 
     },
-    "Day of Ashura" : {
-
-    },
     "day streak" : {
 
     },
@@ -772,9 +736,6 @@
     "Done" : {
 
     },
-    "Done ✓" : {
-
-    },
     "Double tap to count one %@" : {
 
     },
@@ -832,25 +793,13 @@
     "Eid al-Adha" : {
 
     },
-    "Eid al-Adha is tomorrow! Prepare for the celebration." : {
-
-    },
     "Eid al-Fitr" : {
 
     },
     "Eid al-Fitr & Eid al-Adha" : {
 
     },
-    "Eid al-Fitr is tomorrow! Prepare your Eid prayers." : {
-
-    },
     "Eid Mubarak! 🎉" : {
-
-    },
-    "Eid Mubarak! May Allah accept your sacrifice." : {
-
-    },
-    "Eid Mubarak! May Allah accept your worship." : {
 
     },
     "Eid Prayer: %@" : {
@@ -1045,9 +994,6 @@
     "Hadith from Sunnah.com" : {
 
     },
-    "Happy Islamic New Year! May this year bring blessings." : {
-
-    },
     "Haptic Feedback" : {
 
     },
@@ -1147,22 +1093,10 @@
     "Islamic New Year" : {
 
     },
-    "Islamic New Year is tomorrow." : {
-
-    },
     "Isra" : {
 
     },
     "Isra and Mi'raj" : {
-
-    },
-    "Isra and Mi'raj is tomorrow night." : {
-
-    },
-    "It's prayer time." : {
-
-    },
-    "It's time for %@" : {
 
     },
     "It's time for %@ prayer" : {
@@ -1282,9 +1216,6 @@
     "Log ${prayer} prayer" : {
 
     },
-    "Log Fast" : {
-
-    },
     "Log fasting hours automatically" : {
 
     },
@@ -1327,9 +1258,6 @@
     "Mawlid al-Nabi" : {
 
     },
-    "Mawlid al-Nabi is tomorrow." : {
-
-    },
     "May Allah accept your Zakat" : {
 
     },
@@ -1349,12 +1277,6 @@
 
     },
     "Microphone permission is required for pronunciation checking." : {
-
-    },
-    "Mid-Sha'ban" : {
-
-    },
-    "Mid-Sha'ban is tomorrow night." : {
 
     },
     "Migration failed: %@" : {
@@ -1543,9 +1465,6 @@
     "Prayer Notifications" : {
 
     },
-    "Prayer reminder." : {
-
-    },
     "Prayer Reminders" : {
 
     },
@@ -1553,9 +1472,6 @@
 
     },
     "Prayer Streak" : {
-
-    },
-    "Prayer Time" : {
 
     },
     "Prayer Time Adjustments" : {
@@ -1630,16 +1546,10 @@
     "Rak'ahs Prayed" : {
 
     },
-    "Ramadan" : {
-
-    },
     "Ramadan (Start & Laylatul Qadr)" : {
 
     },
     "Ramadan Begins" : {
-
-    },
-    "Ramadan begins tomorrow! Prepare for the blessed month." : {
 
     },
     "Ramadan Duas" : {
@@ -1661,9 +1571,6 @@
 
     },
     "Ramadan Mubarak! 🌙" : {
-
-    },
-    "Ramadan Mubarak! The blessed month begins today." : {
 
     },
     "Ramadan Quran" : {
@@ -1726,9 +1633,6 @@
 
     },
     "Reflect on the Year" : {
-
-    },
-    "Remind in 10 min" : {
 
     },
     "Remove Log" : {
@@ -2093,9 +1997,6 @@
     "The data model could not be found." : {
 
     },
-    "The Day of Ashura is tomorrow. Consider fasting." : {
-
-    },
     "The invite code is invalid or expired." : {
 
     },
@@ -2165,19 +2066,7 @@
     "Today" : {
 
     },
-    "Today is the Day of Ashura. Fasting is recommended." : {
-
-    },
-    "Today we celebrate the birth of Prophet Muhammad (PBUH)." : {
-
-    },
     "Tonight is the %@ - an odd night" : {
-
-    },
-    "Tonight is the Night Journey and Ascension." : {
-
-    },
-    "Tonight is the Night of Mid-Sha'ban." : {
 
     },
     "Tonight's Progress" : {
@@ -2265,9 +2154,6 @@
     "View All" : {
 
     },
-    "View Calendar" : {
-
-    },
     "View Eid Prayers" : {
 
     },
@@ -2275,9 +2161,6 @@
 
     },
     "View Recommended Settings" : {
-
-    },
-    "View Times" : {
 
     },
     "VoiceOver announces the direction to turn and tells you when you're facing the Qibla." : {
@@ -2358,9 +2241,6 @@
 
     },
     "Your Islamic Companion" : {
-
-    },
-    "Your Journey" : {
 
     },
     "Your location is used to calculate accurate prayer times and recommend regional settings." : {

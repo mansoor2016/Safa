@@ -32,7 +32,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollableScreen {
+        ScrollableScreen(stickyContent: nextPrayerChip) {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
                 HomeSkeletonView()
             } else {
@@ -233,6 +233,18 @@ struct HomeView: View {
         withAnimation {
             UserDefaults.standard.set(true, forKey: bannerDismissKey)
             showRamadanBanner = false
+        }
+    }
+
+    // MARK: - Next Prayer Chip (Sticky Toolbar)
+
+    private func nextPrayerChip() -> some View {
+        Group {
+            if let prayer = nextPrayer {
+                NextPrayerChip(prayer: prayer) {
+                    router.selectedTab = "prayer"
+                }
+            }
         }
     }
 
@@ -674,6 +686,69 @@ private struct ReminderCard: View {
         .padding(SafaSpacing.md)
         .background(Color(UIColor.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+    }
+}
+
+// MARK: - Next Prayer Chip (Sticky Toolbar)
+
+private struct NextPrayerChip: View {
+    let prayer: PrayerTime
+    let action: () -> Void
+
+    @State private var countdown = ""
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: SafaSpacing.xs) {
+                Circle()
+                    .fill(prayer.type.color)
+                    .frame(width: 8, height: 8)
+
+                Text(prayer.type.displayName)
+                    .font(SafaTypography.labelMedium)
+                    .foregroundColor(SafaColors.Fallback.text)
+
+                Text("·")
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+                Text(countdown)
+                    .font(SafaTypography.labelMedium)
+                    .monospacedDigit()
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                    .contentTransition(.numericText())
+                    .animation(
+                        reduceMotion ? nil : .default,
+                        value: countdown
+                    )
+            }
+            .padding(.horizontal, SafaSpacing.sm)
+            .padding(.vertical, SafaSpacing.xxs)
+            .background(Color(UIColor.secondarySystemBackground))
+            .clipShape(Capsule())
+        }
+        .accessibilityLabel(accessibilityText)
+        .onReceive(timer) { _ in
+            updateCountdown()
+        }
+        .onAppear {
+            updateCountdown()
+        }
+    }
+
+    private func updateCountdown() {
+        let (hours, minutes, seconds) = prayer.time.countdown()
+        countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    private var accessibilityText: String {
+        let (hours, minutes, _) = prayer.time.countdown()
+        var parts: [String] = []
+        if hours > 0 { parts.append("\(hours) hour\(hours == 1 ? "" : "s")") }
+        if minutes > 0 { parts.append("\(minutes) minute\(minutes == 1 ? "" : "s")") }
+        let timeText = parts.isEmpty ? "now" : "in \(parts.joined(separator: " "))"
+        return "Next prayer: \(prayer.type.displayName) \(timeText)"
     }
 }
 
