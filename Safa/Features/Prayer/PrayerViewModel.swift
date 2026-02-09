@@ -4,7 +4,6 @@
 
 import Foundation
 import CoreLocation
-import UserNotifications
 
 @Observable
 final class PrayerViewModel {
@@ -100,8 +99,8 @@ final class PrayerViewModel {
             // Load notification preferences from PreferencesManager
             await loadNotificationSettings()
 
-            // Schedule notifications for enabled prayers
-            await scheduleEnabledNotifications()
+            // Ensure notifications are scheduled (skips if already done today)
+            await NotificationScheduler.shared.scheduleIfNeeded()
 
         } catch {
             self.error = error
@@ -194,119 +193,22 @@ final class PrayerViewModel {
 
     func toggleNotification(for prayerType: PrayerType) async {
         if notificationEnabledPrayers.contains(prayerType) {
-            // Disable: remove from set and cancel notification
             notificationEnabledPrayers.remove(prayerType)
             await saveNotificationSettings()
-            cancelNotification(for: prayerType)
         } else {
-            // Enable: request permission if needed, then schedule
             if !notificationService.isAuthorized {
                 let granted = try? await notificationService.requestAuthorization()
                 guard granted == true else { return }
             }
             notificationEnabledPrayers.insert(prayerType)
             await saveNotificationSettings()
-            await scheduleNotification(for: prayerType)
         }
+        // Re-schedule all via centralized scheduler (handles add/remove)
+        await NotificationScheduler.shared.forceReschedule()
     }
 
-    private func scheduleNotification(for prayerType: PrayerType) async {
-        guard let prayer = todayPrayers.first(where: { $0.type == prayerType }),
-              prayer.time > Date() else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = String(localized: "\(prayerType.displayName) Time")
-        content.body = String(localized: "It's time for \(prayerType.displayName) prayer")
-        content.interruptionLevel = .timeSensitive
-
-        // Select notification sound based on preferences
-        let prefs = await PreferencesManager.shared.getPreferences()
-        content.sound = selectNotificationSound(for: prayerType, prefs: prefs)
-
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: prayer.time
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        let request = UNNotificationRequest(
-            identifier: "prayer_\(prayerType.rawValue)",
-            content: content,
-            trigger: trigger
-        )
-
-        do {
-            try await UNUserNotificationCenter.current().add(request)
-            notificationSchedulingFailed = false
-        } catch {
-            notificationSchedulingFailed = true
-        }
-    }
-
-    private func selectNotificationSound(for prayerType: PrayerType, prefs: UserPreferences) -> UNNotificationSound {
-        // Iftar adhan: play adhan for Maghrib during Ramadan even if global adhan is off
-        let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
-            && prayerType == .maghrib
-            && HijriDateConverter.shared.isRamadan()
-
-        guard prefs.adhanEnabled || isRamadanIftarAdhan else { return .default }
-
-        // Smart Adhan: only play adhan at home with ringer on
-        if prefs.smartAdhanEnabled && !isRamadanIftarAdhan {
-            let isAtHome = isNearHomeLocation(prefs: prefs)
-            guard isAtHome else { return .default }
-        }
-
-        let fileName = prayerType == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
-        return UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
-    }
-
-    private func isNearHomeLocation(prefs: UserPreferences) -> Bool {
-        guard let homeLat = prefs.savedLatitude,
-              let homeLng = prefs.savedLongitude,
-              let current = locationService.coordinates else { return false }
-
-        let home = CLLocation(latitude: homeLat, longitude: homeLng)
-        let now = CLLocation(latitude: current.latitude, longitude: current.longitude)
-        return home.distance(from: now) < 200 // 200m radius
-    }
-
-    private func cancelNotification(for prayerType: PrayerType) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: ["prayer_\(prayerType.rawValue)"]
-        )
-    }
-
-    private func scheduleEnabledNotifications() async {
-        for prayerType in PrayerType.obligatoryPrayers {
-            if notificationEnabledPrayers.contains(prayerType) {
-                await scheduleNotification(for: prayerType)
-            } else {
-                cancelNotification(for: prayerType)
-            }
-        }
-
-        // Verify notifications were actually registered
-        await verifyScheduledNotifications()
-    }
-
-    private func verifyScheduledNotifications() async {
-        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
-        let scheduledPrayerIDs = Set(pending.map { $0.identifier })
-
-        // Check if any enabled prayer's notification is missing
-        for prayerType in notificationEnabledPrayers {
-            let expectedID = "prayer_\(prayerType.rawValue)"
-            let prayer = todayPrayers.first { $0.type == prayerType }
-            let isFuture = prayer.map { $0.time > Date() } ?? false
-
-            if isFuture && !scheduledPrayerIDs.contains(expectedID) {
-                // Notification should exist but doesn't — system may be blocking
-                notificationSchedulingFailed = true
-                return
-            }
-        }
-        notificationSchedulingFailed = false
-    }
+    // Notification scheduling is handled by NotificationScheduler (single system).
+    // PrayerViewModel only manages preferences and triggers reschedule.
 
     private func loadNotificationSettings() async {
         let prefs = await PreferencesManager.shared.getPreferences()
@@ -331,7 +233,7 @@ final class PrayerViewModel {
         do {
             let granted = try await notificationService.requestAuthorization()
             if granted {
-                await scheduleNotifications()
+                await NotificationScheduler.shared.forceReschedule()
             }
         } catch {
             self.error = error
@@ -375,17 +277,5 @@ final class PrayerViewModel {
         }
     }
 
-    private func scheduleNotifications() async {
-        guard notificationService.isAuthorized else { return }
-
-        do {
-            try await notificationService.scheduleDailyPrayerNotifications(
-                prayers: todayPrayers.filter { $0.type.isObligatory },
-                offsetMinutes: 5
-            )
-        } catch {
-            self.error = error
-        }
-    }
 }
 
