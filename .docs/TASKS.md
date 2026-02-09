@@ -820,8 +820,22 @@ Historical progress logs, completed granular tasks, and previous change summarie
 ### Current Cross-Cutting Gaps
 - [ ] Bundle pronunciation audio files
 - [ ] Create Intents extension target in Xcode project (`SafaIntents`)
-- [ ] Run on-device validation for widgets, Siri, Focus mode, and Live Activities
 - [ ] Complete QA pass for dark mode, accessibility, and performance budgets
+
+### Requires Manual / Device Verification
+Code complete but needs physical device or manual testing to confirm:
+- [ ] Lock Screen widgets (accessoryCircular, accessoryRectangular, accessoryInline)
+- [ ] Home Screen widgets (PrayerTimes, Interactive, Tasbeeh, StandBy, Streak)
+- [ ] Live Activities / Dynamic Island prayer countdown
+- [ ] Siri Shortcuts (GetNextPrayer, OpenQibla, etc.)
+- [ ] Focus Mode integration
+- [ ] StandBy mode display
+- [ ] Spotlight search results tap → navigates to correct content
+- [ ] Notification banners appear with correct sound (default iOS / adhan)
+- [ ] Dark mode visual pass across all screens
+- [ ] RTL Arabic layout validation
+- [ ] Dynamic Type at largest setting
+- [ ] VoiceOver on critical flows
 
 ### TODO: Graceful Degradation & Resilience
 
