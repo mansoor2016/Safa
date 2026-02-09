@@ -98,6 +98,7 @@ private struct LearnContentView: View {
                     viewModel: viewModel
                 )
             }
+            .fullSheet()
         }
         .task {
             await viewModel.loadTracks()

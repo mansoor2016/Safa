@@ -156,12 +156,14 @@ struct AudioPlayerView: View {
         .animation(.spring(response: 0.3), value: isExpanded)
         .sheet(isPresented: $showingReciterPicker) {
             ReciterPickerSheet(selectedReciter: $viewModel.selectedReciter)
+                .compactSheet()
         }
         .sheet(isPresented: $showingSpeedPicker) {
             SpeedPickerSheet(
                 selectedRate: $viewModel.playbackRate,
                 rates: viewModel.playbackRates
             )
+            .compactSheet()
         }
     }
 
@@ -414,7 +416,6 @@ struct ReciterPickerSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
     }
 }
 
@@ -462,7 +463,6 @@ struct SpeedPickerSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
     }
 }
 

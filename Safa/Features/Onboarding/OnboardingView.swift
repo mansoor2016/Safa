@@ -432,6 +432,7 @@ struct OnboardingView: View {
         .padding()
         .sheet(isPresented: $showCustomizeSettings) {
             customizeSettingsSheet
+                .fullSheet()
         }
     }
 

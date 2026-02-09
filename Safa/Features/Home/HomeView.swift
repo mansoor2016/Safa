@@ -32,7 +32,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
+        ScrollableScreen {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
                 HomeSkeletonView()
             } else {

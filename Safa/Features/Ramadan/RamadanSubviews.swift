@@ -164,7 +164,7 @@ struct TaraweehTrackerSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .compactSheet()
     }
 
     // MARK: - Subviews
@@ -246,7 +246,7 @@ struct RamadanSettingsSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .fullSheet()
     }
 
     // MARK: - Sections

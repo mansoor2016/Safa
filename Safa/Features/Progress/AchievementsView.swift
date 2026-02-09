@@ -76,6 +76,7 @@ struct AchievementsView: View {
         .navigationBarTitleDisplayMode(.large)
         .sheet(item: $selectedAchievement) { achievement in
             AchievementDetailSheet(achievement: achievement)
+                .compactSheet()
         }
     }
 

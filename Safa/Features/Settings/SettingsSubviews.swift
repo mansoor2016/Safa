@@ -547,7 +547,7 @@ struct LocationRecommendationsSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .fullSheet()
     }
 
     private func recommendationRow(title: String, current: String, recommended: String, isMatching: Bool) -> some View {

@@ -188,6 +188,7 @@ struct CollectionDetailView: View {
                     hadithRepository: hadithRepository
                 )
             }
+            .fullSheet()
         }
         .task {
             do {
@@ -262,6 +263,7 @@ struct BookHadithListView: View {
             NavigationStack {
                 HadithDetailView(hadith: hadith)
             }
+            .fullSheet()
         }
         .task {
             do {

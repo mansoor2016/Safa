@@ -75,12 +75,15 @@ private struct FamilyContentView: View {
         }
         .sheet(isPresented: $showInviteSheet) {
             InviteMemberSheet(viewModel: viewModel)
+                .compactSheet()
         }
         .sheet(isPresented: $showCreateSheet) {
             CreateCircleSheet(viewModel: viewModel)
+                .compactSheet()
         }
         .sheet(isPresented: $showInviteFriendsSheet) {
             InviteFriendsView()
+                .fullSheet()
         }
         .task {
             await viewModel.loadFamilyCircle()
@@ -591,7 +594,6 @@ private struct InviteMemberSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
     }
 }
 
@@ -644,7 +646,6 @@ private struct CreateCircleSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
     }
 }
 

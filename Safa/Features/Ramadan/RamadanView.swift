@@ -27,7 +27,7 @@ struct RamadanView: View {
     private let totalDays = 30
 
     var body: some View {
-        ScrollView {
+        ScrollableScreen {
             VStack(spacing: SafaSpacing.lg) {
                 // Date subheader (scrolls away with large title)
                 dateSubheader
@@ -75,9 +75,11 @@ struct RamadanView: View {
         }
         .sheet(isPresented: $showingQibla) {
             NavigationStack { QiblaCompassView() }
+                .fullSheet()
         }
         .sheet(isPresented: $showZakat) {
             NavigationStack { ZakatCalculatorView() }
+                .fullSheet()
         }
         .task {
             await loadRamadanData()

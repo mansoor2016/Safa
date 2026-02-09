@@ -328,7 +328,7 @@ private struct IftarDuaPromptSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .compactSheet()
     }
 
     private func duaCard(title: String, arabic: String, transliteration: String, translation: String, reference: String) -> some View {

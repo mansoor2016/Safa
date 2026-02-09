@@ -82,6 +82,7 @@ struct NamesOfAllahView: View {
         .sheet(isPresented: $showingDetail) {
             if let name = viewModel.selectedName {
                 NameDetailView(name: name)
+                    .compactSheet()
             }
         }
     }

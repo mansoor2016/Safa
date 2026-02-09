@@ -226,6 +226,7 @@ struct PrayerLogView: View {
                         prayer: prayer,
                         viewModel: viewModel
                     )
+                    .compactSheet()
                 }
             }
         }

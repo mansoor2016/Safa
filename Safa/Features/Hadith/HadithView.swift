@@ -114,11 +114,13 @@ struct HadithContentView: View {
                     hadithRepository: viewModel.hadithRepository
                 )
             }
+            .fullSheet()
         }
         .sheet(item: $viewModel.selectedHadith) { hadith in
             NavigationStack {
                 HadithDetailView(hadith: hadith)
             }
+            .fullSheet()
         }
     }
 

@@ -67,6 +67,7 @@ private struct QuranContentView: View {
         }
         .sheet(isPresented: $showingSearch) {
             QuranSearchView()
+                .fullSheet()
         }
         .searchable(text: $searchText, prompt: "Search ayahs...")
         .onChange(of: searchText) { _, newValue in

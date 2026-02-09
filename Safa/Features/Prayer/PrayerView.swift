@@ -40,7 +40,7 @@ private struct PrayerContentView: View {
     @State private var showingSettings = false
 
     var body: some View {
-        ScrollView {
+        ScrollableScreen {
             VStack(spacing: SafaSpacing.lg) {
                 // Date Header
                 dateHeader
@@ -82,11 +82,13 @@ private struct PrayerContentView: View {
             NavigationStack {
                 QiblaCompassView()
             }
+            .fullSheet()
         }
         .sheet(isPresented: $showingSettings) {
             NavigationStack {
                 PrayerSettingsView(viewModel: viewModel)
             }
+            .fullSheet()
         }
         .refreshable {
             await viewModel.refreshPrayerTimes()

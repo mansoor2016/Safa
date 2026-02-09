@@ -68,6 +68,9 @@
         }
       }
     },
+    "%@ prayer is already logged for today." : {
+
+    },
     "%@ Time" : {
 
     },
@@ -633,6 +636,9 @@
     "Could not find or create calendar." : {
 
     },
+    "Could not log prayer. Please try again in the app." : {
+
+    },
     "Could not play adhan." : {
 
     },
@@ -664,6 +670,9 @@
 
     },
     "Data & Privacy" : {
+
+    },
+    "Data Categories" : {
 
     },
     "Data Sources" : {
@@ -709,6 +718,9 @@
     "Delete" : {
 
     },
+    "Delete %@?" : {
+
+    },
     "Delete All" : {
 
     },
@@ -728,6 +740,12 @@
 
     },
     "Delete Download?" : {
+
+    },
+    "Delete Everything" : {
+
+    },
+    "Deleting a category only removes that data. Your app settings and preferences are not affected." : {
 
     },
     "Description" : {
@@ -1289,6 +1307,9 @@
 
     },
     "Madhab (Asr)" : {
+
+    },
+    "Manage Data" : {
 
     },
     "Mark as Prayed" : {
@@ -2102,10 +2123,19 @@
     "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي" : {
 
     },
+    "This permanently removes all your data across every category. Your app settings are preserved." : {
+
+    },
     "This Week" : {
 
     },
     "This will permanently delete all your progress, bookmarks, and chat history. This action cannot be undone." : {
+
+    },
+    "This will permanently delete all your progress, bookmarks, prayer history, chat history, and more. This action cannot be undone." : {
+
+    },
+    "This will permanently delete your %@. This action cannot be undone." : {
 
     },
     "This will remove %@ from your device. You can download it again later." : {
@@ -2190,6 +2220,9 @@
 
     },
     "Undo last count" : {
+
+    },
+    "Unknown prayer type." : {
 
     },
     "Unlocked!" : {

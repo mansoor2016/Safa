@@ -37,9 +37,11 @@ struct CalendarView: View {
         }
         .sheet(item: $selectedEvent) { event in
             EventDetailSheet(event: event)
+                .compactSheet()
         }
         .sheet(isPresented: $showExportSheet) {
             CalendarExportSheet()
+                .compactSheet()
         }
     }
 

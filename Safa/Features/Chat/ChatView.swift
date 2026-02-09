@@ -123,6 +123,7 @@ private struct ChatContentView: View {
         }
         .sheet(isPresented: $viewModel.showConversations) {
             ConversationHistoryView(viewModel: viewModel)
+                .fullSheet()
         }
         .task {
             await viewModel.loadActiveConversation()

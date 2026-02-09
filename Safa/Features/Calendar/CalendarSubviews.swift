@@ -93,6 +93,8 @@ struct EventDetailSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
     }
 
     // MARK: - Sections
@@ -202,6 +204,8 @@ struct CalendarExportSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
     }
 
     // MARK: - Sections

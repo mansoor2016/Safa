@@ -247,7 +247,7 @@ struct TasbeehCounterView: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .compactSheet()
     }
 
     // MARK: - Methods

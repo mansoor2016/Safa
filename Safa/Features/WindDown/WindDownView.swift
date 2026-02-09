@@ -39,9 +39,11 @@ struct WindDownView: View {
             }
             .sheet(item: $selectedDhikr) { dhikr in
                 DhikrDetailSheet(dhikr: dhikr, viewModel: viewModel)
+                    .compactSheet()
             }
             .sheet(isPresented: $showingFajrAlarm) {
                 FajrAlarmSheet(viewModel: viewModel)
+                    .compactSheet()
             }
         }
     }

@@ -145,6 +145,7 @@ struct ZakatCalculatorView: View {
         }
         .sheet(isPresented: $showingInfo) {
             ZakatInfoSheet()
+                .compactSheet()
         }
     }
 

@@ -86,6 +86,7 @@ struct SettingsView: View {
                     }
                 }
             )
+            .fullSheet()
         }
         .task {
             await loadSettings()
@@ -433,6 +434,12 @@ struct SettingsView: View {
             }
 
             NavigationLink {
+                DataManagementView()
+            } label: {
+                Label("Manage Data", systemImage: "externaldrive")
+            }
+
+            NavigationLink {
                 SystemStatusView()
             } label: {
                 Label("System Status", systemImage: "heart.text.square")
@@ -469,6 +476,7 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showInviteFriendsSheet) {
                 InviteFriendsView()
+                    .fullSheet()
             }
         } footer: {
             Text("Help others discover Safa by sharing it with friends and family.")
@@ -612,8 +620,10 @@ struct SettingsView: View {
     }
 
     private func deleteAllData() async {
+        let appGroupDefaults = UserDefaults(suiteName: AppConstants.appGroupId)
+        DataDeletionService.deleteAllCategories(from: .standard, appGroupDefaults: appGroupDefaults)
         try? await dependencies.chatRepository.clearHistory()
-        // Reset other data...
+        await dependencies.userState.loadUserData()
     }
 }
 
