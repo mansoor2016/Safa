@@ -1762,6 +1762,44 @@ This keeps the base install small (~90MB Quran + Hadith) and adds ~4-8MB per lan
 - Track fallback usage rate for missing content translations
 - Never log religious text bodies, prompts, or translated passage payloads
 
+### 6.7.2 Performance Architecture (Cross-Cutting)
+
+Performance is a design-level concern, not a launch-gate afterthought. Every feature must be built with these patterns from the start.
+
+**Budgets (enforced by automated tests):**
+
+| Metric | Target | Hard Limit | Test |
+|--------|--------|------------|------|
+| Cold launch to interactive | < 1s p50, < 2s p95 | 3s blocks release | `AppLaunchPerformanceTests` |
+| Screen transition | < 200ms | 500ms | Manual + Instruments |
+| SQLite query (single row) | < 10ms | 50ms | `DatabasePerformanceTests` |
+| SQLite query (list) | < 20ms | 50ms | `DatabasePerformanceTests` |
+| FTS search (100 results) | < 100ms | 500ms | `DatabasePerformanceTests` |
+| Prayer time calculation | < 5ms | 20ms | `DatabasePerformanceTests` |
+| Repeated query (cached conn) | < 5ms avg | 10ms | `DatabasePerformanceTests` |
+| Memory baseline | < 200MB | 300MB | Instruments |
+
+**Mandatory patterns:**
+
+1. **Compressed bundled data**: Large databases ship gzipped, decompress async on first launch (see `SQLiteService.preWarmDatabases()`). Never block UI for decompression.
+
+2. **Persistent database connections**: `SQLiteService` caches read-only connections per database. Never open/close per query.
+
+3. **Skeleton loaders over spinners**: Every async data load shows a shimmer placeholder that mirrors the final layout, not a generic spinner. Users perceive the app as faster when the structure appears immediately.
+
+4. **Precompute on launch**: Prayer times, Hijri date, and streak data are computed in `SafaApp.task{}` before the user navigates. Widget data is synced in the same pass.
+
+5. **Lazy ViewModel initialization**: Heavy ViewModels (Prayer, Quran, Hadith) are created in `.task{}` modifiers, not in `init()`, so the tab bar renders instantly.
+
+6. **Background-only for non-critical work**: Spotlight indexing, notification scheduling, and database decompression run in background tasks that never block the main actor.
+
+7. **Cache aggressively**: Repository results (collections, surahs) are cached in memory after first load. UserDefaults reads use App Group for widget sharing.
+
+**Performance test requirements:**
+- Every database query method must have a timing assertion (< 1s for search, < 50ms for single-row fetch)
+- App launch test must exist and be run before release
+- New features must not regress existing performance tests
+
 ### 6.8 Spotlight Search (CoreSpotlight)
 
 Index Quran, Hadith, and Duas for iOS Spotlight search.

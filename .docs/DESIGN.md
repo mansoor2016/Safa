@@ -127,6 +127,7 @@ Settings → Appearance → Theme Color
 - **Graceful degradation**: Never crash, never silently fail. Inform the user and offer alternatives.
 - **Premium haptics**: Tactile feedback should be intentional, calm, and consistent — encoding meaning in patterns (commit, success, warning), not just buzzing on every tap. Route all haptics through a central service with accessibility gating.
 - **Intent-driven home**: Home should be a strict intent launcher — next prayer, continue Quran, quick dhikr. Most daily actions should complete in ≤2 taps.
+- **Performance as a feature**: Speed is not a Phase 10 polish item — it is a design requirement from day one. Every screen must feel instant. Targets: cold launch < 2s, screen transitions < 200ms, search results < 500ms, no spinner visible for more than 1s on any common path. Ship skeleton loaders for async data, precompute expensive layouts, compress bundled data, cache aggressively, and measure continuously. A slow Islamic app is an unused Islamic app.
 
 ### 2.4.2 Graceful Degradation Principles
 

@@ -739,9 +739,14 @@ xcodebuild -scheme SafaWidget build
 - [ ] Test in Dark Mode
 
 ### 10.3 Performance Optimization
-- [ ] Profile app launch time (target: p50 < 1s, p95 < 2s)
-- [ ] Profile memory usage (target: < 200MB baseline)
 - [x] Add skeleton loading states for Home, Prayer, Quran screens
+- [x] Gzip hadith.sqlite (85MB → 25MB bundle), async decompress on first launch
+- [x] Persistent SQLite connections (no open/close per query)
+- [x] Async database pre-warming on app launch (non-blocking)
+- [x] Add `DatabasePerformanceTests` — 11 tests: SQLite queries < 50ms, FTS search < 500ms, prayer calc < 10ms, connection pooling
+- [ ] Add `AppLaunchPerformanceTests` — XCTMetric launch time < 2s (requires UI test target)
+- [ ] Profile app launch time with Instruments (target: p50 < 1s, p95 < 2s)
+- [ ] Profile memory usage with Instruments (target: < 200MB baseline)
 - [ ] Precompute and cache home context for instant rendering
 - [ ] Optimize Core Data fetch requests
 - [ ] Optimize LLM inference memory
