@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreLocation
+import MapKit
 
 // MARK: - Location Context
 
@@ -40,21 +41,15 @@ final class LocationInferenceService {
     // MARK: - Singleton
     static let shared = LocationInferenceService()
 
-    private let geocoder = CLGeocoder()
-
     private init() {}
 
     // MARK: - Public Methods
 
     /// Infer location context from coordinates with reverse geocoding
     func inferContext(from location: CLLocation) async -> LocationContext {
-        // Try reverse geocoding first
-        let placemarks = try? await geocoder.reverseGeocodeLocation(location)
-        let placemark = placemarks?.first
-
-        let countryCode = placemark?.isoCountryCode?.uppercased()
-        let country = placemark?.country
-        let city = placemark?.locality ?? placemark?.administrativeArea
+        // Reverse geocode using MapKit (CLGeocoder deprecated in iOS 26)
+        let (countryCode, country, city) = await reverseGeocode(location)
+        let _ = country // used below via countryCode/city
 
         let coordinates = Coordinates(
             latitude: location.coordinate.latitude,
@@ -74,7 +69,7 @@ final class LocationInferenceService {
             city: city,
             country: country,
             countryCode: countryCode,
-            timezone: placemark?.timeZone,
+            timezone: TimeZone.current,
             recommendedMethod: method,
             recommendedMadhab: madhab,
             recommendedLanguage: language,
@@ -343,6 +338,39 @@ final class LocationInferenceService {
         }
 
         return nil
+    }
+
+    // MARK: - Reverse Geocoding (MapKit)
+
+    private func reverseGeocode(_ location: CLLocation) async -> (countryCode: String?, country: String?, city: String?) {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = nil
+        request.region = MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: 1000,
+            longitudinalMeters: 1000
+        )
+
+        // Use MKLocalSearch to get placemark data
+        do {
+            let search = MKLocalSearch(request: request)
+            let response = try await search.start()
+            if let item = response.mapItems.first {
+                let placemark = item.placemark
+                return (
+                    placemark.isoCountryCode?.uppercased(),
+                    placemark.country,
+                    placemark.locality ?? placemark.administrativeArea
+                )
+            }
+        } catch {
+            // Fall through to coordinate-based inference
+        }
+
+        // Fallback: infer country from coordinates alone
+        let coords = Coordinates(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        let inferredCountry = inferCountryFromCoordinates(coords)
+        return (inferredCountry, nil, nil)
     }
 
     // MARK: - Helpers
