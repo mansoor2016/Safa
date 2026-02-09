@@ -11,12 +11,12 @@ final class PrayerRepositoryTests: XCTestCase {
 
     func testPrayerRepositoryProtocolExists() {
         // Verify protocol can be used as a type constraint
-        let mockRepo: any PrayerRepositoryProtocol = MockPrayerRepository()
+        let mockRepo: any PrayerRepositoryProtocol = StatefulMockPrayerRepository()
         XCTAssertNotNil(mockRepo)
     }
 
     func testMockGetPrayers() async throws {
-        let mockRepo = MockPrayerRepository()
+        let mockRepo = StatefulMockPrayerRepository()
         let location = Coordinates(latitude: 40.7128, longitude: -74.0060) // New York
 
         let times = try await mockRepo.getPrayers(for: Date(), location: location, method: .muslimWorldLeague)
@@ -26,7 +26,7 @@ final class PrayerRepositoryTests: XCTestCase {
     }
 
     func testMockLogPrayer() async throws {
-        let mockRepo = MockPrayerRepository()
+        let mockRepo = StatefulMockPrayerRepository()
 
         try await mockRepo.logPrayer(.fajr, for: Date(), at: Date(), isOnTime: true)
 
@@ -37,7 +37,7 @@ final class PrayerRepositoryTests: XCTestCase {
 
 // MARK: - Mock Prayer Repository
 
-final class MockPrayerRepository: PrayerRepositoryProtocol {
+final class StatefulMockPrayerRepository: PrayerRepositoryProtocol {
     private var logs: [PrayerLog] = []
 
     func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] {
@@ -855,83 +855,9 @@ final class UserRepositoryTests: XCTestCase {
         XCTAssertEqual(decoded.streakFreezes, 2)
     }
 
-    func testUserStatsLevelCalculation() {
-        // Given/When/Then
-        XCTAssertEqual(UserStats.calculateLevel(from: 0), 1)
-        XCTAssertEqual(UserStats.calculateLevel(from: 99), 1)
-        XCTAssertEqual(UserStats.calculateLevel(from: 100), 2)
-        XCTAssertEqual(UserStats.calculateLevel(from: 500), 3)
-    }
-
-    func testUserStatsLevelTitle() {
-        // Given/When/Then
-        XCTAssertFalse(UserStats.levelTitle(for: 1).isEmpty)
-        XCTAssertFalse(UserStats.levelTitle(for: 5).isEmpty)
-        XCTAssertFalse(UserStats.levelTitle(for: 10).isEmpty)
-    }
-
-    // MARK: - Streak Tests
-
-    func testStreakDefaultValues() {
-        // Given
-        let streak = Streak(type: .daily)
-
-        // Then
-        XCTAssertEqual(streak.type, .daily)
-        XCTAssertEqual(streak.currentCount, 0)
-        XCTAssertEqual(streak.longestCount, 0)
-        XCTAssertNil(streak.lastActivityDate)
-    }
-
-    func testStreakIsCodable() throws {
-        // Given
-        var original = Streak(type: .prayer)
-        original.currentCount = 7
-        original.longestCount = 14
-        original.lastActivityDate = Date()
-
-        // When
-        let data = try JSONEncoder().encode(original)
-        let decoded = try JSONDecoder().decode(Streak.self, from: data)
-
-        // Then
-        XCTAssertEqual(decoded.type, .prayer)
-        XCTAssertEqual(decoded.currentCount, 7)
-        XCTAssertEqual(decoded.longestCount, 14)
-        XCTAssertNotNil(decoded.lastActivityDate)
-    }
-
-    func testAllStreakTypesExist() {
-        // Given
-        let allTypes = StreakType.allCases
-
-        // Then
-        XCTAssertTrue(allTypes.contains(.daily))
-        XCTAssertTrue(allTypes.contains(.prayer))
-        XCTAssertTrue(allTypes.contains(.quran))
-        XCTAssertTrue(allTypes.contains(.dhikr))
-        XCTAssertTrue(allTypes.contains(.learning))
-    }
-
-    // MARK: - Achievement Tests
-
-    func testAchievementAllAchievementsNotEmpty() {
-        // Given
-        let achievements = Achievement.allAchievements
-
-        // Then
-        XCTAssertFalse(achievements.isEmpty)
-    }
-
-    func testAchievementHasRequiredProperties() {
-        // Given
-        let achievement = Achievement.allAchievements.first!
-
-        // Then
-        XCTAssertFalse(achievement.id.isEmpty)
-        XCTAssertFalse(achievement.title.isEmpty)
-        XCTAssertFalse(achievement.description.isEmpty)
-    }
+    // Level calc → IntegrationTests.testHasanatThresholds
+    // Streak defaults/codable/types → StreakTests
+    // Achievement existence/fields → GamificationTests
 
     func testAchievementIsCodable() throws {
         // Given

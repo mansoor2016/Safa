@@ -308,13 +308,13 @@ final class HasanatTrackingTests: XCTestCase {
 @MainActor
 final class HasanatIntegrationTests: XCTestCase {
 
-    private var mockRepo: TrackingMockUserRepository!
+    private var mockRepo: MockUserRepository!
     private var userState: UserStateManager!
 
     override func setUp() {
         super.setUp()
         clearTrackerKeys()
-        mockRepo = TrackingMockUserRepository()
+        mockRepo = MockUserRepository()
         userState = UserStateManager(userRepository: mockRepo)
     }
 
@@ -459,58 +459,4 @@ final class HasanatIntegrationTests: XCTestCase {
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1, "Only one hasanat call")
         XCTAssertEqual(userState.userStats.totalPrayersLogged, 2, "Counter still increments (lifetime total)")
     }
-}
-
-// MARK: - Tracking Mock User Repository
-
-@MainActor
-private final class TrackingMockUserRepository: UserRepositoryProtocol {
-    var addHasanatCalls: [Int] = []
-    var recordStreakCalls: [StreakType] = []
-    var updateStatsCalls: [UserStats] = []
-    private var storedStats = UserStats()
-
-    nonisolated func getUserStats() async throws -> UserStats {
-        await storedStats
-    }
-
-    nonisolated func updateUserStats(_ stats: UserStats) async throws {
-        await MainActor.run {
-            storedStats = stats
-            updateStatsCalls.append(stats)
-        }
-    }
-
-    nonisolated func addHasanat(_ amount: Int) async throws -> Int {
-        await MainActor.run {
-            addHasanatCalls.append(amount)
-            storedStats.totalHasanat += amount
-            return storedStats.totalHasanat
-        }
-    }
-
-    nonisolated func getStreaks() async throws -> [Streak] {
-        StreakType.allCases.map { Streak(type: $0) }
-    }
-
-    nonisolated func getStreak(type: StreakType) async throws -> Streak? {
-        Streak(type: type)
-    }
-
-    nonisolated func updateStreak(_ streak: Streak) async throws {}
-
-    nonisolated func recordStreakActivity(type: StreakType) async throws {
-        await MainActor.run { recordStreakCalls.append(type) }
-    }
-
-    nonisolated func getAchievements() async throws -> [Achievement] { [] }
-    nonisolated func unlockAchievement(_ achievementId: String) async throws {}
-    nonisolated func isAchievementUnlocked(_ achievementId: String) async throws -> Bool { false }
-    nonisolated func getPreference<T: Codable>(key: String) async throws -> T? { nil }
-    nonisolated func setPreference<T: Codable>(key: String, value: T) async throws {}
-    nonisolated func getPreferences() async -> UserPreferences { UserPreferences() }
-    nonisolated func updatePreferences(_ preferences: UserPreferences) async throws {}
-    nonisolated func getStreakFreezes() async throws -> Int { 0 }
-    nonisolated func useStreakFreeze() async throws {}
-    nonisolated func awardStreakFreeze() async throws {}
 }

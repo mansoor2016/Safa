@@ -1,6 +1,8 @@
 // MARK: - UserStatsTests.swift
-// PURPOSE: Unit tests for UserStats and level calculations
+// PURPOSE: Unit tests for UserStats initialization, codable, and UserPreferences
 // DEPENDENCIES: XCTest
+// NOTE: Level calc → IntegrationTests, HasanatAward points → HasanatTrackingTests,
+//       Level titles → IntegrationTests
 
 import XCTest
 @testable import Safa
@@ -40,30 +42,6 @@ final class UserStatsTests: XCTestCase {
         XCTAssertEqual(stats.lessonsCompleted, 10)
     }
 
-    // MARK: - Level Calculation Tests
-
-    func testCalculateLevelFromHasanat() {
-        XCTAssertEqual(UserStats.calculateLevel(from: 0), 1)
-        XCTAssertEqual(UserStats.calculateLevel(from: 50), 1)
-        XCTAssertEqual(UserStats.calculateLevel(from: 100), 2)
-        XCTAssertEqual(UserStats.calculateLevel(from: 300), 3)
-        XCTAssertEqual(UserStats.calculateLevel(from: 600), 4)
-        XCTAssertEqual(UserStats.calculateLevel(from: 1000), 5)
-        XCTAssertEqual(UserStats.calculateLevel(from: 2000), 6)
-        XCTAssertEqual(UserStats.calculateLevel(from: 4000), 7)
-        XCTAssertEqual(UserStats.calculateLevel(from: 7000), 8)
-        XCTAssertEqual(UserStats.calculateLevel(from: 12000), 9)
-        XCTAssertEqual(UserStats.calculateLevel(from: 20000), 10)
-        XCTAssertEqual(UserStats.calculateLevel(from: 50000), 10)
-    }
-
-    func testCalculateLevelBoundaries() {
-        XCTAssertEqual(UserStats.calculateLevel(from: 99), 1)
-        XCTAssertEqual(UserStats.calculateLevel(from: 100), 2)
-        XCTAssertEqual(UserStats.calculateLevel(from: 299), 2)
-        XCTAssertEqual(UserStats.calculateLevel(from: 300), 3)
-    }
-
     // MARK: - Level Title Tests
 
     func testLevelTitles() {
@@ -79,10 +57,12 @@ final class UserStatsTests: XCTestCase {
         XCTAssertEqual(UserStats.levelTitle(for: 10), "Muhsin")
     }
 
+    // MARK: - Level Title Edge Cases
+
     func testLevelTitleInvalidLevel() {
         XCTAssertEqual(UserStats.levelTitle(for: 0), "Beginner")
         XCTAssertEqual(UserStats.levelTitle(for: -1), "Beginner")
-        XCTAssertEqual(UserStats.levelTitle(for: 11), "Beginner")
+        XCTAssertEqual(UserStats.levelTitle(for: 100), "Beginner")
     }
 
     // MARK: - Hasanat For Level Tests
@@ -123,19 +103,6 @@ final class UserStatsTests: XCTestCase {
         XCTAssertEqual(original.totalHasanat, decoded.totalHasanat)
         XCTAssertEqual(original.currentLevel, decoded.currentLevel)
         XCTAssertEqual(original.unlockedAchievements, decoded.unlockedAchievements)
-    }
-
-    // MARK: - Hasanat Award Tests
-
-    func testHasanatAwardPoints() {
-        XCTAssertEqual(HasanatAward.prayerLogged.points, 10)
-        XCTAssertEqual(HasanatAward.prayerAllFive.points, 25)
-        XCTAssertEqual(HasanatAward.quranPage.points, 5)
-        XCTAssertEqual(HasanatAward.quranSurah.points, 15)
-        XCTAssertEqual(HasanatAward.quranJuz.points, 50)
-        XCTAssertEqual(HasanatAward.lessonComplete.points, 10)
-        XCTAssertEqual(HasanatAward.morningDhikr.points, 15)
-        XCTAssertEqual(HasanatAward.eveningDhikr.points, 15)
     }
 
     // MARK: - User Preferences Tests
