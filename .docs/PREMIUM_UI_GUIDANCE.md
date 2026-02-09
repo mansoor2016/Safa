@@ -187,10 +187,10 @@ Empty surfaces should always teach the next action and reduce time-to-value.
 - Keep trust cues explicit in sensitive surfaces (privacy-safe AI, local-first data, export transparency).
 - Avoid engagement patterns that feel manipulative; nudge gently and purposefully.
 
-## Suggested Rollout Order
-1. Navigation Bar Material Morph + Screen State Transition Standards (Home + Prayer)
-2. Hero Compression + Sticky Context Chip (Home)
-3. Numeric Text Transitions + Optimistic Action Feedback (Home + Prayer + Dhikr)
-4. Matched-Geometry Transition (Quran list -> reader)
-5. Contextual Actions + Sticky Filter Rail + Bottom Sheet Standards (Quran/Hadith/Calendar)
-6. Adaptive Tab Bar Behavior + Zero-State/Resume Quality pass (cross-app polish)
+## Rollout Progress
+1. ~~Navigation Bar Material Morph~~ ✅ Shipped (Home + Prayer + Ramadan, Feb 9 2026)
+2. Hero Compression + Sticky Context Chip (Home) — next
+3. ~~Numeric Text Transitions~~ ✅ Shipped (.contentTransition(.numericText()) on all live counters)
+4. Matched-Geometry Transition (Quran list → reader)
+5. ~~Bottom Sheet Standards~~ ✅ Shipped (25 sheets with .compactSheet()/.fullSheet(), Feb 9 2026)
+6. Screen State Transitions + Contextual Actions + Adaptive Tab Bar + Zero-State/Resume — remaining
