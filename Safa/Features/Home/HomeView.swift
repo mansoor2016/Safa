@@ -37,9 +37,6 @@ struct HomeView: View {
                 HomeSkeletonView()
             } else {
             VStack(spacing: SafaSpacing.lg) {
-                // Header with date
-                dateHeader
-
                 // Next prayer card
                 if let prayer = nextPrayer {
                     NextPrayerHomeCard(prayer: prayer) {
@@ -76,14 +73,23 @@ struct HomeView: View {
             .padding()
             } // end else (skeleton)
         }
-        .navigationTitle("Safa")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .topBarLeading) {
                 Button {
                     router.navigate(to: .settings)
                 } label: {
                     Image(systemName: "gearshape")
+                        .font(.body)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 0) {
+                    Text("Safa")
+                        .font(.headline)
+                    Text(compactDateLine)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -220,26 +226,14 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Date Header
+    // MARK: - Compact Date Line (for toolbar)
 
-    private var dateHeader: some View {
-        VStack(spacing: SafaSpacing.xxs) {
-            Text(Date().formatted(date: .complete, time: .omitted))
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-            Text(hijriDate)
-                .font(SafaTypography.titleMedium)
-                .foregroundColor(SafaColors.Fallback.text)
-
-            if isRamadan {
-                Label("Ramadan Mubarak", systemImage: "moon.stars.fill")
-                    .font(SafaTypography.labelSmall)
-                    .foregroundColor(.accentColor)
-                    .padding(.top, SafaSpacing.xxs)
-            }
+    private var compactDateLine: String {
+        let gregorian = Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+        if hijriDate.isEmpty {
+            return gregorian
         }
-        .frame(maxWidth: .infinity)
+        return "\(gregorian) · \(hijriDate)"
     }
 
     // MARK: - Quick Actions
