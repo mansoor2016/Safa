@@ -343,28 +343,81 @@ struct RamadanView: View {
 
     private func togglePrayer(_ prayerType: PrayerType) async {
         if loggedPrayers.contains(prayerType) {
-            do {
-                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
-                if let log = logs.first(where: { $0.prayerType == prayerType }) {
-                    try await dependencies.prayerRepository.deletePrayerLog(log)
-                    loggedPrayers.remove(prayerType)
-                }
-            } catch {}
+            await optimisticUnlogPrayer(prayerType)
         } else {
-            do {
-                let prayer = todayPrayers.first { $0.type == prayerType }
-                let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
-                try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
-                loggedPrayers.insert(prayerType)
-                await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
-                await dependencies.userState.incrementPrayersLogged()
-                await dependencies.userState.recordActivity(type: .prayer)
+            await optimisticLogPrayer(prayerType)
+        }
+    }
 
-                // Check if all obligatory prayers completed
-                if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
-                    await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
-                }
-            } catch {}
+    private func optimisticLogPrayer(_ prayerType: PrayerType) async {
+        // Optimistic: update UI immediately
+        loggedPrayers.insert(prayerType)
+        WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+
+        let displayName = prayerType.displayName
+        ToastService.shared.show(Toast.undoAction(message: "\(displayName) logged") {
+            Task { @MainActor [self] in
+                loggedPrayers.remove(prayerType)
+                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+                // Best-effort: delete from repo
+                do {
+                    let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+                    if let log = logs.first(where: { $0.prayerType == prayerType }) {
+                        try await dependencies.prayerRepository.deletePrayerLog(log)
+                    }
+                } catch {}
+            }
+        })
+
+        // Persist
+        do {
+            let prayer = todayPrayers.first { $0.type == prayerType }
+            let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
+            try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
+
+            await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
+            await dependencies.userState.incrementPrayersLogged()
+            await dependencies.userState.recordActivity(type: .prayer)
+
+            if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
+                await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
+            }
+        } catch {
+            // Revert on failure
+            loggedPrayers.remove(prayerType)
+            WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+        }
+    }
+
+    private func optimisticUnlogPrayer(_ prayerType: PrayerType) async {
+        // Optimistic: update UI immediately
+        loggedPrayers.remove(prayerType)
+        WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+
+        let displayName = prayerType.displayName
+        ToastService.shared.show(Toast.undoAction(message: "\(displayName) unlogged", type: .info) {
+            Task { @MainActor [self] in
+                loggedPrayers.insert(prayerType)
+                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
+                // Best-effort: re-log to repo
+                do {
+                    let prayer = todayPrayers.first { $0.type == prayerType }
+                    let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
+                    try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
+                } catch {}
+            }
+        })
+
+        // Persist
+        do {
+            let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
+            if let log = logs.first(where: { $0.prayerType == prayerType }) {
+                try await dependencies.prayerRepository.deletePrayerLog(log)
+            }
+        } catch {
+            // Revert on failure
+            loggedPrayers.insert(prayerType)
+            WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
         }
     }
 

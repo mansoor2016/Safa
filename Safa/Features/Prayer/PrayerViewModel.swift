@@ -118,15 +118,21 @@ final class PrayerViewModel {
 
     func logPrayer(_ prayerType: PrayerType) async {
         guard !loggedPrayers.contains(prayerType) else { return }
+        guard let prayer = todayPrayers.first(where: { $0.type == prayerType }) else { return }
 
+        // Optimistic: update UI immediately
+        loggedPrayers.insert(prayerType)
+        widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+
+        // Show undo toast
+        let displayName = prayerType.displayName
+        ToastService.shared.show(Toast.undoAction(message: "\(displayName) logged") { [weak self] in
+            self?.revertLog(prayerType)
+        })
+
+        // Persist
         do {
-            // Find the prayer time
-            guard let prayer = todayPrayers.first(where: { $0.type == prayerType }) else { return }
-
-            // Check if on time (within 30 minutes of prayer time)
             let isOnTime = abs(Date().timeIntervalSince(prayer.time)) < 30 * 60
-
-            // Log the prayer
             try await prayerRepository.logPrayer(
                 prayerType,
                 for: currentDate,
@@ -134,48 +140,86 @@ final class PrayerViewModel {
                 isOnTime: isOnTime
             )
 
-            // Update local state
-            loggedPrayers.insert(prayerType)
-
-            // Sync logged state to widgets
-            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
-
-            // Award Hasanat (dedup: log-unlog-relog won't double-award)
+            // Side effects (after persist succeeds)
             await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: userState)
-
-            // Increment lifetime prayer counter (before first-prayer check)
             let wasFirstPrayer = userState.userStats.totalPrayersLogged == 0
             await userState.incrementPrayersLogged()
 
-            // Check if all prayers completed
             if allPrayersCompleted {
                 await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: userState)
                 await userState.checkAndUnlockAchievement("prayer_perfect_day")
             }
 
-            // Update prayer streak
             await userState.recordActivity(type: .prayer)
 
-            // Check first prayer achievement
             if wasFirstPrayer {
                 await userState.checkAndUnlockAchievement("prayer_first")
             }
-
         } catch {
+            // Revert optimistic state on failure
+            loggedPrayers.remove(prayerType)
+            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
             self.error = error
         }
     }
 
     private func unlogPrayer(_ prayerType: PrayerType) async {
+        guard loggedPrayers.contains(prayerType) else { return }
+
+        // Optimistic: update UI immediately
+        loggedPrayers.remove(prayerType)
+        widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+
+        // Show undo toast
+        let displayName = prayerType.displayName
+        ToastService.shared.show(Toast.undoAction(message: "\(displayName) unlogged", type: .info) { [weak self] in
+            self?.revertUnlog(prayerType)
+        })
+
+        // Persist
         do {
             let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
             if let log = logs.first(where: { $0.prayerType == prayerType }) {
                 try await prayerRepository.deletePrayerLog(log)
-                loggedPrayers.remove(prayerType)
-                widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
             }
         } catch {
+            // Revert optimistic state on failure
+            loggedPrayers.insert(prayerType)
+            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
             self.error = error
+        }
+    }
+
+    // MARK: - Undo Helpers
+
+    private func revertLog(_ prayerType: PrayerType) {
+        loggedPrayers.remove(prayerType)
+        widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
+                if let log = logs.first(where: { $0.prayerType == prayerType }) {
+                    try await prayerRepository.deletePrayerLog(log)
+                }
+            } catch {
+                // Silent — best-effort undo
+            }
+        }
+    }
+
+    private func revertUnlog(_ prayerType: PrayerType) {
+        loggedPrayers.insert(prayerType)
+        widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                guard let prayer = todayPrayers.first(where: { $0.type == prayerType }) else { return }
+                let isOnTime = abs(Date().timeIntervalSince(prayer.time)) < 30 * 60
+                try await prayerRepository.logPrayer(prayerType, for: currentDate, at: Date(), isOnTime: isOnTime)
+            } catch {
+                // Silent — best-effort undo
+            }
         }
     }
 

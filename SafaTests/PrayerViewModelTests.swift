@@ -240,6 +240,36 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertNotNil(sut.error)
     }
 
+    func test_logPrayer_failure_revertsOptimisticState() async {
+        // Given
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 40.7128, longitude: -74.0060)
+        await sut.loadPrayerTimes()
+        mockPrayerRepository.errorToThrow = PrayerTestError.logFailed
+
+        // When
+        await sut.logPrayer(.fajr)
+
+        // Then - optimistic insert should be reverted
+        XCTAssertFalse(sut.loggedPrayers.contains(.fajr))
+    }
+
+    func test_togglePrayer_rapidDoubleTap_endsUnlogged() async {
+        // Given
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 40.7128, longitude: -74.0060)
+        await sut.loadPrayerTimes()
+
+        // When - log then unlog
+        await sut.togglePrayer(.fajr)
+        XCTAssertTrue(sut.loggedPrayers.contains(.fajr))
+
+        await sut.togglePrayer(.fajr)
+
+        // Then - should end unlogged
+        XCTAssertFalse(sut.loggedPrayers.contains(.fajr))
+    }
+
     // MARK: - All Prayers Completed Tests
 
     func test_allPrayersCompleted_returnsTrueWhenAllLogged() async {

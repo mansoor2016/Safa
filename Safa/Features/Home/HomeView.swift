@@ -425,48 +425,6 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Toggle Prayer Log
-
-    private func togglePrayer(_ prayerType: PrayerType) async {
-        if loggedPrayers.contains(prayerType) {
-            // Unlog the prayer
-            do {
-                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
-                if let log = logs.first(where: { $0.prayerType == prayerType }) {
-                    try await dependencies.prayerRepository.deletePrayerLog(log)
-                    loggedPrayers.remove(prayerType)
-                }
-            } catch {
-                // Handle error silently on home screen
-            }
-        } else {
-            // Log the prayer
-            do {
-                let prayer = todayPrayers.first { $0.type == prayerType }
-                let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
-
-                try await dependencies.prayerRepository.logPrayer(
-                    prayerType,
-                    for: Date(),
-                    at: Date(),
-                    isOnTime: isOnTime
-                )
-
-                loggedPrayers.insert(prayerType)
-                await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
-                await dependencies.userState.incrementPrayersLogged()
-                await dependencies.userState.recordActivity(type: .prayer)
-
-                // Check if all obligatory prayers completed
-                if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
-                    await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
-                }
-            } catch {
-                // Handle error silently on home screen
-            }
-        }
-    }
-
     private func reloadLoggedPrayers() async {
         do {
             let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())

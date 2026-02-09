@@ -6,11 +6,13 @@ import SwiftUI
 
 // MARK: - Toast Model
 
-struct Toast: Equatable, Identifiable {
+struct Toast: Identifiable {
     let id = UUID()
     let message: String
     let type: ToastType
     let duration: TimeInterval
+    let actionTitle: String?
+    let action: (() -> Void)?
 
     enum ToastType {
         case info
@@ -37,10 +39,12 @@ struct Toast: Equatable, Identifiable {
         }
     }
 
-    init(message: String, type: ToastType = .info, duration: TimeInterval = 2.5) {
+    init(message: String, type: ToastType = .info, duration: TimeInterval = 2.5, actionTitle: String? = nil, action: (() -> Void)? = nil) {
         self.message = message
         self.type = type
         self.duration = duration
+        self.actionTitle = actionTitle
+        self.action = action
     }
 
     static func comingSoon(_ featureName: String) -> Toast {
@@ -48,6 +52,16 @@ struct Toast: Equatable, Identifiable {
             message: "\(featureName) coming soon",
             type: .comingSoon,
             duration: 2.0
+        )
+    }
+
+    static func undoAction(message: String, type: ToastType = .success, onUndo: @escaping () -> Void) -> Toast {
+        Toast(
+            message: message,
+            type: type,
+            duration: 4.0,
+            actionTitle: "Undo",
+            action: onUndo
         )
     }
 }
@@ -105,6 +119,19 @@ struct ToastView: View {
             Text(toast.message)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.primary)
+
+            if let actionTitle = toast.actionTitle, let action = toast.action {
+                Spacer()
+
+                Button {
+                    action()
+                    ToastService.shared.dismiss()
+                } label: {
+                    Text(actionTitle)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(toast.type.color)
+                }
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

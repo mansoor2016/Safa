@@ -32,6 +32,7 @@ struct SafaApp: App {
                 }
             }
             .safaTheme(themeManager)
+            .toastContainer()
             .environment(dependencies)
             .environment(router)
             .environment(themeManager)
