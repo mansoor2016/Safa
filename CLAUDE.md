@@ -460,6 +460,8 @@ Or construct ViewModels with explicit injection:
 - **Don't** exceed file size limits - split instead
 - **Don't** use abbreviations in names - be explicit (`.muslimWorldLeague` not `.mwl`)
 - **Don't** duplicate type names across files - rename if needed (e.g., `HomeStatItem` vs `StatItem`)
+- **Don't** use `class` for stateless types - use `struct` (avoids heap allocation bugs; see PrayerTimeCalculator SIGABRT fix)
+- **Don't** access `.shared` singletons directly from ViewModels or business logic - inject via `Dependencies` container or init parameters instead. Singletons hide dependencies and make testing harder. Existing `.shared` usage is legacy; new code should prefer injection.
 
 ---
 
@@ -472,6 +474,8 @@ Or construct ViewModels with explicit injection:
 - **Do** write tests for new code
 - **Do** keep files focused on single responsibility
 - **Do** use meaningful variable names
+- **Do** prefer `struct` over `class` unless you need reference semantics (mutable shared state, `@Observable`, inheritance, `NSObject`)
+- **Do** inject services through `Dependencies` container or init parameters for testability
 - **Do** build and run tests immediately after changes (see below)
 
 ---
