@@ -2,981 +2,222 @@
 
 ## Overview
 
-This document tracks all development tasks for the Safa iOS app. Each phase includes:
-- **Implementation tasks** - Code to write
-- **Acceptance criteria** - How we verify it works correctly
-- **Integration tests** - User flow verification
-- **Milestone demo** - End-of-phase validation checkpoint
+This document tracks remaining development tasks for the Safa iOS app. Completed phases are summarized as rollups. Active backlog items use `[ ]` (not started), `[~]` (in progress), `[!]` (blocked).
 
-**Compact Mode (February 8, 2026):**
-- This file prioritizes active backlog items (`[ ]`, `[~]`, `[!]`) and keeps completed work as condensed rollups.
-- Completed granular history is archived in `.docs/TASKS_ARCHIVE_2026-02-08.md`.
-
-**Legend:**
-- `[ ]` Not started
-- `[x]` Completed
-- `[~]` In progress
-- `[!]` Blocked
-
-**Verification Commands:**
+**Verification:**
 ```bash
-# Build project
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' build
-
-# Run all tests
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' test
-
-# Run specific test class
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:SafaTests/{TestClassName} test
-
-# Launch app in simulator
-xcrun simctl boot "iPhone 17" && xcrun simctl launch booted com.safa.app
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:SafaTests test
 ```
 
 ---
 
-## Completed Rollups (February 8, 2026)
-- [x] Localization foundation shipped: Phase language plan finalized, fallback policy defined, app String Catalog enabled, Phase 1 locales configured, and ~119 programmatic strings localized.
-- [x] Content data foundation shipped: full Quran dataset (6,236 ayahs) and full Hadith dataset (34,178 entries) populated with SQLite + FTS coverage and integrity checks.
-- [x] Platform baseline shipped: widget extension target, App Group prayer data sharing, lock-screen widget families, and streak widget implementation.
-- [x] UX quality systems shipped: centralized haptics system, degraded state banner pattern, and system status surfacing in Settings.
-- [x] Dark mode foundation shipped: theme wiring, appearance picker, semantic color tokens, and ThemeManager unit-test coverage.
-- [x] Observability baseline shipped: analytics schema, onboarding/core action instrumentation, degraded-state tracking, and privacy-safe logging rules.
-- [x] Data sovereignty baseline shipped: JSON export, CSV prayer-log export, and in-app transparency screen for user data visibility.
-- [x] Prayer time bug fixes shipped: Isha-before-Maghrib fix (Makkah method + high-latitude fallbacks + monotonic ordering), HomeView/RamadanView calculation method consistency, 21 monotonic regression tests.
-- [x] Notification reliability shipped: default ON in onboarding, daily re-scheduling on app launch via NotificationScheduler, force-reschedule on method change.
-- [x] Skeleton loaders shipped: shimmer-animated placeholders for Home, Prayer, and Quran screens replacing spinners.
-- [x] Code health shipped: UserPreferences extracted from Gamification.swift, orphaned SafaWidget/ folder removed (1,528 lines), localization plan amended with Malay, content pack schema, pluralization rules.
+## Completed Rollups
+
+- **Phase 0-1 (Foundation):** Project structure, Dependencies container, AppRouter, Core Data stack, domain entities, design system, disabled feature pattern, location intelligence — all shipped.
+- **Phase 2 (Prayer):** Prayer time calculation (7 methods), Qibla compass, location service, prayer repository, prayer UI with logging, notification scheduling — all shipped. Remaining: optional prayer quality logs.
+- **Phase 3 (Quran):** Full 6,236-ayah dataset, surah browsing, ayah reader, search with FTS, bookmarks, reading progress, predictive download service, smart cleanup — all shipped. Remaining: audio playback, download/caching, CloudKit bookmark sync, transliteration.
+- **Phase 4 (Gamification):** UserStateManager, hasanat awards (20 types with dedup via HasanatTracker), streaks (5 types with daily dedup), 24 achievements, level system (1-10), progress card on home — all shipped. Remaining: achievement badge assets, weekly reflection summary, progress dashboard UI (marked coming soon).
+- **Phase 5 (Learning):** Learning tracks, lesson content view, pronunciation checker UI — scaffolding shipped but feature-flagged as coming soon. Remaining: pronunciation audio files, content for tracks, micro-practice sessions.
+- **Localization foundation:** Phase 1 locales configured (en/ar/id/ur/bn), ~119 strings localized, String Catalog enabled.
+- **Content data:** Full Quran (6,236 ayahs) + Hadith (34,178 entries) in SQLite with FTS + integrity tests.
+- **Platform baseline:** Widget extension, App Group sharing, lock-screen + streak widgets, Spotlight indexing.
+- **UX systems:** Haptics, degraded state banners, skeleton loaders, theme/dark mode foundation.
+- **Observability:** Analytics schema, onboarding/core instrumentation, privacy-safe logging.
+- **Data sovereignty:** JSON export, CSV prayer logs, per-category deletion (6 categories, 20+ tests), transparency screen.
+- **Prayer fixes:** Isha-before-Maghrib fix, monotonic ordering (21 tests), notification reliability, duplicate notification consolidation (3 systems → 1 NotificationScheduler).
+- **Hasanat overhaul (Feb 9):** HasanatTracker dedup layer, prayer log-unlog-relog fix, prayerAllFive wired to all screens, 6 previously unused awards wired, ShareService rewired to UserStateManager, daily streak on app launch, totalPrayersLogged counter, 37 tests.
+- **Notification consolidation (Feb 9):** Deleted NotificationService (496 lines) + protocol, all callers use NotificationScheduler.shared, legacy identifier cleanup, 17-scenario virtual walkthrough verified.
+- **Test consolidation (Feb 9):** SharedMocks.swift, 25 duplicate tests removed, 6 inline mocks → 1 shared mock, -415 lines.
+- **Premium UI (Feb 9):** Nav bar material morph (Home/Prayer/Ramadan), 25 bottom sheets standardized with .compactSheet()/.fullSheet(), progress section marked coming soon.
+- **Ramadan (Feb 9):** Combined duplicate daily goals ("Read 1 Juz Quran"), Ramadan page restructured with iftar platter/prayer progress/fasting tracker/Khatm goal.
+- **App Intents (Feb 9):** 5 intents wired to real data (GetPrayerTimes, GetNextPrayer, LogPrayer, GetQiblaDirection, GetDailyVerse).
 
 ---
 
-## Cross-Cutting Workstream: Localization & Internationalization (Scoped)
+## Active Work: Localization (L10N)
 
-**Dependency order:** L10N.1 (resolved) → L10N.2 (foundation) → L10N.4 (RTL, do early) → L10N.3 (settings) → L10N.5 (content packs) → L10N.6 (validation)
+**Dependency order:** L10N.2 → L10N.4 (RTL) → L10N.3 (settings) → L10N.5 (content) → L10N.6 (validation)
 
-### L10N.1 Product Scope and Language Rollout [MOSTLY RESOLVED]
-- [x] Finalize rollout and fallback baseline (Phase 1: `en/ar/id/ur/bn`, Phase 2: `ms/fr/hi/tr/fa`, Phase 3: `zh-Hans`; fallback `selected -> en -> Arabic/transliteration` for content)
-- [ ] Publish feature-by-language support matrix (`localizable_ui` vs `localized_content`)
-
-### L10N.2 Xcode Localization Foundation (START HERE)
-- [x] Audit hardcoded string volume and baseline scope
-- [x] Enable app target String Catalog workflow and localize core programmatic strings
-- [x] Configure Phase 1 project localizations in Xcode
+### L10N.2 Xcode Foundation (remaining)
 - [ ] Enable String Catalog for SafaWidgetExtension target (shared keys)
 - [ ] Ensure widgets and Live Activities consume shared localized keys
-- [ ] Add localization lint/check in CI (missing keys, duplicate keys, empty values)
+- [ ] Add localization lint/check in CI
+- [ ] Publish feature-by-language support matrix
 
-### L10N.4 RTL Readiness (DO EARLY — architectural, harder to fix late)
-- [ ] Audit major screens for semantic layout (`leading`/`trailing`) and mirrored icons
-- [ ] Validate Arabic UI flow in onboarding, home, prayer, Quran shell, and settings
-- [ ] Validate mixed-script rendering (Arabic + Latin + numerals) with Dynamic Type
-- [ ] Fix truncation/overlap defects for compact devices (iPhone SE class)
+### L10N.4 RTL Readiness
+- [ ] Audit major screens for semantic layout and mirrored icons
+- [ ] Validate Arabic UI flow in key screens
+- [ ] Validate mixed-script rendering with Dynamic Type
+- [ ] Fix truncation/overlap for compact devices (iPhone SE)
 
-### L10N.3 Language Settings and Runtime Behavior
-- [ ] Add `Settings > Language` section with separate `App Language` and `Content Language`
-- [ ] Persist language preferences in shared preferences store (LanguagePreferences model)
-- [ ] Implement runtime fallback chain: UI (`selected → en`), content (`selected → en → Arabic/transliteration`)
-- [ ] Show explicit "Not available in <Language>" states for untranslated content
+### L10N.3 Language Settings
+- [ ] Add Settings > Language section (App Language + Content Language)
+- [ ] Persist language preferences (LanguagePreferences model)
+- [ ] Implement runtime fallback chain
+- [ ] Show "Not available" states for untranslated content
 
-### L10N.5 Scoped Religious Content Translation
-- [ ] Create `ayah_translations` table (additive, separate from base ayahs table)
-- [ ] Create `hadith_translations` table (same pattern)
-- [ ] Create `dua_translations` table (same pattern)
-- [ ] Implement on-demand language pack download + local cache
-- [ ] Define content availability manifest (per feature, per language)
-- [ ] Add user-facing availability labels in Quran, Hadith, Dua, and AI surfaces
-- [ ] Define acceptance criteria for enabling each new content language pack
+### L10N.5 Content Translation
+- [ ] Create ayah/hadith/dua translation tables
+- [ ] Implement on-demand language pack download + cache
+- [ ] Define content availability manifest
+- [ ] Add availability labels in Quran/Hadith/Dua surfaces
 
-### L10N.6 Validation and Release Gates
-- [ ] Add pseudo-localization UI test pass (string expansion and bidi edge cases)
-- [ ] Add screenshot coverage for Phase 1 languages on key flows
-- [ ] Verify pluralization rules for Arabic (6 forms), Bengali/Hindi/Urdu (2 forms), Indonesian/Malay/Turkish/Persian/Chinese Simplified (no grammatical plural)
-- [ ] Track localization telemetry: missing-key rate and content-fallback rate
-- [ ] Block release if localization regression threshold is exceeded
-
-### Localization Acceptance Criteria
-- [ ] **AC-L10N.1**: App shell and settings fully localized for all Phase 1 languages
-- [ ] **AC-L10N.2**: Arabic UI renders RTL correctly across key flows with no blocking layout defects
-- [ ] **AC-L10N.3**: Missing content translations show clear user-facing state (never silent fallback)
-- [ ] **AC-L10N.4**: Widgets and Live Activities display localized labels for selected app language
-- [ ] **AC-L10N.5**: Localization CI checks run and fail on missing critical keys
-- [ ] **AC-L10N.6**: Plural-sensitive strings use String Catalog plural variants for all Phase 1 languages
-
-### Localization Integration Tests
-- [ ] **IT-L10N.1**: Change app language in Settings → relaunch target screen → all shell strings updated
-- [ ] **IT-L10N.2**: Select Arabic app language → navigation/layout mirrors correctly in key screens
-- [ ] **IT-L10N.3**: Select content language without Quran translation pack → explicit unavailable state shown
-- [ ] **IT-L10N.4**: Add widget in non-English app language → localized labels visible on Home/Lock screen
-- [ ] **IT-L10N.5**: Toggle between Phase 1 languages (English/Arabic/Indonesian/Urdu/Bengali) → no crashes, no missing-key placeholders
-- [ ] **IT-L10N.6**: Verify "5 days" / "1 day" / "0 days" renders correct plural form in Arabic
-
-### Localization Verification
-```bash
-# Build in default locale
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' build
-
-# Run localization-sensitive tests (to be created)
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:SafaTests/LocalizationTests test
-
-# Run UI localization tests (to be created)
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:SafaUITests/SafaLocalizationUITests test
-```
+### L10N.6 Validation & Release Gates
+- [ ] Pseudo-localization UI test pass
+- [ ] Screenshot coverage for Phase 1 languages
+- [ ] Verify pluralization rules (Arabic 6 forms, Bengali/Hindi/Urdu 2 forms, etc.)
+- [ ] Track localization telemetry + block release on regression
 
 ---
 
-## Phase 0: Project Foundation
+## Active Work: Phase 6 — AI Companion
 
-### 0.1 Repository & Git Setup
-- [ ] Set up branch protection rules (main branch)
-
-### 0.2 Agent Guidance Documentation
-
-### 0.3 Xcode Project Configuration
-- [ ] Create Intents extension target in Xcode project (`SafaIntents`)
-- [ ] [manual] Verify Apple Developer account/certificates/provisioning are valid for both `Mawj.Safa` and `Mawj.Safa.SafaWidgetExtension` by running on a physical iPhone
-
-### 0.4 Core Directory Structure
-
-### Phase 0 Acceptance Criteria
-
-### Phase 0 Verification
-```bash
-# Verify build succeeds
-xcodebuild -scheme Safa build
-
-# Verify app launches
-xcrun simctl launch booted com.safa.app
-
-# Verify folder structure
-find Safa -type d -name "*.swift" | head -20
-```
-
-### 🎯 Milestone 0: Project Skeleton
-**Demo Checklist:**
-- [ ] Fresh clone builds without errors
-- [ ] App launches to empty screen in simulator
-- [ ] All directories created per technical spec
-- [ ] Documentation files in place
+- [~] Apple Foundation Models integration (placeholder — requires iOS 26 SDK)
+- [~] Response streaming (placeholder)
+- [~] Test with 20 diverse queries (test cases created, actual AI testing requires device)
+- [ ] Response quality acceptance: dua queries, fiqh queries, offline capability
 
 ---
 
-## Phase 1: Core Infrastructure
+## Active Work: Phase 7 — Platform Features
 
-### 1.1 Dependencies Container
-
-### 1.2 App Router & Navigation
-
-### 1.3 Core Data Stack
-
-### 1.4 Domain Entities
-
-### 1.5 Design System
-
-### 1.5.1 Disabled Feature Pattern
-
-### 1.6 Shared Utilities
-
-### 1.7 Location Intelligence
-
-### Phase 1 Acceptance Criteria
-
-### Phase 1 Integration Tests
-- [ ] **IT-1.1**: App launches → Dependencies available in first view
-- [ ] **IT-1.2**: Navigate via deep link → Correct screen displays
-- [ ] **IT-1.3**: Save entity → Kill app → Relaunch → Entity persists
-
-### Phase 1 Verification
-```bash
-# Run all Phase 1 tests
-xcodebuild test -only-testing:SafaTests/CoreTests
-xcodebuild test -only-testing:SafaTests/DomainTests
-
-# Verify Core Data persistence
-# Manual: Save data, force quit, relaunch, verify data exists
-```
-
-### 🎯 Milestone 1: Core Infrastructure
-**Demo Checklist:**
-- [ ] App launches with dependency injection working
-- [ ] Navigate between 3 placeholder screens
-- [ ] Deep link opens correct screen
-- [ ] Core Data saves and retrieves test data
-- [ ] Design system components render correctly
-- [ ] Hijri date displays correctly
-- [ ] **Record 2-minute walkthrough video**
-
----
-
-## Phase 2: Prayer Features
-
-### 2.1 Prayer Time Calculation
-
-### 2.2 Qibla Calculation
-
-### 2.3 Location Service
-
-### 2.4 Prayer Repository
-
-### 2.5 Prayer UI
-
-### 2.6 Prayer Notifications
-
-### 2.7 Prayer Quality Logs (Optional)
-- [ ] Add optional lightweight prayer log fields: on-time, congregation, focus rating
-- [ ] Keep private and non-judgmental — no gamification pressure on quality
-- [ ] Show in personal progress only
-
-### Phase 2 Acceptance Criteria
-
-### Phase 2 Integration Tests
-- [ ] **IT-2.1**: Grant location → Prayer times display for current location
-- [ ] **IT-2.2**: Tap prayer row → Log prayer → Row shows checkmark
-- [ ] **IT-2.3**: Open Qibla → Compass points in correct direction
-- [ ] **IT-2.4**: Schedule notification → Background app → Notification fires
-- [ ] **IT-2.5**: Log all 5 prayers → Daily completion indicator shows
-
-### Phase 2 Verification
-```bash
-# Run prayer calculation tests
-xcodebuild test -only-testing:SafaTests/PrayerTests
-
-# Verify against external source
-# Manual: Compare app times with islamicfinder.org for 5 cities
-
-# Test notification timing
-# Manual: Set notification for 1 min ahead, verify it fires
-```
-
-### 🎯 Milestone 2: Prayer Features Complete
-**Demo Checklist:**
-- [ ] App shows accurate prayer times for current location
-- [ ] Change calculation method → times update correctly
-- [ ] Countdown to next prayer updates in real-time
-- [ ] Qibla compass points in correct direction
-- [ ] Log a prayer → checkmark appears
-- [ ] Notification fires at prayer time
-- [ ] Prayer times match external source for 5 test cities
-- [ ] **Record 3-minute demo video**
-
----
-
-## Phase 3: Quran Reader
-
-### 3.1 Quran Data
-
-### 3.2 Quran Repository
-
-### 3.3 Quran UI
-
-### 3.4 Audio Playback
-
-### 3.5 Predictive Audio Download
-
-### 3.6 Smart Cleanup (Auto-Remove Unused Audio)
-
-### 3.7 Remaining Quran Backlog
-- [ ] Connect audio player UI to AVFoundation for actual playback
-- [ ] Implement audio download/caching for recitations
-- [ ] Migrate bookmarks/progress from UserDefaults to Core Data (CloudKit sync)
-- [ ] Add transliteration data (quran.com API or similar)
-
-### Phase 3 Acceptance Criteria
-
-### Phase 3 Integration Tests
-- [ ] **IT-3.1**: Browse surahs → Select surah → Ayahs display correctly
-- [ ] **IT-3.2**: Read ayah → Add bookmark → View bookmarks → Bookmark present
-- [ ] **IT-3.3**: Play audio → Background app → Audio continues
-- [ ] **IT-3.4**: Read to ayah 50 → Close app → Reopen → Resume at ayah 50
-- [ ] **IT-3.5**: Search "Allah" → Results display → Tap result → Navigate to ayah
-
-### Phase 3 Verification
-```bash
-# Run Quran tests
-xcodebuild test -only-testing:SafaTests/QuranTests
-
-# Verify ayah counts
-# Manual: Spot check 5 surahs against quran.com for ayah count
-
-# Verify audio sync
-# Manual: Play Surah Al-Fatiha, verify each ayah highlights correctly
-```
-
-### 🎯 Milestone 3: Quran Reader Complete
-**Demo Checklist:**
-- [ ] Browse all 114 surahs
-- [ ] Read Surah Al-Fatiha with Arabic + translation
-- [ ] Arabic renders beautifully with proper font
-- [ ] Search finds relevant ayahs
-- [ ] Bookmark an ayah, find it in bookmarks
-- [ ] Play audio for a surah
-- [ ] Audio continues when app backgrounded
-- [ ] Reading progress resumes correctly
-- [ ] **Record 4-minute demo video**
-
----
-
-## Phase 4: Gamification System
-
-### 4.1 User State Manager
-
-### 4.2 Hasanat Logic
-
-### 4.3 Streak Logic
-
-### 4.4 Achievements
-- [ ] Create achievement badge assets
-
-### 4.5 Progress UI
-
-### 4.6 Weekly Reflection Summary
-- [ ] Aggregate weekly metrics (prayers logged, Quran continuity, streak trends)
-- [ ] Design summary layout with suggested focus for next week
-- [ ] Schedule weekly notification prompt (opt-in, not pushy)
-
-### Phase 4 Acceptance Criteria
-
-### Phase 4 Integration Tests
-- [ ] **IT-4.1**: Log prayer → Hasanat increases by 10 → Display updates
-- [ ] **IT-4.2**: Read Quran page → Hasanat increases → Streak updates
-- [ ] **IT-4.3**: Reach 100 Hasanat → Level changes to 2 → UI reflects
-- [ ] **IT-4.4**: Activity 7 days in row → Streak shows 7 → Freeze earned
-- [ ] **IT-4.5**: Miss day with freeze → Streak maintained → Freeze consumed
-- [ ] **IT-4.6**: Unlock achievement → Notification shows → Badge in profile
-
-### Phase 4 Verification
-```bash
-# Run gamification tests
-xcodebuild test -only-testing:SafaTests/GamificationTests
-
-# Test streak edge cases
-xcodebuild test -only-testing:SafaTests/StreakTests
-
-# Verify Hasanat calculations
-# Manual: Perform known actions, verify exact point totals
-```
-
-### 🎯 Milestone 4: Gamification Complete
-**Demo Checklist:**
-- [ ] Start fresh → 0 Hasanat, Level 1, no streaks
-- [ ] Log prayer → See Hasanat increase by 10
-- [ ] Read Quran → See Hasanat increase by 5
-- [ ] Reach Level 2 at 100 Hasanat
-- [ ] View progress dashboard with all stats
-- [ ] Unlock "First Prayer" achievement
-- [ ] Streaks display and increment correctly
-- [ ] All data persists after restart
-- [ ] **Record 3-minute demo video**
-
----
-
-## Phase 5: Learning Features
-
-### 5.1 Learning Data
-- [ ] Create pronunciation audio files
-
-### 5.2 Learning Repository
-
-### 5.3 Pronunciation Checker
-- [ ] Write unit tests with sample audio
-
-### 5.4 Learning UI
-
-### 5.5 Progressive Learn Rollout
-- [ ] Audit which learning tracks have content ready
-- [ ] Enable ready tracks individually via FeatureFlags instead of gating entire tab
-- [ ] Add track-level "Coming Soon" for incomplete tracks
-
-### 5.6 Micro-Practice Sessions
-- [ ] Build 1-ayah read + reflection prompt flow
-- [ ] Build 33-count dhikr quick session
-- [ ] Build 1-hadith/day with save/share
-
-### Phase 5 Acceptance Criteria
-
-### Phase 5 Integration Tests
-- [ ] **IT-5.1**: View tracks → Select track → See lessons → Complete lesson
-- [ ] **IT-5.2**: Complete lesson → Hasanat increase → Progress updates
-- [ ] **IT-5.3**: Attempt pronunciation → See score → Retry improves score
-- [ ] **IT-5.4**: Complete all lessons in track → Achievement unlocks
-
-### Phase 5 Verification
-```bash
-# Run learning tests
-xcodebuild test -only-testing:SafaTests/LearningTests
-
-# Test pronunciation service
-# Manual: Speak Arabic letter, verify recognition works
-
-# Verify lesson content
-# Manual: Complete 3 lessons, verify content is educational
-```
-
-### 🎯 Milestone 5: Learning Features Complete
-**Demo Checklist:**
-- [ ] View all 4 learning tracks
-- [ ] Start Arabic Foundations track
-- [ ] Complete first letter lesson
-- [ ] Listen to pronunciation audio
-- [ ] Attempt pronunciation, see score
-- [ ] View progress in track
-- [ ] Hasanat awarded for completion
-- [ ] Progress persists after restart
-- [ ] **Record 3-minute demo video**
-
----
-
-## Phase 6: AI Companion
-
-### 6.1 Apple Foundation Models Integration
-- [~] Implement `LanguageModelSession` integration (placeholder - requires iOS 18.4 SDK)
-- [~] Implement response streaming with Apple FM API (placeholder - requires iOS 18.4 SDK)
-
-### 6.2 RAG (Retrieval-Augmented Generation)
-
-### 6.3 System Prompt
-- [~] Test with 20 diverse queries (test cases created in AICompanionQueryTests.swift, actual AI testing requires iOS 18.4+)
-
-### 6.4 Chat Repository
-
-### 6.5 Chat UI
-
-### Phase 6 Acceptance Criteria
-- [ ] **AC-6.2**: Response generates in under 5 seconds for simple query (iOS 18.4+)
-- [ ] **AC-6.3**: "What is the dua before eating?" returns Bismillah with source citation
-- [ ] **AC-6.4**: "What breaks the fast?" returns accurate fiqh information with Hadith reference
-- [ ] **AC-6.9**: Chat works fully offline (Apple FM + local RAG)
-
-### Phase 6 Integration Tests
-- [ ] **IT-6.1**: Open chat → Type question → See response stream in
-- [ ] **IT-6.2**: Ask about dua → Response includes Arabic + translation
-- [ ] **IT-6.3**: Close app → Reopen → Previous conversation visible
-- [ ] **IT-6.4**: Enable airplane mode → Chat still works
-
-### Phase 6 Verification
-```bash
-# Test LLM performance
-# Manual: Time model loading and response generation
-
-# Test response quality
-# Manual: Ask 20 questions from test set, evaluate responses
-
-# Test offline capability
-# Manual: Enable airplane mode, verify chat works
-```
-
-### 🎯 Milestone 6: AI Companion Complete
-**Demo Checklist:**
-- [ ] Open chat, see clean interface
-- [ ] Ask "What is the dua before eating?" - get correct response
-- [ ] Ask "How do I perform wudu?" - get step-by-step guide
-- [ ] Ask political question - politely declined
-- [ ] Response includes source citations
-- [ ] Chat works with airplane mode on
-- [ ] Conversation history persists
-- [ ] Response time under 5 seconds
-- [ ] **Record 4-minute demo video**
-
----
-
-## Phase 7: Platform Features
-
-### 7.1 Widgets (Prioritized)
-
-
-### 7.1.1 Lock Screen Widgets
-- [ ] Test Lock Screen widgets on device
-
-### 7.1.2 Interactive Widgets
-- [ ] Test interactive widgets on device
-
-### 7.1.3 StandBy Mode
-- [ ] Test in StandBy simulator
-
-### 7.1.4 Spotlight Search (CoreSpotlight)
-
-### 7.2 Live Activities
-
-### 7.3 Focus Mode
-- [ ] Test Focus Mode integration
-
-### 7.4 Siri Shortcuts
-- [ ] Test Siri invocations
-
-### Phase 7 Acceptance Criteria
-- [ ] **AC-7.1**: Small prayer widget shows next prayer name and time (code complete, needs device testing)
-- [ ] **AC-7.2**: Widget updates at each prayer time automatically (code complete, needs device testing)
-- [x] **AC-7.3**: Streak widget shows current daily streak count (StreakWidget: small + medium, reads from App Group)
-- [ ] **AC-7.4**: Live Activity shows countdown to next prayer (Live Activity code exists in main app)
-- [ ] **AC-7.5**: Dynamic Island shows prayer name and time remaining (Live Activity code exists)
-- [ ] **AC-7.6**: Tapping Live Activity opens app to prayer screen (needs device testing)
-- [ ] **AC-7.7**: "Hey Siri, what's the next prayer?" returns correct answer (needs device testing)
-- [ ] **AC-7.8**: "Hey Siri, open Qibla" opens Qibla compass screen (needs device testing)
-- [ ] **AC-7.9**: Focus Mode silences non-prayer notifications (needs device testing)
-- [ ] **AC-7.10**: Tap prayer in interactive widget → logs prayer without opening app (code complete, needs device testing)
-- [ ] **AC-7.11**: Tap tasbeeh widget → counter increments (code complete, needs device testing)
-- [ ] **AC-7.12**: StandBy mode shows prayer times in large, readable format (code complete, needs device testing)
-- [ ] **AC-7.13**: Search "Ayatul Kursi" in iOS Spotlight → shows result from Safa (needs device testing)
-- [ ] **AC-7.14**: Tap Spotlight result → opens correct content in Safa (needs device testing)
-
-### Phase 7 Integration Tests
-- [ ] **IT-7.1**: Add widget to home screen → Shows correct prayer time
-- [ ] **IT-7.2**: Wait for prayer time → Widget updates automatically
-- [ ] **IT-7.3**: Live Activity active → See on Lock Screen → Tap → App opens
-- [ ] **IT-7.4**: Ask Siri next prayer → Hear correct response
-- [ ] **IT-7.5**: Enable Focus Mode → Non-essential notifications blocked
-
-### Phase 7 Verification
-```bash
-# Build widget extension
-xcodebuild -scheme SafaWidget build
-
-# Test widget rendering
-# Manual: Add each widget size, verify display
-
-# Test Siri
-# Manual: Test 5 Siri commands, verify responses
-```
-
-### 🎯 Milestone 7: Platform Features Complete
-**Demo Checklist:**
-- [ ] Add small prayer widget to home screen
-- [ ] Add medium widget showing all prayer times
-- [ ] Add streak widget showing current streak
-- [ ] Live Activity shows prayer countdown
-- [ ] Dynamic Island displays prayer info
-- [ ] Ask Siri for next prayer time
-- [ ] Ask Siri to open Qibla
-- [ ] Enable Prayer Focus Mode
-- [ ] **Record 4-minute demo video**
-
----
-
-## Phase 8: Social Features
-
-### 8.1 Family Circle
-
-### 8.2 Family UI
-
-### 8.3 Sharing
-
-### 8.3.1 Invite Friends (App Store Link)
-- [ ] Update `appStoreURL` placeholder with real App ID after submission
-
-### 8.4 CloudKit Sync
-- [ ] Test sync between two devices
-- [ ] Test sync performance
-
-### Phase 8 Acceptance Criteria
-- [ ] **AC-8.8**: Data syncs between iPhone and iPad within 30 seconds (needs multi-device test)
-
-### Phase 8 Integration Tests
-- [ ] **IT-8.1**: Create circle → Generate link → Share → Other device joins
-- [ ] **IT-8.2**: Log prayer on Device A → See update on Device B
-- [ ] **IT-8.3**: Share verse → Opens share sheet → Share to Messages
-- [ ] **IT-8.4**: Enable privacy → Family can't see hidden data
-
-### Phase 8 Verification
-```bash
-# Test CloudKit sync
-# Manual: Use two devices, verify data syncs
-
-# Test family features
-# Manual: Create circle, invite member, verify visibility
-
-# Test sharing
-# Manual: Share verse to Messages, verify card appearance
-```
-
-### 🎯 Milestone 8: Social Features Complete
-**Demo Checklist:**
-- [ ] Create family circle
-- [ ] Generate and share invite link
-- [ ] Second device joins circle
-- [ ] See family member's streak
-- [ ] Configure privacy settings
-- [ ] Share a Quran verse
-- [ ] Data syncs between devices
-- [ ] Offline changes sync later
-- [ ] **Record 4-minute demo video**
-
----
-
-## Phase 9: Content & Polish
-
-### 9.1 Hadith Feature
-
-### 9.2 Dua & Dhikr Feature
-- [ ] Add audio pronunciations
-
-### 9.3 Islamic Calendar
-
-### 9.3.1 Calendar Integration (EventKit + .ics)
-
-### 9.4 Ramadan Mode
-
-### 9.4.0 Apple Health Integration (Fasting)
-
-### 9.4.1 Ramadan Home Banner
-- [ ] Bundle Maghrib adhan audio file
-
-### 9.5 Wind Down Mode
-
-### 9.6 Settings
-
-### 9.7 Onboarding (Streamlined 3-page flow)
-
-### 9.8 Home Screen
-
-### 9.9 Haptic System Unification
-
-### 9.10 Degraded State Banners
-
-### 9.11 Home Intent Resolver
-- [ ] Build `HomeIntentResolver` service (returns 1-3 prioritised actions based on time + streak + recency)
-- [ ] Create reusable `ResumeCard` component (last surah, last lesson, last dhikr)
-- [ ] Update HomeView with context-aware quick actions
-
-### 9.12 Motion & Interaction Polish
-- [x] Add `.contentTransition(.numericText())` to all live counters (prayer countdown, iftar timer, tasbeeh, taraweeh)
-- [ ] Define motion tokens in design system (durations, curves, spring presets)
-- [ ] Define semantic elevation/surface tokens for card styles
-- [ ] Apply tokens across Home/Prayer/Quran/Learn for consistency
-
-### 9.12.1 Premium UI Enhancements (Progressive Rollout)
-See `.docs/PREMIUM_UI_GUIDANCE.md` for full specification.
-
-**Wave 1 — Foundation polish (Home + Prayer):**
-- [ ] Navigation bar material morph (transparent → blur on scroll)
-- [ ] Formalize screen state transitions (loading/ready/degraded/offline/success)
-
-**Wave 2 — Hero interactions (Home):**
-- [ ] Hero card compression + sticky context chip (matchedGeometryEffect)
-- [ ] Optimistic action feedback with undo rail for prayer logging
-
-**Wave 3 — Transitions + counters (Quran + Dhikr):**
-- [ ] Matched-geometry card-to-detail transition (Quran list → reader)
-
-**Wave 4 — Navigation + filters (Quran/Hadith/Calendar):**
-- [ ] Contextual navigation actions + sticky filter rail
-- [ ] Bottom sheet behavior standards (detents, drag, consistent chrome)
-- [ ] Adaptive tab bar visibility (hide on read scroll, reveal on upward intent)
-
-**Wave 5 — Zero-state + resume (cross-app):**
-- [ ] Zero-state quality pass (teach next action on every empty surface)
-- [ ] Resume-where-you-left-off rails on Home (Quran, Learn, Dhikr)
-
-### 9.13 Search & Navigation Coherence
-- [ ] Unify search UI pattern across Quran/Hadith/Calendar
-
-### 9.14 Dark Mode Implementation
-- [ ] Tune Quran reading surface for night comfort (low-glare, no pure-black + harsh-white)
-- [ ] Dark mode pass: Home, Prayer, Qibla
-- [ ] Dark mode pass: Quran reader and search
-- [ ] Dark mode pass: Dhikr, counters, Settings, Onboarding
-- [ ] Dark mode pass: Banners, alerts, progress visuals, sheets
-- [ ] Screenshot/snapshot coverage for key screens in both themes
-
-### 9.15 Sharing & Social Polish
-- [ ] Upgrade share cards with refined layout presets and export quality
-- [ ] Add cleaner share composer flow for verses/hadith/achievements
-- [ ] Improve invite flow with clear post-share confirmation states
-
-### 9.16 Observability Instrumentation
-- [ ] Add release quality gate checks for crash-free sessions and performance budgets
-
-### Phase 9 Acceptance Criteria
-
-### Phase 9 Integration Tests
-- [ ] **IT-9.1**: Browse hadith → Search → Find specific hadith
-- [ ] **IT-9.2**: Complete tasbeeh 33 times → Hasanat awarded
-- [ ] **IT-9.3**: Fresh install → Complete onboarding → Home screen
-- [ ] **IT-9.4**: Set Ramadan mode → Home screen transforms
-- [ ] **IT-9.5**: Open app before Fajr → See Tahajjud reminder
-
-### 🎯 Milestone 9: Content & Polish Complete
-**Demo Checklist:**
-- [ ] Fresh install shows onboarding flow
-- [ ] Complete onboarding, arrive at home screen
-- [ ] Home shows contextual reminder
-- [ ] Browse and search Hadith
-- [ ] Use tasbeeh counter with haptics
-- [ ] Complete morning dhikr checklist
-- [ ] View Islamic calendar with Hijri dates
-- [ ] Enable Ramadan mode, see transformed home
-- [ ] Calculate Zakat
-- [ ] Start wind down mode
-- [ ] Change theme in settings
-- [ ] **Record 5-minute demo video**
-
----
-
-## Phase 10: Launch Preparation
-
-### 10.1 Accessibility
-- [ ] Verify Dynamic Type scaling on all screens
-- [ ] Verify color contrast meets WCAG AA (4.5:1)
-- [ ] Complete Dynamic Type support audit for all major screens
-- [ ] Improve VoiceOver rotor flow for Quran ayah navigation
-- [ ] Refine high-contrast mode for core cards and charts
-- [ ] Add "Minimal Motion" profile that suppresses all non-essential animation
-- [ ] UI tests for large content size and VoiceOver labels on critical screens
-
-### 10.2 Device Compatibility & Testing
-
-**Supported Device Range:**
-- **Minimum iOS**: 26.0 (uses latest SwiftUI, @Observable, NavigationPath)
-- **AI Companion**: Disabled by default via FeatureFlags (iOS version gate removed — feature not yet implemented)
-- **Supported iPhones**: iPhone XS (2018) and newer (~6 years of devices)
-
-**Note:** SwiftUI scales layouts natively. Only boundary testing required.
-
-#### 10.2.1 Screen Size Boundary Testing
-- [ ] Test on iPhone SE simulator (4.7" - smallest supported)
-- [ ] Test on iPhone 16 Pro Max simulator (6.9" - largest)
-- [ ] Verify Arabic text doesn't overflow on SE
-- [ ] Verify layouts don't look sparse on Pro Max
-- [ ] Spot check: Quran reader, Prayer cards, Home screen
-
-#### 10.2.2 iOS Version Testing
-- [ ] Test on iOS 26.0 (minimum supported)
-- [ ] Test on iOS 18.4+ (verify AI Companion activates)
-- [ ] Verify "Requires iOS 18.4" fallback message works
-
-#### 10.2.3 Feature Verification
-- [ ] Dynamic Island displays correctly (Pro models)
-- [ ] Live Activities work
-
-#### 10.2.4 Test Coverage
-- [ ] Achieve 90%+ unit test coverage for Domain layer
-- [ ] Achieve 80%+ unit test coverage for Repositories
-- [ ] Run UI tests on iPhone SE + iPhone 16 Pro simulators
-
-#### 10.2.5 Manual QA
-- [ ] Perform manual QA on all features
-- [ ] Test VoiceOver on critical flows
-- [ ] Test Dynamic Type at largest setting
-- [ ] Test with Low Power Mode
-- [ ] Test in Dark Mode
-
-### 10.3 Performance Optimization
-- [x] Add skeleton loading states for Home, Prayer, Quran screens
-- [x] Gzip hadith.sqlite (85MB → 25MB bundle), async decompress on first launch
-- [x] Persistent SQLite connections (no open/close per query)
-- [x] Async database pre-warming on app launch (non-blocking)
-- [x] Add `DatabasePerformanceTests` — 11 tests: SQLite queries < 50ms, FTS search < 500ms, prayer calc < 10ms, connection pooling
-- [ ] Add `AppLaunchPerformanceTests` — XCTMetric launch time < 2s (requires UI test target)
-- [ ] Profile app launch time with Instruments (target: p50 < 1s, p95 < 2s)
-- [ ] Profile memory usage with Instruments (target: < 200MB baseline)
-- [ ] Precompute and cache home context for instant rendering
-- [ ] Optimize Core Data fetch requests
-- [ ] Optimize LLM inference memory
-- [ ] Test battery impact over 1 hour usage
-- [ ] Optimize image assets
-- [ ] Set up performance budget gates for release (block if p95 > 3s or crash-free < 99%)
-
-### 10.3.1 Dark Mode QA
-- [ ] Dark mode contrast audit for all primary screens
-- [ ] Verify Quran reading surface readability in dark mode
-- [ ] Verify all semantic tokens have light/dark parity
-- [ ] Screenshot comparison: light vs dark for key flows
-
-### 10.3.2 Observability & Release Quality
-- [ ] Quality dashboards operational (crash rate, launch time, feature adoption)
-- [ ] Release gating thresholds set and validated
-- [ ] Regression prevention: UI snapshots + flow checks in CI
-
-### 10.4 Beta Testing
-- [ ] Set up TestFlight
-- [ ] Recruit 50+ beta testers
-- [ ] Create feedback form
-- [ ] Run 2-week beta period
-- [ ] Triage and fix critical bugs
-- [ ] Incorporate top feedback items
-
-### 10.5 App Store Submission
-- [ ] Create App Store screenshots (6.9", 6.7", 6.1", 5.5" - all supported sizes)
-- [ ] Write App Store description (highlight device compatibility)
-- [ ] Create 30-second app preview video
-- [ ] Configure App Store Connect metadata
-- [ ] Set minimum iOS version to 26.0 in App Store Connect
-- [ ] Set up pricing (Free)
-- [ ] Submit for App Review
-- [ ] Address any review feedback
-- [ ] Launch!
-
-### Phase 10 Acceptance Criteria
-- [ ] **AC-10.1**: App launches in under 2 seconds on iPhone 15
-- [ ] **AC-10.2**: Baseline memory usage under 200MB
-- [ ] **AC-10.3**: No crash reports in 2-week beta
-- [ ] **AC-10.4**: Beta tester satisfaction >80%
-- [ ] **AC-10.5**: All critical bugs fixed
-- [ ] **AC-10.6**: App Review approval received
-- [ ] **AC-10.7**: App live on App Store
-
-### Phase 10 Verification
-```bash
-# Run full test suite
-xcodebuild test -scheme Safa
-
-# Check test coverage
-xcov --project Safa.xcodeproj --scheme Safa --minimum_coverage_percentage 80
-
-# Profile performance
-# Use Instruments: Time Profiler, Allocations, Energy Log
-```
-
-### 🎯 Milestone 10: Launch Ready
-**Final Demo Checklist:**
-- [ ] Complete fresh install experience
-- [ ] All features working end-to-end
-- [ ] Performance meets targets
-- [ ] No critical bugs
-- [ ] Beta feedback addressed
-- [ ] App Store assets ready
-- [ ] App approved and live
-- [ ] **Record 10-minute complete walkthrough video**
-
----
-
-## Deferred Backlog (Unscheduled)
-
-Historical progress logs, completed granular tasks, and previous change summaries were moved to `.docs/TASKS_ARCHIVE_2026-02-08.md`.
-
-### Current Cross-Cutting Gaps
-- [ ] Bundle pronunciation audio files
-- [ ] Create Intents extension target in Xcode project (`SafaIntents`)
-- [ ] Complete QA pass for dark mode, accessibility, and performance budgets
-
-### Requires Manual / Device Verification
-Code complete but needs physical device or manual testing to confirm:
-- [ ] Lock Screen widgets (accessoryCircular, accessoryRectangular, accessoryInline)
-- [ ] Home Screen widgets (PrayerTimes, Interactive, Tasbeeh, StandBy, Streak)
+All code complete, needs device testing:
+- [ ] Lock Screen widgets, Home Screen widgets, interactive widgets, StandBy mode
 - [ ] Live Activities / Dynamic Island prayer countdown
-- [ ] Siri Shortcuts (GetNextPrayer, OpenQibla, etc.)
+- [ ] Siri Shortcuts (5 intents implemented — need device invocation testing)
 - [ ] Focus Mode integration
-- [ ] StandBy mode display
-- [ ] Spotlight search results tap → navigates to correct content
-- [ ] Notification banners appear with correct sound (default iOS / adhan)
-- [ ] Dark mode visual pass across all screens
-- [ ] RTL Arabic layout validation
-- [ ] Dynamic Type at largest setting
-- [ ] VoiceOver on critical flows
+- [ ] Spotlight search result tap → navigation
 
-### TODO: Graceful Degradation & Resilience
+---
 
-**Priority: HIGH — Must fix before launch**
+## Active Work: Phase 8 — Social Features
 
-#### Critical (App Stability)
+Code scaffolding exists, needs real multi-device testing:
+- [ ] Update appStoreURL with real App ID after submission
+- [ ] Test CloudKit sync between two devices
+- [ ] Test family circle create/join/privacy flows
 
-#### High (Incorrect Behavior)
+---
 
-#### Medium (User Experience)
-- [ ] **Audio: Add resumable downloads** — Use URLSession resume data so interrupted downloads don't restart from zero.
+## Active Work: Phase 9 — Content & Polish
 
-#### Low (Robustness)
-- [ ] **Offline queue: Migrate from UserDefaults to Core Data** — Current queue isn't crash-safe.
+### Remaining feature work
+- [ ] Dua audio pronunciations
+- [ ] Bundle Maghrib adhan audio file
+- [ ] Home intent resolver (context-aware quick actions + resume cards)
 
-### DONE: Ramadan Page Enhancement
-- [x] Ramadan page restructured: iftar/suhoor countdown platter, full-width prayer progress, adhan/qibla buttons, interactive daily goals, fasting tracker, Quran Khatm goal, Prayer tab auto-swap during Ramadan
-- [x] Combined duplicate daily goals: "Read Quran" + "Read 1 Juz" → single "Read 1 Juz Quran" during Ramadan (key "juz" preserved for Khatm tracker)
+### Premium UI (remaining waves)
+- [ ] Screen state transitions (loading/ready/degraded/offline/success)
+- [ ] Hero card compression + sticky context chip (Home)
+- [ ] Optimistic action feedback with undo rail (prayer logging)
+- [ ] Matched-geometry card-to-detail transition (Quran list → reader)
+- [ ] Contextual navigation actions + sticky filter rail
+- [ ] Adaptive tab bar visibility
+- [ ] Zero-state quality pass + resume-where-you-left-off rails
 
-### DONE: Notification Architecture Consolidation (February 9, 2026)
-- [x] Fixed duplicate prayer notifications: three independent systems consolidated into single `NotificationScheduler`
-- [x] Deleted `NotificationService.swift` (496 lines) and `NotificationServiceProtocol.swift` — all callers now use `NotificationScheduler.shared`
-- [x] Removed `notificationService` from `Dependencies` container and `PrayerViewModel` init
-- [x] `AchievementManager` switched from concrete `NotificationService` to `NotificationScheduler.shared.showAchievementUnlocked()`
-- [x] `OnboardingView` switched to `NotificationScheduler.shared.requestAuthorization()`
-- [x] Legacy identifier cleanup: `cancelPrayerNotifications()` removes all three old formats (`prayer_*`, `prayer_at_*`, `prayer_*_<timestamp>`)
-- [x] `scheduleIfNeeded()` (cached, skips if already done today) for normal loads; `forceReschedule()` only for preference changes
-- [x] Virtual walkthrough verified 17 scenarios: all correct, one filter bug found and fixed
+### Design system tokens
+- [ ] Motion tokens (durations, curves, spring presets)
+- [ ] Semantic elevation/surface tokens for card styles
 
-### DONE: Premium UI Polish (February 9, 2026)
-- [x] Nav bar material morph: transparent → frosted ultraThinMaterial on scroll (Home, Prayer, Ramadan)
-- [x] Bottom sheet standards: 25 sheets standardized with .compactSheet() / .fullSheet() modifiers (drag indicator, 16pt corner radius, consistent detents)
-- [x] Progress section marked coming soon in More tab (partially implemented)
+### Dark mode
+- [ ] Quran reading surface comfort tuning
+- [ ] Dark mode pass: Home, Prayer, Qibla, Quran, Dhikr, Settings, Onboarding
+- [ ] Dark mode pass: Banners, alerts, progress visuals, sheets
+- [ ] Screenshot comparison: light vs dark
 
-### TODO: Smart Adhan (Location-Aware Notification Sounds)
+### Search & sharing
+- [ ] Unify search UI pattern across Quran/Hadith/Calendar
+- [ ] Upgrade share cards with refined layout
+- [ ] Improve invite flow with confirmation states
 
-**Priority: MEDIUM — v1 enhancement to existing notification system**
+### Observability
+- [ ] Release quality gate checks for crash-free sessions and performance budgets
 
-Design: One toggle, two automatic modes. No settings explosion.
+---
 
-| Condition | Behaviour |
-|-----------|-----------|
-| At Home + ringer on | Adhan sound (if adhan enabled) |
-| Away from home OR silent mode | Standard iOS notification tone |
+## Active Work: Phase 10 — Launch Preparation
 
-- [ ] Detect silent/ringer mode via `AVAudioSession` or system settings — deferred (iOS has no public API for ringer state detection; would require AudioToolbox private API)
+### Accessibility
+- [ ] Dynamic Type scaling audit
+- [ ] WCAG AA color contrast verification
+- [ ] VoiceOver rotor flow for Quran navigation
+- [ ] High-contrast mode refinement
+- [ ] "Minimal Motion" profile
+- [ ] UI tests for large content size + VoiceOver labels
 
-### TODO: v2 Strategic Enhancements
+### Device testing
+- [ ] iPhone SE (smallest) + iPhone 16 Pro Max (largest) boundary testing
+- [ ] iOS 26.0 minimum version testing
+- [ ] Dynamic Island / Live Activities on Pro models
 
-**Priority: FUTURE — Post-launch features**
+### Test coverage
+- [ ] 90%+ unit test coverage for Domain layer
+- [ ] 80%+ unit test coverage for Repositories
+- [ ] UI tests on SE + Pro simulators
 
-#### Mosque Mode
-- [ ] Define mosque geofence data model (user-defined locations or mosque database)
-- [ ] Implement CLCircularRegion monitoring for mosque zones (~100m radius)
-- [ ] Auto-switch to silent/vibrate when entering mosque zone
-- [ ] Adjust notification delivery: haptic only, no sound while in mosque
-- [ ] Integrate with iOS Focus modes (if possible)
-- [ ] Settings UI: "My Mosques" list with add/remove
-- [ ] Show "In Mosque" indicator on prayer page when inside geofence
-- [ ] Test geofence entry/exit transitions
+### Performance
+- [ ] AppLaunchPerformanceTests (XCTMetric, target < 2s)
+- [ ] Profile launch time with Instruments (p50 < 1s, p95 < 2s)
+- [ ] Profile memory usage (target < 200MB)
+- [ ] Precompute home context for instant rendering
+- [ ] Optimize Core Data fetch requests + LLM inference memory
+- [ ] Battery impact test (1 hour usage)
+- [ ] Image asset optimization
+- [ ] Performance budget gates for release
 
-#### watchOS Companion App
-- [ ] Create watchOS target in Xcode
-- [ ] Implement prayer time complications (Corner, Circular, Rectangular)
-- [ ] Implement haptic adhan with distinct patterns per prayer
-- [ ] Implement Digital Crown tasbeeh counter
-- [ ] Implement standalone Qibla compass on watch
-- [ ] Set up WatchConnectivity for iPhone ↔ Watch sync
-- [ ] Test standalone mode (without iPhone)
+### Dark mode QA
+- [ ] Contrast audit, Quran readability, semantic token parity, screenshot comparison
 
-#### Data Sovereignty & Export
-- [x] Baseline shipped: JSON export, CSV prayer-log export, and "View All My Data" transparency screen
-- [ ] Implement manual backup/restore
-- [x] Per-category data deletion shipped: 6 categories (Prayer History, Quran Progress, Hadith Bookmarks, Chat History, Streaks & Achievements, Ramadan Data), granular UI with confirmation alerts, cross-category isolation verified in 20+ tests
+### Beta & submission
+- [ ] Set up TestFlight, recruit 50+ testers, feedback form
+- [ ] 2-week beta period, triage critical bugs
+- [ ] App Store screenshots, description, preview video
+- [ ] Configure App Store Connect, submit for review, launch
 
-#### Hasanat Tracking Overhaul (February 9, 2026)
-- [x] Created HasanatTracker dedup layer (awardOnce date-scoped, awardOnceEver permanent, pruneOldEntries on launch)
-- [x] Fixed prayer log-unlog-relog double-award bug across PrayerViewModel, HomeView, RamadanView, SafaShortcuts
-- [x] Added prayerAllFive bonus check to HomeView and RamadanView (was only in PrayerViewModel)
-- [x] Deduped lesson completion awards (awardOnceEver keyed by lesson ID)
-- [x] Rewired ShareService from ephemeral HasanatService to persistent UserStateManager
-- [x] Wired invite notification listener in UserStateManager (was posted but never received)
-- [x] Wired 4 previously unused awards: fastingDay, taraweeh, dailyVerse, dailyHadith
-- [x] Fixed daily streak never recorded — added recordActivity(.daily) on app launch
-- [x] Fixed totalPrayersLogged never incremented — added incrementPrayersLogged() to all prayer logging sites
-- [x] Wrapped dailyOpen hasanat with HasanatTracker dedup (multiple app launches = one award)
-- [x] 37 new tests: HasanatTracker unit tests + HasanatIntegrationTests with tracking mock
+---
 
-#### Test Suite Consolidation (February 9, 2026)
-- [x] Created SharedMocks.swift with unified MockUserRepository, MockPrayerRepository, MockLocationService, MockNotificationService
-- [x] Removed 25 duplicate tests across GamificationTests, UserStatsTests, IntegrationTests, RepositoryTests
-- [x] Eliminated 6 inline MockUserRepository copies → 1 shared mock with call tracking
-- [x] Net: -415 lines of duplicate test code, 0 coverage loss
+## Deferred Backlog (Post-Launch)
 
-#### Apple Intelligence (App Intents)
-- [x] Define Prayer, Surah, Hadith as AppEntities (PrayerTypeEntity, DhikrEntity)
-- [x] Implement GetNextPrayerIntent with real prayer time calculation (location + method + next prayer detection)
-- [x] Implement GetPrayerTimesIntent with all 6 daily prayers + user location
-- [x] Implement GetQiblaDirectionIntent with bearing calculation + cardinal direction
-- [x] Implement GetDailyVerseIntent with curated 31-verse rotation + fallback
-- [x] Implement LogPrayerIntent with hasanat award + streak recording + deduplication
-- [ ] Implement PlayAdhanIntent
-- [ ] Implement OpenSurahIntent
-- [ ] Implement StartTasbeehIntent
-- [ ] Test Shortcuts automations (location-based prayer logging)
+### Cross-cutting gaps
+- [ ] Bundle pronunciation audio files
+- [ ] Create SafaIntents extension target
+- [ ] QA pass for dark mode, accessibility, performance
 
-#### Assistive Access Mode
-- [ ] Detect Assistive Access / Guided Access mode
-- [ ] Build simplified 3-tab layout (Prayer, Qibla, Dhikr)
-- [ ] Implement large-font prayer card
-- [ ] Implement full-screen Qibla arrow
-- [ ] Implement single-button tasbeeh
-- [ ] Test with Switch Control and Voice Control
+### Remaining App Intents
+- [ ] PlayAdhanIntent, OpenSurahIntent, StartTasbeehIntent
+- [ ] Shortcuts automations (location-based prayer logging)
 
-*Last Updated: February 9, 2026 (evening)*
+### Gamification remaining
+- [ ] Achievement badge assets
+- [ ] Weekly reflection summary
+- [ ] Progress dashboard (marked coming soon)
+
+### Quran remaining
+- [ ] Connect audio player to AVFoundation
+- [ ] Audio download/caching for recitations
+- [ ] Migrate bookmarks to Core Data (CloudKit sync)
+- [ ] Transliteration data
+
+### Prayer remaining
+- [ ] Optional prayer quality logs (on-time, congregation, focus rating)
+
+### Smart Adhan
+- [ ] Detect ringer mode (deferred — no public iOS API)
+
+### Graceful degradation
+- [ ] Resumable audio downloads
+- [ ] Migrate offline queue from UserDefaults to Core Data
+
+### Data sovereignty remaining
+- [ ] Manual backup/restore
+
+### v2 strategic
+- [ ] Mosque Mode (geofence-based silent/vibrate)
+- [ ] watchOS companion app (complications, haptic adhan, Digital Crown tasbeeh)
+- [ ] Assistive Access Mode (simplified 3-tab layout)
+
+---
+
+*Last Updated: February 9, 2026*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*
