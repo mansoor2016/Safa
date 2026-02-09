@@ -98,20 +98,35 @@ struct DailyGoalRow: View {
     let icon: String
     let title: String
     let isCompleted: Bool
+    var onToggle: (() -> Void)? = nil
 
     var body: some View {
-        HStack {
-            Image(systemName: isCompleted ? "checkmark.circle.fill" : icon)
-                .foregroundColor(isCompleted ? .green : SafaColors.Fallback.tertiaryText)
-                .frame(width: 24)
+        Button {
+            HapticFeedbackService.shared.play(isCompleted ? .tap : .commit)
+            onToggle?()
+        } label: {
+            HStack {
+                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isCompleted ? .green : SafaColors.Fallback.tertiaryText)
+                    .frame(width: 24)
 
-            Text(title)
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(isCompleted ? SafaColors.Fallback.secondaryText : SafaColors.Fallback.text)
-                .strikethrough(isCompleted)
+                Text(title)
+                    .font(SafaTypography.bodyMedium)
+                    .foregroundColor(isCompleted ? .green : SafaColors.Fallback.text)
 
-            Spacer()
+                Spacer()
+
+                if isCompleted {
+                    Image(systemName: "arrow.uturn.backward.circle")
+                        .font(.caption)
+                        .foregroundColor(SafaColors.Fallback.tertiaryText)
+                }
+            }
+            .padding(.vertical, 4)
+            .animation(.easeInOut(duration: 0.2), value: isCompleted)
         }
+        .buttonStyle(.plain)
+        .disabled(onToggle == nil)
     }
 }
 

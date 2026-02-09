@@ -192,9 +192,12 @@ struct RamadanView: View {
             RamadanQuickAction(icon: "moon.stars.fill", title: "Taraweeh", subtitle: "Track prayers", color: .purple) {
                 showTaraweehTracker = true
             }
-            RamadanQuickAction(icon: "dollarsign.circle.fill", title: "Zakat", subtitle: "Calculator", color: .teal) {
-                router.navigate(to: .settings) // TODO: navigate to ZakatCalculator
+            NavigationLink {
+                ZakatCalculatorView()
+            } label: {
+                RamadanQuickAction(icon: "dollarsign.circle.fill", title: "Zakat", subtitle: "Calculator", color: .teal) {}
             }
+            .buttonStyle(.plain)
             RamadanQuickAction(icon: "hands.sparkles.fill", title: "Duas", subtitle: "Iftar duas", color: .orange) {
                 router.selectedTab = "duas"
             }
@@ -295,7 +298,7 @@ struct RamadanView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
-                        Text("5/30")
+                        Text("0/30")
                             .font(SafaTypography.titleMedium)
                             .foregroundColor(.accentColor)
                         Text("Juz")
@@ -307,7 +310,7 @@ struct RamadanView: View {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color.gray.opacity(0.2)).frame(height: 8)
-                        Capsule().fill(Color.green).frame(width: geometry.size.width * 5 / 30, height: 8)
+                        Capsule().fill(Color.green).frame(width: geometry.size.width * 0 / 30, height: 8)
                     }
                 }
                 .frame(height: 8)
@@ -330,6 +333,9 @@ struct RamadanView: View {
                 Task { try? await healthKitService.logFast(start: suhoor, end: iftar, type: .ramadan) }
             }
         }
+        // Persist
+        let year = String(Calendar.current.component(.year, from: Date()))
+        UserDefaults.standard.set(Array(fastingDays), forKey: "ramadan_fasting_days_\(year)")
     }
 
     private func togglePrayer(_ prayerType: PrayerType) async {
@@ -401,7 +407,9 @@ struct RamadanView: View {
             } catch {}
         }
 
-        fastingDays = [1, 2, 3, 4, 5] // Sample data — TODO: persist to UserDefaults
+        // Load persisted fasting days
+        let savedFasting = UserDefaults.standard.array(forKey: "ramadan_fasting_days_\(currentDay > 0 ? String(Calendar.current.component(.year, from: Date())) : "")") as? [Int] ?? []
+        fastingDays = Set(savedFasting)
     }
 }
 
