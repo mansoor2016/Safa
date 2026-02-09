@@ -31,27 +31,78 @@ final class SQLiteService {
     // MARK: - Singleton
     static let shared = SQLiteService()
 
+    // MARK: - Persistent Connections
+    private var persistentConnections: [String: OpaquePointer] = [:]
+    private let connectionLock = NSLock()
+
     private init() {}
+
+    deinit {
+        for (_, db) in persistentConnections {
+            sqlite3_close(db)
+        }
+    }
 
     // MARK: - Database Paths
 
-    /// Get path to bundled database
+    /// Get path to a usable database file, decompressing from .gz if needed
     func databasePath(for name: String) -> URL? {
-        // First check in Database subdirectory
+        // Check if uncompressed file exists in bundle
         if let path = Bundle.main.url(forResource: name, withExtension: "sqlite", subdirectory: "Data/Database") {
             return path
         }
-        // Fallback to Resources/Data/Database
         if let path = Bundle.main.url(forResource: name, withExtension: "sqlite") {
             return path
         }
+
+        // Check for gzipped version — decompress to Application Support on first use
+        if let gzPath = Bundle.main.url(forResource: name, withExtension: "sqlite.gz", subdirectory: "Data/Database")
+            ?? Bundle.main.url(forResource: name, withExtension: "sqlite.gz") {
+            return decompressIfNeeded(gzPath: gzPath, name: name)
+        }
+
         return nil
+    }
+
+    /// Decompress a .gz database to Application Support (once, cached for future launches)
+    private func decompressIfNeeded(gzPath: URL, name: String) -> URL? {
+        let fileManager = FileManager.default
+        guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+
+        let dbDir = appSupport.appendingPathComponent("Databases")
+        let targetPath = dbDir.appendingPathComponent("\(name).sqlite")
+
+        // Already decompressed from a previous launch
+        if fileManager.fileExists(atPath: targetPath.path) {
+            return targetPath
+        }
+
+        // Decompress gzip to Application Support
+        do {
+            try fileManager.createDirectory(at: dbDir, withIntermediateDirectories: true)
+            let compressedData = try Data(contentsOf: gzPath)
+            guard let decompressed = compressedData.gunzip() else { return nil }
+            try decompressed.write(to: targetPath)
+            return targetPath
+        } catch {
+            return nil
+        }
     }
 
     // MARK: - Database Operations
 
-    /// Open a database connection
+    /// Get or create a persistent read-only connection for a database
     func openDatabase(named name: String) throws -> OpaquePointer {
+        connectionLock.lock()
+        defer { connectionLock.unlock() }
+
+        // Return cached connection if available
+        if let existing = persistentConnections[name] {
+            return existing
+        }
+
         guard let dbPath = databasePath(for: name) else {
             throw SQLiteError.databaseNotFound(name)
         }
@@ -68,12 +119,13 @@ final class SQLiteService {
             throw SQLiteError.openFailed("Unknown error")
         }
 
+        persistentConnections[name] = database
         return database
     }
 
-    /// Close a database connection
+    /// Close is a no-op for persistent connections (they close on deinit)
     func closeDatabase(_ db: OpaquePointer) {
-        sqlite3_close(db)
+        // Managed by service lifecycle — no-op for backward compatibility
     }
 
     /// Execute a query and return results
