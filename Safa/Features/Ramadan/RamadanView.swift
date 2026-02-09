@@ -18,6 +18,8 @@ struct RamadanView: View {
     @State private var showTaraweehTracker = false
     @State private var showSettings = false
     @State private var showingQibla = false
+    @State private var showZakat = false
+    @State private var juzCompleted = 0
     @State private var healthSyncEnabled = false
     @State private var healthKitService = HealthKitService.shared
 
@@ -74,9 +76,15 @@ struct RamadanView: View {
         .sheet(isPresented: $showingQibla) {
             NavigationStack { QiblaCompassView() }
         }
+        .sheet(isPresented: $showZakat) {
+            NavigationStack { ZakatCalculatorView() }
+        }
         .task {
             await loadRamadanData()
             healthSyncEnabled = healthKitService.syncEnabled
+        }
+        .onAppear {
+            loadJuzCount() // Refresh when returning to view after toggling goals
         }
     }
 
@@ -192,12 +200,9 @@ struct RamadanView: View {
             RamadanQuickAction(icon: "moon.stars.fill", title: "Taraweeh", subtitle: "Track prayers", color: .purple) {
                 showTaraweehTracker = true
             }
-            NavigationLink {
-                ZakatCalculatorView()
-            } label: {
-                RamadanQuickAction(icon: "dollarsign.circle.fill", title: "Zakat", subtitle: "Calculator", color: .teal) {}
+            RamadanQuickAction(icon: "dollarsign.circle.fill", title: "Zakat", subtitle: "Calculator", color: .teal) {
+                showZakat = true
             }
-            .buttonStyle(.plain)
             RamadanQuickAction(icon: "hands.sparkles.fill", title: "Duas", subtitle: "Iftar duas", color: .orange) {
                 router.selectedTab = "duas"
             }
@@ -298,9 +303,10 @@ struct RamadanView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
-                        Text("0/30")
+                        Text("\(juzCompleted)/30")
                             .font(SafaTypography.titleMedium)
                             .foregroundColor(.accentColor)
+                            .contentTransition(.numericText())
                         Text("Juz")
                             .font(SafaTypography.labelSmall)
                             .foregroundColor(SafaColors.Fallback.secondaryText)
@@ -310,7 +316,9 @@ struct RamadanView: View {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color.gray.opacity(0.2)).frame(height: 8)
-                        Capsule().fill(Color.green).frame(width: geometry.size.width * 0 / 30, height: 8)
+                        Capsule().fill(Color.green)
+                            .frame(width: geometry.size.width * CGFloat(juzCompleted) / 30, height: 8)
+                            .animation(.easeInOut, value: juzCompleted)
                     }
                 }
                 .frame(height: 8)
@@ -408,8 +416,28 @@ struct RamadanView: View {
         }
 
         // Load persisted fasting days
-        let savedFasting = UserDefaults.standard.array(forKey: "ramadan_fasting_days_\(currentDay > 0 ? String(Calendar.current.component(.year, from: Date())) : "")") as? [Int] ?? []
+        let year = String(Calendar.current.component(.year, from: Date()))
+        let savedFasting = UserDefaults.standard.array(forKey: "ramadan_fasting_days_\(year)") as? [Int] ?? []
         fastingDays = Set(savedFasting)
+
+        // Count juz completed from daily goals (how many days had "juz" checked)
+        loadJuzCount()
+    }
+
+    /// Count days where "Read 1 Juz" was completed in daily goals
+    private func loadJuzCount() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let calendar = Calendar.current
+        var count = 0
+        for dayOffset in 0..<totalDays {
+            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) {
+                let key = "dailyGoals_\(formatter.string(from: date))"
+                let goals = UserDefaults.standard.stringArray(forKey: key) ?? []
+                if goals.contains("juz") { count += 1 }
+            }
+        }
+        withAnimation { juzCompleted = count }
     }
 }
 
