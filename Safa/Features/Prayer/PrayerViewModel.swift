@@ -20,7 +20,6 @@ final class PrayerViewModel {
     // MARK: - Dependencies
     private let prayerRepository: PrayerRepositoryProtocol
     private let locationService: LocationServiceProtocol
-    private let notificationService: NotificationServiceProtocol
     private let userState: UserStateManager
     private let widgetDataService: WidgetDataService
 
@@ -31,13 +30,11 @@ final class PrayerViewModel {
     init(
         prayerRepository: PrayerRepositoryProtocol,
         locationService: LocationServiceProtocol,
-        notificationService: NotificationServiceProtocol,
         userState: UserStateManager,
         widgetDataService: WidgetDataService = .shared
     ) {
         self.prayerRepository = prayerRepository
         self.locationService = locationService
-        self.notificationService = notificationService
         self.userState = userState
         self.widgetDataService = widgetDataService
 
@@ -196,9 +193,9 @@ final class PrayerViewModel {
             notificationEnabledPrayers.remove(prayerType)
             await saveNotificationSettings()
         } else {
-            if !notificationService.isAuthorized {
-                let granted = try? await notificationService.requestAuthorization()
-                guard granted == true else { return }
+            if !NotificationScheduler.shared.isAuthorized {
+                let granted = await NotificationScheduler.shared.requestAuthorization()
+                guard granted else { return }
             }
             notificationEnabledPrayers.insert(prayerType)
             await saveNotificationSettings()
@@ -230,13 +227,9 @@ final class PrayerViewModel {
     }
 
     func requestNotificationPermission() async {
-        do {
-            let granted = try await notificationService.requestAuthorization()
-            if granted {
-                await NotificationScheduler.shared.forceReschedule()
-            }
-        } catch {
-            self.error = error
+        let granted = await NotificationScheduler.shared.requestAuthorization()
+        if granted {
+            await NotificationScheduler.shared.forceReschedule()
         }
     }
 

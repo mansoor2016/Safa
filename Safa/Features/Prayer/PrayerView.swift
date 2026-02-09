@@ -23,7 +23,6 @@ struct PrayerView: View {
                 viewModel = PrayerViewModel(
                     prayerRepository: dependencies.prayerRepository,
                     locationService: dependencies.locationService,
-                    notificationService: dependencies.notificationService,
                     userState: dependencies.userState
                 )
             }

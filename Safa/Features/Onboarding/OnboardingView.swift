@@ -613,7 +613,7 @@ struct OnboardingView: View {
 
             // Request notification permission if enabled
             if notificationsEnabled {
-                try? await dependencies.notificationService.requestAuthorization()
+                _ = await NotificationScheduler.shared.requestAuthorization()
             }
 
             // Record if user was invited (honor system)

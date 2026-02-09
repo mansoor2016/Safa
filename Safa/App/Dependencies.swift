@@ -24,7 +24,6 @@ final class Dependencies {
 
     // MARK: - Services
     let locationService: LocationService
-    let notificationService: NotificationService
     let audioPlayerService: AudioPlayerService
     let llmService: LLMService
     let ragService: RAGService
@@ -50,7 +49,6 @@ final class Dependencies {
 
         // Initialize services
         self.locationService = LocationService()
-        self.notificationService = NotificationService()
         self.audioPlayerService = AudioPlayerService()
         self.llmService = LLMService()
         self.pronunciationService = PronunciationService()

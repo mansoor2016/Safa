@@ -273,7 +273,6 @@ final class CheckAchievementsUseCase: CheckAchievementsUseCaseProtocol {
 @Observable
 final class AchievementManager {
     private let checkUseCase: CheckAchievementsUseCaseProtocol
-    private let notificationService: NotificationService?
     private let hapticService: HapticFeedbackService?
 
     private(set) var recentlyUnlocked: [Achievement] = []
@@ -285,11 +284,9 @@ final class AchievementManager {
 
     init(
         checkUseCase: CheckAchievementsUseCaseProtocol = CheckAchievementsUseCase(),
-        notificationService: NotificationService? = nil,
         hapticService: HapticFeedbackService? = nil
     ) {
         self.checkUseCase = checkUseCase
-        self.notificationService = notificationService
         self.hapticService = hapticService
     }
 
@@ -308,7 +305,7 @@ final class AchievementManager {
         showAchievementBanner(achievement)
 
         Task {
-            try? await notificationService?.showAchievementNotification(achievement: achievement)
+            try? await NotificationScheduler.shared.showAchievementUnlocked(achievement: achievement)
         }
     }
 

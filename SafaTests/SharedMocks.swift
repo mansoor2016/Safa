@@ -196,29 +196,4 @@ final class MockLocationService: LocationServiceProtocol {
     }
 }
 
-// MARK: - Mock Notification Service
-
-/// Shared mock for NotificationServiceProtocol.
-@MainActor
-final class MockNotificationService: NotificationServiceProtocol {
-    var authorizationResult = false
-    var errorToThrow: Error?
-    var requestAuthorizationCalled = false
-    var scheduleCalled = false
-
-    nonisolated var isAuthorized: Bool { true }
-
-    nonisolated func requestAuthorization() async throws -> Bool {
-        let error = await errorToThrow
-        let result = await authorizationResult
-        await MainActor.run { requestAuthorizationCalled = true }
-        if let error { throw error }
-        return result
-    }
-
-    nonisolated func scheduleDailyPrayerNotifications(prayers: [PrayerTime], offsetMinutes: Int) async throws {
-        let error = await errorToThrow
-        await MainActor.run { scheduleCalled = true }
-        if let error { throw error }
-    }
-}
+// NotificationService mock removed — notifications consolidated into NotificationScheduler singleton
