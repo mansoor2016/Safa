@@ -316,9 +316,6 @@
     "0 min" : {
 
     },
-    "0.0.1" : {
-
-    },
     "0.5x" : {
 
     },
@@ -359,6 +356,9 @@
 
     },
     "About" : {
+
+    },
+    "About Safa" : {
 
     },
     "About Zakat" : {
@@ -522,6 +522,9 @@
 
     },
     "Bismillah! Time to break your fast." : {
+
+    },
+    "Bismillah. May Safa be a means of benefit for you in this life and the next." : {
 
     },
     "Bookmarks" : {
@@ -868,6 +871,9 @@
     "Events to Export" : {
 
     },
+    "Every Muslim deserves a beautiful, respectful app that helps them in their daily worship — one that feels as thoughtfully crafted as the best apps on your phone, without compromising your privacy or demanding your attention for profit." : {
+
+    },
     "Exit" : {
 
     },
@@ -1138,6 +1144,9 @@
     "Jumu'ah" : {
 
     },
+    "Just you and your faith." : {
+
+    },
     "Juz" : {
 
     },
@@ -1369,6 +1378,9 @@
     "Nisab Threshold" : {
 
     },
+    "No ads. No clutter. No tracking." : {
+
+    },
     "No ayahs found for \"%@\".\nTry a different search term." : {
 
     },
@@ -1538,6 +1550,9 @@
 
     },
     "Progress" : {
+
+    },
+    "Purity · Clarity" : {
 
     },
     "Qibla" : {
@@ -1716,10 +1731,16 @@
     "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nAchievement Notifications: Passive\n- Low priority, silent\n- Shown in Notification Center only\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa" : {
 
     },
+    "Safa is a comprehensive Islamic companion app designed with privacy, simplicity, and intelligence at its core." : {
+
+    },
     "Safa is built with privacy at its core. We believe your spiritual journey is personal and should stay that way." : {
 
     },
     "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
+
+    },
+    "Safa was built to be that app. Free, private, and always respectful of your time and intention." : {
 
     },
     "safaapp.com" : {
@@ -2245,6 +2266,9 @@
 
     },
     "White Days Fasting" : {
+
+    },
+    "Why Safa?" : {
 
     },
     "Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi." : {

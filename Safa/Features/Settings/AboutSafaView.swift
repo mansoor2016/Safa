@@ -45,14 +45,7 @@ struct AboutSafaView: View {
 
                 // Why
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Why Safa?")
-                        .font(.headline)
-
-                    Text("Every Muslim deserves a beautiful, respectful app that helps them in their daily worship — one that feels as thoughtfully crafted as the best apps on your phone, without compromising your privacy or demanding your attention for profit.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    Text("Safa was built to be that app. Free, private, and always respectful of your time and intention.")
+                    Text("I built Safa because I couldn't find an Islamic app I actually enjoyed using. Free, private, and made with care.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
