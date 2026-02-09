@@ -326,6 +326,10 @@ struct RamadanView: View {
             fastingDays.remove(day)
         } else {
             fastingDays.insert(day)
+            // Award fasting hasanat (once per day)
+            Task {
+                await HasanatTracker.awardOnce(.fastingDay, key: "fastingDay_\(day)", via: dependencies.userState)
+            }
             if healthSyncEnabled, let suhoor = suhoorTime, let iftar = iftarTime {
                 Task { try? await healthKitService.logFast(start: suhoor, end: iftar, type: .ramadan) }
             }
@@ -350,8 +354,14 @@ struct RamadanView: View {
                 let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
                 try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
                 loggedPrayers.insert(prayerType)
-                await dependencies.userState.awardHasanat(.prayerLogged)
+                await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
+                await dependencies.userState.incrementPrayersLogged()
                 await dependencies.userState.recordActivity(type: .prayer)
+
+                // Check if all obligatory prayers completed
+                if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
+                    await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
+                }
             } catch {}
         }
     }

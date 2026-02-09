@@ -23,6 +23,18 @@ final class UserStateManager {
         self.streaks = StreakType.allCases.map { Streak(type: $0) }
         self.achievements = Achievement.allAchievements
 
+        // Listen for invite hasanat notification (from InviteFriendsService)
+        NotificationCenter.default.addObserver(
+            forName: .inviteHasanatAwarded,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task {
+                await HasanatTracker.awardOnceEver(.inviteAccepted, key: "inviteAccepted", via: self)
+            }
+        }
+
         // Load initial data
         Task {
             await loadUserData()
@@ -64,6 +76,17 @@ final class UserStateManager {
         }
     }
 
+    // MARK: - Prayer Counter
+
+    func incrementPrayersLogged() async {
+        userStats.totalPrayersLogged += 1
+        do {
+            try await userRepository.updateUserStats(userStats)
+        } catch {
+            self.error = error
+        }
+    }
+
     // MARK: - Streaks
 
     func recordActivity(type: StreakType) async {
@@ -71,9 +94,9 @@ final class UserStateManager {
             try await userRepository.recordStreakActivity(type: type)
             streaks = try await userRepository.getStreaks()
 
-            // Award daily open hasanat if this is the first activity today
+            // Award daily open hasanat (once per day, deduped by tracker)
             if type == .daily {
-                await awardHasanat(.dailyOpen)
+                await HasanatTracker.awardOnce(.dailyOpen, key: "dailyOpen", via: self)
             }
 
             // Check for streak achievements

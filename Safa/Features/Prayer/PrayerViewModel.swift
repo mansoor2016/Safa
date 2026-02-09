@@ -144,12 +144,16 @@ final class PrayerViewModel {
             // Sync logged state to widgets
             widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
 
-            // Award Hasanat
-            await userState.awardHasanat(.prayerLogged)
+            // Award Hasanat (dedup: log-unlog-relog won't double-award)
+            await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: userState)
+
+            // Increment lifetime prayer counter (before first-prayer check)
+            let wasFirstPrayer = userState.userStats.totalPrayersLogged == 0
+            await userState.incrementPrayersLogged()
 
             // Check if all prayers completed
             if allPrayersCompleted {
-                await userState.awardHasanat(.prayerAllFive)
+                await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: userState)
                 await userState.checkAndUnlockAchievement("prayer_perfect_day")
             }
 
@@ -157,7 +161,7 @@ final class PrayerViewModel {
             await userState.recordActivity(type: .prayer)
 
             // Check first prayer achievement
-            if userState.userStats.totalPrayersLogged == 0 {
+            if wasFirstPrayer {
                 await userState.checkAndUnlockAchievement("prayer_first")
             }
 

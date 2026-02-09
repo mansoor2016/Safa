@@ -1,9 +1,44 @@
 // MARK: - SafaShortcuts.swift
 // PURPOSE: App Intents for Siri Shortcuts integration
-// DEPENDENCIES: AppIntents
+// DEPENDENCIES: AppIntents, Dependencies
 
 import AppIntents
 import SwiftUI
+
+// MARK: - Intent Helpers
+
+private enum IntentHelpers {
+    /// Get the user's saved coordinates, falling back to London
+    static func getCoordinates() -> Coordinates {
+        Dependencies.shared.locationService.coordinates ?? AppDefaults.defaultCoordinates
+    }
+
+    /// Get the user's saved calculation method
+    static func getCalculationMethod() async -> CalculationMethod {
+        let prefs = await PreferencesManager.shared.getPreferences()
+        return prefs.calculationMethod
+    }
+
+    /// Calculate today's prayer times using real data
+    static func getTodayPrayers() async -> [PrayerTime] {
+        let coords = getCoordinates()
+        let method = await getCalculationMethod()
+        let calculator = PrayerTimeCalculator()
+        return calculator.calculatePrayerTimes(for: Date(), location: coords, method: method)
+    }
+
+    /// Format a time for display
+    static func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
+    /// Map PrayerTypeEntity ID to PrayerType
+    static func prayerType(from entityId: String) -> PrayerType? {
+        PrayerType(rawValue: entityId)
+    }
+}
 
 // MARK: - Prayer Times Intent
 
@@ -15,16 +50,16 @@ struct GetPrayerTimesIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        // In a real implementation, this would fetch from the repository
-        let prayerTimes = """
-        Today's Prayer Times:
-        Fajr: 5:23 AM
-        Sunrise: 6:45 AM
-        Dhuhr: 12:30 PM
-        Asr: 3:45 PM
-        Maghrib: 6:15 PM
-        Isha: 7:45 PM
-        """
+        let prayers = await IntentHelpers.getTodayPrayers()
+
+        guard !prayers.isEmpty else {
+            return .result(value: "Unable to calculate prayer times. Please open Safa to set your location.")
+        }
+
+        let lines = prayers.map { prayer in
+            "\(prayer.type.displayName): \(IntentHelpers.formatTime(prayer.time))"
+        }
+        let prayerTimes = "Today's Prayer Times:\n" + lines.joined(separator: "\n")
 
         return .result(value: prayerTimes)
     }
@@ -40,8 +75,27 @@ struct GetNextPrayerIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        // In a real implementation, this would calculate based on current time
-        return .result(value: "Next prayer: Asr at 3:45 PM (in 2 hours)")
+        let prayers = await IntentHelpers.getTodayPrayers()
+        let now = Date()
+
+        // Find the next obligatory prayer
+        guard let nextPrayer = prayers.first(where: { $0.type.isObligatory && $0.time > now }) else {
+            return .result(value: "All prayers for today have passed. May Allah accept your worship.")
+        }
+
+        let interval = nextPrayer.time.timeIntervalSince(now)
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
+
+        let timeString = IntentHelpers.formatTime(nextPrayer.time)
+        let remainingString: String
+        if hours > 0 {
+            remainingString = "in \(hours)h \(minutes)m"
+        } else {
+            remainingString = "in \(minutes)m"
+        }
+
+        return .result(value: "Next prayer: \(nextPrayer.type.displayName) at \(timeString) (\(remainingString))")
     }
 }
 
@@ -60,8 +114,41 @@ struct LogPrayerIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        // In a real implementation, this would save to the repository
-        return .result(dialog: "Logged \(prayer.name) prayer. +10 Hasanat earned!")
+        guard let prayerType = IntentHelpers.prayerType(from: prayer.id) else {
+            return .result(dialog: "Unknown prayer type.")
+        }
+
+        let deps = Dependencies.shared
+        let now = Date()
+
+        // Check if already logged
+        let alreadyLogged = try? await deps.prayerRepository.isPrayerLogged(prayerType, for: now)
+        if alreadyLogged == true {
+            return .result(dialog: "\(prayer.name) prayer is already logged for today.")
+        }
+
+        // Determine if on time by comparing to calculated prayer time
+        let prayers = await IntentHelpers.getTodayPrayers()
+        let matchingPrayer = prayers.first(where: { $0.type == prayerType })
+        let isOnTime = matchingPrayer.map { abs(now.timeIntervalSince($0.time)) < 30 * 60 } ?? false
+
+        do {
+            try await deps.prayerRepository.logPrayer(prayerType, for: now, at: now, isOnTime: isOnTime)
+            await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: deps.userState)
+            await deps.userState.incrementPrayersLogged()
+            await deps.userState.recordActivity(type: .prayer)
+
+            // Check if all five obligatory prayers are now logged
+            let logs = try await deps.prayerRepository.getPrayerLogs(for: now)
+            let loggedTypes = Set(logs.map { $0.prayerType })
+            if PrayerType.obligatoryPrayers.allSatisfy({ loggedTypes.contains($0) }) {
+                await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: deps.userState)
+            }
+
+            return .result(dialog: "Logged \(prayer.name) prayer. +10 Hasanat earned!")
+        } catch {
+            return .result(dialog: "Could not log prayer. Please try again in the app.")
+        }
     }
 }
 
@@ -261,8 +348,20 @@ struct GetQiblaDirectionIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        // In a real implementation, this would calculate based on user's location
-        return .result(value: "Qibla direction: 58° (Northeast)")
+        let coords = IntentHelpers.getCoordinates()
+        let calculator = PrayerTimeCalculator()
+        let bearing = calculator.calculateQiblaDirection(from: coords)
+        let rounded = Int(bearing.rounded())
+
+        let cardinal = Self.cardinalDirection(for: bearing)
+
+        return .result(value: "Qibla direction: \(rounded)\u{00B0} (\(cardinal)) from your location")
+    }
+
+    private static func cardinalDirection(for degrees: Double) -> String {
+        let directions = ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"]
+        let index = Int((degrees + 22.5).truncatingRemainder(dividingBy: 360) / 45)
+        return directions[index]
     }
 }
 
@@ -274,15 +373,49 @@ struct GetDailyVerseIntent: AppIntent {
 
     static var openAppWhenRun: Bool = false
 
+    /// Well-known ayahs that make good daily verses (surah, ayah)
+    private static let curatedVerses: [(surah: Int, ayah: Int)] = [
+        (1, 1), (2, 255), (2, 286), (3, 139), (3, 173),
+        (5, 3), (6, 162), (13, 28), (14, 7), (16, 97),
+        (17, 80), (20, 114), (23, 115), (24, 35), (25, 63),
+        (28, 88), (29, 69), (33, 56), (39, 53), (40, 60),
+        (41, 30), (42, 11), (49, 13), (55, 13), (57, 4),
+        (59, 22), (65, 3), (67, 2), (93, 5), (94, 6),
+        (112, 1),
+    ]
+
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        // In a real implementation, this would fetch from the repository
+        // Use day-of-year as a stable daily seed
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+        let index = (dayOfYear - 1) % Self.curatedVerses.count
+        let ref = Self.curatedVerses[index]
+
+        let repo = Dependencies.shared.quranRepository
+
+        do {
+            if let ayah = try await repo.getAyah(surah: ref.surah, ayah: ref.ayah) {
+                let surahName = try await repo.getSurah(number: ref.surah)?.nameEnglish ?? "Surah \(ref.surah)"
+                let verse = """
+                \(ayah.textArabic)
+
+                "\(ayah.textTranslation)"
+
+                \u{2014} \(surahName) (\(ref.surah):\(ref.ayah))
+                """
+                return .result(value: verse)
+            }
+        } catch {
+            // Fall through to fallback
+        }
+
+        // Fallback if repository fails
         let verse = """
-        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+        \u{0628}\u{0650}\u{0633}\u{0652}\u{0645}\u{0650} \u{0627}\u{0644}\u{0644}\u{0651}\u{0647}\u{0650} \u{0627}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0652}\u{0645}\u{064E}\u{0670}\u{0646}\u{0650} \u{0627}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}
 
         "In the name of Allah, the Most Gracious, the Most Merciful"
 
-        — Surah Al-Fatiha (1:1)
+        \u{2014} Al-Fatiha (1:1)
         """
         return .result(value: verse)
     }

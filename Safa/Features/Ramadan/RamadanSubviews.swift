@@ -133,6 +133,7 @@ struct DailyGoalRow: View {
 // MARK: - Taraweeh Tracker Sheet
 
 struct TaraweehTrackerSheet: View {
+    @Environment(Dependencies.self) private var dependencies
     @Environment(\.dismiss) private var dismiss
     @State private var rakahsPrayed = 8
 
@@ -205,6 +206,9 @@ struct TaraweehTrackerSheet: View {
 
     private var saveButton: some View {
         Button {
+            Task {
+                await HasanatTracker.awardOnce(.taraweeh, key: "taraweeh", via: dependencies.userState)
+            }
             dismiss()
         } label: {
             Text("Save")

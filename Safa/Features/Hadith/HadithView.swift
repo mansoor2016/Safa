@@ -29,6 +29,7 @@ struct HadithView: View {
 // MARK: - Hadith Content View
 
 struct HadithContentView: View {
+    @Environment(Dependencies.self) private var dependencies
     @Bindable var viewModel: HadithViewModel
 
     var body: some View {
@@ -126,6 +127,10 @@ struct HadithContentView: View {
     private func dailyHadithCard(_ hadith: Hadith) -> some View {
         InteractiveCard(action: {
             viewModel.selectedHadith = hadith
+            // Award dailyHadith hasanat when user taps (once per day)
+            Task {
+                await HasanatTracker.awardOnce(.dailyHadith, key: "dailyHadith", via: dependencies.userState)
+            }
         }) {
             VStack(alignment: .leading, spacing: SafaSpacing.sm) {
                 HStack {

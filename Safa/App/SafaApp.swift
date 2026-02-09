@@ -59,6 +59,14 @@ struct SafaApp: App {
                     await NotificationScheduler.shared.scheduleIfNeeded()
                 }
 
+                // Record daily activity (awards .dailyOpen hasanat + daily streak)
+                if prefs.hasCompletedOnboarding {
+                    await dependencies.userState.recordActivity(type: .daily)
+                }
+
+                // Prune old hasanat tracker entries (prevents UserDefaults bloat)
+                HasanatTracker.pruneOldEntries()
+
                 // Pre-warm compressed databases in background (non-blocking)
                 await SQLiteService.shared.preWarmDatabases()
             }

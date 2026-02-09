@@ -205,10 +205,10 @@ struct LessonContentView: View {
                 score: scorePercent
             )
 
-            // Award Hasanat
-            await dependencies.userState.awardHasanat(.lessonComplete)
+            // Award Hasanat (dedup: completing same lesson again won't double-award)
+            await HasanatTracker.awardOnceEver(.lessonComplete, key: "lesson_\(lesson.id)", via: dependencies.userState)
             if score == totalQuestions && totalQuestions > 0 {
-                await dependencies.userState.awardHasanat(.lessonPerfect)
+                await HasanatTracker.awardOnceEver(.lessonPerfect, key: "lessonPerfect_\(lesson.id)", via: dependencies.userState)
             }
 
             // Record activity

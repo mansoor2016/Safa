@@ -69,12 +69,12 @@ final class ShareService {
 
     // MARK: - Properties
 
-    private let hasanatService: HasanatService?
+    private let userState: UserStateManager?
 
     // MARK: - Initialization
 
-    init(hasanatService: HasanatService? = nil) {
-        self.hasanatService = hasanatService
+    init(userState: UserStateManager? = nil) {
+        self.userState = userState
     }
 
     // MARK: - Public Methods
@@ -219,17 +219,25 @@ final class ShareService {
     // MARK: - Private Methods
 
     private func awardSharingHasanat(for content: ShareableContent) {
-        guard let service = hasanatService else { return }
+        guard let userState else { return }
 
-        switch content {
-        case .quranVerse:
-            service.award(for: .sharedVerse)
-        case .achievement:
-            service.award(for: .sharedAchievement)
-        case .inviteLink:
-            service.award(for: .invitedFriend)
-        default:
-            break
+        Task {
+            let dateString = {
+                let f = DateFormatter()
+                f.dateFormat = "yyyy-MM-dd"
+                return f.string(from: Date())
+            }()
+
+            switch content {
+            case .quranVerse:
+                await HasanatTracker.awardOnce(.share, key: "share_verse_\(dateString)", via: userState)
+            case .achievement:
+                await HasanatTracker.awardOnce(.share, key: "share_achievement_\(dateString)", via: userState)
+            case .inviteLink:
+                await HasanatTracker.awardOnce(.share, key: "share_invite_\(dateString)", via: userState)
+            default:
+                await HasanatTracker.awardOnce(.share, key: "share_other_\(dateString)", via: userState)
+            }
         }
     }
 }
@@ -425,14 +433,21 @@ struct ProgressShareCard: View {
 // MARK: - Share Button View
 
 struct ShareButton: View {
+    @Environment(Dependencies.self) private var dependencies
     let content: ShareableContent
-    @State private var shareService = ShareService()
+    @State private var shareService: ShareService?
 
     var body: some View {
         Button {
-            shareService.share(content)
+            let service = shareService ?? ShareService(userState: dependencies.userState)
+            service.share(content)
         } label: {
             Label("Share", systemImage: "square.and.arrow.up")
+        }
+        .task {
+            if shareService == nil {
+                shareService = ShareService(userState: dependencies.userState)
+            }
         }
     }
 }

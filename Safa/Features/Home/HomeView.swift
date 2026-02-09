@@ -436,8 +436,14 @@ struct HomeView: View {
                 )
 
                 loggedPrayers.insert(prayerType)
-                await dependencies.userState.awardHasanat(.prayerLogged)
+                await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
+                await dependencies.userState.incrementPrayersLogged()
                 await dependencies.userState.recordActivity(type: .prayer)
+
+                // Check if all obligatory prayers completed
+                if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
+                    await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
+                }
             } catch {
                 // Handle error silently on home screen
             }
@@ -510,6 +516,11 @@ struct HomeView: View {
 
         // Load daily verse
         dailyVerse = Ayah.alFatiha.randomElement()
+
+        // Award dailyVerse hasanat (once per day)
+        if dailyVerse != nil {
+            await HasanatTracker.awardOnce(.dailyVerse, key: "dailyVerse", via: dependencies.userState)
+        }
     }
 }
 
