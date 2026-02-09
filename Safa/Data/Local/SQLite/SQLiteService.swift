@@ -43,6 +43,20 @@ final class SQLiteService {
         }
     }
 
+    // MARK: - Pre-Warm (call on app launch, runs off main thread)
+
+    /// Decompress any gzipped databases in the background so they're ready when needed.
+    /// Call from SafaApp.task{} — safe to call multiple times (no-ops if already decompressed).
+    func preWarmDatabases() async {
+        await withTaskGroup(of: Void.self) { group in
+            for name in ["hadith"] {
+                group.addTask { [weak self] in
+                    _ = self?.databasePath(for: name)
+                }
+            }
+        }
+    }
+
     // MARK: - Database Paths
 
     /// Get path to a usable database file, decompressing from .gz if needed

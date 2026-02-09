@@ -58,6 +58,9 @@ struct SafaApp: App {
                 if prefs.hasCompletedOnboarding {
                     await NotificationScheduler.shared.scheduleIfNeeded()
                 }
+
+                // Pre-warm compressed databases in background (non-blocking)
+                await SQLiteService.shared.preWarmDatabases()
             }
             .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
                 // Handle Spotlight search result tap
