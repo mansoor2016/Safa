@@ -4,9 +4,6 @@
     "" : {
 
     },
-    "--:--" : {
-
-    },
     "..." : {
 
     },
@@ -431,9 +428,6 @@
 
     },
     "Alarm Time" : {
-
-    },
-    "All prayer times" : {
 
     },
     "Allah has ninety-nine Names, one-hundred less one; and he who memorizes them all by heart will enter Paradise." : {
@@ -1462,9 +1456,6 @@
     "Permission denied to access this data." : {
 
     },
-    "Play Adhan" : {
-
-    },
     "Playback Speed" : {
 
     },
@@ -1610,9 +1601,6 @@
 
     },
     "Ramadan is coming!" : {
-
-    },
-    "Ramadan Mode" : {
 
     },
     "Ramadan mode is now active. May this blessed month bring you peace and blessings." : {
@@ -1914,10 +1902,10 @@
     "Streaks" : {
 
     },
-    "Suhoor Dua" : {
+    "Suhoor" : {
 
     },
-    "Suhoor Ends" : {
+    "Suhoor Dua" : {
 
     },
     "Suhoor ends in" : {
@@ -2102,13 +2090,7 @@
     "Time to Wind Down" : {
 
     },
-    "Time until Iftar" : {
-
-    },
     "Time until next prayer" : {
-
-    },
-    "Time until Suhoor ends" : {
 
     },
     "Tips" : {
@@ -2124,9 +2106,6 @@
 
     },
     "Today we celebrate the birth of Prophet Muhammad (PBUH)." : {
-
-    },
-    "Today's Times" : {
 
     },
     "Tonight is the %@ - an odd night" : {
@@ -2145,9 +2124,6 @@
 
     },
     "Total Hasanat" : {
-
-    },
-    "Track your fasting" : {
 
     },
     "Track your journey with صفا" : {
@@ -2184,6 +2160,12 @@
 
     },
     "Unlocked!" : {
+
+    },
+    "until Iftar" : {
+
+    },
+    "until Suhoor ends" : {
 
     },
     "Upcoming: %@" : {
@@ -2352,9 +2334,6 @@
 
     },
     "تَقَبَّلَ اللهُ مِنَّا وَمِنْكُمْ" : {
-
-    },
-    "رمضان مبارك" : {
 
     },
     "صفا" : {

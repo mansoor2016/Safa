@@ -92,10 +92,31 @@ final class DatabasePerformanceTests: XCTestCase {
     }
 
     // MARK: - Prayer Time Calculation Performance
-    // Note: PrayerTimeCalculator performance is validated via PrayerTimeMonotonicTests
-    // (21 test methods across 11 cities × 7 methods). Direct perf timing tests were
-    // removed because the calculator crashes when instantiated in certain simulator
-    // clone configurations during parallel test execution.
+
+    func test_prayerTimeCalculation_under50ms() {
+        let calculator = PrayerTimeCalculator()
+        let london = Coordinates(latitude: 51.5074, longitude: -0.1278)
+
+        let start = CFAbsoluteTimeGetCurrent()
+        let prayers = calculator.calculatePrayerTimes(for: Date(), location: london, method: .muslimWorldLeague)
+        let elapsed = CFAbsoluteTimeGetCurrent() - start
+
+        XCTAssertEqual(prayers.count, 6)
+        XCTAssertLessThan(elapsed, 0.05, "Prayer calculation should complete in < 50ms, took \(elapsed * 1000)ms")
+    }
+
+    func test_prayerTimeCalculation_allMethods_under100ms() {
+        let calculator = PrayerTimeCalculator()
+        let london = Coordinates(latitude: 51.5074, longitude: -0.1278)
+
+        let start = CFAbsoluteTimeGetCurrent()
+        for method in CalculationMethod.allCases {
+            _ = calculator.calculatePrayerTimes(for: Date(), location: london, method: method)
+        }
+        let elapsed = CFAbsoluteTimeGetCurrent() - start
+
+        XCTAssertLessThan(elapsed, 0.1, "All 7 methods should calculate in < 100ms total, took \(elapsed * 1000)ms")
+    }
 
     // MARK: - Repeated Query Performance (tests connection pooling)
 

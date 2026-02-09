@@ -4,7 +4,7 @@
 
 import Foundation
 
-final class PrayerTimeCalculator {
+struct PrayerTimeCalculator {
     // MARK: - Constants
     private let kaabahLatitude = 21.4225
     private let kaabahLongitude = 39.8262

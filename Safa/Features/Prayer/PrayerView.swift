@@ -59,6 +59,9 @@ private struct PrayerContentView: View {
                     }
                 )
 
+                // Daily Goals
+                DailyGoalsCard(isRamadan: false, loggedPrayers: viewModel.loggedPrayers)
+
                 // Quick Actions
                 quickActionsSection
             }
