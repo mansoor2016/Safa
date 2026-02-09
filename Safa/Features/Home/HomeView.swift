@@ -339,7 +339,7 @@ struct HomeView: View {
 
     private var progressCard: some View {
         InteractiveCard(action: {
-            // Navigate to progress/stats
+            ToastService.shared.show(Toast(message: "Progress Dashboard coming soon", type: .info))
         }) {
             HStack {
                 VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
