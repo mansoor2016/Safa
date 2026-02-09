@@ -2,7 +2,7 @@
 
 **Your beautiful, intelligent Islamic companion for iPhone.**
 
-Safa (صفا - meaning purity/clarity) is a comprehensive Islamic app designed with privacy, simplicity, and intelligence at its core. No ads, no clutter, no tracking - just you and your faith.
+Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed with privacy, simplicity, and intelligence at its core. No ads, no clutter, no tracking — just you and your faith.
 
 ## Why Safa?
 
@@ -11,78 +11,84 @@ Safa (صفا - meaning purity/clarity) is a comprehensive Islamic app designed w
 | Cluttered, outdated UI | Clean, calm design inspired by Apple's design language |
 | Aggressive advertisements | No ads, ever |
 | Need 5+ apps for different features | All-in-one: Prayer, Quran, Hadith, Learning, AI |
-| No intelligence | Contextually aware - adapts to time, date, and Islamic calendar |
-| No habit formation | Duolingo-style gamification with Hasanat points and streaks |
+| No intelligence | Contextually aware — adapts to time, location, and Islamic calendar |
+| No habit formation | Gamification with Hasanat points, streaks, and achievements |
 
 ## Features
 
 ### Core Features
-- **Prayer Times** - Accurate calculations with multiple methods (ISNA, MWL, Makkah, etc.)
-- **Qibla Compass** - Find the direction to Makkah with haptic feedback
-- **Quran Reader** - Full Quran with Arabic text, translations, and audio recitation
-- **Hadith Collections** - Sahih Bukhari, Muslim, and other major collections
-- **Dua & Adhkar** - Morning/evening adhkar, categorized duas with audio
-- **AI Companion** - On-device Islamic Q&A powered by Apple Foundation Models (iOS 18.4+)
-- **Learning** - Arabic alphabet, Tajweed rules, pronunciation practice
+- **Prayer Times** — Accurate astronomical calculations with 7 methods (ISNA, MWL, Makkah, Karachi, Egypt, Tehran, Jafari)
+- **Qibla Compass** — Real-time compass with haptic feedback at alignment
+- **Quran Reader** — Full 6,236 ayahs with Arabic (Uthmani), Sahih International translation, and FTS search
+- **Hadith Collections** — 34,178 hadiths across all 6 Kutub al-Sittah (Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasa'i, Ibn Majah)
+- **Dua & Dhikr** — Morning/evening dhikr, sleep duas (incl. Ayatul Kursi), categorized duas
+- **AI Companion** — On-device Islamic Q&A powered by Apple Foundation Models (coming soon)
+- **Learning** — Arabic alphabet, Tajweed rules, pronunciation practice
 
 ### Intelligent Features
-- **Contextual Reminders** - Relevant prompts based on time and Islamic calendar
-- **Ramadan Mode** - Auto-activates with fasting tracker, Iftar countdown, Quran goals
-- **Wind-Down Mode** - Evening routine with sleep adhkar and Fajr alarm
+- **Contextual Reminders** — Relevant prompts based on time of day and Islamic calendar
+- **Ramadan Mode** — Auto-activates with fasting tracker, Iftar countdown, Taraweeh tracking, Quran Khatm goals
+- **Wind-Down Mode** — Evening routine with sleep dhikr and Fajr alarm
+- **Dark Mode** — System/Light/Dark with adaptive prayer colors and 13 semantic color tokens
+- **Location Intelligence** — Auto-detects calculation method, madhab, and language from your location
 
 ### iOS Integration
-- **Widgets** - Prayer times, streaks, daily verse on your home screen
-- **Interactive Widgets** - Log prayers or count tasbeeh without opening the app
-- **Live Activities** - Prayer countdown on Lock Screen and Dynamic Island
-- **StandBy Mode** - Prayer times on your bedside clock
-- **Spotlight Search** - Find Quran verses, hadith, and duas from iOS search
-- **Siri Shortcuts** - "Hey Siri, what's the next prayer?"
-- **Focus Mode** - Distraction-free prayer time
-- **Apple Health** - Sync Ramadan fasting hours
-- **Calendar Export** - Add Islamic events to Apple Calendar or export .ics
+- **6 Widgets** — Prayer times, interactive prayer log, tasbeeh counter, streak, StandBy, and lock screen widgets
+- **Live Activities** — Prayer countdown on Lock Screen and Dynamic Island
+- **Spotlight Search** — Find Quran verses, hadith, and duas from iOS search
+- **Siri Shortcuts** — "Hey Siri, what's the next prayer?"
+- **Focus Mode** — Distraction-free prayer time
+- **Apple Health** — Sync Ramadan fasting hours
+- **Calendar Export** — Add Islamic events to Apple Calendar or export .ics
+- **Notifications** — Prayer time alerts with optional adhan sounds (11 reciters)
 
 ### Gamification
-- **Hasanat Points** - Earn rewards for prayers, Quran reading, and learning
-- **Streaks** - Track daily consistency across multiple activities
-- **Achievements** - Unlock badges for milestones
-- **Levels** - Progress from Beginner to Muhsin
+- **Hasanat Points** — Earn rewards for prayers, Quran reading, and learning
+- **Streaks** — Track daily consistency across prayer, Quran, dhikr, and learning
+- **Achievements** — Unlock badges for milestones (20+ achievements)
+- **Levels** — Progress from Beginner to Muhsin (10 levels)
 
 ### Privacy First
-- **No account required** - Works immediately after download
-- **On-device AI** - Questions never leave your phone
-- **No tracking** - We don't collect or sell your data
-- **iCloud Sync** - Your data syncs through your personal Apple account
+- **No account required** — Works immediately after download
+- **On-device AI** — Questions never leave your phone
+- **No tracking** — Zero analytics, zero telemetry, zero data collection
+- **iCloud Sync** — Your data syncs through your personal Apple account (optional)
+- **Data Export** — Export all your data as JSON/CSV at any time
 
 ## Requirements
 
-- **iOS 17.0+** (for widgets, Live Activities)
-- **iOS 18.4+** (for AI Companion feature)
-- **iPhone** (iPad optimization planned for future)
+- **iOS 26.0+** (SwiftUI, @Observable, NavigationPath)
+- **iPhone** (iPad layout support included)
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| UI | SwiftUI |
-| Architecture | MVVM + Clean Architecture |
-| Persistence | Core Data + CloudKit |
+| UI | SwiftUI (iOS 26+) |
+| State | @Observable (no Combine) |
+| Architecture | MVVM + protocol-based DI |
+| Local Data | SQLite (FTS5) + Core Data |
+| Cloud Sync | CloudKit (optional) |
 | AI | Apple Foundation Models + RAG |
 | Audio | AVFoundation |
-| Widgets | WidgetKit |
-| Notifications | UserNotifications |
+| Widgets | WidgetKit (App Group shared data) |
+| Notifications | UserNotifications + adhan CAF audio |
+| Localization | String Catalogs (.xcstrings), Phase 1: en/ar/id/ur/bn |
 
 ## Project Structure
 
 ```
 Safa/
 ├── App/                    # App entry point, router, dependencies
-├── Core/                   # Shared utilities, design system, services
+├── Core/                   # Design system, services, utilities, notifications
 ├── Domain/                 # Entities, use cases, protocols
-├── Data/                   # Repositories, Core Data, CloudKit
-├── Features/               # Feature modules (Prayer, Quran, Learn, etc.)
+├── Data/                   # Repositories, Core Data, SQLite, ML
+├── Features/               # Feature modules (Prayer, Quran, Hadith, etc.)
 ├── Shared/                 # Reusable UI components
-├── SafaWidgets/            # Widget extension
-└── Resources/              # Assets, bundled data, fonts
+├── Resources/              # Assets, bundled databases, audio
+SafaWidgetExtension/        # Widget extension (5 widgets)
+SafaShared/                 # Shared Swift package (widget logic)
+scripts/                    # Database generation scripts
 ```
 
 ## Building
@@ -92,28 +98,33 @@ Safa/
 git clone https://github.com/mansoor2016/Safa.git
 cd Safa
 
-# Open in Xcode
-open Safa.xcodeproj
-
 # Build
-xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17' build
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+
+# Run unit tests (1,700+)
+xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing:SafaTests test
 ```
+
+## Content Data
+
+| Content | Source | Records |
+|---------|--------|---------|
+| Quran Arabic + Translation | [quran-json](https://github.com/AhmedBaset/hadith-json) (Tanzil.net data) | 6,236 ayahs |
+| Hadith (6 collections) | [hadith-json](https://github.com/AhmedBaset/hadith-json) (Sunnah.com data) | 34,178 hadiths |
+| Duas & Dhikr | Hisnul Muslim | Sample data |
+| Audio (Adhan) | Bundled CAF | 11 reciters |
 
 ## Documentation
 
-- [Design Document](.docs/DESIGN.md) - Product vision, features, and UX
-- [Technical Requirements](.docs/TECHNICAL.md) - Architecture and implementation details
-- [Task Breakdown](.docs/TASKS.md) - Development progress and task tracking
-- [Development Guide](CLAUDE.md) - Coding conventions and patterns
-
-## Content Sources
-
-| Content | Source | License |
-|---------|--------|---------|
-| Quran Arabic | [Tanzil.net](https://tanzil.net) | Free |
-| Translation | Sahih International | Free |
-| Hadith | [Sunnah.com](https://sunnah.com) | Free (non-commercial) |
-| Audio | [Everyayah.com](https://everyayah.com) | Free for Islamic apps |
+| Document | Purpose |
+|----------|---------|
+| [Design Document](.docs/DESIGN.md) | Product vision, UX principles, feature specs |
+| [Technical Spec](.docs/TECHNICAL.md) | Architecture, patterns, performance budgets |
+| [Task Breakdown](.docs/TASKS.md) | Development progress and backlog |
+| [Development Guide](CLAUDE.md) | Coding conventions, templates, build workflow |
+| [Premium UI Guidance](.docs/PREMIUM_UI_GUIDANCE.md) | Interaction polish and animation standards |
+| [Testing Guide](.docs/TEST.md) | QA checklists and smoke tests |
 
 ## Contributing
 
@@ -127,7 +138,7 @@ Contributions are welcome! Please read the [Development Guide](CLAUDE.md) for co
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
