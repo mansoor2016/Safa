@@ -223,10 +223,7 @@ struct RamadanBanner: View {
                 router.navigate(to: .quran)
             }
 
-            bannerQuickAction(icon: "speaker.wave.2.fill", title: "Adhan") {
-                // Play iftar adhan
-                playIftarAdhan()
-            }
+            AdhanPlayButton(style: .banner)
         }
     }
 
@@ -267,33 +264,7 @@ struct RamadanBanner: View {
         }
     }
 
-    private func playIftarAdhan() {
-        // Play selected adhan sound
-        Task {
-            let prefs = await PreferencesManager.shared.getPreferences()
-            let fileName = prefs.selectedAdhan
-            let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
-
-            if adhanSound != .defaultSound {
-                do {
-                    try dependencies.audioPlayerService.playBundled(
-                        fileName: adhanSound.rawValue,
-                        fileExtension: "caf"
-                    )
-                } catch {
-                    ToastService.shared.show(Toast(
-                        message: "Could not play adhan.",
-                        type: .warning
-                    ))
-                }
-            }
-        }
-
-        // Show dua prompt after a short delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            showingIftarDuaPrompt = true
-        }
-    }
+    // Adhan play/stop extracted to AdhanPlayButton shared component
 
     private func loadQuranProgress() async {
         do {

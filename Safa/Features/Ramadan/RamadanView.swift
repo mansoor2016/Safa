@@ -20,7 +20,6 @@ struct RamadanView: View {
     @State private var showingQibla = false
     @State private var showZakat = false
     @State private var juzCompleted = 0
-    @State private var isAdhanPlaying = false
     @State private var healthSyncEnabled = false
     @State private var healthKitService = HealthKitService.shared
 
@@ -235,21 +234,7 @@ struct RamadanView: View {
             .buttonStyle(.plain)
 
             // Adhan
-            Button {
-                toggleAdhan()
-            } label: {
-                VStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: isAdhanPlaying ? "stop.fill" : "speaker.wave.2.fill")
-                        .font(.title2)
-                    Text(isAdhanPlaying ? "Stop" : "Adhan")
-                        .font(SafaTypography.labelSmall)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, SafaSpacing.sm)
-                .background(Color(UIColor.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-            }
-            .buttonStyle(.plain)
+            AdhanPlayButton(style: .quickAction)
         }
     }
 
@@ -371,25 +356,7 @@ struct RamadanView: View {
         }
     }
 
-    private func toggleAdhan() {
-        if isAdhanPlaying {
-            dependencies.audioPlayerService.stop()
-            isAdhanPlaying = false
-            return
-        }
-        Task {
-            let prefs = await PreferencesManager.shared.getPreferences()
-            let adhanSound = AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy
-            if adhanSound != .defaultSound {
-                do {
-                    try dependencies.audioPlayerService.playBundled(fileName: adhanSound.rawValue, fileExtension: "caf")
-                    isAdhanPlaying = true
-                } catch {
-                    ToastService.shared.show(Toast(message: String(localized: "Could not play adhan."), type: .warning))
-                }
-            }
-        }
-    }
+    // Adhan play/stop logic extracted to AdhanPlayButton shared component
 
     // MARK: - Load Data
 

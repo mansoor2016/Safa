@@ -145,49 +145,11 @@ private struct PrayerContentView: View {
                 action: { showingQibla = true }
             )
 
-            QuickActionButton(
-                icon: dependencies.audioPlayerService.isPlaying ? "stop.fill" : "speaker.wave.2.fill",
-                title: dependencies.audioPlayerService.isPlaying ? "Stop" : "Adhan",
-                action: {
-                    playAdhan()
-                }
-            )
+            AdhanPlayButton(style: .quickAction, isFajr: viewModel.nextPrayer?.type == .fajr)
         }
     }
 
-    // MARK: - Play Adhan
-
-    private func playAdhan() {
-        // If already playing, stop playback
-        if dependencies.audioPlayerService.isPlaying {
-            dependencies.audioPlayerService.stop()
-            return
-        }
-
-        // Start playback from the beginning
-        Task {
-            let prefs = await PreferencesManager.shared.getPreferences()
-            let isFajr = viewModel.nextPrayer?.type == .fajr
-            let fileName = isFajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
-            let adhanSound = AdhanSound(rawValue: fileName) ?? .misharyAlafasy
-
-            if adhanSound == .defaultSound {
-                return
-            }
-
-            do {
-                try dependencies.audioPlayerService.playBundled(
-                    fileName: adhanSound.rawValue,
-                    fileExtension: "caf"
-                )
-            } catch {
-                ToastService.shared.show(Toast(
-                    message: "Could not play adhan. Check audio settings.",
-                    type: .warning
-                ))
-            }
-        }
-    }
+    // Adhan play/stop logic extracted to AdhanPlayButton shared component
 }
 
 // MARK: - Next Prayer Card

@@ -569,6 +569,9 @@
     "Clear All" : {
 
     },
+    "Coming soon" : {
+
+    },
     "Coming Soon" : {
 
     },
@@ -628,6 +631,9 @@
 
     },
     "Could not find or create calendar." : {
+
+    },
+    "Could not play adhan." : {
 
     },
     "Create Family Circle" : {
@@ -947,6 +953,9 @@
 
     },
     "Fasting complete for today" : {
+
+    },
+    "Fasting hours will be logged to Apple Health in a future update." : {
 
     },
     "Fasting Sunnah" : {
@@ -2254,9 +2263,6 @@
 
     },
     "What's included in JSON export:" : {
-
-    },
-    "When enabled, your fasting periods will be logged to Apple Health so you can track your Ramadan wellness journey." : {
 
     },
     "White Days" : {
