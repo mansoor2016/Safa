@@ -36,7 +36,9 @@ struct HadithContentView: View {
         VStack(spacing: 0) {
             searchBar
 
-            if viewModel.isLoading {
+            if let error = viewModel.error, !viewModel.isSearching {
+                ErrorView.loadFailed(retry: { await viewModel.loadCollections() })
+            } else if viewModel.isLoading {
                 LoadingView()
             } else if viewModel.isSearching {
                 searchResultsView

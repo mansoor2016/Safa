@@ -47,12 +47,16 @@ private struct QuranContentView: View {
             .padding()
 
             // Content
-            TabView(selection: $selectedTab) {
-                surahListView.tag(0)
-                juzListView.tag(1)
-                bookmarksView.tag(2)
+            if let error = viewModel.error {
+                ErrorView.loadFailed(retry: { await viewModel.loadSurahs() })
+            } else {
+                TabView(selection: $selectedTab) {
+                    surahListView.tag(0)
+                    juzListView.tag(1)
+                    bookmarksView.tag(2)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .navigationTitle("Quran")
         .navigationBarTitleDisplayMode(.large)

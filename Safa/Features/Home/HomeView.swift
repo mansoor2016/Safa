@@ -23,6 +23,7 @@ struct HomeView: View {
     @State private var isLastTenNights = false
     @State private var isRamadanBannerExpanded = false
     @State private var showShareBanner = !ShareBanner.isDismissed
+    @State private var loadError: Error?
 
     // Banner dismiss key (reappears next day)
     private var bannerDismissKey: String {
@@ -34,7 +35,11 @@ struct HomeView: View {
     var body: some View {
         ScrollableScreen(stickyContent: nextPrayerChip) {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
-                HomeSkeletonView()
+                if let loadError {
+                    ErrorView.loadFailed(retry: { await loadHomeData() })
+                } else {
+                    HomeSkeletonView()
+                }
             } else {
             VStack(spacing: SafaSpacing.lg) {
                 // Date subheader (Option 4: visible below large title, scrolls away)
@@ -474,6 +479,8 @@ struct HomeView: View {
     // MARK: - Load Data
 
     private func loadHomeData() async {
+        loadError = nil
+
         // Load Hijri date
         hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
@@ -523,7 +530,7 @@ struct HomeView: View {
                 iftarTime = todayPrayers.first { $0.type == .maghrib }?.time
             }
         } catch {
-            // Handle error silently on home screen
+            loadError = error
         }
 
         // Load daily verse

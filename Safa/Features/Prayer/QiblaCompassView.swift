@@ -52,7 +52,7 @@ struct QiblaCompassView: View {
             if isLoading {
                 LoadingView(message: "Finding Qibla direction...")
             } else if let error = error {
-                ErrorView(error: error) {
+                QiblaErrorView(error: error) {
                     Task {
                         await loadQiblaDirection()
                     }
@@ -374,9 +374,9 @@ private struct QiblaArrow: View {
     }
 }
 
-// MARK: - Error View
+// MARK: - Qibla Error View
 
-private struct ErrorView: View {
+private struct QiblaErrorView: View {
     let error: Error
     let retry: () -> Void
 

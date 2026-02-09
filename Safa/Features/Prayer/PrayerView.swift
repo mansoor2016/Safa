@@ -40,6 +40,9 @@ private struct PrayerContentView: View {
 
     var body: some View {
         ScrollableScreen {
+            if let error = viewModel.error {
+                ErrorView.prayerTimesError(retry: { await viewModel.loadPrayerTimes() })
+            } else {
             VStack(spacing: SafaSpacing.lg) {
                 // Date Header
                 dateHeader
@@ -65,6 +68,7 @@ private struct PrayerContentView: View {
                 quickActionsSection
             }
             .padding(SafaSpacing.md)
+            } // end error check
         }
         .navigationTitle("Prayer Times")
         .navigationBarTitleDisplayMode(.large)

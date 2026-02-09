@@ -108,8 +108,8 @@ Code scaffolding exists, needs real multi-device testing:
 - [ ] Home intent resolver (context-aware quick actions + resume cards)
 
 ### Premium UI (remaining waves)
-- [ ] Screen state transitions (loading/ready/degraded/offline/success)
-- [ ] Hero card compression + sticky context chip (Home)
+- [x] Screen state transitions (ErrorView component + wired into Prayer/Quran/Hadith/Home)
+- [x] Hero card compression + sticky context chip (Home)
 - [ ] Optimistic action feedback with undo rail (prayer logging)
 - [ ] Matched-geometry card-to-detail transition (Quran list → reader)
 - [ ] Contextual navigation actions + sticky filter rail
