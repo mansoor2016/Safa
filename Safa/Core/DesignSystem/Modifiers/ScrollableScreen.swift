@@ -22,10 +22,8 @@ struct ScrollableScreen<Content: View>: View {
                     scrolledPastThreshold = isPast
                 }
         }
-        .toolbarBackground(
-            scrolledPastThreshold ? Material.ultraThin : Material.regular,
-            for: .navigationBar
-        )
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackgroundVisibility(scrolledPastThreshold ? .visible : .hidden, for: .navigationBar)
         .animation(
             reduceMotion ? nil : .easeInOut(duration: 0.2),
             value: scrolledPastThreshold
