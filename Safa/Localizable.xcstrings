@@ -793,6 +793,9 @@
     "Duas for this category are coming soon." : {
 
     },
+    "During Ramadan, the adhan will play for Maghrib (Iftar) only." : {
+
+    },
     "Each prayer time is announced with the prayer name, time, and completion status. The log button describes its function." : {
 
     },
@@ -1046,6 +1049,9 @@
 
     },
     "Iftar" : {
+
+    },
+    "Iftar Adhan (Ramadan)" : {
 
     },
     "Iftar Duas" : {
