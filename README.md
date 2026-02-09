@@ -143,7 +143,6 @@ This project is licensed under the Apache License 2.0 — see the [LICENSE](LICE
 ## Contact
 
 - **GitHub**: [@mansoor2016](https://github.com/mansoor2016)
-- **Email**: mansoor.aman11@gmail.com
 
 ---
 
