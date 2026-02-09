@@ -245,18 +245,19 @@ struct HomeView: View {
     /// Option 4: Date line below large title (scrolls away with content)
     private var dateSubheader: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(Date().formatted(date: .complete, time: .omitted))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            if isRamadan {
+                Label(hijriDate, systemImage: "moon.stars.fill")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.purple)
+            } else {
                 Text(hijriDate)
                     .font(.subheadline.weight(.medium))
-            }
-            Spacer()
-            if isRamadan {
-                Label("Ramadan", systemImage: "moon.stars.fill")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.purple)
             }
         }
     }
