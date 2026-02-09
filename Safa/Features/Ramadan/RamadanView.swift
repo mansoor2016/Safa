@@ -20,6 +20,7 @@ struct RamadanView: View {
     @State private var showingQibla = false
     @State private var showZakat = false
     @State private var juzCompleted = 0
+    @State private var isAdhanPlaying = false
     @State private var healthSyncEnabled = false
     @State private var healthKitService = HealthKitService.shared
 
@@ -235,12 +236,12 @@ struct RamadanView: View {
 
             // Adhan
             Button {
-                playAdhan()
+                toggleAdhan()
             } label: {
                 VStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: dependencies.audioPlayerService.isPlaying ? "stop.fill" : "speaker.wave.2.fill")
+                    Image(systemName: isAdhanPlaying ? "stop.fill" : "speaker.wave.2.fill")
                         .font(.title2)
-                    Text(dependencies.audioPlayerService.isPlaying ? "Stop" : "Adhan")
+                    Text(isAdhanPlaying ? "Stop" : "Adhan")
                         .font(SafaTypography.labelSmall)
                 }
                 .frame(maxWidth: .infinity)
@@ -370,9 +371,10 @@ struct RamadanView: View {
         }
     }
 
-    private func playAdhan() {
-        if dependencies.audioPlayerService.isPlaying {
+    private func toggleAdhan() {
+        if isAdhanPlaying {
             dependencies.audioPlayerService.stop()
+            isAdhanPlaying = false
             return
         }
         Task {
@@ -381,8 +383,9 @@ struct RamadanView: View {
             if adhanSound != .defaultSound {
                 do {
                     try dependencies.audioPlayerService.playBundled(fileName: adhanSound.rawValue, fileExtension: "caf")
+                    isAdhanPlaying = true
                 } catch {
-                    ToastService.shared.show(Toast(message: "Could not play adhan.", type: .warning))
+                    ToastService.shared.show(Toast(message: String(localized: "Could not play adhan."), type: .warning))
                 }
             }
         }

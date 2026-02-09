@@ -479,17 +479,17 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section {
-            NavigationLink {
-                AboutSafaView()
-            } label: {
-                Text("About Safa")
-            }
-
             HStack {
                 Text("Version")
                 Spacer()
                 Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                     .foregroundColor(SafaColors.Fallback.secondaryText)
+            }
+
+            NavigationLink {
+                AboutSafaView()
+            } label: {
+                Text("About Safa")
             }
 
             NavigationLink {

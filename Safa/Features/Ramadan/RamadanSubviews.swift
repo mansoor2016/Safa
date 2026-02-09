@@ -249,18 +249,22 @@ struct RamadanSettingsSheet: View {
 
     private var healthSection: some View {
         Section {
-            if healthKitService.isHealthKitAvailable {
-                healthToggle
-                if healthSyncEnabled {
-                    healthStats
+            HStack {
+                Image(systemName: "heart.fill")
+                    .foregroundColor(.red)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Sync to Apple Health")
+                    Text("Coming soon")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-            } else {
-                healthUnavailable
+                Spacer()
             }
+            .opacity(0.5)
         } header: {
             Text("Apple Health")
         } footer: {
-            Text("When enabled, your fasting periods will be logged to Apple Health so you can track your Ramadan wellness journey.")
+            Text("Fasting hours will be logged to Apple Health in a future update.")
         }
     }
 
