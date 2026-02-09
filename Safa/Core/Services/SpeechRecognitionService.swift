@@ -329,24 +329,27 @@ enum SpeechError: LocalizedError {
 @Observable
 final class MicrophonePermissionService {
 
+    enum PermissionState { case undetermined, granted, denied }
+
     var isAuthorized: Bool = false
-    var authorizationStatus: AVAudioSession.RecordPermission = .undetermined
+    var authorizationStatus: PermissionState = .undetermined
 
     func requestPermission() async -> Bool {
-        await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
-                Task { @MainActor in
-                    self?.isAuthorized = granted
-                    self?.authorizationStatus = granted ? .granted : .denied
-                    continuation.resume(returning: granted)
-                }
-            }
+        do {
+            let granted = await AVAudioApplication.requestRecordPermission()
+            isAuthorized = granted
+            authorizationStatus = granted ? .granted : .denied
+            return granted
         }
     }
 
     func checkPermission() {
-        let status = AVAudioSession.sharedInstance().recordPermission
-        authorizationStatus = status
-        isAuthorized = status == .granted
+        let status = AVAudioApplication.shared.recordPermission
+        isAuthorized = (status == .granted)
+        switch status {
+        case .granted: authorizationStatus = .granted
+        case .denied: authorizationStatus = .denied
+        default: authorizationStatus = .undetermined
+        }
     }
 }

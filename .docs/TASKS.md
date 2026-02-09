@@ -879,11 +879,8 @@ Code complete but needs physical device or manual testing to confirm:
 #### Low (Robustness)
 - [ ] **Offline queue: Migrate from UserDefaults to Core Data** — Current queue isn't crash-safe.
 
-### TODO: Ramadan Page Enhancement
-
-**Priority: MEDIUM — Enhance existing RamadanView**
-
-- [ ] Implement Ramadan page enhancement set (hero iftar/suhoor countdown, compact prayer progress, adhan controls, and fasting-focused quick actions)
+### DONE: Ramadan Page Enhancement
+- [x] Ramadan page restructured: iftar/suhoor countdown platter, full-width prayer progress, adhan/qibla buttons, interactive daily goals, fasting tracker, Quran Khatm goal, Prayer tab auto-swap during Ramadan
 
 ### TODO: Smart Adhan (Location-Aware Notification Sounds)
 
