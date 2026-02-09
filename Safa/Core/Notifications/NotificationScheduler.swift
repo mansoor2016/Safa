@@ -90,7 +90,14 @@ final class NotificationScheduler {
                 content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
                 content.userInfo = ["prayerType": prayer.type.rawValue]
 
-                if prefs.adhanEnabled {
+                // Adhan sound selection:
+                // 1. Global adhan enabled → use selected adhan for all prayers
+                // 2. Iftar adhan enabled + Ramadan + Maghrib → use adhan just for iftar
+                let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
+                    && prayer.type == .maghrib
+                    && HijriDateConverter.shared.isRamadan()
+
+                if prefs.adhanEnabled || isRamadanIftarAdhan {
                     let fileName = prayer.type == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
                     content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
                 }

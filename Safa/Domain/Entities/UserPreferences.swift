@@ -25,6 +25,7 @@ struct UserPreferences: Codable, Hashable {
     var selectedAdhan: String
     var selectedFajrAdhan: String
     var smartAdhanEnabled: Bool
+    var iftarAdhanEnabled: Bool  // Play adhan for Maghrib during Ramadan even if adhanEnabled is off
 
     // MARK: - Appearance Settings
     var accentColorName: String
@@ -66,6 +67,7 @@ struct UserPreferences: Codable, Hashable {
         selectedAdhan: String = AdhanSound.misharyAlafasy.rawValue,
         selectedFajrAdhan: String = AdhanSound.misharyAlafasyFajr.rawValue,
         smartAdhanEnabled: Bool = false,
+        iftarAdhanEnabled: Bool = false,
         notificationEnabledPrayers: [String] = PrayerType.obligatoryPrayers.map { $0.rawValue },
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
@@ -89,6 +91,7 @@ struct UserPreferences: Codable, Hashable {
         self.selectedAdhan = selectedAdhan
         self.selectedFajrAdhan = selectedFajrAdhan
         self.smartAdhanEnabled = smartAdhanEnabled
+        self.iftarAdhanEnabled = iftarAdhanEnabled
         self.notificationEnabledPrayers = notificationEnabledPrayers
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled

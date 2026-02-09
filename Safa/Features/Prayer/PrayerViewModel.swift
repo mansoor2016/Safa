@@ -239,10 +239,15 @@ final class PrayerViewModel {
     }
 
     private func selectNotificationSound(for prayerType: PrayerType, prefs: UserPreferences) -> UNNotificationSound {
-        guard prefs.adhanEnabled else { return .default }
+        // Iftar adhan: play adhan for Maghrib during Ramadan even if global adhan is off
+        let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
+            && prayerType == .maghrib
+            && HijriDateConverter.shared.isRamadan()
+
+        guard prefs.adhanEnabled || isRamadanIftarAdhan else { return .default }
 
         // Smart Adhan: only play adhan at home with ringer on
-        if prefs.smartAdhanEnabled {
+        if prefs.smartAdhanEnabled && !isRamadanIftarAdhan {
             let isAtHome = isNearHomeLocation(prefs: prefs)
             guard isAtHome else { return .default }
         }

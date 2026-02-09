@@ -84,7 +84,10 @@ struct RamadanView: View {
             healthSyncEnabled = healthKitService.syncEnabled
         }
         .onAppear {
-            loadJuzCount() // Refresh when returning to view after toggling goals
+            loadJuzCount()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+            loadJuzCount() // Refresh when daily goals are toggled
         }
     }
 
