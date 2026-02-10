@@ -41,6 +41,8 @@ private struct QuranContentView: View {
     @State private var searchText = ""
     @State private var selectedTab = 0
     @State private var showingSearch = false
+    @State private var editingBookmark: QuranBookmark?
+    @State private var editNoteText = ""
     @Namespace private var surahTransition
 
     var body: some View {
@@ -161,6 +163,9 @@ private struct QuranContentView: View {
                                     surahNumber: bookmark.surahNumber,
                                     startAyah: bookmark.ayahNumber
                                 ))
+                            } onEditNote: {
+                                editNoteText = bookmark.note ?? ""
+                                editingBookmark = bookmark
                             } onDelete: {
                                 Task {
                                     await viewModel.removeBookmark(bookmark)
@@ -174,6 +179,27 @@ private struct QuranContentView: View {
         }
         .task {
             await viewModel.loadBookmarks()
+        }
+        .alert("Edit Note", isPresented: Binding(
+            get: { editingBookmark != nil },
+            set: { if !$0 { editingBookmark = nil } }
+        )) {
+            TextField("Add a note...", text: $editNoteText)
+            Button("Save") {
+                if let bookmark = editingBookmark {
+                    Task {
+                        await viewModel.updateBookmarkNote(bookmark, note: editNoteText)
+                    }
+                }
+                editingBookmark = nil
+            }
+            Button("Cancel", role: .cancel) {
+                editingBookmark = nil
+            }
+        } message: {
+            if let bookmark = editingBookmark {
+                Text("Note for \(bookmark.reference)")
+            }
         }
     }
 }
@@ -300,6 +326,7 @@ private struct JuzRow: View {
 private struct BookmarkRow: View {
     let bookmark: QuranBookmark
     let action: () -> Void
+    let onEditNote: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -323,6 +350,13 @@ private struct BookmarkRow: View {
                 }
 
                 Spacer()
+
+                Button(action: onEditNote) {
+                    Image(systemName: "pencil")
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                }
+                .accessibilityLabel("Edit note")
+                .accessibilityHint("Double tap to edit bookmark note")
 
                 Button(action: onDelete) {
                     Image(systemName: "trash")

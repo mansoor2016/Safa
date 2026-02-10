@@ -116,6 +116,19 @@ final class QuranViewModel {
         }
     }
 
+    func updateBookmarkNote(_ bookmark: QuranBookmark, note: String?) async {
+        do {
+            try await quranRepository.updateBookmarkNote(
+                surahNumber: bookmark.surahNumber,
+                ayahNumber: bookmark.ayahNumber,
+                note: note
+            )
+            await loadBookmarks()
+        } catch {
+            self.error = error
+        }
+    }
+
     // MARK: - Juz Navigation Helper
 
     func navigationTargetForJuz(_ juzNumber: Int) -> QuranNavigationTarget? {
