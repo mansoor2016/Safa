@@ -209,7 +209,7 @@ struct InviteFriendsView: View {
             FeatureRow(
                 icon: "star.fill",
                 title: "Earn Hasanat",
-                description: "+\(InviteFriendsService.hasanatPerInvite) Hasanat when friends join (honor system)"
+                description: "+\(InviteFriendsService.hasanatPerInvite) Hasanat when friends join"
             )
         }
         .padding()

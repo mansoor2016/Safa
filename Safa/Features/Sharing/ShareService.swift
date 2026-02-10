@@ -24,41 +24,35 @@ struct ShareCardStyle {
     let backgroundColor: Color
     let textColor: Color
     let accentColor: Color
-    let fontName: String
 
     static let quran = ShareCardStyle(
         backgroundColor: Color(red: 0.05, green: 0.25, blue: 0.20),
         textColor: .white,
-        accentColor: Color(red: 0.4, green: 0.8, blue: 0.6),
-        fontName: "Amiri"
+        accentColor: Color(red: 0.4, green: 0.8, blue: 0.6)
     )
 
     static let hadith = ShareCardStyle(
         backgroundColor: Color(red: 0.15, green: 0.10, blue: 0.25),
         textColor: .white,
-        accentColor: Color(red: 0.7, green: 0.5, blue: 0.9),
-        fontName: "Amiri"
+        accentColor: Color(red: 0.7, green: 0.5, blue: 0.9)
     )
 
     static let achievement = ShareCardStyle(
         backgroundColor: Color(red: 0.95, green: 0.85, blue: 0.30),
         textColor: Color(red: 0.2, green: 0.15, blue: 0.0),
-        accentColor: Color(red: 0.6, green: 0.45, blue: 0.0),
-        fontName: "System"
+        accentColor: Color(red: 0.6, green: 0.45, blue: 0.0)
     )
 
     static let progress = ShareCardStyle(
         backgroundColor: Color(red: 0.10, green: 0.30, blue: 0.50),
         textColor: .white,
-        accentColor: Color(red: 0.3, green: 0.7, blue: 1.0),
-        fontName: "System"
+        accentColor: Color(red: 0.3, green: 0.7, blue: 1.0)
     )
 
     static let dua = ShareCardStyle(
         backgroundColor: Color(red: 0.05, green: 0.20, blue: 0.35),
         textColor: .white,
-        accentColor: Color(red: 0.4, green: 0.7, blue: 0.9),
-        fontName: "Amiri"
+        accentColor: Color(red: 0.4, green: 0.7, blue: 0.9)
     )
 }
 
@@ -242,7 +236,79 @@ final class ShareService {
     }
 }
 
-// MARK: - Share Card View
+// MARK: - Share Card Layout
+
+struct ShareCardLayout<Content: View>: View {
+    let style: ShareCardStyle
+    let headerIcon: String
+    let headerTitle: String
+    let headerDetail: String?
+    let footerText: String
+    let width: CGFloat
+    let height: CGFloat
+    @ViewBuilder let content: () -> Content
+
+    init(
+        style: ShareCardStyle,
+        headerIcon: String,
+        headerTitle: String,
+        headerDetail: String? = nil,
+        footerText: String,
+        width: CGFloat,
+        height: CGFloat,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.style = style
+        self.headerIcon = headerIcon
+        self.headerTitle = headerTitle
+        self.headerDetail = headerDetail
+        self.footerText = footerText
+        self.width = width
+        self.height = height
+        self.content = content
+    }
+
+    var body: some View {
+        VStack(spacing: SafaSpacing.md) {
+            // Header
+            HStack {
+                Image(systemName: headerIcon)
+                    .font(SafaTypography.titleSmall)
+                Text(headerTitle)
+                    .font(SafaTypography.titleMedium)
+                Spacer()
+                if let detail = headerDetail {
+                    Text(detail)
+                        .font(SafaTypography.bodySmall)
+                }
+            }
+            .foregroundStyle(style.accentColor)
+
+            Divider()
+                .background(style.accentColor.opacity(0.3))
+
+            // Content slot
+            content()
+
+            Spacer()
+
+            // Footer
+            HStack {
+                Image(systemName: "sparkles")
+                    .font(SafaTypography.labelSmall)
+                Text(footerText)
+                    .font(SafaTypography.labelSmall)
+            }
+            .foregroundStyle(style.accentColor.opacity(0.7))
+        }
+        .padding(SafaSpacing.lg)
+        .frame(width: width, height: height)
+        .background(style.backgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.xl))
+    }
+}
+
+// MARK: - Share Card Views
 
 struct QuranShareCard: View {
     let surahName: String
@@ -251,50 +317,26 @@ struct QuranShareCard: View {
     let translation: String
 
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            HStack {
-                Image(systemName: "book.fill")
-                    .font(.title3)
-                Text("Quran")
-                    .font(.headline)
-                Spacer()
-                Text("\(surahName):\(ayahNumber)")
-                    .font(.subheadline)
-            }
-            .foregroundStyle(ShareCardStyle.quran.accentColor)
-
-            Divider()
-                .background(ShareCardStyle.quran.accentColor.opacity(0.3))
-
-            // Arabic text
+        ShareCardLayout(
+            style: .quran,
+            headerIcon: "book.fill",
+            headerTitle: "Quran",
+            headerDetail: "\(surahName):\(ayahNumber)",
+            footerText: "Shared via صفا",
+            width: 350,
+            height: 450
+        ) {
             Text(arabicText)
-                .font(.system(size: 28, weight: .medium, design: .serif))
+                .font(SafaTypography.arabicLarge)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(ShareCardStyle.quran.textColor)
 
-            // Translation
             Text("\"\(translation)\"")
-                .font(.body)
+                .font(SafaTypography.readingSmall)
                 .italic()
                 .multilineTextAlignment(.center)
                 .foregroundStyle(ShareCardStyle.quran.textColor.opacity(0.9))
-
-            Spacer()
-
-            // Footer
-            HStack {
-                Image(systemName: "sparkles")
-                    .font(.caption)
-                Text("Shared via صفا")
-                    .font(.caption)
-            }
-            .foregroundStyle(ShareCardStyle.quran.accentColor.opacity(0.7))
         }
-        .padding(24)
-        .frame(width: 350, height: 450)
-        .background(ShareCardStyle.quran.backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
@@ -304,56 +346,28 @@ struct AchievementShareCard: View {
     let iconName: String
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Trophy icon
-            Image(systemName: "trophy.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(ShareCardStyle.achievement.accentColor)
-
-            Text("Achievement Unlocked!")
-                .font(.headline)
-                .foregroundStyle(ShareCardStyle.achievement.accentColor)
-
-            Divider()
-                .background(ShareCardStyle.achievement.accentColor.opacity(0.3))
-
-            // Achievement icon
+        ShareCardLayout(
+            style: .achievement,
+            headerIcon: "trophy.fill",
+            headerTitle: "Achievement Unlocked!",
+            footerText: "Achieved with صفا",
+            width: 300,
+            height: 420
+        ) {
             Image(systemName: iconName)
-                .font(.system(size: 64))
+                .font(.system(size: SafaSpacing.IconSize.xxl))
                 .foregroundStyle(ShareCardStyle.achievement.textColor)
 
-            // Title
             Text(title)
-                .font(.title2.weight(.bold))
+                .font(SafaTypography.titleMedium)
+                .bold()
                 .foregroundStyle(ShareCardStyle.achievement.textColor)
 
-            // Description
             Text(description)
-                .font(.subheadline)
+                .font(SafaTypography.bodySmall)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(ShareCardStyle.achievement.textColor.opacity(0.8))
-
-            Spacer()
-
-            // Footer with app link
-            VStack(spacing: 4) {
-                HStack {
-                    Image(systemName: "sparkles")
-                        .font(.caption)
-                    Text("Achieved with صفا")
-                        .font(.caption)
-                }
-
-                Text("safaapp.com")
-                    .font(.caption2)
-                    .opacity(0.7)
-            }
-            .foregroundStyle(ShareCardStyle.achievement.accentColor)
         }
-        .padding(24)
-        .frame(width: 300, height: 420)
-        .background(ShareCardStyle.achievement.backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
@@ -364,69 +378,104 @@ struct ProgressShareCard: View {
     let levelTitle: String
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Header
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .font(.title3)
-                Text("My Progress")
-                    .font(.headline)
-                Spacer()
-            }
-            .foregroundStyle(ShareCardStyle.progress.accentColor)
-
-            Divider()
-                .background(ShareCardStyle.progress.accentColor.opacity(0.3))
-
-            // Stats
-            HStack(spacing: 24) {
+        ShareCardLayout(
+            style: .progress,
+            headerIcon: "chart.line.uptrend.xyaxis",
+            headerTitle: "My Progress",
+            footerText: "Track your journey with صفا",
+            width: 300,
+            height: 350
+        ) {
+            HStack(spacing: SafaSpacing.lg) {
                 VStack {
                     Text("\(hasanat)")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(SafaTypography.counterMedium)
                     Text("Hasanat")
-                        .font(.caption)
+                        .font(SafaTypography.labelSmall)
                         .foregroundStyle(.secondary)
                 }
 
                 VStack {
-                    HStack(spacing: 4) {
+                    HStack(spacing: SafaSpacing.xxs) {
                         Image(systemName: "flame.fill")
                             .foregroundStyle(.orange)
                         Text("\(streak)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(SafaTypography.counterMedium)
                     }
                     Text("Day Streak")
-                        .font(.caption)
+                        .font(SafaTypography.labelSmall)
                         .foregroundStyle(.secondary)
                 }
             }
             .foregroundStyle(ShareCardStyle.progress.textColor)
 
-            // Level
-            VStack(spacing: 4) {
+            VStack(spacing: SafaSpacing.xxs) {
                 Text("Level \(level)")
-                    .font(.title3.weight(.semibold))
+                    .font(SafaTypography.titleSmall)
+                    .fontWeight(.semibold)
                 Text(levelTitle)
-                    .font(.caption)
+                    .font(SafaTypography.labelSmall)
                     .foregroundStyle(.secondary)
             }
             .foregroundStyle(ShareCardStyle.progress.textColor)
-
-            Spacer()
-
-            // Footer
-            HStack {
-                Image(systemName: "sparkles")
-                    .font(.caption)
-                Text("Track your journey with صفا")
-                    .font(.caption)
-            }
-            .foregroundStyle(ShareCardStyle.progress.accentColor.opacity(0.7))
         }
-        .padding(24)
-        .frame(width: 300, height: 350)
-        .background(ShareCardStyle.progress.backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+struct HadithShareCard: View {
+    let collection: String
+    let narrator: String
+    let text: String
+
+    var body: some View {
+        ShareCardLayout(
+            style: .hadith,
+            headerIcon: "text.quote",
+            headerTitle: "Hadith",
+            headerDetail: collection,
+            footerText: "Shared via صفا",
+            width: 350,
+            height: 450
+        ) {
+            Text(text)
+                .font(SafaTypography.readingSmall)
+                .italic()
+                .multilineTextAlignment(.center)
+                .foregroundStyle(ShareCardStyle.hadith.textColor)
+
+            Text("— Narrated by \(narrator)")
+                .font(SafaTypography.bodySmall)
+                .foregroundStyle(ShareCardStyle.hadith.textColor.opacity(0.7))
+        }
+    }
+}
+
+struct DuaShareCard: View {
+    let title: String
+    let arabicText: String
+    let translation: String
+
+    var body: some View {
+        ShareCardLayout(
+            style: .dua,
+            headerIcon: "hands.sparkles.fill",
+            headerTitle: "Dua",
+            headerDetail: title,
+            footerText: "Shared via صفا",
+            width: 350,
+            height: 420
+        ) {
+            Text(arabicText)
+                .font(SafaTypography.arabicMedium)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(ShareCardStyle.dua.textColor)
+
+            Text("\"\(translation)\"")
+                .font(SafaTypography.readingSmall)
+                .italic()
+                .multilineTextAlignment(.center)
+                .foregroundStyle(ShareCardStyle.dua.textColor.opacity(0.9))
+        }
     }
 }
 
@@ -477,5 +526,21 @@ struct ShareButton: View {
         streak: 14,
         level: 5,
         levelTitle: "Consistent"
+    )
+}
+
+#Preview("Hadith Share Card") {
+    HadithShareCard(
+        collection: "Sahih Bukhari",
+        narrator: "Abu Hurairah",
+        text: "The Prophet (peace be upon him) said: \"The best of you are those who learn the Quran and teach it.\""
+    )
+}
+
+#Preview("Dua Share Card") {
+    DuaShareCard(
+        title: "Morning Remembrance",
+        arabicText: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+        translation: "In the name of Allah, with whose name nothing on earth or in heaven can cause harm, and He is the All-Hearing, the All-Knowing."
     )
 }

@@ -23,12 +23,12 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 - [x] Resume-where-you-left-off card on Home (Quran reading progress)
 
 ### Dark Mode
-- [ ] Quran reading surface comfort tuning
-- [ ] Screen-by-screen dark mode pass (Home, Prayer, Qibla, Quran, Dhikr, Settings, Onboarding)
-- [ ] Banners, alerts, progress visuals, sheets dark mode pass
+- [x] Quran reading surface comfort tuning
+- [x] Screen-by-screen dark mode pass (Home, Prayer, Qibla, Quran, Dhikr, Settings, Onboarding)
+- [x] Banners, alerts, progress visuals, sheets dark mode pass
 
 ### Search & Sharing
-- [ ] Unify search UI pattern across Quran/Hadith/Calendar
+- [x] Unify search UI pattern across Quran/Hadith/Calendar
 - [ ] Upgrade share cards with refined layout
 - [ ] Improve invite flow with confirmation states
 

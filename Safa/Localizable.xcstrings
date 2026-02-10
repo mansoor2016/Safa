@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "— Narrated by %@" : {
+
+    },
     "..." : {
 
     },
@@ -59,16 +62,6 @@
     },
     "%@: 0 min" : {
 
-    },
-    "%@:%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@:%2$lld"
-          }
-        }
-      }
     },
     "%lld" : {
 
@@ -356,9 +349,6 @@
 
     },
     "Accessibility Tips" : {
-
-    },
-    "Achieved with صفا" : {
 
     },
     "Achievement" : {
@@ -1315,9 +1305,6 @@
     "Mosque Mode" : {
 
     },
-    "My Progress" : {
-
-    },
     "Name Detail" : {
 
     },
@@ -1364,6 +1351,12 @@
 
     },
     "No Duas Yet" : {
+
+    },
+    "No Events Found" : {
+
+    },
+    "No events matching \"%@\"" : {
 
     },
     "No Family Circle" : {
@@ -1700,28 +1693,13 @@
     "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
 
     },
-    "safaapp.com" : {
-
-    },
     "Save" : {
 
     },
     "Schedule" : {
 
     },
-    "Search duas..." : {
-
-    },
-    "Search hadith..." : {
-
-    },
-    "Search names..." : {
-
-    },
     "Search Quran" : {
-
-    },
-    "Search Quran..." : {
 
     },
     "Search surahs..." : {
@@ -1785,9 +1763,6 @@
 
     },
     "Share your spiritual journey with family members." : {
-
-    },
-    "Shared via صفا" : {
 
     },
     "Show Arabic Text" : {
@@ -2112,9 +2087,6 @@
 
     },
     "Total Hasanat" : {
-
-    },
-    "Track your journey with صفا" : {
 
     },
     "Translation" : {
