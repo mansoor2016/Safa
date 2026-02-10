@@ -189,8 +189,12 @@ Empty surfaces should always teach the next action and reduce time-to-value.
 
 ## Rollout Progress
 1. ~~Navigation Bar Material Morph~~ ✅ Shipped (Home + Prayer + Ramadan, Feb 9 2026)
-2. Hero Compression + Sticky Context Chip (Home) — next
+2. ~~Hero Compression + Sticky Context Chip~~ ✅ Shipped (Home, Feb 9 2026)
 3. ~~Numeric Text Transitions~~ ✅ Shipped (.contentTransition(.numericText()) on all live counters)
-4. Matched-Geometry Transition (Quran list → reader)
-5. ~~Bottom Sheet Standards~~ ✅ Shipped (25 sheets with .compactSheet()/.fullSheet(), Feb 9 2026)
-6. Screen State Transitions + Contextual Actions + Adaptive Tab Bar + Zero-State/Resume — remaining
+4. ~~Screen State Transitions~~ ✅ Shipped (ErrorView + wired into Prayer/Quran/Hadith/Home, Feb 9 2026)
+5. ~~Optimistic Actions with Undo~~ ✅ Shipped (prayer logging + undo rail, Feb 9 2026)
+6. ~~Bottom Sheet Standards~~ ✅ Shipped (25 sheets with .compactSheet()/.fullSheet(), Feb 9 2026)
+7. Matched-Geometry Transition (Quran list → reader) — next
+8. Contextual Actions + Sticky Filter Rail — remaining
+9. Adaptive Tab Bar — remaining
+10. Zero-State/Resume Rails — remaining

@@ -383,6 +383,30 @@ final class {Feature}ViewModelTests: XCTestCase {
 }
 ```
 
+### Writing Effective Tests
+
+**Test correctness, not conformance.** Every test should verify that the code does the right thing — not just that it does what it currently does. A test that stores a value and asserts it was stored is tautological. A good test proves a behavior contract that would catch real bugs.
+
+**Ask:** "If someone introduced a bug here, would this test fail?" If the answer is no, the test has no value.
+
+| Bad (conformance) | Good (correctness) |
+|---|---|
+| `XCTAssertNotNil(modifier.error)` after setting error | Verify that when `error != nil`, ErrorView is rendered instead of content |
+| `XCTAssertNil(screen.stickyContent)` on convenience init | Verify that scrolling past threshold shows the sticky content in the toolbar |
+| `XCTAssertEqual(toast.actionTitle, "Undo")` | Verify that tapping Undo actually reverts the state change |
+
+**Prioritize:**
+1. **Behavior tests** — call a method, assert the observable outcome (state change, side effect, return value)
+2. **Edge case tests** — boundary inputs, error paths, race conditions
+3. **Regression tests** — reproduce a known bug, prove the fix works
+
+**Avoid:**
+- Testing that a property you just set has the value you set it to
+- Testing that a struct initializer stores its parameters
+- Tests that would pass even if the feature were completely broken
+
+**For SwiftUI views without ViewInspector:** Extract testable logic into standalone functions or ViewModel methods rather than testing View property storage. If logic is locked behind `private`, extract it to an `internal` helper to enable real correctness tests.
+
 ---
 
 ## File Size Limits

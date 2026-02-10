@@ -110,7 +110,7 @@ Code scaffolding exists, needs real multi-device testing:
 ### Premium UI (remaining waves)
 - [x] Screen state transitions (ErrorView component + wired into Prayer/Quran/Hadith/Home)
 - [x] Hero card compression + sticky context chip (Home)
-- [ ] Optimistic action feedback with undo rail (prayer logging)
+- [x] Optimistic action feedback with undo rail (prayer logging)
 - [ ] Matched-geometry card-to-detail transition (Quran list → reader)
 - [ ] Contextual navigation actions + sticky filter rail
 - [ ] Adaptive tab bar visibility
