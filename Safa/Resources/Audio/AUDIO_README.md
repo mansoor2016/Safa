@@ -5,8 +5,11 @@
 Full-length adhan files are AAC-compressed M4A at 128kbps.
 Notification sounds are AAC-compressed CAF at 64kbps/22kHz.
 
-These were re-encoded from higher-quality originals to reduce bundle size.
-If audio quality is insufficient, follow the steps below to restore or upgrade.
+These were encoded from higher-quality originals to reduce bundle size.
+
+**IMPORTANT:** Re-encoding the current compressed files at a higher bitrate
+will NOT improve quality — the information is already lost. You must go back
+to the original lossless source files (WAV/AIFF) and re-encode from those.
 
 ## Original Sources
 
@@ -28,42 +31,39 @@ If audio quality is insufficient, follow the steps below to restore or upgrade.
 
 ### Full-length adhan (M4A, for in-app playback)
 
-To re-encode at higher quality (e.g. 256kbps):
+All commands below assume you have the original lossless files (WAV/AIFF).
+Do NOT re-encode the existing .m4a files — you cannot recover lost quality.
+
 ```bash
+# From original lossless → 256kbps AAC (excellent quality, larger)
 afconvert original.wav output.m4a -d aac -f m4af -b 256000
-```
 
-To restore to uncompressed CAF (maximum quality, large file):
-```bash
-afconvert original.wav output.caf -d LEI16 -f caff
-```
-
-Current encoding (128kbps, good quality, small size):
-```bash
+# From original lossless → 128kbps AAC (current, good balance)
 afconvert original.wav output.m4a -d aac -f m4af -b 128000
+
+# From original lossless → uncompressed CAF (maximum quality, very large)
+afconvert original.wav output.caf -d LEI16 -f caff
 ```
 
 ### Notification sounds (CAF, required by Apple)
 
 Apple requires notification sounds to be CAF format, ≤30 seconds.
 
-To re-encode at higher quality:
 ```bash
+# From original lossless → higher quality notification
 afconvert original.wav output_notification.caf -d aac -f caff -r 44100 -b 128000
-```
 
-Current encoding (64kbps, 22kHz — smallest while maintaining clarity):
-```bash
+# From original lossless → current encoding (smallest, still clear)
 afconvert original.wav output_notification.caf -d aac -f caff -r 22050 -b 64000
 ```
 
-### Batch re-encode all full-length files
+### Batch re-encode all full-length files from originals
 
 ```bash
-for f in Safa/Resources/Audio/Adhan/*.m4a; do
-  base=$(basename "$f" .m4a)
-  # Replace with path to your high-quality originals
-  afconvert "originals/${base}.wav" "$f" -d aac -f m4af -b 256000
+# Place original lossless files in an "originals/" directory first
+for f in originals/*.wav; do
+  base=$(basename "$f" .wav)
+  afconvert "$f" "Safa/Resources/Audio/Adhan/${base}.m4a" -d aac -f m4af -b 256000
 done
 ```
 
