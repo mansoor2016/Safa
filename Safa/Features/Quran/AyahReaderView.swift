@@ -43,6 +43,9 @@ private struct AyahReaderContent: View {
     @Bindable var viewModel: AyahReaderViewModel
     @State private var autoScrollTimer: Timer?
     @State private var currentScrollIndex = 0
+    @State private var isAutoScrollControlVisible = true
+    @State private var autoHideTask: Task<Void, Never>?
+    @State private var autoScrollEnabled = false
 
     var body: some View {
         Group {
@@ -143,21 +146,31 @@ private struct AyahReaderContent: View {
                     }
                 }
 
-                // Auto-scroll control
-                AutoScrollControl(
-                    isScrolling: viewModel.isAutoScrolling,
-                    speed: viewModel.autoScrollSpeed,
-                    onToggle: { toggleAutoScroll(proxy: proxy) },
-                    onSpeedChange: { newSpeed in
-                        viewModel.autoScrollSpeed = newSpeed
-                        if viewModel.isAutoScrolling {
-                            restartAutoScroll(proxy: proxy)
+                // Auto-scroll control (only visible if enabled in settings)
+                if autoScrollEnabled {
+                    AutoScrollControl(
+                        isScrolling: viewModel.isAutoScrolling,
+                        speed: viewModel.autoScrollSpeed,
+                        onToggle: { toggleAutoScroll(proxy: proxy) },
+                        onSpeedChange: { newSpeed in
+                            viewModel.autoScrollSpeed = newSpeed
+                            if viewModel.isAutoScrolling {
+                                restartAutoScroll(proxy: proxy)
+                            }
+                            resetAutoHideTimer()
                         }
+                    )
+                    .padding(.bottom, SafaSpacing.lg)
+                    .opacity(isAutoScrollControlVisible ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: isAutoScrollControlVisible)
+                    .onTapGesture {
+                        // Tapping the control makes it stay visible
+                        resetAutoHideTimer()
                     }
-                )
-                .padding(.bottom, SafaSpacing.lg)
+                }
             }
             .onAppear {
+                loadAutoScrollSetting()
                 if viewModel.startAyah > 1 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         withAnimation {
@@ -168,6 +181,28 @@ private struct AyahReaderContent: View {
             }
             .onDisappear {
                 stopAutoScroll()
+                autoHideTask?.cancel()
+                autoHideTask = nil
+            }
+        }
+    }
+
+    // MARK: - Auto Scroll Settings
+
+    private func loadAutoScrollSetting() {
+        let isEnabled = UserDefaults.standard.bool(forKey: "autoScrollEnabled")
+        autoScrollEnabled = isEnabled
+    }
+
+    private func resetAutoHideTimer() {
+        autoHideTask?.cancel()
+        isAutoScrollControlVisible = true
+        autoHideTask = Task {
+            try? await Task.sleep(for: .seconds(7))
+            if !viewModel.isAutoScrolling {
+                withAnimation {
+                    isAutoScrollControlVisible = false
+                }
             }
         }
     }
@@ -175,6 +210,7 @@ private struct AyahReaderContent: View {
     // MARK: - Auto Scroll
 
     private func toggleAutoScroll(proxy: ScrollViewProxy) {
+        resetAutoHideTimer()
         if viewModel.isAutoScrolling {
             stopAutoScroll()
         } else {
@@ -185,6 +221,8 @@ private struct AyahReaderContent: View {
     private func startAutoScroll(proxy: ScrollViewProxy) {
         viewModel.isAutoScrolling = true
         currentScrollIndex = 0
+        isAutoScrollControlVisible = true // Keep visible while scrolling
+        autoHideTask?.cancel()
         scheduleNextAyahScroll(proxy: proxy)
     }
 

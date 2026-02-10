@@ -43,6 +43,9 @@ struct UserPreferences: Codable, Hashable {
     var largerArabicTextEnabled: Bool
     var highContrastEnabled: Bool
 
+    // MARK: - Quran Reader Settings
+    var autoScrollEnabled: Bool
+
     // MARK: - App State
     var hasCompletedOnboarding: Bool
 
@@ -71,7 +74,8 @@ struct UserPreferences: Codable, Hashable {
         notificationEnabledPrayers: [String] = PrayerType.obligatoryPrayers.map { $0.rawValue },
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
-        highContrastEnabled: Bool = false
+        highContrastEnabled: Bool = false,
+        autoScrollEnabled: Bool = false
     ) {
         self.calculationMethod = calculationMethod
         self.madhab = madhab
@@ -96,6 +100,7 @@ struct UserPreferences: Codable, Hashable {
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled
         self.highContrastEnabled = highContrastEnabled
+        self.autoScrollEnabled = autoScrollEnabled
     }
 
     // MARK: - Location Helpers

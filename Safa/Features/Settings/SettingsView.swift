@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
     @State private var selectedTranslation = AppDefaults.translationLanguage
+    @State private var autoScrollEnabled = false
     @State private var selectedAppearance: AppearanceOption = .system
     @State private var selectedAccentColor: AccentColorOption = .teal
     @State private var showDeleteConfirmation = false
@@ -325,6 +326,11 @@ struct SettingsView: View {
             } label: {
                 Text("Font Settings")
             }
+
+            Toggle("Auto-Scroll Reader", isOn: $autoScrollEnabled)
+                .onChange(of: autoScrollEnabled) { _, newValue in
+                    Task { await prefsManager.update(\.autoScrollEnabled, to: newValue) }
+                }
         } header: {
             Text("Quran")
         } footer: {
@@ -588,6 +594,9 @@ struct SettingsView: View {
         reduceMotionEnabled = prefs.reduceMotionEnabled
         largerTextEnabled = prefs.largerArabicTextEnabled
         highContrastEnabled = prefs.highContrastEnabled
+
+        // Load Quran reader settings
+        autoScrollEnabled = prefs.autoScrollEnabled
 
         // Load location context if we have saved coordinates
         if let coords = prefs.savedCoordinates {
