@@ -334,87 +334,90 @@ struct OnboardingView: View {
     // MARK: - Page 3: Ready
 
     private var readyPage: some View {
-        VStack(spacing: SafaSpacing.xl) {
-            Spacer()
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: SafaSpacing.lg) {
+                    Spacer(minLength: SafaSpacing.md)
 
-            ZStack {
-                Circle()
-                    .fill(Color.green.opacity(0.1))
-                    .frame(width: 120, height: 120)
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.1))
+                            .frame(width: 100, height: 100)
 
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(.green)
-            }
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 64))
+                            .foregroundColor(.green)
+                    }
 
-            VStack(spacing: SafaSpacing.sm) {
-                Text("Ready to Begin")
-                    .font(SafaTypography.headlineMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                Text("May your journey with Safa be blessed")
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            // Brief summary
-            VStack(spacing: SafaSpacing.xs) {
-                if let context = locationContext {
-                    summaryItem(icon: "mappin", value: context.regionName)
-                }
-                summaryItem(icon: "clock", value: selectedMethod.displayName)
-                summaryItem(icon: "person", value: selectedMadhab.displayName)
-                if notificationsEnabled {
-                    summaryItem(icon: "bell", value: "Notifications On")
-                }
-            }
-            .padding()
-            .background(Color(UIColor.tertiarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-            .padding(.horizontal, SafaSpacing.xl)
-
-            // Customize Settings link
-            Button {
-                showCustomizeSettings = true
-            } label: {
-                HStack {
-                    Image(systemName: "slider.horizontal.3")
-                    Text("Customize Settings")
-                }
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(.accentColor)
-            }
-
-            // "I was invited" toggle (honor system for Hasanat)
-            Toggle(isOn: $wasInvitedByFriend) {
-                HStack(spacing: SafaSpacing.sm) {
-                    Image(systemName: "person.badge.plus")
-                        .foregroundColor(.accentColor)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("I was invited by a friend")
-                            .font(SafaTypography.bodyMedium)
+                    VStack(spacing: SafaSpacing.xs) {
+                        Text("Ready to Begin")
+                            .font(SafaTypography.headlineMedium)
                             .foregroundColor(SafaColors.Fallback.text)
 
-                        Text("+\(InviteFriendsService.hasanatPerInvite) Hasanat bonus")
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                        Text("May your journey with Safa be blessed")
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
                     }
+
+                    // Brief summary
+                    VStack(spacing: SafaSpacing.xs) {
+                        if let context = locationContext {
+                            summaryItem(icon: "mappin", value: context.regionName)
+                        }
+                        summaryItem(icon: "clock", value: selectedMethod.displayName)
+                        summaryItem(icon: "person", value: selectedMadhab.displayName)
+                        if notificationsEnabled {
+                            summaryItem(icon: "bell", value: "Notifications On")
+                        }
+                    }
+                    .padding()
+                    .background(Color(UIColor.tertiarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                    .padding(.horizontal, SafaSpacing.xl)
+
+                    // Customize Settings link
+                    Button {
+                        showCustomizeSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "slider.horizontal.3")
+                            Text("Customize Settings")
+                        }
+                        .font(SafaTypography.bodyMedium)
+                        .foregroundColor(.accentColor)
+                    }
+
+                    // "I was invited" toggle (honor system for Hasanat)
+                    Toggle(isOn: $wasInvitedByFriend) {
+                        HStack(spacing: SafaSpacing.sm) {
+                            Image(systemName: "person.badge.plus")
+                                .foregroundColor(.accentColor)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("I was invited by a friend")
+                                    .font(SafaTypography.bodyMedium)
+                                    .foregroundColor(SafaColors.Fallback.text)
+
+                                Text("+\(InviteFriendsService.hasanatPerInvite) Hasanat bonus")
+                                    .font(SafaTypography.bodySmall)
+                                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(UIColor.tertiarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                    .padding(.horizontal, SafaSpacing.xl)
+
+                    Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
+                        .font(SafaTypography.arabicMedium)
+                        .foregroundColor(SafaColors.Fallback.text)
+                        .environment(\.layoutDirection, .rightToLeft)
                 }
+                .padding()
             }
-            .padding()
-            .background(Color(UIColor.tertiarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-            .padding(.horizontal, SafaSpacing.xl)
 
-            Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
-                .font(SafaTypography.arabicMedium)
-                .foregroundColor(SafaColors.Fallback.text)
-                .environment(\.layoutDirection, .rightToLeft)
-                .padding(.top)
-
-            Spacer()
-
+            // Pinned button at bottom
             Button {
                 completeOnboarding()
             } label: {
@@ -428,8 +431,8 @@ struct OnboardingView: View {
                     .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
             }
             .padding(.horizontal)
+            .padding(.bottom, SafaSpacing.sm)
         }
-        .padding()
         .sheet(isPresented: $showCustomizeSettings) {
             customizeSettingsSheet
                 .fullSheet()
