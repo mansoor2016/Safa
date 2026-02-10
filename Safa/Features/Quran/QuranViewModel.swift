@@ -12,7 +12,6 @@ final class QuranViewModel {
     var bookmarks: [QuranBookmark] = []
     var readingProgress: QuranProgress?
     var searchResults: [Ayah] = []
-    var selectedSurah: Surah?
     var isLoading = false
     var error: Error?
 
@@ -117,18 +116,11 @@ final class QuranViewModel {
         }
     }
 
-    // MARK: - Navigation
+    // MARK: - Juz Navigation Helper
 
-    func navigateToAyah(surah: Int, ayah: Int) {
-        // This would trigger navigation in the parent view
-        if let surahData = surahs.first(where: { $0.id == surah }) {
-            selectedSurah = surahData
-        }
-    }
-
-    func navigateToJuz(_ juzNumber: Int) {
-        guard let juz = juzList.first(where: { $0.number == juzNumber }) else { return }
-        navigateToAyah(surah: juz.startSurah, ayah: juz.startAyah)
+    func navigationTargetForJuz(_ juzNumber: Int) -> QuranNavigationTarget? {
+        guard let juz = juzList.first(where: { $0.number == juzNumber }) else { return nil }
+        return QuranNavigationTarget(surahNumber: juz.startSurah, startAyah: juz.startAyah)
     }
 
     // MARK: - Helpers

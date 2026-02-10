@@ -7,13 +7,19 @@ import SwiftUI
 struct QuranView: View {
     @Environment(Dependencies.self) private var dependencies
     @State private var viewModel: QuranViewModel?
+    @State private var path = NavigationPath()
 
     var body: some View {
-        Group {
-            if let viewModel = viewModel {
-                QuranContentView(viewModel: viewModel)
-            } else {
-                QuranSkeletonView()
+        NavigationStack(path: $path) {
+            Group {
+                if let viewModel = viewModel {
+                    QuranContentView(viewModel: viewModel, path: $path)
+                } else {
+                    QuranSkeletonView()
+                }
+            }
+            .navigationDestination(for: QuranNavigationTarget.self) { target in
+                AyahReaderView(surahNumber: target.surahNumber, startAyah: target.startAyah)
             }
         }
         .task {
@@ -31,11 +37,11 @@ struct QuranView: View {
 
 private struct QuranContentView: View {
     @Bindable var viewModel: QuranViewModel
+    @Binding var path: NavigationPath
     @State private var searchText = ""
     @State private var selectedTab = 0
     @State private var showingSearch = false
     @Namespace private var surahTransition
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
@@ -75,11 +81,7 @@ private struct QuranContentView: View {
             QuranSearchView()
                 .fullSheet()
         }
-        .navigationDestination(for: Surah.self) { surah in
-            AyahReaderView(surahNumber: surah.number)
-                .navigationTransition(.zoom(sourceID: surah.id, in: surahTransition))
-        }
-        .searchable(text: $searchText, prompt: "Search ayahs...")
+        .searchable(text: $searchText, prompt: "Search surahs...")
         .onChange(of: searchText) { _, newValue in
             Task {
                 await viewModel.search(query: newValue)
@@ -102,16 +104,16 @@ private struct QuranContentView: View {
                         ayahNumber: progress.lastAyah,
                         surahName: viewModel.getSurahName(progress.lastSurah)
                     ) {
-                        viewModel.navigateToAyah(
-                            surah: progress.lastSurah,
-                            ayah: progress.lastAyah
-                        )
+                        path.append(QuranNavigationTarget(
+                            surahNumber: progress.lastSurah,
+                            startAyah: progress.lastAyah
+                        ))
                     }
                     .padding()
                 }
 
                 ForEach(viewModel.filteredSurahs) { surah in
-                    NavigationLink(value: surah) {
+                    NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
                         SurahRow(surah: surah)
                     }
                     .buttonStyle(.plain)
@@ -131,7 +133,9 @@ private struct QuranContentView: View {
             LazyVStack(spacing: SafaSpacing.sm) {
                 ForEach(viewModel.juzList) { juz in
                     JuzRow(juz: juz) {
-                        viewModel.navigateToJuz(juz.number)
+                        if let target = viewModel.navigationTargetForJuz(juz.number) {
+                            path.append(target)
+                        }
                     }
                 }
             }
@@ -153,10 +157,10 @@ private struct QuranContentView: View {
                     LazyVStack(spacing: SafaSpacing.sm) {
                         ForEach(viewModel.bookmarks) { bookmark in
                             BookmarkRow(bookmark: bookmark) {
-                                viewModel.navigateToAyah(
-                                    surah: bookmark.surahNumber,
-                                    ayah: bookmark.ayahNumber
-                                )
+                                path.append(QuranNavigationTarget(
+                                    surahNumber: bookmark.surahNumber,
+                                    startAyah: bookmark.ayahNumber
+                                ))
                             } onDelete: {
                                 Task {
                                     await viewModel.removeBookmark(bookmark)
@@ -236,7 +240,7 @@ private struct SurahRow: View {
 
                 HStack(spacing: SafaSpacing.xs) {
                     Text(surah.revelationType.rawValue)
-                    Text("•")
+                    Text("\u{2022}")
                     Text("\(surah.ayahCount) ayahs")
                 }
                 .font(SafaTypography.bodySmall)
@@ -346,8 +350,6 @@ private struct BookmarkRow: View {
 // MARK: - Preview
 
 #Preview {
-    NavigationStack {
-        QuranView()
-            .environment(Dependencies())
-    }
+    QuranView()
+        .environment(Dependencies())
 }

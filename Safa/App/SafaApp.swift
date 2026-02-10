@@ -147,9 +147,7 @@ struct MainTabView: View {
             .tag(Tab.home)
 
             // Quran Tab
-            NavigationStack {
-                QuranView()
-            }
+            QuranView()
             .tabItem {
                 Label(Tab.quran.title, systemImage: router.selectedTab == Tab.quran.rawValue ? Tab.quran.selectedIcon : Tab.quran.icon)
             }

@@ -122,6 +122,17 @@ struct QuranProgress: Codable, Hashable {
     }
 }
 
+// MARK: - Quran Navigation Target
+struct QuranNavigationTarget: Hashable {
+    let surahNumber: Int
+    let startAyah: Int
+
+    init(surahNumber: Int, startAyah: Int = 1) {
+        self.surahNumber = surahNumber
+        self.startAyah = startAyah
+    }
+}
+
 // MARK: - Reciter
 struct Reciter: Identifiable, Codable, Hashable {
     let id: String

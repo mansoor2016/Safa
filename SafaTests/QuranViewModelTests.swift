@@ -296,41 +296,56 @@ final class QuranViewModelTests: XCTestCase {
         XCTAssertTrue(result)
     }
 
-    // MARK: - Navigation Tests
+    // MARK: - Navigation Helper Tests
 
-    func test_navigateToAyah_selectsSurah() async {
+    func test_navigationTargetForJuz_returnsCorrectTarget() async {
         // Given
-        mockRepository.surahsToReturn = [
-            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "The Opening", nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1),
-            Surah(id: 2, nameArabic: "البقرة", nameEnglish: "The Cow", nameTransliteration: "Al-Baqarah", revelationType: .medinan, ayahCount: 286, juzStart: 1)
-        ]
-        await sut.loadSurahs()
-
-        // When
-        sut.navigateToAyah(surah: 2, ayah: 255)
-
-        // Then
-        XCTAssertEqual(sut.selectedSurah?.number, 2)
-    }
-
-    func test_navigateToJuz_navigatesToCorrectSurah() async {
-        // Given
-        mockRepository.surahsToReturn = [
-            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "The Opening", nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1),
-            Surah(id: 2, nameArabic: "البقرة", nameEnglish: "The Cow", nameTransliteration: "Al-Baqarah", revelationType: .medinan, ayahCount: 286, juzStart: 1)
-        ]
         mockRepository.juzListToReturn = [
             Juz(id: 1, startSurah: 1, startAyah: 1, endSurah: 2, endAyah: 141),
             Juz(id: 2, startSurah: 2, startAyah: 142, endSurah: 2, endAyah: 252)
         ]
-        await sut.loadSurahs()
         await sut.loadJuz()
 
         // When
-        sut.navigateToJuz(2)
+        let target = sut.navigationTargetForJuz(2)
 
         // Then
-        XCTAssertEqual(sut.selectedSurah?.number, 2)
+        XCTAssertEqual(target?.surahNumber, 2)
+        XCTAssertEqual(target?.startAyah, 142)
+    }
+
+    func test_navigationTargetForJuz_returnsNilForInvalidJuz() async {
+        // Given
+        mockRepository.juzListToReturn = [
+            Juz(id: 1, startSurah: 1, startAyah: 1, endSurah: 2, endAyah: 141)
+        ]
+        await sut.loadJuz()
+
+        // When
+        let target = sut.navigationTargetForJuz(99)
+
+        // Then
+        XCTAssertNil(target)
+    }
+
+    // MARK: - QuranNavigationTarget Tests
+
+    func test_quranNavigationTarget_equality() {
+        let a = QuranNavigationTarget(surahNumber: 2, startAyah: 255)
+        let b = QuranNavigationTarget(surahNumber: 2, startAyah: 255)
+        XCTAssertEqual(a, b)
+    }
+
+    func test_quranNavigationTarget_defaultStartAyah() {
+        let target = QuranNavigationTarget(surahNumber: 1)
+        XCTAssertEqual(target.startAyah, 1)
+    }
+
+    func test_quranNavigationTarget_hashable() {
+        let a = QuranNavigationTarget(surahNumber: 1, startAyah: 1)
+        let b = QuranNavigationTarget(surahNumber: 2, startAyah: 142)
+        let set: Set<QuranNavigationTarget> = [a, b]
+        XCTAssertEqual(set.count, 2)
     }
 
     // MARK: - Helper Tests
