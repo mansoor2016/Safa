@@ -17,8 +17,8 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 ## Remaining — Code-Only (no device/external dependency)
 
 ### UI Polish
-- [ ] Contextual navigation actions + sticky filter rail
-- [ ] Adaptive tab bar visibility (hide on deliberate downward scroll)
+- [x] Contextual navigation actions + sticky filter rail (Quran + Hadith search filter pills)
+- [x] Adaptive tab bar visibility (behind FF `.adaptiveTabBar`, OFF by default)
 - [ ] Home intent resolver (context-aware quick actions based on time/streak)
 - [x] Resume-where-you-left-off card on Home (Quran reading progress)
 

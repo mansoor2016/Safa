@@ -89,6 +89,7 @@ struct HomeView: View {
             .padding()
             } // end else (skeleton)
         }
+        .adaptiveTabBar()
         .navigationTitle(useBasicInlineHeader ? "" : "Safa")
         .navigationBarTitleDisplayMode(useBasicInlineHeader ? .inline : .large)
         .toolbar {

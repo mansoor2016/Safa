@@ -28,13 +28,37 @@ struct HadithView: View {
 
 // MARK: - Hadith Content View
 
+enum HadithSearchFilter: String, Hashable {
+    case all = "All"
+    case bukhari = "Bukhari"
+    case muslim = "Muslim"
+    case abuDawud = "Abu Dawud"
+    case tirmidhi = "Tirmidhi"
+}
+
 struct HadithContentView: View {
     @Environment(Dependencies.self) private var dependencies
     @Bindable var viewModel: HadithViewModel
+    @State private var selectedFilter: HadithSearchFilter = .all
+
+    private var hadithFilterOptions: [FilterOption<HadithSearchFilter>] {
+        [
+            FilterOption(label: "All", value: .all),
+            FilterOption(label: "Bukhari", value: .bukhari),
+            FilterOption(label: "Muslim", value: .muslim),
+            FilterOption(label: "Abu Dawud", value: .abuDawud),
+            FilterOption(label: "Tirmidhi", value: .tirmidhi),
+        ]
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             searchBar
+
+            // Filter pills (visible when searching)
+            if viewModel.isSearching {
+                FilterPillsView(options: hadithFilterOptions, selected: $selectedFilter)
+            }
 
             if let error = viewModel.error, !viewModel.isSearching {
                 ErrorView.loadFailed(retry: { await viewModel.loadCollections() })

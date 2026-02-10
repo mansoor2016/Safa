@@ -494,9 +494,6 @@
     "Below Nisab threshold" : {
 
     },
-    "Bengali" : {
-
-    },
     "Best" : {
 
     },
@@ -976,9 +973,6 @@
     "Force Ramadan Mode" : {
 
     },
-    "French" : {
-
-    },
     "Friday Duas" : {
 
     },
@@ -1036,7 +1030,7 @@
     "Help & Support" : {
 
     },
-    "Help others discover Safa by sharing it with friends and family." : {
+    "Help others discover Safa" : {
 
     },
     "High Contrast" : {
@@ -1091,9 +1085,6 @@
 
     },
     "Increment Tasbeeh" : {
-
-    },
-    "Indonesian" : {
 
     },
     "Invite" : {
@@ -1384,9 +1375,6 @@
     "No mapping model found for migration." : {
 
     },
-    "No Prayer History" : {
-
-    },
     "No recent activity" : {
 
     },
@@ -1658,16 +1646,6 @@
     "Recommended Settings" : {
 
     },
-    "Recommended translation for %@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Recommended translation for %1$@: %2$@"
-          }
-        }
-      }
-    },
     "Recommended: %@" : {
 
     },
@@ -1881,9 +1859,6 @@
     "Spread the Word" : {
 
     },
-    "Start logging your prayers to see your history here" : {
-
-    },
     "Start Tasbeeh" : {
 
     },
@@ -1944,6 +1919,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Surah %1$lld, %2$@, %3$@, %4$lld verses"
+          }
+        }
+      }
+    },
+    "Surah %lld, Ayah %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Surah %1$lld, Ayah %2$lld"
           }
         }
       }
@@ -2135,16 +2120,10 @@
     "Translation" : {
 
     },
-    "Translation Language" : {
-
-    },
     "Translation Text Size" : {
 
     },
     "Transliteration" : {
-
-    },
-    "Turkish" : {
 
     },
     "Type" : {
@@ -2181,9 +2160,6 @@
 
     },
     "Update Location" : {
-
-    },
-    "Urdu - Ahmed Ali" : {
 
     },
     "Use Adhan Sound" : {

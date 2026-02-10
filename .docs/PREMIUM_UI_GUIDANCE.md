@@ -195,6 +195,6 @@ Empty surfaces should always teach the next action and reduce time-to-value.
 5. ~~Optimistic Actions with Undo~~ ✅ Shipped (prayer logging + undo rail, Feb 9 2026)
 6. ~~Bottom Sheet Standards~~ ✅ Shipped (25 sheets with .compactSheet()/.fullSheet(), Feb 9 2026)
 7. ~~Matched-Geometry Transition~~ ✅ Shipped (Quran list → reader zoom, Feb 10 2026)
-8. Contextual Actions + Sticky Filter Rail — remaining
-9. Adaptive Tab Bar — remaining
+8. ~~Contextual Actions + Sticky Filter Rail~~ ✅ Shipped (Quran + Hadith search filter pills, Feb 10 2026)
+9. ~~Adaptive Tab Bar~~ ✅ Shipped behind FF `.adaptiveTabBar` (OFF by default, Feb 10 2026)
 10. ~~Zero-State/Resume Rails~~ ✅ Shipped (Home "Continue Reading" card from QuranProgress, Feb 10 2026)

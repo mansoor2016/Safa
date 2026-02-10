@@ -37,8 +37,9 @@ enum Feature: String, CaseIterable {
     case predictiveDownload = "predictive_download"
     case smartCleanup = "smart_cleanup"
 
-    // UX Variants (toggle to switch between home header layouts)
+    // UX Variants (toggle to switch between layouts)
     case basicInlineHeader = "basic_inline_header"  // ON = basic inline header, OFF = modern scroll-collapsing (default)
+    case adaptiveTabBar = "adaptive_tab_bar"        // ON = hide tab bar on downward scroll, OFF = always visible (default)
 
     // Coming Soon Features (Disabled - partially implemented or requires additional work)
     case progressDashboard = "progress_dashboard"
@@ -73,6 +74,7 @@ enum Feature: String, CaseIterable {
         case .standByMode: return "StandBy Mode"
         case .moreTranslations: return "More Translations"
         case .basicInlineHeader: return "Basic Inline Header"
+        case .adaptiveTabBar: return "Adaptive Tab Bar"
         case .spotlightSearch: return "Spotlight Search"
         case .calendarExport: return "Calendar Export"
         case .prayerCalendarExport: return "Prayer Time Calendar"
@@ -99,8 +101,8 @@ enum Feature: String, CaseIterable {
              .standByMode,
              .moreTranslations:
             return false
-        // UX variant: OFF = modern scroll-collapsing, ON = basic inline
-        case .basicInlineHeader:
+        // UX variants: OFF by default
+        case .basicInlineHeader, .adaptiveTabBar:
             return false
         default:
             return true
