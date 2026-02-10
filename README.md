@@ -101,7 +101,7 @@ cd Safa
 # Build
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 
-# Run unit tests (1,700+)
+# Run unit tests (1,889)
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:SafaTests test
 ```
@@ -123,7 +123,6 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 | [Technical Spec](.docs/TECHNICAL.md) | Architecture, patterns, performance budgets |
 | [Task Breakdown](.docs/TASKS.md) | Development progress and backlog |
 | [Development Guide](CLAUDE.md) | Coding conventions, templates, build workflow |
-| [Premium UI Guidance](.docs/PREMIUM_UI_GUIDANCE.md) | Interaction polish and animation standards |
 | [Testing Guide](.docs/TEST.md) | QA checklists and smoke tests |
 
 ## Contributing

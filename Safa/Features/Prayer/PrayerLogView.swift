@@ -94,33 +94,31 @@ final class PrayerLogViewModel {
         )
     }
 
-    // Load sample data
-    func loadSampleData() {
+    // Load real prayer log data from repository
+    func loadData() async {
         let calendar = Calendar.current
         let today = Date()
+        let repository = Dependencies.shared.prayerRepository
 
-        // Generate some sample prayer logs for the past week
         for dayOffset in 0..<7 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
             let startOfDay = calendar.startOfDay(for: date)
 
-            var dailyLogs: [PrayerLogEntry] = []
-
-            // Add random prayers for each day
-            let prayersToLog = PrayerType.allCases.filter { _ in Bool.random() || dayOffset == 0 }
-
-            for prayer in prayersToLog {
-                let quality: PrayerQuality = Bool.random() ? .onTime : .delayed
-                dailyLogs.append(PrayerLogEntry(
-                    id: UUID(),
-                    prayerType: prayer,
-                    date: date,
-                    quality: quality,
-                    notes: nil
-                ))
+            do {
+                let logs = try await repository.getPrayerLogs(for: date)
+                let entries = logs.map { log in
+                    PrayerLogEntry(
+                        id: log.id,
+                        prayerType: log.prayerType,
+                        date: log.date,
+                        quality: log.isOnTime ? .onTime : .delayed,
+                        notes: nil
+                    )
+                }
+                prayerLogs[startOfDay] = entries
+            } catch {
+                prayerLogs[startOfDay] = []
             }
-
-            prayerLogs[startOfDay] = dailyLogs
         }
     }
 }
@@ -217,8 +215,8 @@ struct PrayerLogView: View {
             }
             .navigationTitle("Prayer Log")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                viewModel.loadSampleData()
+            .task {
+                await viewModel.loadData()
             }
             .sheet(isPresented: $viewModel.showingLogSheet) {
                 if let prayer = viewModel.selectedPrayer {

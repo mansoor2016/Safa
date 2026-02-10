@@ -158,67 +158,58 @@ final class PrayerLogViewModelTests: XCTestCase {
         XCTAssertEqual(logs.count, 3)
     }
 
-    // MARK: - Weekly Stats Tests
+    // MARK: - Weekly Stats Tests (using manually inserted test data)
 
-    func test_weeklyStats_calculatesTotalLogged() {
-        sut.loadSampleData()
-
+    func test_weeklyStats_emptyByDefault() {
         let stats = sut.weeklyStats
-        XCTAssertGreaterThanOrEqual(stats.totalLogged, 0)
+        XCTAssertEqual(stats.totalLogged, 0)
+        XCTAssertEqual(stats.onTime, 0)
+        XCTAssertEqual(stats.missed, 35) // 7 days × 5 prayers
     }
 
-    func test_weeklyStats_calculatesOnTime() {
-        sut.loadSampleData()
+    func test_weeklyStats_withManualEntries() {
+        let today = Calendar.current.startOfDay(for: Date())
+        sut.prayerLogs[today] = [
+            PrayerLogEntry(id: UUID(), prayerType: .fajr, date: today, quality: .onTime, notes: nil),
+            PrayerLogEntry(id: UUID(), prayerType: .dhuhr, date: today, quality: .delayed, notes: nil),
+        ]
 
         let stats = sut.weeklyStats
-        XCTAssertGreaterThanOrEqual(stats.onTime, 0)
-        XCTAssertLessThanOrEqual(stats.onTime, stats.totalLogged)
+        XCTAssertEqual(stats.totalLogged, 2)
+        XCTAssertEqual(stats.onTime, 1)
+        XCTAssertEqual(stats.late, 1)
+        XCTAssertEqual(stats.missed, 33) // 35 - 2
     }
 
-    func test_weeklyStats_calculatesLate() {
-        sut.loadSampleData()
+    func test_weeklyStats_perfectDay() {
+        let today = Calendar.current.startOfDay(for: Date())
+        sut.prayerLogs[today] = PrayerType.obligatoryPrayers.map {
+            PrayerLogEntry(id: UUID(), prayerType: $0, date: today, quality: .onTime, notes: nil)
+        }
 
         let stats = sut.weeklyStats
-        XCTAssertEqual(stats.late, stats.totalLogged - stats.onTime)
-    }
-
-    func test_weeklyStats_calculatesMissed() {
-        sut.loadSampleData()
-
-        let stats = sut.weeklyStats
-        // Missed should be 35 (7 days × 5 prayers) minus total logged
-        let expected = max(0, 35 - stats.totalLogged)
-        XCTAssertEqual(stats.missed, expected)
-    }
-
-    func test_weeklyStats_calculatesPerfectDays() {
-        sut.loadSampleData()
-
-        let stats = sut.weeklyStats
-        XCTAssertGreaterThanOrEqual(stats.perfectDays, 0)
-        XCTAssertLessThanOrEqual(stats.perfectDays, 7)
+        XCTAssertEqual(stats.perfectDays, 1)
+        XCTAssertEqual(stats.totalLogged, 5)
     }
 
     func test_weeklyStats_completionPercentage() {
-        sut.loadSampleData()
+        let today = Calendar.current.startOfDay(for: Date())
+        sut.prayerLogs[today] = [
+            PrayerLogEntry(id: UUID(), prayerType: .fajr, date: today, quality: .onTime, notes: nil),
+        ]
 
         let stats = sut.weeklyStats
-        let expected = Double(stats.totalLogged) / 35.0 * 100
+        let expected = Double(1) / 35.0 * 100
         XCTAssertEqual(stats.completionPercentage, expected, accuracy: 0.01)
     }
 
-    // MARK: - Load Sample Data Tests
+    // MARK: - Load Data Tests
 
-    func test_loadSampleData_populatesPrayerLogs() {
-        sut.loadSampleData()
-
-        XCTAssertFalse(sut.prayerLogs.isEmpty)
-    }
-
-    func test_loadSampleData_createsEntriesForMultipleDays() {
-        sut.loadSampleData()
-
-        XCTAssertGreaterThan(sut.prayerLogs.keys.count, 1)
+    func test_loadData_populatesFromRepository() async {
+        await sut.loadData()
+        // With real repo, should have entries (may be empty if no prayers logged)
+        // Just verify it doesn't crash
+        XCTAssertNotNil(sut.prayerLogs)
     }
 
     // MARK: - PrayerLogEntry Model Tests

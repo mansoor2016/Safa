@@ -238,11 +238,27 @@ struct HadithContentView: View {
         }
     }
 
+    // MARK: - Filtered Results
+
+    private var filteredSearchResults: [Hadith] {
+        guard selectedFilter != .all else { return viewModel.searchResults }
+        let collectionId: String = {
+            switch selectedFilter {
+            case .all: return ""
+            case .bukhari: return "bukhari"
+            case .muslim: return "muslim"
+            case .abuDawud: return "abudawud"
+            case .tirmidhi: return "tirmidhi"
+            }
+        }()
+        return viewModel.searchResults.filter { $0.collectionId == collectionId }
+    }
+
     // MARK: - Search Results View
 
     private var searchResultsView: some View {
         Group {
-            if viewModel.searchResults.isEmpty && !viewModel.isLoading {
+            if filteredSearchResults.isEmpty && !viewModel.isLoading {
                 EmptyStateView(
                     icon: "magnifyingglass",
                     title: "No Results",
@@ -251,12 +267,12 @@ struct HadithContentView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: SafaSpacing.sm) {
-                        Text("\(viewModel.searchResults.count) results")
+                        Text("\(filteredSearchResults.count) results")
                             .font(SafaTypography.labelMedium)
                             .foregroundColor(SafaColors.Fallback.secondaryText)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        ForEach(viewModel.searchResults) { hadith in
+                        ForEach(filteredSearchResults) { hadith in
                             HadithSearchResultRow(hadith: hadith) {
                                 viewModel.selectedHadith = hadith
                             }
