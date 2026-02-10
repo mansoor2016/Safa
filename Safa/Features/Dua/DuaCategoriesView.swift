@@ -83,27 +83,10 @@ struct DuaCategoriesView: View {
     }
 
     private var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-
-            TextField("Search duas...", text: $searchText)
-                .textFieldStyle(.plain)
-
-            if !searchText.isEmpty {
-                Button {
-                    searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .padding(.horizontal)
-        .padding(.top, 8)
+        SearchBar(
+            text: $searchText,
+            placeholder: "Search duas..."
+        )
     }
 
     private var categoriesSection: some View {

@@ -106,26 +106,10 @@ struct NamesOfAllahView: View {
     }
 
     private var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-
-            TextField("Search names...", text: $viewModel.searchText)
-                .textFieldStyle(.plain)
-
-            if !viewModel.searchText.isEmpty {
-                Button {
-                    viewModel.searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .padding(.horizontal)
+        SearchBar(
+            text: $viewModel.searchText,
+            placeholder: "Search names..."
+        )
     }
 }
 

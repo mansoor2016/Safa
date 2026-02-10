@@ -81,29 +81,12 @@ struct HadithContentView: View {
     // MARK: - Search Bar
 
     private var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-
-            TextField("Search hadith...", text: $viewModel.searchQuery)
-                .textFieldStyle(.plain)
-                .onSubmit {
-                    Task { await viewModel.search() }
-                }
-
-            if !viewModel.searchQuery.isEmpty {
-                Button {
-                    viewModel.clearSearch()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
-            }
-        }
-        .padding(SafaSpacing.sm)
-        .background(Color(UIColor.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-        .padding()
+        SearchBar(
+            text: $viewModel.searchQuery,
+            placeholder: "Search hadith...",
+            onSubmit: { Task { await viewModel.search() } },
+            onClear: { viewModel.clearSearch() }
+        )
     }
 
     // MARK: - Collections List View

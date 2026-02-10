@@ -171,33 +171,12 @@ struct QuranSearchView: View {
     // MARK: - Search Bar
 
     private var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-
-            TextField("Search Quran...", text: $viewModel.searchText)
-                .textFieldStyle(.plain)
-                .autocorrectionDisabled()
-                .onSubmit {
-                    Task {
-                        await viewModel.search()
-                    }
-                }
-
-            if !viewModel.searchText.isEmpty {
-                Button {
-                    viewModel.searchText = ""
-                    viewModel.searchResults = []
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding()
+        SearchBar(
+            text: $viewModel.searchText,
+            placeholder: "Search Quran...",
+            onSubmit: { Task { await viewModel.search() } },
+            onClear: { viewModel.searchResults = [] }
+        )
     }
 
     // MARK: - Recent Searches

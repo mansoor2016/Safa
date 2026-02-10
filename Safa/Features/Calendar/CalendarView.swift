@@ -10,17 +10,35 @@ struct CalendarView: View {
     @State private var currentMonth = Date()
     @State private var selectedEvent: CalendarEvent?
     @State private var showExportSheet = false
+    @State private var searchText = ""
 
     private let calendar = Calendar.current
     private let hijriConverter = HijriDateConverter.shared
 
+    private var filteredEvents: [CalendarEvent] {
+        guard !searchText.isEmpty else { return [] }
+        return CalendarEvent.allEvents.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.arabicName.contains(searchText)
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
-                monthHeader
-                calendarGrid
-                selectedDateCard
-                upcomingEventsSection
+                SearchBar(
+                    text: $searchText,
+                    placeholder: "Search events..."
+                )
+
+                if searchText.isEmpty {
+                    monthHeader
+                    calendarGrid
+                    selectedDateCard
+                    upcomingEventsSection
+                } else {
+                    searchResultsSection
+                }
             }
             .padding()
         }
@@ -267,6 +285,55 @@ struct CalendarView: View {
     private func upcomingEvents() -> [CalendarEvent] {
         CalendarEvent.allEvents.sorted { event1, event2 in
             (event1.daysUntilNextOccurrence() ?? 365) < (event2.daysUntilNextOccurrence() ?? 365)
+        }
+    }
+
+    // MARK: - Search Results
+
+    private var searchResultsSection: some View {
+        Group {
+            if filteredEvents.isEmpty {
+                ContentUnavailableView(
+                    "No Events Found",
+                    systemImage: "magnifyingglass",
+                    description: Text("No events matching \"\(searchText)\"")
+                )
+            } else {
+                VStack(spacing: SafaSpacing.sm) {
+                    ForEach(filteredEvents) { event in
+                        Button {
+                            selectedEvent = event
+                        } label: {
+                            HStack {
+                                Circle()
+                                    .fill(event.color)
+                                    .frame(width: 12, height: 12)
+
+                                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                                    Text(event.name)
+                                        .font(SafaTypography.bodyMedium)
+                                        .foregroundColor(SafaColors.Fallback.text)
+
+                                    Text(event.arabicName)
+                                        .font(SafaTypography.labelSmall)
+                                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                                }
+
+                                Spacer()
+
+                                if let daysUntil = event.daysUntilNextOccurrence() {
+                                    Text("\(daysUntil) days")
+                                        .font(SafaTypography.labelSmall)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                            .padding(SafaSpacing.md)
+                            .background(Color(UIColor.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+                        }
+                    }
+                }
+            }
         }
     }
 }
