@@ -83,7 +83,9 @@ private struct FamilyContentView: View {
         }
         .sheet(isPresented: $showInviteFriendsSheet) {
             InviteFriendsView()
-                .fullSheet()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
         }
         .task {
             await viewModel.loadFamilyCircle()

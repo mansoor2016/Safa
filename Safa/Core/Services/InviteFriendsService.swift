@@ -168,7 +168,6 @@ struct InviteFriendsView: View {
                     handleShareCompleted(activityType: activityType)
                 }
             }
-            .presentationDetents([.large])
         }
     }
 

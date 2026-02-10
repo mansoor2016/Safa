@@ -471,7 +471,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showInviteFriendsSheet) {
                 InviteFriendsView()
-                    .fullSheet()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
             }
         } footer: {
             Text("Help others discover Safa")
