@@ -182,7 +182,22 @@ final class HijriDateConverter {
 
     // MARK: - Important Dates
 
+    /// Single-entry cache: stores the last computed year to avoid redundant calendar math.
+    private var cachedYear: Int?
+    private var cachedDates: [IslamicDate] = []
+
     func importantIslamicDates(for gregorianYear: Int) -> [IslamicDate] {
+        if gregorianYear == cachedYear {
+            return cachedDates
+        }
+
+        let result = computeImportantIslamicDates(for: gregorianYear)
+        cachedYear = gregorianYear
+        cachedDates = result
+        return result
+    }
+
+    private func computeImportantIslamicDates(for gregorianYear: Int) -> [IslamicDate] {
         var dates: [IslamicDate] = []
 
         let importantDates: [(month: Int, day: Int, name: String, arabic: String)] = [
@@ -193,30 +208,58 @@ final class HijriDateConverter {
             (8, 15, "Mid-Sha'ban", "ليلة النصف من شعبان"),
             (9, 1, "First of Ramadan", "أول رمضان"),
             (10, 1, "Eid al-Fitr", "عيد الفطر"),
-            (12, 8, "Day of Arafah", "يوم عرفة"),
+            (12, 9, "Day of Arafah", "يوم عرفة"),
             (12, 10, "Eid al-Adha", "عيد الأضحى"),
         ]
 
-        for (month, day, name, arabic) in importantDates {
-            var components = DateComponents()
-            components.month = month
-            components.day = day
-            // This is approximate - would need proper year calculation
-            components.year = 1445 // Example year, should be calculated
+        // A Gregorian year spans parts of 2-3 Hijri years (Islamic year is ~354 days).
+        // Find the Hijri year at Jan 1 and Dec 31 of the target Gregorian year to cover all.
+        let hijriYears = hijriYearsOverlapping(gregorianYear: gregorianYear)
 
-            if let gregorianDate = self.gregorianDate(from: components),
-               gregorianCalendar.component(.year, from: gregorianDate) == gregorianYear {
-                dates.append(IslamicDate(
-                    name: name,
-                    nameArabic: arabic,
-                    hijriMonth: month,
-                    hijriDay: day,
-                    gregorianDate: gregorianDate
-                ))
+        for hijriYear in hijriYears {
+            for (month, day, name, arabic) in importantDates {
+                var components = DateComponents()
+                components.year = hijriYear
+                components.month = month
+                components.day = day
+
+                if let gregorianDate = self.gregorianDate(from: components),
+                   gregorianCalendar.component(.year, from: gregorianDate) == gregorianYear {
+                    dates.append(IslamicDate(
+                        name: name,
+                        nameArabic: arabic,
+                        hijriMonth: month,
+                        hijriDay: day,
+                        gregorianDate: gregorianDate
+                    ))
+                }
             }
         }
 
-        return dates
+        return dates.sorted { $0.gregorianDate < $1.gregorianDate }
+    }
+
+    /// Returns the set of Hijri years that overlap with the given Gregorian year.
+    private func hijriYearsOverlapping(gregorianYear: Int) -> Set<Int> {
+        var gregComponents = DateComponents()
+        gregComponents.year = gregorianYear
+
+        gregComponents.month = 1
+        gregComponents.day = 1
+        let jan1 = gregorianCalendar.date(from: gregComponents) ?? Date()
+
+        gregComponents.month = 12
+        gregComponents.day = 31
+        let dec31 = gregorianCalendar.date(from: gregComponents) ?? Date()
+
+        let startYear = islamicCalendar.component(.year, from: jan1)
+        let endYear = islamicCalendar.component(.year, from: dec31)
+
+        var years: Set<Int> = []
+        for year in startYear...endYear {
+            years.insert(year)
+        }
+        return years
     }
 }
 

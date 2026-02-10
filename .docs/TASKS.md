@@ -19,7 +19,7 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 ### UI Polish
 - [x] Contextual navigation actions + sticky filter rail (Quran + Hadith search filter pills)
 - [x] Adaptive tab bar visibility (behind FF `.adaptiveTabBar`, OFF by default)
-- [ ] Home intent resolver (context-aware quick actions based on time/streak)
+- [x] Home intent resolver (context-aware quick actions based on time/streak)
 - [x] Resume-where-you-left-off card on Home (Quran reading progress)
 
 ### Dark Mode

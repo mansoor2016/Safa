@@ -25,6 +25,7 @@ struct HomeView: View {
     @State private var isRamadanBannerExpanded = false
     @State private var showShareBanner = !ShareBanner.isDismissed
     @State private var loadError: Error?
+    @State private var resolvedActions: [HomeAction] = []
 
     // Banner dismiss key (reappears next day)
     private var bannerDismissKey: String {
@@ -131,6 +132,13 @@ struct HomeView: View {
             }
             // Re-check banner dismiss state (synced with Settings toggle)
             showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
+            // Re-resolve quick actions (time/prayer may have changed)
+            resolvedActions = HomeIntentResolver.resolve(
+                currentDate: Date(),
+                nextPrayer: nextPrayer,
+                loggedPrayers: loggedPrayers,
+                streaks: dependencies.userState.streaks
+            )
         }
     }
 
@@ -300,43 +308,56 @@ struct HomeView: View {
 
     private var quickActions: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: SafaSpacing.md) {
-            QuickActionCard(
-                icon: "clock.fill",
-                title: "Prayer",
-                subtitle: "Times & logging",
-                color: .green
-            ) {
-                router.selectedTab = "prayer"
+            ForEach(resolvedActions) { action in
+                quickActionCard(for: action)
             }
+        }
+    }
 
-            QuickActionCard(
-                icon: "heart.text.square.fill",
-                title: "Duas",
-                subtitle: "Daily supplications",
-                color: .blue
-            ) {
-                router.selectedTab = "duas"
-            }
+    @ViewBuilder
+    private func quickActionCard(for action: HomeAction) -> some View {
+        let card = QuickActionCard(
+            icon: action.icon,
+            title: action.title,
+            subtitle: action.subtitle,
+            color: color(for: action.colorName)
+        ) {
+            navigate(to: action.destination)
+        }
 
-            QuickActionCard(
-                icon: "graduationcap.fill",
-                title: "Learn",
-                subtitle: "Arabic & Tajweed",
-                color: .purple
-            ) {
-                router.navigate(to: .learn)
-            }
-            .disabledFeature(.learning)
+        switch action.destination {
+        case .disabled(let feature):
+            card.disabledFeature(isDisabled: true, name: feature)
+        default:
+            card
+        }
+    }
 
-            QuickActionCard(
-                icon: "sparkles",
-                title: "Ask Safa",
-                subtitle: "AI companion",
-                color: .orange
-            ) {
-                // No-op — feature not yet implemented
+    private func color(for name: HomeAction.HomeActionColor) -> Color {
+        switch name {
+        case .green: return .green
+        case .blue: return .blue
+        case .purple: return .purple
+        case .orange: return .orange
+        case .red: return .red
+        case .teal: return .teal
+        case .indigo: return .indigo
+        }
+    }
+
+    private func navigate(to destination: HomeAction.HomeActionDestination) {
+        switch destination {
+        case .tab(let tabId):
+            router.selectedTab = tabId
+        case .route(let routeName):
+            switch routeName {
+            case "dhikr": router.navigate(to: .dhikr)
+            case "qibla": router.navigate(to: .qibla)
+            case "learn": router.navigate(to: .learn)
+            default: break
             }
-            .disabledFeature(.aiCompanion)
+        case .disabled:
+            break // handled by .disabledFeature modifier
         }
     }
 
@@ -521,6 +542,14 @@ struct HomeView: View {
         } catch {
             loadError = error
         }
+
+        // Resolve context-aware quick actions
+        resolvedActions = HomeIntentResolver.resolve(
+            currentDate: Date(),
+            nextPrayer: nextPrayer,
+            loggedPrayers: loggedPrayers,
+            streaks: dependencies.userState.streaks
+        )
 
         // Load Quran reading progress for resume card
         quranProgress = try? await dependencies.quranRepository.getReadingProgress()

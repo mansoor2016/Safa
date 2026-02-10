@@ -166,6 +166,44 @@ final class HijriDateConverterBasicTests: XCTestCase {
         XCTAssertFalse(result.isEmpty)
     }
 
+    // MARK: - Important Islamic Dates
+
+    func testImportantIslamicDates_returnsEventsForYear() {
+        // 2025 should contain multiple Islamic events (Ramadan, Eid, etc.)
+        let dates = converter.importantIslamicDates(for: 2025)
+
+        XCTAssertFalse(dates.isEmpty, "Should find Islamic events in 2025")
+        XCTAssertTrue(dates.count >= 5, "Should find at least 5 major events, got \(dates.count)")
+
+        // All returned dates should fall within 2025
+        let gregorian = Calendar(identifier: .gregorian)
+        for date in dates {
+            let year = gregorian.component(.year, from: date.gregorianDate)
+            XCTAssertEqual(year, 2025, "\(date.name) should fall in 2025, got \(year)")
+        }
+    }
+
+    func testImportantIslamicDates_worksForFutureYears() {
+        // Verify the fix: should work for years beyond the old hardcoded 1445
+        let dates2026 = converter.importantIslamicDates(for: 2026)
+        let dates2030 = converter.importantIslamicDates(for: 2030)
+
+        XCTAssertFalse(dates2026.isEmpty, "Should find events in 2026")
+        XCTAssertFalse(dates2030.isEmpty, "Should find events in 2030")
+    }
+
+    func testImportantIslamicDates_sortedChronologically() {
+        let dates = converter.importantIslamicDates(for: 2025)
+        guard dates.count >= 2 else { return }
+
+        for i in 0..<(dates.count - 1) {
+            XCTAssertLessThanOrEqual(
+                dates[i].gregorianDate, dates[i + 1].gregorianDate,
+                "\(dates[i].name) should come before \(dates[i + 1].name)"
+            )
+        }
+    }
+
     // MARK: - Helper Methods
 
     private func createDate(year: Int, month: Int, day: Int) -> Date {
