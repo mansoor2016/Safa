@@ -301,25 +301,17 @@ struct SettingsView: View {
                 }
 
             HStack {
-                Picker("Translation", selection: $selectedTranslation) {
-                    Text("English - Sahih International").tag("English")
-                    Text("Arabic").tag("Arabic")
-                    Text("Urdu - Ahmed Ali").tag("Urdu")
-                    Text("Indonesian").tag("Indonesian")
-                    Text("French").tag("French")
-                    Text("Turkish").tag("Turkish")
-                    Text("Bengali").tag("Bengali")
-                }
-                .onChange(of: selectedTranslation) { _, newValue in
-                    Task { await prefsManager.saveTranslation(newValue) }
-                }
-
-                if let context = locationContext, selectedTranslation == context.recommendedLanguage {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                }
+                Text("Translation")
+                Spacer()
+                Text("English - Sahih International")
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
             }
+
+            DisabledFeatureRow(
+                title: "More Translations",
+                icon: "globe",
+                feature: .moreTranslations
+            )
 
             NavigationLink {
                 FontSettingsView()
@@ -334,9 +326,6 @@ struct SettingsView: View {
         } header: {
             Text("Quran")
         } footer: {
-            if let context = locationContext, selectedTranslation != context.recommendedLanguage {
-                Text("Recommended translation for \(context.regionName): \(context.recommendedLanguage)")
-            }
         }
     }
 
@@ -485,7 +474,7 @@ struct SettingsView: View {
                     .fullSheet()
             }
         } footer: {
-            Text("Help others discover Safa by sharing it with friends and family.")
+            Text("Help others discover Safa")
         }
     }
 

@@ -459,10 +459,11 @@ struct OnboardingView: View {
                 }
 
                 Section("Quran") {
-                    Picker("Translation Language", selection: $selectedLanguage) {
-                        ForEach(availableLanguages, id: \.self) { language in
-                            Text(language).tag(language)
-                        }
+                    HStack {
+                        Text("Translation")
+                        Spacer()
+                        Text("English - Sahih International")
+                            .foregroundColor(.secondary)
                     }
                 }
             }

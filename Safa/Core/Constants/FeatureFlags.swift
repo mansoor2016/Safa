@@ -45,6 +45,7 @@ enum Feature: String, CaseIterable {
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
     case standByMode = "standby_mode"
+    case moreTranslations = "more_translations"
 
     var displayName: String {
         switch self {
@@ -70,6 +71,7 @@ enum Feature: String, CaseIterable {
         case .aiCompanion: return "AI Companion"
         case .interactiveWidgets: return "Interactive Widgets"
         case .standByMode: return "StandBy Mode"
+        case .moreTranslations: return "More Translations"
         case .basicInlineHeader: return "Basic Inline Header"
         case .spotlightSearch: return "Spotlight Search"
         case .calendarExport: return "Calendar Export"
@@ -94,7 +96,8 @@ enum Feature: String, CaseIterable {
             return false
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets,
-             .standByMode:
+             .standByMode,
+             .moreTranslations:
             return false
         // UX variant: OFF = modern scroll-collapsing, ON = basic inline
         case .basicInlineHeader:

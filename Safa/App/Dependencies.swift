@@ -68,5 +68,8 @@ final class Dependencies {
 
         // Initialize global state (depends on user repository)
         self.userState = UserStateManager(userRepository: userRepository)
+
+        // Configure preferences manager (must happen after userRepository init)
+        PreferencesManager.shared.configure(userRepository: userRepository)
     }
 }
