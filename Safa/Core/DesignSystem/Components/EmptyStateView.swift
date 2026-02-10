@@ -80,6 +80,24 @@ extension EmptyStateView {
             message: "Connect to the internet to access this feature."
         )
     }
+
+    static func noPrayerHistory(onLogPrayer: @escaping () -> Void) -> EmptyStateView {
+        EmptyStateView(
+            icon: "calendar.badge.clock",
+            title: "No Prayer History",
+            message: "Start logging your daily prayers to track your consistency.",
+            actionTitle: "Go to Prayer Times",
+            action: onLogPrayer
+        )
+    }
+
+    static var noDhikr: EmptyStateView {
+        EmptyStateView(
+            icon: "text.book.closed",
+            title: "No Dhikr Yet",
+            message: "Morning and evening adhkar will appear here. Use the tasbeeh counter to get started."
+        )
+    }
 }
 
 // MARK: - Preview

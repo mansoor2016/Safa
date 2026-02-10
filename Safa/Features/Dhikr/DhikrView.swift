@@ -185,11 +185,7 @@ private struct DhikrListView: View {
             if isLoading {
                 LoadingView()
             } else if dhikr.isEmpty {
-                EmptyStateView(
-                    icon: "text.book.closed",
-                    title: "No Dhikr",
-                    message: "Dhikr content is being prepared."
-                )
+                EmptyStateView.noDhikr
             } else {
                 ScrollView {
                     LazyVStack(spacing: SafaSpacing.sm) {

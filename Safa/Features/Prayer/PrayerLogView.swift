@@ -329,10 +329,10 @@ struct PrayerLogView: View {
         .listStyle(.insetGrouped)
         .overlay {
             if viewModel.prayerLogs.isEmpty {
-                ContentUnavailableView(
-                    "No Prayer History",
-                    systemImage: "calendar.badge.exclamationmark",
-                    description: Text("Start logging your prayers to see your history here")
+                EmptyStateView(
+                    icon: "calendar.badge.clock",
+                    title: "No Prayer History",
+                    message: "Start logging your daily prayers to track your consistency."
                 )
             }
         }
