@@ -7,17 +7,17 @@ import SwiftUI
 // MARK: - Auto Scroll Speed
 
 enum AutoScrollSpeed: Double, CaseIterable {
+    case quarter = 0.25
     case half = 0.5
+    case threeQuarter = 0.75
     case normal = 1.0
-    case double = 2.0
-    case triple = 3.0
 
     var label: String {
         switch self {
+        case .quarter: return "0.25x"
         case .half: return "0.5x"
+        case .threeQuarter: return "0.75x"
         case .normal: return "1x"
-        case .double: return "2x"
-        case .triple: return "3x"
         }
     }
 }

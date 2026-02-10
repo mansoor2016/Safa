@@ -9,64 +9,44 @@ final class AutoScrollSpeedTests: XCTestCase {
 
     // MARK: - Label Tests
 
+    func test_quarterSpeed_label() {
+        XCTAssertEqual(AutoScrollSpeed.quarter.label, "0.25x")
+    }
+
     func test_halfSpeed_label() {
         XCTAssertEqual(AutoScrollSpeed.half.label, "0.5x")
+    }
+
+    func test_threeQuarterSpeed_label() {
+        XCTAssertEqual(AutoScrollSpeed.threeQuarter.label, "0.75x")
     }
 
     func test_normalSpeed_label() {
         XCTAssertEqual(AutoScrollSpeed.normal.label, "1x")
     }
 
-    func test_doubleSpeed_label() {
-        XCTAssertEqual(AutoScrollSpeed.double.label, "2x")
-    }
-
-    func test_tripleSpeed_label() {
-        XCTAssertEqual(AutoScrollSpeed.triple.label, "3x")
-    }
-
     // MARK: - Raw Value Tests
+
+    func test_quarterSpeed_rawValue() {
+        XCTAssertEqual(AutoScrollSpeed.quarter.rawValue, 0.25)
+    }
 
     func test_halfSpeed_rawValue() {
         XCTAssertEqual(AutoScrollSpeed.half.rawValue, 0.5)
+    }
+
+    func test_threeQuarterSpeed_rawValue() {
+        XCTAssertEqual(AutoScrollSpeed.threeQuarter.rawValue, 0.75)
     }
 
     func test_normalSpeed_rawValue() {
         XCTAssertEqual(AutoScrollSpeed.normal.rawValue, 1.0)
     }
 
-    func test_doubleSpeed_rawValue() {
-        XCTAssertEqual(AutoScrollSpeed.double.rawValue, 2.0)
-    }
-
-    func test_tripleSpeed_rawValue() {
-        XCTAssertEqual(AutoScrollSpeed.triple.rawValue, 3.0)
-    }
-
     // MARK: - All Cases
 
     func test_allCases_hasFourSpeeds() {
         XCTAssertEqual(AutoScrollSpeed.allCases.count, 4)
-    }
-
-    // MARK: - Timer Interval
-
-    func test_timerInterval_halfSpeed() {
-        // 3.0 / 0.5 = 6 seconds per ayah
-        let interval = 3.0 / AutoScrollSpeed.half.rawValue
-        XCTAssertEqual(interval, 6.0)
-    }
-
-    func test_timerInterval_normalSpeed() {
-        // 3.0 / 1.0 = 3 seconds per ayah
-        let interval = 3.0 / AutoScrollSpeed.normal.rawValue
-        XCTAssertEqual(interval, 3.0)
-    }
-
-    func test_timerInterval_tripleSpeed() {
-        // 3.0 / 3.0 = 1 second per ayah
-        let interval = 3.0 / AutoScrollSpeed.triple.rawValue
-        XCTAssertEqual(interval, 1.0)
     }
 }
 
@@ -95,5 +75,61 @@ final class AutoScrollViewModelTests: XCTestCase {
 
     func test_defaultAutoScrollSpeed_isNormal() {
         XCTAssertEqual(sut.autoScrollSpeed, .normal)
+    }
+
+    // MARK: - Character-Aware Interval Tests
+
+    func test_scrollIntervalForAyah_shortAyah_0_25x() {
+        // 10 chars at 0.25x: max(2.0, 10 / (15 * 0.25)) = max(2.0, 2.67) = 2.67s
+        sut.autoScrollSpeed = .quarter
+        let ayah = Ayah(
+            surahNumber: 1, ayahNumber: 1,
+            textArabic: String(repeating: "ع", count: 10),
+            textTranslation: "In the name",
+            juzNumber: 1, pageNumber: 1
+        )
+        let interval = sut.scrollIntervalForAyah(ayah)
+        XCTAssertGreaterThan(interval, 2.0)
+        XCTAssertLessThan(interval, 3.0)
+    }
+
+    func test_scrollIntervalForAyah_mediumAyah_1x() {
+        // 60 chars at 1x: max(2.0, 60 / 15) = max(2.0, 4.0) = 4.0s
+        sut.autoScrollSpeed = .normal
+        let ayah = Ayah(
+            surahNumber: 1, ayahNumber: 1,
+            textArabic: String(repeating: "ع", count: 60),
+            textTranslation: "Text",
+            juzNumber: 1, pageNumber: 1
+        )
+        let interval = sut.scrollIntervalForAyah(ayah)
+        XCTAssertEqual(interval, 4.0, accuracy: 0.01)
+    }
+
+    func test_scrollIntervalForAyah_longAyah_halfSpeed() {
+        // 200 chars at 0.5x: max(2.0, 200 / (15 * 0.5)) = max(2.0, 26.67) = 26.67s
+        sut.autoScrollSpeed = .half
+        let ayah = Ayah(
+            surahNumber: 1, ayahNumber: 1,
+            textArabic: String(repeating: "ع", count: 200),
+            textTranslation: "Text",
+            juzNumber: 1, pageNumber: 1
+        )
+        let interval = sut.scrollIntervalForAyah(ayah)
+        XCTAssertGreaterThan(interval, 26.0)
+        XCTAssertLessThan(interval, 27.0)
+    }
+
+    func test_scrollIntervalForAyah_enforcesMinimum() {
+        // 3 chars at 1x: max(2.0, 0.2) = 2.0s (enforced minimum)
+        sut.autoScrollSpeed = .normal
+        let ayah = Ayah(
+            surahNumber: 1, ayahNumber: 1,
+            textArabic: "أي",
+            textTranslation: "Or",
+            juzNumber: 1, pageNumber: 1
+        )
+        let interval = sut.scrollIntervalForAyah(ayah)
+        XCTAssertEqual(interval, 2.0)
     }
 }

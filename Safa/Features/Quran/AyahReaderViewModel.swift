@@ -52,6 +52,15 @@ final class AyahReaderViewModel {
         surahReadProgress?.isComplete ?? false
     }
 
+    // MARK: - Auto-Scroll Helpers
+
+    func scrollIntervalForAyah(_ ayah: Ayah) -> TimeInterval {
+        let charCount = Double(ayah.textArabic.count)
+        let baseReadingPace = 15.0 // characters per second at 1x speed
+        let interval = charCount / (baseReadingPace * autoScrollSpeed.rawValue)
+        return max(2.0, interval) // Minimum 2 seconds
+    }
+
     // MARK: - Public Methods
 
     func loadAyahs() async {
@@ -116,6 +125,22 @@ final class AyahReaderViewModel {
             }
         } catch {
             self.error = error
+        }
+    }
+
+    func markAllAyahsRead() async {
+        guard let progress = surahReadProgress else { return }
+        for ayahNumber in 1...progress.totalAyahs {
+            surahReadProgress?.readAyahs.insert(ayahNumber)
+        }
+        Task {
+            for ayahNumber in 1...progress.totalAyahs {
+                try? await repository.markAyahRead(
+                    surahNumber: surahNumber,
+                    ayahNumber: ayahNumber,
+                    totalAyahs: progress.totalAyahs
+                )
+            }
         }
     }
 }

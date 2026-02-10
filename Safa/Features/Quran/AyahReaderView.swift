@@ -176,20 +176,25 @@ private struct AyahReaderContent: View {
     private func startAutoScroll(proxy: ScrollViewProxy) {
         viewModel.isAutoScrolling = true
         currentScrollIndex = 0
-        let interval = 3.0 / viewModel.autoScrollSpeed.rawValue
-        autoScrollTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
-            Task { @MainActor in
-                scrollToNextAyah(proxy: proxy)
-            }
-        }
+        scheduleNextAyahScroll(proxy: proxy)
     }
 
     private func restartAutoScroll(proxy: ScrollViewProxy) {
         autoScrollTimer?.invalidate()
-        let interval = 3.0 / viewModel.autoScrollSpeed.rawValue
-        autoScrollTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+        autoScrollTimer = nil
+        scheduleNextAyahScroll(proxy: proxy)
+    }
+
+    private func scheduleNextAyahScroll(proxy: ScrollViewProxy) {
+        guard currentScrollIndex < viewModel.ayahs.count else {
+            stopAutoScroll()
+            return
+        }
+        let currentAyah = viewModel.ayahs[currentScrollIndex]
+        let interval = viewModel.scrollIntervalForAyah(currentAyah)
+        autoScrollTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
             Task { @MainActor in
-                scrollToNextAyah(proxy: proxy)
+                self.scrollToNextAyah(proxy: proxy)
             }
         }
     }
@@ -203,6 +208,7 @@ private struct AyahReaderContent: View {
     private func scrollToNextAyah(proxy: ScrollViewProxy) {
         currentScrollIndex += 1
         guard currentScrollIndex < viewModel.ayahs.count else {
+            Task { await viewModel.markAllAyahsRead() }
             stopAutoScroll()
             return
         }
@@ -210,6 +216,7 @@ private struct AyahReaderContent: View {
         withAnimation(.easeInOut(duration: 0.5)) {
             proxy.scrollTo(ayahNumber, anchor: .top)
         }
+        scheduleNextAyahScroll(proxy: proxy)
     }
 
     // MARK: - Surah Header
