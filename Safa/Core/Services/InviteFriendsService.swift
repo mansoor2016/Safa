@@ -130,12 +130,13 @@ struct InviteFriendsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var service = InviteFriendsService.shared
     @State private var showShareSheet = false
+    @State private var showConfirmation = false
     @State private var toastService = ToastService.shared
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: SafaSpacing.lg) {
                     // Header illustration
                     headerSection
 
@@ -148,9 +149,10 @@ struct InviteFriendsView: View {
                     // Stats
                     if service.inviteCount > 0 {
                         statsSection
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
-                .padding()
+                .padding(SafaSpacing.md)
             }
             .navigationTitle("Invite Friends")
             .navigationBarTitleDisplayMode(.inline)
@@ -162,38 +164,77 @@ struct InviteFriendsView: View {
                 }
             }
             .sheet(isPresented: $showShareSheet) {
-                ShareSheet(items: service.shareItems) {
-                    service.recordInviteShared()
-                    toastService.show(Toast(
-                        message: "Thanks for sharing!",
-                        type: .success
-                    ))
+                ShareSheet(items: service.shareItems) { activityType in
+                    handleShareCompleted(activityType: activityType)
                 }
             }
+            .presentationDetents([.large])
+        }
+    }
+
+    // MARK: - Actions
+
+    private func handleShareCompleted(activityType: UIActivity.ActivityType?) {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            service.recordInviteShared()
+            showConfirmation = true
+        }
+
+        let count = service.inviteCount
+        let message = platformPrefix(for: activityType) + milestoneMessage(for: count)
+        toastService.show(Toast(message: message, type: .success))
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showConfirmation = false
+            }
+        }
+    }
+
+    private func milestoneMessage(for count: Int) -> String {
+        switch count {
+        case 1: return "First share! May it reach someone who benefits"
+        case 5: return "5 shares! Your generosity is inspiring"
+        case 10: return "10 shares! You're spreading light"
+        case 25: return "25 shares! A true ambassador of good"
+        default: return "Thanks for sharing! (\(count) total)"
+        }
+    }
+
+    private func platformPrefix(for activityType: UIActivity.ActivityType?) -> String {
+        guard let activityType else { return "" }
+        switch activityType.rawValue {
+        case "com.apple.UIKit.activity.Message":
+            return "Sent via Messages! "
+        case let raw where raw.contains("whatsapp"):
+            return "Sent via WhatsApp! "
+        default:
+            return ""
         }
     }
 
     // MARK: - Subviews
 
     private var headerSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: SafaSpacing.md) {
             Image(systemName: "person.2.fill")
                 .font(.system(size: 60))
                 .foregroundStyle(Color.accentColor)
-                .padding()
+                .padding(SafaSpacing.md)
                 .background {
                     Circle()
                         .fill(Color.accentColor.opacity(0.1))
                 }
 
             Text("Share Safa with Friends & Family")
-                .font(.title2.weight(.bold))
+                .font(SafaTypography.headlineSmall)
                 .multilineTextAlignment(.center)
         }
     }
 
     private var contentSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: SafaSpacing.md) {
             FeatureRow(
                 icon: "heart.fill",
                 title: "Help Others Connect",
@@ -212,9 +253,9 @@ struct InviteFriendsView: View {
                 description: "+\(InviteFriendsService.hasanatPerInvite) Hasanat when friends join"
             )
         }
-        .padding()
+        .padding(SafaSpacing.md)
         .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.xl, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         }
     }
@@ -224,16 +265,18 @@ struct InviteFriendsView: View {
             showShareSheet = true
         } label: {
             HStack {
-                Image(systemName: "square.and.arrow.up")
-                Text("Share Safa")
+                Image(systemName: showConfirmation ? "checkmark" : "square.and.arrow.up")
+                Text(showConfirmation ? "Shared!" : "Share Safa")
             }
             .font(.headline)
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.accentColor)
+            .padding(SafaSpacing.md)
+            .background(showConfirmation ? Color.green : Color.accentColor)
             .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg, style: .continuous))
+            .animation(.easeInOut(duration: 0.3), value: showConfirmation)
         }
+        .disabled(showConfirmation)
     }
 
     private var statsSection: some View {
@@ -242,13 +285,13 @@ struct InviteFriendsView: View {
                 .foregroundStyle(.secondary)
 
             Text("You've shared \(service.inviteCount) time\(service.inviteCount == 1 ? "" : "s")")
-                .font(.subheadline)
+                .font(SafaTypography.bodyMedium)
                 .foregroundStyle(.secondary)
         }
-        .padding()
+        .padding(SafaSpacing.md)
         .frame(maxWidth: .infinity)
         .background {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg, style: .continuous)
                 .fill(Color(.tertiarySystemBackground))
         }
     }
@@ -262,18 +305,18 @@ private struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: SafaSpacing.sm) {
             Image(systemName: icon)
                 .font(.title3)
                 .foregroundStyle(Color.accentColor)
-                .frame(width: 32)
+                .frame(width: SafaSpacing.IconSize.lg)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(SafaTypography.titleSmall)
 
                 Text(description)
-                    .font(.caption)
+                    .font(SafaTypography.bodySmall)
                     .foregroundStyle(.secondary)
             }
         }
@@ -284,7 +327,7 @@ private struct FeatureRow: View {
 
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
-    let onComplete: () -> Void
+    let onComplete: (_ activityType: UIActivity.ActivityType?) -> Void
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(
@@ -292,9 +335,9 @@ struct ShareSheet: UIViewControllerRepresentable {
             applicationActivities: nil
         )
 
-        controller.completionWithItemsHandler = { _, completed, _, _ in
+        controller.completionWithItemsHandler = { activityType, completed, _, _ in
             if completed {
-                onComplete()
+                onComplete(activityType)
             }
         }
 

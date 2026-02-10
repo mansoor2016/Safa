@@ -29,7 +29,7 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 
 ### Search & Sharing
 - [x] Unify search UI pattern across Quran/Hadith/Calendar
-- [ ] Upgrade share cards with refined layout
+- [x] Upgrade share cards with refined layout
 - [ ] Improve invite flow with confirmation states
 
 ### Test Coverage

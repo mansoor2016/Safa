@@ -199,7 +199,7 @@ struct CalendarExportSheet: View {
             }
             .sheet(isPresented: $showShareSheet) {
                 if let url = icsFileURL {
-                    ShareSheet(items: [url]) {}
+                    ShareSheet(items: [url]) { _ in }
                 }
             }
         }
