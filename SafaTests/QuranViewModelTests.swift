@@ -386,6 +386,7 @@ private enum TestError: Error {
 final class TestableQuranRepository: QuranRepositoryProtocol {
     var surahsToReturn: [Surah] = []
     var juzListToReturn: [Juz] = []
+    var ayahsToReturn: [Ayah] = []
     var searchResultsToReturn: [Ayah] = []
     var bookmarksToReturn: [QuranBookmark] = []
     var readingProgressToReturn: QuranProgress?
@@ -409,7 +410,11 @@ final class TestableQuranRepository: QuranRepositoryProtocol {
     }
 
     nonisolated func getAyahs(forSurah surahNumber: Int) async throws -> [Ayah] {
-        return []
+        let error = await errorToThrow
+        if let error {
+            throw error
+        }
+        return await ayahsToReturn
     }
 
     nonisolated func getAyah(surah surahNumber: Int, ayah ayahNumber: Int) async throws -> Ayah? {
