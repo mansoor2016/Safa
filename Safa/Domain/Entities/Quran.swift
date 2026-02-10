@@ -216,6 +216,33 @@ struct SurahReadProgress: Codable, Equatable {
     }
 }
 
+// MARK: - Progress Ring Mode
+enum ProgressRingMode: String, CaseIterable {
+    case highWaterMark
+    case currentPosition
+
+    var label: String {
+        switch self {
+        case .highWaterMark: return "Furthest Read"
+        case .currentPosition: return "Current Position"
+        }
+    }
+
+    private static let storageKey = "progressRingMode"
+
+    static func load() -> ProgressRingMode {
+        guard let raw = UserDefaults.standard.string(forKey: storageKey),
+              let mode = ProgressRingMode(rawValue: raw) else {
+            return .highWaterMark
+        }
+        return mode
+    }
+
+    func save() {
+        UserDefaults.standard.set(rawValue, forKey: Self.storageKey)
+    }
+}
+
 // MARK: - Quran Navigation Target
 struct QuranNavigationTarget: Hashable {
     let surahNumber: Int

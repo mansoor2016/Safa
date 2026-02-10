@@ -71,6 +71,26 @@ private struct AyahReaderContent: View {
                         lineWidth: 2.5,
                         progressColor: viewModel.isSurahComplete ? .green : .accentColor
                     )
+                    .contextMenu {
+                        ForEach(ProgressRingMode.allCases, id: \.self) { mode in
+                            Button {
+                                viewModel.progressRingMode = mode
+                            } label: {
+                                Label(
+                                    mode.label,
+                                    systemImage: viewModel.progressRingMode == mode
+                                        ? "checkmark.circle.fill"
+                                        : "circle"
+                                )
+                            }
+                        }
+                        Divider()
+                        Button(role: .destructive) {
+                            viewModel.resetProgress()
+                        } label: {
+                            Label("Reset Progress", systemImage: "arrow.counterclockwise")
+                        }
+                    }
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {

@@ -50,6 +50,23 @@ final class AutoScrollSpeedTests: XCTestCase {
     }
 }
 
+// MARK: - Progress Ring Mode Tests
+
+final class ProgressRingModeTests: XCTestCase {
+
+    func test_highWaterMark_label() {
+        XCTAssertEqual(ProgressRingMode.highWaterMark.label, "Furthest Read")
+    }
+
+    func test_currentPosition_label() {
+        XCTAssertEqual(ProgressRingMode.currentPosition.label, "Current Position")
+    }
+
+    func test_allCases_hasTwoModes() {
+        XCTAssertEqual(ProgressRingMode.allCases.count, 2)
+    }
+}
+
 // MARK: - ViewModel Auto-Scroll State
 
 @MainActor
@@ -131,5 +148,89 @@ final class AutoScrollViewModelTests: XCTestCase {
         )
         let interval = sut.scrollIntervalForAyah(ayah)
         XCTAssertEqual(interval, 2.0)
+    }
+
+    // MARK: - Progress Ring Mode Tests
+
+    func test_defaultProgressRingMode_isHighWaterMark() {
+        XCTAssertEqual(sut.progressRingMode, .highWaterMark)
+    }
+
+    func test_progressFraction_highWaterMark_usesReadAyahs() async {
+        // Given: surah with 7 ayahs, 3 read
+        mockRepository.surahsToReturn = [
+            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "Al-Fatiha",
+                  nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1)
+        ]
+        mockRepository.ayahsToReturn = (1...7).map {
+            Ayah(surahNumber: 1, ayahNumber: $0, textArabic: "آية", textTranslation: "Verse \($0)", juzNumber: 1, pageNumber: 1)
+        }
+        await sut.loadAyahs()
+        sut.markAyahVisible(1)
+        sut.markAyahVisible(2)
+        sut.markAyahVisible(3)
+        sut.progressRingMode = .highWaterMark
+
+        // Then: 3/7 = 0.4286
+        XCTAssertEqual(sut.progressFraction, 3.0 / 7.0, accuracy: 0.01)
+    }
+
+    func test_progressFraction_currentPosition_usesCurrentAyah() async {
+        // Given: surah with 7 ayahs, currently viewing ayah 5
+        mockRepository.surahsToReturn = [
+            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "Al-Fatiha",
+                  nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1)
+        ]
+        mockRepository.ayahsToReturn = (1...7).map {
+            Ayah(surahNumber: 1, ayahNumber: $0, textArabic: "آية", textTranslation: "Verse \($0)", juzNumber: 1, pageNumber: 1)
+        }
+        await sut.loadAyahs()
+        sut.markAyahVisible(5)
+        sut.progressRingMode = .currentPosition
+
+        // Then: 5/7 = 0.714
+        XCTAssertEqual(sut.progressFraction, 5.0 / 7.0, accuracy: 0.01)
+    }
+
+    func test_progressFraction_currentPosition_scrollBackDecreases() async {
+        // Given: user reads to ayah 5, then scrolls back to ayah 2
+        mockRepository.surahsToReturn = [
+            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "Al-Fatiha",
+                  nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1)
+        ]
+        mockRepository.ayahsToReturn = (1...7).map {
+            Ayah(surahNumber: 1, ayahNumber: $0, textArabic: "آية", textTranslation: "Verse \($0)", juzNumber: 1, pageNumber: 1)
+        }
+        await sut.loadAyahs()
+        sut.markAyahVisible(5)
+        sut.markAyahVisible(2)
+        sut.progressRingMode = .currentPosition
+
+        // Then: current position = ayah 2, so 2/7
+        XCTAssertEqual(sut.progressFraction, 2.0 / 7.0, accuracy: 0.01)
+    }
+
+    func test_resetProgress_clearsReadAyahs() async {
+        // Given: surah loaded, some ayahs marked read
+        mockRepository.surahsToReturn = [
+            Surah(id: 1, nameArabic: "الفاتحة", nameEnglish: "Al-Fatiha",
+                  nameTransliteration: "Al-Fatihah", revelationType: .meccan, ayahCount: 7, juzStart: 1)
+        ]
+        mockRepository.ayahsToReturn = (1...7).map {
+            Ayah(surahNumber: 1, ayahNumber: $0, textArabic: "آية", textTranslation: "Verse \($0)", juzNumber: 1, pageNumber: 1)
+        }
+        await sut.loadAyahs()
+        sut.markAyahVisible(1)
+        sut.markAyahVisible(2)
+        sut.markAyahVisible(3)
+        XCTAssertGreaterThan(sut.progressFraction, 0)
+
+        // When
+        sut.resetProgress()
+
+        // Then: high-water mark resets to 0
+        sut.progressRingMode = .highWaterMark
+        XCTAssertEqual(sut.progressFraction, 0)
+        XCTAssertFalse(sut.isSurahComplete)
     }
 }

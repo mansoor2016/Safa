@@ -17,6 +17,10 @@ final class AyahReaderViewModel {
         didSet { fontPreferences.save() }
     }
     private(set) var surahReadProgress: SurahReadProgress?
+    private(set) var currentVisibleAyah: Int = 1
+    var progressRingMode: ProgressRingMode = ProgressRingMode.load() {
+        didSet { progressRingMode.save() }
+    }
     var isAutoScrolling = false
     var autoScrollSpeed: AutoScrollSpeed = .normal
 
@@ -45,7 +49,13 @@ final class AyahReaderViewModel {
     }
 
     var progressFraction: Double {
-        surahReadProgress?.fractionComplete ?? 0
+        switch progressRingMode {
+        case .highWaterMark:
+            return surahReadProgress?.fractionComplete ?? 0
+        case .currentPosition:
+            guard !ayahs.isEmpty else { return 0 }
+            return Double(currentVisibleAyah) / Double(ayahs.count)
+        }
     }
 
     var isSurahComplete: Bool {
@@ -97,6 +107,7 @@ final class AyahReaderViewModel {
     }
 
     func markAyahVisible(_ ayahNumber: Int) {
+        currentVisibleAyah = ayahNumber
         guard surahReadProgress != nil else { return }
         let isNewAyah = !(surahReadProgress?.readAyahs.contains(ayahNumber) ?? false)
         if isNewAyah {
@@ -129,6 +140,18 @@ final class AyahReaderViewModel {
         } catch {
             self.error = error
             return wasBookmarked // Return previous state on error
+        }
+    }
+
+    func resetProgress() {
+        guard surahReadProgress != nil else { return }
+        surahReadProgress = SurahReadProgress(
+            surahNumber: surahNumber,
+            totalAyahs: ayahs.count
+        )
+        let key = "surahReadProgress_\(surahNumber)"
+        if let data = try? JSONEncoder().encode(surahReadProgress) {
+            UserDefaults.standard.set(data, forKey: key)
         }
     }
 
