@@ -114,17 +114,21 @@ final class AyahReaderViewModel {
         }
     }
 
-    func toggleBookmark(_ ayah: Ayah) async {
+    func toggleBookmark(_ ayah: Ayah) async -> Bool {
+        let wasBookmarked = isBookmarked(ayah)
         do {
-            if isBookmarked(ayah) {
+            if wasBookmarked {
                 try await repository.removeBookmark(surah: ayah.surahNumber, ayah: ayah.ayahNumber)
                 bookmarkedAyahs.remove(ayah.id)
+                return false // Removed
             } else {
                 try await repository.addBookmark(surah: ayah.surahNumber, ayah: ayah.ayahNumber)
                 bookmarkedAyahs.insert(ayah.id)
+                return true // Added
             }
         } catch {
             self.error = error
+            return wasBookmarked // Return previous state on error
         }
     }
 

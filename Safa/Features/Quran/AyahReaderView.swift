@@ -117,7 +117,16 @@ private struct AyahReaderContent: View {
                                 arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
                                 translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
                                 onBookmarkToggle: {
-                                    Task { await viewModel.toggleBookmark(ayah) }
+                                    Task {
+                                        let wasAdded = await viewModel.toggleBookmark(ayah)
+                                        let message = wasAdded
+                                            ? "Ayah \(ayah.reference) bookmarked"
+                                            : "Bookmark removed"
+                                        let toast = Toast.undoAction(message: message) {
+                                            Task { await viewModel.toggleBookmark(ayah) }
+                                        }
+                                        ToastService.shared.show(toast)
+                                    }
                                 }
                             )
                             .id(ayah.ayahNumber)
