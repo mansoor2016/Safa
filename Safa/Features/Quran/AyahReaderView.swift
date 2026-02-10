@@ -165,6 +165,7 @@ private struct AyahReaderContent: View {
                         endOfSurahView(surah: surah)
                     }
                 }
+                .background(SafaSurface.quranReading.color)
 
                 // Auto-scroll control (only visible if enabled in settings)
                 if autoScrollEnabled {

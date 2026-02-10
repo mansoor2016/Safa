@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI
 
 import SwiftUI
+import UIKit
 
 // MARK: - Color Palette
 
@@ -79,11 +80,31 @@ enum AccentColorOption: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .green: return Color(hex: "2E7D32")
-        case .teal: return Color(hex: "00695C")
-        case .blue: return Color(hex: "1565C0")
-        case .purple: return Color(hex: "6A1B9A")
-        case .gold: return Color(hex: "F9A825")
+        case .green:
+            return Color(UIColor { $0.userInterfaceStyle == .dark
+                ? UIColor(red: 0.40, green: 0.73, blue: 0.42, alpha: 1) // #66BB6A
+                : UIColor(red: 0.18, green: 0.49, blue: 0.20, alpha: 1) // #2E7D32
+            })
+        case .teal:
+            return Color(UIColor { $0.userInterfaceStyle == .dark
+                ? UIColor(red: 0.30, green: 0.71, blue: 0.67, alpha: 1) // #4DB6AC
+                : UIColor(red: 0.00, green: 0.41, blue: 0.36, alpha: 1) // #00695C
+            })
+        case .blue:
+            return Color(UIColor { $0.userInterfaceStyle == .dark
+                ? UIColor(red: 0.26, green: 0.65, blue: 0.96, alpha: 1) // #42A5F5
+                : UIColor(red: 0.08, green: 0.40, blue: 0.75, alpha: 1) // #1565C0
+            })
+        case .purple:
+            return Color(UIColor { $0.userInterfaceStyle == .dark
+                ? UIColor(red: 0.67, green: 0.28, blue: 0.74, alpha: 1) // #AB47BC
+                : UIColor(red: 0.42, green: 0.11, blue: 0.60, alpha: 1) // #6A1B9A
+            })
+        case .gold:
+            return Color(UIColor { $0.userInterfaceStyle == .dark
+                ? UIColor(red: 1.00, green: 0.93, blue: 0.35, alpha: 1) // #FFEE58
+                : UIColor(red: 0.98, green: 0.66, blue: 0.15, alpha: 1) // #F9A825
+            })
         }
     }
 

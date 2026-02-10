@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI
 
 import SwiftUI
+import UIKit
 
 // MARK: - Elevation Levels
 
@@ -18,10 +19,26 @@ enum SafaElevation {
 
     var shadowColor: Color {
         switch self {
-        case .none: return .clear
-        case .low: return .black.opacity(0.05)
-        case .medium: return .black.opacity(0.08)
-        case .high: return .black.opacity(0.12)
+        case .none:
+            return .clear
+        case .low:
+            return Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor.black.withAlphaComponent(0.30)
+                    : UIColor.black.withAlphaComponent(0.05)
+            })
+        case .medium:
+            return Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor.black.withAlphaComponent(0.40)
+                    : UIColor.black.withAlphaComponent(0.08)
+            })
+        case .high:
+            return Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor.black.withAlphaComponent(0.50)
+                    : UIColor.black.withAlphaComponent(0.12)
+            })
         }
     }
 
@@ -53,12 +70,20 @@ enum SafaSurface {
     case secondary
     /// Tertiary background (nested cards, badges, summary blocks)
     case tertiary
+    /// Warm reading surface — reduces blue light in dark mode for sustained reading
+    case quranReading
 
     var color: Color {
         switch self {
         case .primary: return Color(UIColor.systemBackground)
         case .secondary: return Color(UIColor.secondarySystemBackground)
         case .tertiary: return Color(UIColor.tertiarySystemBackground)
+        case .quranReading:
+            return Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor(red: 0.12, green: 0.11, blue: 0.10, alpha: 1)
+                    : .systemBackground
+            })
         }
     }
 }
