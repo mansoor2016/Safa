@@ -333,6 +333,10 @@ final class MockQuranRepository: QuranRepositoryProtocol {
     func getAllJuz() async throws -> [Juz] {
         return (1...30).map { Juz(id: $0, startSurah: 1, startAyah: 1, endSurah: 2, endAyah: 141) }
     }
+
+    func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress? { nil }
+    func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws {}
+    func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {}
 }
 
 // MARK: - Hadith Repository Tests

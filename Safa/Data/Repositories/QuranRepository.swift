@@ -175,6 +175,49 @@ final class QuranRepository: QuranRepositoryProtocol {
         UserDefaults.standard.set(data, forKey: progressKey)
     }
 
+    // MARK: - Surah Read Progress
+
+    private let surahReadProgressKeyPrefix = "surahReadProgress_"
+
+    func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress? {
+        let key = "\(surahReadProgressKeyPrefix)\(surahNumber)"
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let progress = try? JSONDecoder().decode(SurahReadProgress.self, from: data) else {
+            return nil
+        }
+        return progress
+    }
+
+    func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws {
+        let key = "\(surahReadProgressKeyPrefix)\(surahNumber)"
+        var progress = (try await getSurahReadProgress(surahNumber: surahNumber))
+            ?? SurahReadProgress(surahNumber: surahNumber, totalAyahs: totalAyahs)
+        progress.readAyahs.insert(ayahNumber)
+        let data = try JSONEncoder().encode(progress)
+        UserDefaults.standard.set(data, forKey: key)
+    }
+
+    // MARK: - Bookmark Note
+
+    func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {
+        var bookmarks = try await getBookmarks()
+        guard let index = bookmarks.firstIndex(where: { $0.surahNumber == surahNumber && $0.ayahNumber == ayahNumber }) else {
+            return
+        }
+        let existing = bookmarks[index]
+        let normalizedNote = (note?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) ? nil : note
+        let updated = QuranBookmark(
+            id: existing.id,
+            surahNumber: existing.surahNumber,
+            ayahNumber: existing.ayahNumber,
+            createdAt: existing.createdAt,
+            note: normalizedNote
+        )
+        bookmarks[index] = updated
+        let data = try JSONEncoder().encode(bookmarks)
+        UserDefaults.standard.set(data, forKey: bookmarksKey)
+    }
+
     // MARK: - Juz
 
     func getJuz(number: Int) async throws -> Juz? {

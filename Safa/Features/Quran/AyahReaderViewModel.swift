@@ -16,6 +16,7 @@ final class AyahReaderViewModel {
     var fontPreferences = QuranFontPreferences.load() {
         didSet { fontPreferences.save() }
     }
+    private(set) var surahReadProgress: SurahReadProgress?
 
     // MARK: - Config
     let surahNumber: Int
@@ -41,6 +42,14 @@ final class AyahReaderViewModel {
         surahNumber + 1
     }
 
+    var progressFraction: Double {
+        surahReadProgress?.fractionComplete ?? 0
+    }
+
+    var isSurahComplete: Bool {
+        surahReadProgress?.isComplete ?? false
+    }
+
     // MARK: - Public Methods
 
     func loadAyahs() async {
@@ -64,6 +73,9 @@ final class AyahReaderViewModel {
 
             try await repository.updateProgress(surah: surahNumber, ayah: 1)
 
+            surahReadProgress = try await repository.getSurahReadProgress(surahNumber: surahNumber)
+                ?? SurahReadProgress(surahNumber: surahNumber, totalAyahs: ayahs.count)
+
             isLoading = false
         } catch {
             self.error = error
@@ -73,6 +85,19 @@ final class AyahReaderViewModel {
 
     func isBookmarked(_ ayah: Ayah) -> Bool {
         bookmarkedAyahs.contains(ayah.id)
+    }
+
+    func markAyahVisible(_ ayahNumber: Int) {
+        guard surahReadProgress != nil else { return }
+        guard !(surahReadProgress?.readAyahs.contains(ayahNumber) ?? false) else { return }
+        surahReadProgress?.readAyahs.insert(ayahNumber)
+        Task {
+            try? await repository.markAyahRead(
+                surahNumber: surahNumber,
+                ayahNumber: ayahNumber,
+                totalAyahs: ayahs.count
+            )
+        }
     }
 
     func toggleBookmark(_ ayah: Ayah) async {

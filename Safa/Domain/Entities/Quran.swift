@@ -194,6 +194,28 @@ struct QuranFontPreferences: Codable, Equatable {
     }
 }
 
+// MARK: - Surah Read Progress
+struct SurahReadProgress: Codable, Equatable {
+    let surahNumber: Int
+    var readAyahs: Set<Int>
+    let totalAyahs: Int
+
+    init(surahNumber: Int, readAyahs: Set<Int> = [], totalAyahs: Int) {
+        self.surahNumber = surahNumber
+        self.readAyahs = readAyahs
+        self.totalAyahs = totalAyahs
+    }
+
+    var fractionComplete: Double {
+        guard totalAyahs > 0 else { return 0 }
+        return Double(readAyahs.count) / Double(totalAyahs)
+    }
+
+    var isComplete: Bool {
+        readAyahs.count >= totalAyahs
+    }
+}
+
 // MARK: - Quran Navigation Target
 struct QuranNavigationTarget: Hashable {
     let surahNumber: Int

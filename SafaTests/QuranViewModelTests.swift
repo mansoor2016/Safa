@@ -474,6 +474,16 @@ final class TestableQuranRepository: QuranRepositoryProtocol {
 
     nonisolated func updateProgress(surah: Int, ayah: Int) async throws {
     }
+
+    nonisolated func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress? {
+        return nil
+    }
+
+    nonisolated func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws {
+    }
+
+    nonisolated func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {
+    }
 }
 
 // MARK: - Stub User Repository

@@ -159,6 +159,9 @@ private final class ExportTestMockQuranRepository: QuranRepositoryProtocol {
     nonisolated func updateProgress(surah: Int, ayah: Int) async throws {}
     nonisolated func getJuz(number: Int) async throws -> Juz? { nil }
     nonisolated func getAllJuz() async throws -> [Juz] { [] }
+    nonisolated func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress? { nil }
+    nonisolated func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws {}
+    nonisolated func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {}
 }
 
 @MainActor

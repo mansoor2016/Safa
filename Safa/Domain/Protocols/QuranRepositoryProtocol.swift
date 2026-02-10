@@ -67,4 +67,23 @@ protocol QuranRepositoryProtocol {
     /// Gets all Juz
     /// - Returns: Array of all 30 Juz
     func getAllJuz() async throws -> [Juz]
+
+    /// Gets surah read progress
+    /// - Parameter surahNumber: The surah number
+    /// - Returns: Progress data with set of read ayahs
+    func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress?
+
+    /// Marks an ayah as read
+    /// - Parameters:
+    ///   - surahNumber: The surah number
+    ///   - ayahNumber: The ayah number
+    ///   - totalAyahs: Total ayahs in the surah
+    func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws
+
+    /// Updates a bookmark's note
+    /// - Parameters:
+    ///   - surahNumber: Surah number
+    ///   - ayahNumber: Ayah number
+    ///   - note: The new note text (nil to remove)
+    func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws
 }

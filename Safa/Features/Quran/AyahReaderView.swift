@@ -54,9 +54,20 @@ private struct AyahReaderContent: View {
                 LoadingView(message: "Loading...")
             }
         }
-        .navigationTitle(viewModel.surah?.nameEnglish ?? "Surah")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: 8) {
+                    Text(viewModel.surah?.nameEnglish ?? "Surah")
+                        .font(SafaTypography.titleSmall)
+                    CircularProgressRing(
+                        progress: viewModel.progressFraction,
+                        size: 20,
+                        lineWidth: 2.5,
+                        progressColor: viewModel.isSurahComplete ? .green : .accentColor
+                    )
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Toggle("Show Translation", isOn: $viewModel.showTranslation)
@@ -107,6 +118,7 @@ private struct AyahReaderContent: View {
                             }
                         )
                         .id(ayah.ayahNumber)
+                        .onAppear { viewModel.markAyahVisible(ayah.ayahNumber) }
 
                         if index < viewModel.ayahs.count - 1 {
                             Divider()
@@ -159,9 +171,9 @@ private struct AyahReaderContent: View {
 
     private func endOfSurahView(surah: Surah) -> some View {
         VStack(spacing: SafaSpacing.md) {
-            Image(systemName: "star.fill")
+            Image(systemName: viewModel.isSurahComplete ? "checkmark.circle.fill" : "star.fill")
                 .font(.system(size: 48))
-                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                .foregroundColor(viewModel.isSurahComplete ? .green : SafaColors.Fallback.tertiaryText)
 
             Text("End of \(surah.nameEnglish)")
                 .font(SafaTypography.titleMedium)
