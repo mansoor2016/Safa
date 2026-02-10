@@ -41,6 +41,8 @@ struct AyahReaderView: View {
 
 private struct AyahReaderContent: View {
     @Bindable var viewModel: AyahReaderViewModel
+    @State private var autoScrollTimer: Timer?
+    @State private var currentScrollIndex = 0
 
     var body: some View {
         Group {
@@ -98,37 +100,53 @@ private struct AyahReaderContent: View {
 
     private func readerContent(surah: Surah) -> some View {
         ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    // Surah header (Bismillah)
-                    if surah.number != 9 {
-                        surahHeader(surah: surah)
-                    }
+            ZStack(alignment: .bottom) {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        // Surah header (Bismillah)
+                        if surah.number != 9 {
+                            surahHeader(surah: surah)
+                        }
 
-                    // Ayahs
-                    ForEach(Array(viewModel.ayahs.enumerated()), id: \.element.id) { index, ayah in
-                        AyahRow(
-                            ayah: ayah,
-                            showTranslation: viewModel.showTranslation,
-                            isBookmarked: viewModel.isBookmarked(ayah),
-                            arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
-                            translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
-                            onBookmarkToggle: {
-                                Task { await viewModel.toggleBookmark(ayah) }
+                        // Ayahs
+                        ForEach(Array(viewModel.ayahs.enumerated()), id: \.element.id) { index, ayah in
+                            AyahRow(
+                                ayah: ayah,
+                                showTranslation: viewModel.showTranslation,
+                                isBookmarked: viewModel.isBookmarked(ayah),
+                                arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
+                                translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
+                                onBookmarkToggle: {
+                                    Task { await viewModel.toggleBookmark(ayah) }
+                                }
+                            )
+                            .id(ayah.ayahNumber)
+                            .onAppear { viewModel.markAyahVisible(ayah.ayahNumber) }
+
+                            if index < viewModel.ayahs.count - 1 {
+                                Divider()
+                                    .padding(.horizontal)
                             }
-                        )
-                        .id(ayah.ayahNumber)
-                        .onAppear { viewModel.markAyahVisible(ayah.ayahNumber) }
+                        }
 
-                        if index < viewModel.ayahs.count - 1 {
-                            Divider()
-                                .padding(.horizontal)
+                        // End of surah
+                        endOfSurahView(surah: surah)
+                    }
+                }
+
+                // Auto-scroll control
+                AutoScrollControl(
+                    isScrolling: viewModel.isAutoScrolling,
+                    speed: viewModel.autoScrollSpeed,
+                    onToggle: { toggleAutoScroll(proxy: proxy) },
+                    onSpeedChange: { newSpeed in
+                        viewModel.autoScrollSpeed = newSpeed
+                        if viewModel.isAutoScrolling {
+                            restartAutoScroll(proxy: proxy)
                         }
                     }
-
-                    // End of surah
-                    endOfSurahView(surah: surah)
-                }
+                )
+                .padding(.bottom, SafaSpacing.lg)
             }
             .onAppear {
                 if viewModel.startAyah > 1 {
@@ -139,6 +157,58 @@ private struct AyahReaderContent: View {
                     }
                 }
             }
+            .onDisappear {
+                stopAutoScroll()
+            }
+        }
+    }
+
+    // MARK: - Auto Scroll
+
+    private func toggleAutoScroll(proxy: ScrollViewProxy) {
+        if viewModel.isAutoScrolling {
+            stopAutoScroll()
+        } else {
+            startAutoScroll(proxy: proxy)
+        }
+    }
+
+    private func startAutoScroll(proxy: ScrollViewProxy) {
+        viewModel.isAutoScrolling = true
+        currentScrollIndex = 0
+        let interval = 3.0 / viewModel.autoScrollSpeed.rawValue
+        autoScrollTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            Task { @MainActor in
+                scrollToNextAyah(proxy: proxy)
+            }
+        }
+    }
+
+    private func restartAutoScroll(proxy: ScrollViewProxy) {
+        autoScrollTimer?.invalidate()
+        let interval = 3.0 / viewModel.autoScrollSpeed.rawValue
+        autoScrollTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            Task { @MainActor in
+                scrollToNextAyah(proxy: proxy)
+            }
+        }
+    }
+
+    private func stopAutoScroll() {
+        viewModel.isAutoScrolling = false
+        autoScrollTimer?.invalidate()
+        autoScrollTimer = nil
+    }
+
+    private func scrollToNextAyah(proxy: ScrollViewProxy) {
+        currentScrollIndex += 1
+        guard currentScrollIndex < viewModel.ayahs.count else {
+            stopAutoScroll()
+            return
+        }
+        let ayahNumber = viewModel.ayahs[currentScrollIndex].ayahNumber
+        withAnimation(.easeInOut(duration: 0.5)) {
+            proxy.scrollTo(ayahNumber, anchor: .top)
         }
     }
 

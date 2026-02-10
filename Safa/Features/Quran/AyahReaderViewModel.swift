@@ -17,6 +17,8 @@ final class AyahReaderViewModel {
         didSet { fontPreferences.save() }
     }
     private(set) var surahReadProgress: SurahReadProgress?
+    var isAutoScrolling = false
+    var autoScrollSpeed: AutoScrollSpeed = .normal
 
     // MARK: - Config
     let surahNumber: Int
