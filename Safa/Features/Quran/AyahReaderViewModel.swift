@@ -13,6 +13,9 @@ final class AyahReaderViewModel {
     private(set) var error: Error?
     private(set) var bookmarkedAyahs: Set<String> = []
     var showTranslation = true
+    var fontPreferences = QuranFontPreferences.load() {
+        didSet { fontPreferences.save() }
+    }
 
     // MARK: - Config
     let surahNumber: Int

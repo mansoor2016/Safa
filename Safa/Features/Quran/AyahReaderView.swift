@@ -60,6 +60,22 @@ private struct AyahReaderContent: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Toggle("Show Translation", isOn: $viewModel.showTranslation)
+
+                    Menu("Arabic Text Size") {
+                        Picker("Arabic Text Size", selection: $viewModel.fontPreferences.arabicFontSize) {
+                            ForEach(QuranFontPreferences.ArabicFontSize.allCases, id: \.self) { size in
+                                Text(size.label).tag(size)
+                            }
+                        }
+                    }
+
+                    Menu("Translation Text Size") {
+                        Picker("Translation Text Size", selection: $viewModel.fontPreferences.translationFontSize) {
+                            ForEach(QuranFontPreferences.TranslationFontSize.allCases, id: \.self) { size in
+                                Text(size.label).tag(size)
+                            }
+                        }
+                    }
                 } label: {
                     Image(systemName: "textformat.size")
                 }
@@ -84,6 +100,8 @@ private struct AyahReaderContent: View {
                             ayah: ayah,
                             showTranslation: viewModel.showTranslation,
                             isBookmarked: viewModel.isBookmarked(ayah),
+                            arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
+                            translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
                             onBookmarkToggle: {
                                 Task { await viewModel.toggleBookmark(ayah) }
                             }
@@ -192,6 +210,8 @@ private struct AyahRow: View {
     let ayah: Ayah
     let showTranslation: Bool
     let isBookmarked: Bool
+    let arabicFontSize: CGFloat
+    let translationFontSize: CGFloat
     let onBookmarkToggle: () -> Void
 
     var body: some View {
@@ -221,7 +241,7 @@ private struct AyahRow: View {
 
             // Arabic text
             Text(ayah.textArabic)
-                .font(SafaTypography.arabicLarge)
+                .font(.system(size: arabicFontSize, weight: .medium, design: .serif))
                 .foregroundColor(SafaColors.Fallback.text)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -230,7 +250,7 @@ private struct AyahRow: View {
             // Translation
             if showTranslation {
                 Text(ayah.textTranslation)
-                    .font(SafaTypography.bodyMedium)
+                    .font(.system(size: translationFontSize))
                     .foregroundColor(SafaColors.Fallback.text)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

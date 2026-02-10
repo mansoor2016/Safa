@@ -122,6 +122,78 @@ struct QuranProgress: Codable, Hashable {
     }
 }
 
+// MARK: - Quran Font Preferences
+struct QuranFontPreferences: Codable, Equatable {
+    var arabicFontSize: ArabicFontSize
+    var translationFontSize: TranslationFontSize
+
+    init(
+        arabicFontSize: ArabicFontSize = .medium,
+        translationFontSize: TranslationFontSize = .medium
+    ) {
+        self.arabicFontSize = arabicFontSize
+        self.translationFontSize = translationFontSize
+    }
+
+    enum ArabicFontSize: String, Codable, CaseIterable {
+        case small, medium, large, extraLarge
+
+        var label: String {
+            switch self {
+            case .small: return "Small"
+            case .medium: return "Medium"
+            case .large: return "Large"
+            case .extraLarge: return "Extra Large"
+            }
+        }
+
+        var pointSize: CGFloat {
+            switch self {
+            case .small: return 22
+            case .medium: return 28
+            case .large: return 34
+            case .extraLarge: return 42
+            }
+        }
+    }
+
+    enum TranslationFontSize: String, Codable, CaseIterable {
+        case small, medium, large
+
+        var label: String {
+            switch self {
+            case .small: return "Small"
+            case .medium: return "Medium"
+            case .large: return "Large"
+            }
+        }
+
+        var pointSize: CGFloat {
+            switch self {
+            case .small: return 14
+            case .medium: return 16
+            case .large: return 20
+            }
+        }
+    }
+
+    private static let storageKey = "quranFontPreferences"
+
+    static func load() -> QuranFontPreferences {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let prefs = try? JSONDecoder().decode(QuranFontPreferences.self, from: data) else {
+            return QuranFontPreferences()
+        }
+        return prefs
+    }
+
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: Self.storageKey)
+        }
+    }
+}
+
 // MARK: - Quran Navigation Target
 struct QuranNavigationTarget: Hashable {
     let surahNumber: Int
