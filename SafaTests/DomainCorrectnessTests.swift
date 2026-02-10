@@ -446,3 +446,234 @@ final class TasbeehSessionEdgeCaseTests: XCTestCase {
         XCTAssertFalse(session.isComplete)
     }
 }
+
+// MARK: - Track Progress Correctness Tests
+
+final class TrackProgressCorrectnessTests: XCTestCase {
+
+    func test_completionPercentage_zeroLessons_returnsZero() {
+        // Guard against divide-by-zero when track has no lessons
+        let progress = TrackProgress(trackId: "empty", completedLessons: 0, totalLessons: 0)
+        XCTAssertEqual(progress.completionPercentage, 0)
+    }
+
+    func test_completionPercentage_noProgress_returnsZero() {
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 0, totalLessons: 28)
+        XCTAssertEqual(progress.completionPercentage, 0)
+    }
+
+    func test_completionPercentage_halfComplete_returnsFifty() {
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 14, totalLessons: 28)
+        XCTAssertEqual(progress.completionPercentage, 50.0, accuracy: 0.01)
+    }
+
+    func test_completionPercentage_allComplete_returnsHundred() {
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 28, totalLessons: 28)
+        XCTAssertEqual(progress.completionPercentage, 100.0, accuracy: 0.01)
+    }
+
+    func test_isComplete_false_whenPartial() {
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 27, totalLessons: 28)
+        XCTAssertFalse(progress.isComplete)
+    }
+
+    func test_isComplete_true_whenAllDone() {
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 28, totalLessons: 28)
+        XCTAssertTrue(progress.isComplete)
+    }
+
+    func test_isComplete_true_whenExceeding() {
+        // Edge case: completed > total (shouldn't happen, but verify it doesn't crash)
+        let progress = TrackProgress(trackId: "arabic", completedLessons: 30, totalLessons: 28)
+        XCTAssertTrue(progress.isComplete)
+    }
+}
+
+// MARK: - Hasanat Calculation Correctness Tests
+
+final class HasanatCalculationCorrectnessTests: XCTestCase {
+
+    let sut = CalculateHasanatUseCase()
+
+    // MARK: - Surah Point Tiers (via public calculatePoints API)
+
+    func test_surahPoints_alFatiha_getsBonus() {
+        // Al-Fatiha (surah 1) should get base + 5 = 15 + 5 = 20
+        let points = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 1))
+        XCTAssertEqual(points, 20, "Al-Fatiha: base 15 + 5 bonus")
+    }
+
+    func test_surahPoints_alBaqarah_gets5xMultiplier() {
+        // Al-Baqarah (surah 2, longest) should get base * 5 = 75
+        let points = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 2))
+        XCTAssertEqual(points, 75, "Al-Baqarah: base 15 * 5")
+    }
+
+    func test_surahPoints_longSurahs_get4x() {
+        // Surahs 3-4 get base * 4 = 60
+        let points3 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 3))
+        let points4 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 4))
+        XCTAssertEqual(points3, 60, "Surah 3: base 15 * 4")
+        XCTAssertEqual(points4, 60, "Surah 4: base 15 * 4")
+    }
+
+    func test_surahPoints_mediumSurahs_get3x() {
+        // Surahs 5-10 get base * 3 = 45
+        let points5 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 5))
+        let points10 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 10))
+        XCTAssertEqual(points5, 45, "Surah 5 boundary: base 15 * 3")
+        XCTAssertEqual(points10, 45, "Surah 10 boundary: base 15 * 3")
+    }
+
+    func test_surahPoints_semiShortSurahs_get2x() {
+        // Surahs 11-30 get base * 2 = 30
+        let points11 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 11))
+        let points30 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 30))
+        XCTAssertEqual(points11, 30, "Surah 11 boundary: base 15 * 2")
+        XCTAssertEqual(points30, 30, "Surah 30 boundary: base 15 * 2")
+    }
+
+    func test_surahPoints_shortSurahs_getBase() {
+        // Surahs 31+ get base = 15
+        let points31 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 31))
+        let points114 = sut.calculatePoints(for: .quranSurahCompleted(surahNumber: 114))
+        XCTAssertEqual(points31, 15, "Surah 31: base 15")
+        XCTAssertEqual(points114, 15, "Surah 114 (An-Nas): base 15")
+    }
+
+    // MARK: - Tasbeeh Point Buckets
+
+    func test_tasbeehPoints_zero_returnsZero() {
+        let points = sut.calculatePoints(for: .tasbeeh(count: 0))
+        XCTAssertEqual(points, 0)
+    }
+
+    func test_tasbeehPoints_belowThirtyThree_floorDivisionByTen() {
+        // 10/10 = 1, 32/10 = 3 (floor division)
+        XCTAssertEqual(sut.calculatePoints(for: .tasbeeh(count: 10)), 1)
+        XCTAssertEqual(sut.calculatePoints(for: .tasbeeh(count: 32)), 3)
+    }
+
+    func test_tasbeehPoints_exactlyThirtyThree_getsTenPoints() {
+        // Boundary: 33 enters the 33..<100 bucket = 10 points
+        let points = sut.calculatePoints(for: .tasbeeh(count: 33))
+        XCTAssertEqual(points, 10)
+    }
+
+    func test_tasbeehPoints_ninetyNine_stillTenPoints() {
+        let points = sut.calculatePoints(for: .tasbeeh(count: 99))
+        XCTAssertEqual(points, 10)
+    }
+
+    func test_tasbeehPoints_exactlyHundred_getsTwentyPoints() {
+        // Boundary: 100 enters the 100+ bucket = 20 points
+        let points = sut.calculatePoints(for: .tasbeeh(count: 100))
+        XCTAssertEqual(points, 20)
+    }
+
+    func test_tasbeehPoints_overHundred_stillTwentyPoints() {
+        let points = sut.calculatePoints(for: .tasbeeh(count: 500))
+        XCTAssertEqual(points, 20)
+    }
+
+    // MARK: - Streak Milestone Points
+
+    func test_streakPoints_day7_milestone() {
+        let points = sut.calculatePoints(for: .streakMilestone(days: 7))
+        XCTAssertEqual(points, 50)
+    }
+
+    func test_streakPoints_day30_milestone() {
+        let points = sut.calculatePoints(for: .streakMilestone(days: 30))
+        XCTAssertEqual(points, 150)
+    }
+
+    func test_streakPoints_day100_milestone() {
+        let points = sut.calculatePoints(for: .streakMilestone(days: 100))
+        XCTAssertEqual(points, 500)
+    }
+
+    func test_streakPoints_multipleOfTen_getsHalfDays() {
+        // day 20 → 20/2 = 10 points, day 50 → 50/2 = 25 points
+        XCTAssertEqual(sut.calculatePoints(for: .streakMilestone(days: 20)), 10)
+        XCTAssertEqual(sut.calculatePoints(for: .streakMilestone(days: 50)), 25)
+    }
+
+    func test_streakPoints_nonMilestone_returnsZero() {
+        // Day 5, 13, 99 are not milestones and not multiples of 10
+        XCTAssertEqual(sut.calculatePoints(for: .streakMilestone(days: 5)), 0)
+        XCTAssertEqual(sut.calculatePoints(for: .streakMilestone(days: 13)), 0)
+        XCTAssertEqual(sut.calculatePoints(for: .streakMilestone(days: 99)), 0)
+    }
+
+    // MARK: - Multiplier Logic
+
+    func test_multiplier_ramadan_doubles() {
+        let base = sut.calculatePoints(for: .prayerLogged(.fajr))
+        let withRamadan = sut.calculateWithMultipliers(for: .prayerLogged(.fajr), isRamadan: true, isFriday: false)
+        XCTAssertEqual(withRamadan, base * 2, "Ramadan should double points")
+    }
+
+    func test_multiplier_friday_eligibleAction_gets1_5x() {
+        let base = sut.calculatePoints(for: .quranPageRead)
+        let withFriday = sut.calculateWithMultipliers(for: .quranPageRead, isRamadan: false, isFriday: true)
+        XCTAssertEqual(withFriday, Int(Double(base) * 1.5), "Friday bonus = 1.5x for eligible actions")
+    }
+
+    func test_multiplier_friday_ineligibleAction_noBonus() {
+        let base = sut.calculatePoints(for: .lessonCompleted)
+        let withFriday = sut.calculateWithMultipliers(for: .lessonCompleted, isRamadan: false, isFriday: true)
+        XCTAssertEqual(withFriday, base, "Lesson completed should NOT get Friday bonus")
+    }
+
+    func test_multiplier_ramadanTakesPrecedenceOverFriday() {
+        // When both Ramadan (2x) and Friday (1.5x), Ramadan wins via max()
+        let base = sut.calculatePoints(for: .prayerLogged(.dhuhr))
+        let withBoth = sut.calculateWithMultipliers(for: .prayerLogged(.dhuhr), isRamadan: true, isFriday: true)
+        XCTAssertEqual(withBoth, base * 2, "Ramadan 2x > Friday 1.5x, so Ramadan wins")
+    }
+
+    func test_multiplier_noMultipliers_returnsBase() {
+        let base = sut.calculatePoints(for: .morningDhikrCompleted)
+        let noMultiplier = sut.calculateWithMultipliers(for: .morningDhikrCompleted, isRamadan: false, isFriday: false)
+        XCTAssertEqual(noMultiplier, base)
+    }
+
+    // MARK: - Friday Bonus Eligibility
+
+    func test_fridayBonus_eligibleActions() {
+        // These 6 actions should get Friday bonus
+        let eligibleActions: [HasanatAction] = [
+            .prayerLogged(.fajr),
+            .quranPageRead,
+            .quranSurahCompleted(surahNumber: 1),
+            .duaRecited,
+            .morningDhikrCompleted,
+            .eveningDhikrCompleted
+        ]
+
+        for action in eligibleActions {
+            let base = sut.calculatePoints(for: action)
+            let friday = sut.calculateWithMultipliers(for: action, isRamadan: false, isFriday: true)
+            XCTAssertGreaterThan(friday, base, "Action \(action) should get Friday bonus")
+        }
+    }
+
+    func test_fridayBonus_ineligibleActions() {
+        // These actions should NOT get Friday bonus
+        let ineligibleActions: [HasanatAction] = [
+            .allFivePrayersLogged,
+            .lessonCompleted,
+            .trackCompleted,
+            .invitedFriend,
+            .sharedVerse,
+            .perfectWeek
+        ]
+
+        for action in ineligibleActions {
+            let base = sut.calculatePoints(for: action)
+            let friday = sut.calculateWithMultipliers(for: action, isRamadan: false, isFriday: true)
+            XCTAssertEqual(friday, base, "Action \(action) should NOT get Friday bonus")
+        }
+    }
+}
