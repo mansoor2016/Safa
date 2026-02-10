@@ -117,11 +117,11 @@ Code scaffolding exists, needs real multi-device testing:
 - [x] Matched-geometry card-to-detail transition (Quran list → reader)
 - [ ] Contextual navigation actions + sticky filter rail
 - [ ] Adaptive tab bar visibility
-- [ ] Zero-state quality pass + resume-where-you-left-off rails
+- [x] Zero-state quality pass (improved empty state messages with next-action guidance)
 
 ### Design system tokens
-- [ ] Motion tokens (durations, curves, spring presets)
-- [ ] Semantic elevation/surface tokens for card styles
+- [x] Motion tokens (durations, curves, spring presets)
+- [x] Semantic elevation/surface tokens for card styles
 
 ### Dark mode
 - [ ] Quran reading surface comfort tuning
@@ -222,5 +222,5 @@ Code scaffolding exists, needs real multi-device testing:
 
 ---
 
-*Last Updated: February 10, 2026*
+*Last Updated: February 10, 2026 (session 2)*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*
