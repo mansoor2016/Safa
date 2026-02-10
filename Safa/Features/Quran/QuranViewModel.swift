@@ -12,6 +12,7 @@ final class QuranViewModel {
     var bookmarks: [QuranBookmark] = []
     var readingProgress: QuranProgress?
     var searchResults: [Ayah] = []
+    var completedSurahs: Set<Int> = []
     var isLoading = false
     var error: Error?
 
@@ -49,8 +50,17 @@ final class QuranViewModel {
         do {
             surahs = try await quranRepository.getAllSurahs()
             readingProgress = try await quranRepository.getReadingProgress()
+            completedSurahs = try await quranRepository.getCompletedSurahNumbers()
         } catch {
             self.error = error
+        }
+    }
+
+    func loadCompletedSurahs() async {
+        do {
+            completedSurahs = try await quranRepository.getCompletedSurahNumbers()
+        } catch {
+            // Non-critical — don't overwrite existing error
         }
     }
 

@@ -93,7 +93,10 @@ private struct QuranContentView: View {
             await viewModel.loadSurahs()
         }
         .onAppear {
-            Task { await viewModel.refreshReadingProgress() }
+            Task {
+                await viewModel.refreshReadingProgress()
+                await viewModel.loadCompletedSurahs()
+            }
         }
     }
 
@@ -119,7 +122,7 @@ private struct QuranContentView: View {
 
                 ForEach(viewModel.filteredSurahs) { surah in
                     NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
-                        SurahRow(surah: surah)
+                        SurahRow(surah: surah, isComplete: viewModel.completedSurahs.contains(surah.number))
                     }
                     .buttonStyle(.plain)
                     .matchedTransitionSource(id: surah.id, in: surahTransition)
@@ -250,6 +253,7 @@ private struct ResumeReadingCard: View {
 
 private struct SurahRow: View {
     let surah: Surah
+    let isComplete: Bool
 
     var body: some View {
         HStack(spacing: SafaSpacing.md) {
@@ -277,6 +281,13 @@ private struct SurahRow: View {
             }
 
             Spacer()
+
+            // Completion indicator
+            if isComplete {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .font(.system(size: 18))
+            }
 
             // Arabic name
             Text(surah.nameArabic)

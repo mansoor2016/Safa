@@ -218,6 +218,27 @@ final class QuranRepository: QuranRepositoryProtocol {
         UserDefaults.standard.set(data, forKey: bookmarksKey)
     }
 
+    // MARK: - Completed Surahs
+
+    func getCompletedSurahNumbers() async throws -> Set<Int> {
+        let defaults = UserDefaults.standard
+        let allKeys = defaults.dictionaryRepresentation().keys
+        var completed = Set<Int>()
+
+        for key in allKeys {
+            if key.hasPrefix(surahReadProgressKeyPrefix) {
+                guard let data = defaults.data(forKey: key),
+                      let progress = try? JSONDecoder().decode(SurahReadProgress.self, from: data),
+                      progress.isComplete else {
+                    continue
+                }
+                completed.insert(progress.surahNumber)
+            }
+        }
+
+        return completed
+    }
+
     // MARK: - Juz
 
     func getJuz(number: Int) async throws -> Juz? {

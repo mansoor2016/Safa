@@ -337,6 +337,7 @@ final class MockQuranRepository: QuranRepositoryProtocol {
     func getSurahReadProgress(surahNumber: Int) async throws -> SurahReadProgress? { nil }
     func markAyahRead(surahNumber: Int, ayahNumber: Int, totalAyahs: Int) async throws {}
     func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {}
+    func getCompletedSurahNumbers() async throws -> Set<Int> { [] }
 }
 
 // MARK: - Hadith Repository Tests

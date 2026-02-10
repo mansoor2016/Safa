@@ -484,6 +484,10 @@ final class TestableQuranRepository: QuranRepositoryProtocol {
 
     nonisolated func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {
     }
+
+    nonisolated func getCompletedSurahNumbers() async throws -> Set<Int> {
+        return []
+    }
 }
 
 // MARK: - Stub User Repository

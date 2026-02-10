@@ -86,4 +86,8 @@ protocol QuranRepositoryProtocol {
     ///   - ayahNumber: Ayah number
     ///   - note: The new note text (nil to remove)
     func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws
+
+    /// Gets the set of completed surah numbers
+    /// - Returns: Set of surah numbers (1-114) that have been completed
+    func getCompletedSurahNumbers() async throws -> Set<Int>
 }
