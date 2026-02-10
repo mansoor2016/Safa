@@ -654,6 +654,16 @@ private struct ReminderCard: View {
     }
 }
 
+// MARK: - Next Prayer Accessibility Helper
+
+func formatNextPrayerAccessibilityLabel(prayerName: String, hours: Int, minutes: Int) -> String {
+    var parts: [String] = []
+    if hours > 0 { parts.append("\(hours) hour\(hours == 1 ? "" : "s")") }
+    if minutes > 0 { parts.append("\(minutes) minute\(minutes == 1 ? "" : "s")") }
+    let timeText = parts.isEmpty ? "now" : "in \(parts.joined(separator: " "))"
+    return "Next prayer: \(prayerName) \(timeText)"
+}
+
 // MARK: - Next Prayer Chip (Sticky Toolbar)
 
 private struct NextPrayerChip: View {
@@ -709,11 +719,11 @@ private struct NextPrayerChip: View {
 
     private var accessibilityText: String {
         let (hours, minutes, _) = prayer.time.countdown()
-        var parts: [String] = []
-        if hours > 0 { parts.append("\(hours) hour\(hours == 1 ? "" : "s")") }
-        if minutes > 0 { parts.append("\(minutes) minute\(minutes == 1 ? "" : "s")") }
-        let timeText = parts.isEmpty ? "now" : "in \(parts.joined(separator: " "))"
-        return "Next prayer: \(prayer.type.displayName) \(timeText)"
+        return formatNextPrayerAccessibilityLabel(
+            prayerName: prayer.type.displayName,
+            hours: hours,
+            minutes: minutes
+        )
     }
 }
 
