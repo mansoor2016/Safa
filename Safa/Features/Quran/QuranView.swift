@@ -34,6 +34,8 @@ private struct QuranContentView: View {
     @State private var searchText = ""
     @State private var selectedTab = 0
     @State private var showingSearch = false
+    @Namespace private var surahTransition
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
@@ -73,6 +75,10 @@ private struct QuranContentView: View {
             QuranSearchView()
                 .fullSheet()
         }
+        .navigationDestination(for: Surah.self) { surah in
+            AyahReaderView(surahNumber: surah.number)
+                .navigationTransition(.zoom(sourceID: surah.id, in: surahTransition))
+        }
         .searchable(text: $searchText, prompt: "Search ayahs...")
         .onChange(of: searchText) { _, newValue in
             Task {
@@ -105,9 +111,12 @@ private struct QuranContentView: View {
                 }
 
                 ForEach(viewModel.filteredSurahs) { surah in
-                    SurahRow(surah: surah) {
-                        viewModel.selectedSurah = surah
+                    NavigationLink(value: surah) {
+                        SurahRow(surah: surah)
                     }
+                    .buttonStyle(.plain)
+                    .matchedTransitionSource(id: surah.id, in: surahTransition)
+
                     Divider()
                         .padding(.leading, SafaSpacing.xl + SafaSpacing.md)
                 }
@@ -208,46 +217,42 @@ private struct ResumeReadingCard: View {
 
 private struct SurahRow: View {
     let surah: Surah
-    let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: SafaSpacing.md) {
-                // Surah number
-                Text("\(surah.number)")
-                    .font(SafaTypography.labelMedium)
-                    .foregroundColor(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Color.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+        HStack(spacing: SafaSpacing.md) {
+            // Surah number
+            Text("\(surah.number)")
+                .font(SafaTypography.labelMedium)
+                .foregroundColor(.white)
+                .frame(width: 36, height: 36)
+                .background(Color.accentColor)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                // Surah info
-                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                    Text(surah.nameEnglish)
-                        .font(SafaTypography.bodyLarge)
-                        .foregroundColor(SafaColors.Fallback.text)
-
-                    HStack(spacing: SafaSpacing.xs) {
-                        Text(surah.revelationType.rawValue)
-                        Text("•")
-                        Text("\(surah.ayahCount) ayahs")
-                    }
-                    .font(SafaTypography.bodySmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
-
-                Spacer()
-
-                // Arabic name
-                Text(surah.nameArabic)
-                    .font(SafaTypography.arabicMedium)
+            // Surah info
+            VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                Text(surah.nameEnglish)
+                    .font(SafaTypography.bodyLarge)
                     .foregroundColor(SafaColors.Fallback.text)
+
+                HStack(spacing: SafaSpacing.xs) {
+                    Text(surah.revelationType.rawValue)
+                    Text("•")
+                    Text("\(surah.ayahCount) ayahs")
+                }
+                .font(SafaTypography.bodySmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
             }
-            .padding(.horizontal, SafaSpacing.md)
-            .padding(.vertical, SafaSpacing.sm)
-            .contentShape(Rectangle())
+
+            Spacer()
+
+            // Arabic name
+            Text(surah.nameArabic)
+                .font(SafaTypography.arabicMedium)
+                .foregroundColor(SafaColors.Fallback.text)
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.sm)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Surah \(surah.number), \(surah.nameEnglish), \(surah.revelationType.rawValue), \(surah.ayahCount) verses")
         .accessibilityHint("Double tap to read this surah")
