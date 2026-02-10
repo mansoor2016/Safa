@@ -73,8 +73,6 @@ final class AyahReaderViewModel {
                     .map { "\($0.surahNumber):\($0.ayahNumber)" }
             )
 
-            try await repository.updateProgress(surah: surahNumber, ayah: 1)
-
             surahReadProgress = try await repository.getSurahReadProgress(surahNumber: surahNumber)
                 ?? SurahReadProgress(surahNumber: surahNumber, totalAyahs: ayahs.count)
 
@@ -91,14 +89,19 @@ final class AyahReaderViewModel {
 
     func markAyahVisible(_ ayahNumber: Int) {
         guard surahReadProgress != nil else { return }
-        guard !(surahReadProgress?.readAyahs.contains(ayahNumber) ?? false) else { return }
-        surahReadProgress?.readAyahs.insert(ayahNumber)
+        let isNewAyah = !(surahReadProgress?.readAyahs.contains(ayahNumber) ?? false)
+        if isNewAyah {
+            surahReadProgress?.readAyahs.insert(ayahNumber)
+        }
         Task {
-            try? await repository.markAyahRead(
-                surahNumber: surahNumber,
-                ayahNumber: ayahNumber,
-                totalAyahs: ayahs.count
-            )
+            if isNewAyah {
+                try? await repository.markAyahRead(
+                    surahNumber: surahNumber,
+                    ayahNumber: ayahNumber,
+                    totalAyahs: ayahs.count
+                )
+            }
+            try? await repository.updateProgress(surah: surahNumber, ayah: ayahNumber)
         }
     }
 

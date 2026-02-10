@@ -54,6 +54,14 @@ final class QuranViewModel {
         }
     }
 
+    func refreshReadingProgress() async {
+        do {
+            readingProgress = try await quranRepository.getReadingProgress()
+        } catch {
+            // Non-critical — don't overwrite existing error
+        }
+    }
+
     func loadJuz() async {
         guard juzList.isEmpty else { return }
 

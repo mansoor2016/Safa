@@ -155,6 +155,9 @@
     "%lld of 5 prayers completed" : {
 
     },
+    "%lld percent complete" : {
+
+    },
     "%lld results" : {
 
     },
@@ -373,6 +376,9 @@
     "Activity" : {
 
     },
+    "Add a note..." : {
+
+    },
     "Add any notes..." : {
 
     },
@@ -427,6 +433,9 @@
     "Arabic" : {
 
     },
+    "Arabic Text Size" : {
+
+    },
     "Arabic, Tajweed, and Islamic studies lessons are coming soon." : {
 
     },
@@ -472,6 +481,9 @@
           }
         }
       }
+    },
+    "Ayah %lld, bookmarked" : {
+
     },
     "Back" : {
 
@@ -739,7 +751,13 @@
     "Done" : {
 
     },
+    "Double tap to bookmark" : {
+
+    },
     "Double tap to count one %@" : {
+
+    },
+    "Double tap to edit bookmark note" : {
 
     },
     "Double tap to go to this ayah" : {
@@ -752,6 +770,9 @@
 
     },
     "Double tap to read this surah" : {
+
+    },
+    "Double tap to remove bookmark" : {
 
     },
     "Double tap to remove this bookmark" : {
@@ -791,6 +812,12 @@
 
     },
     "Each surah is announced with its number, name, revelation type, and verse count. Arabic text uses proper right-to-left reading." : {
+
+    },
+    "Edit note" : {
+
+    },
+    "Edit Note" : {
 
     },
     "Eid al-Adha" : {
@@ -1321,6 +1348,9 @@
     "Next Prayer" : {
 
     },
+    "Next Surah" : {
+
+    },
     "Night of Power Guide" : {
 
     },
@@ -1367,6 +1397,9 @@
 
     },
     "Not set" : {
+
+    },
+    "Note for %@" : {
 
     },
     "Note: For complex religious rulings, please consult a qualified scholar." : {
@@ -1426,7 +1459,13 @@
     "Open the tasbeeh counter" : {
 
     },
+    "Pause auto-scroll" : {
+
+    },
     "Permission denied to access this data." : {
+
+    },
+    "Play auto-scroll" : {
 
     },
     "Playback Speed" : {
@@ -1686,9 +1725,6 @@
     "Schedule" : {
 
     },
-    "Search ayahs..." : {
-
-    },
     "Search duas..." : {
 
     },
@@ -1702,6 +1738,9 @@
 
     },
     "Search Quran..." : {
+
+    },
+    "Search surahs..." : {
 
     },
     "Searching..." : {
@@ -1828,6 +1867,9 @@
 
     },
     "Speech recognition is not available." : {
+
+    },
+    "Speed %@" : {
 
     },
     "Spread the Word" : {
@@ -2088,6 +2130,9 @@
 
     },
     "Translation Language" : {
+
+    },
+    "Translation Text Size" : {
 
     },
     "Transliteration" : {

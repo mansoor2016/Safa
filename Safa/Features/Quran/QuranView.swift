@@ -92,6 +92,9 @@ private struct QuranContentView: View {
         .task {
             await viewModel.loadSurahs()
         }
+        .onAppear {
+            Task { await viewModel.refreshReadingProgress() }
+        }
     }
 
     // MARK: - Surah List
