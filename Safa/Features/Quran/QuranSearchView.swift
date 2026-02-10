@@ -12,15 +12,7 @@ final class QuranSearchViewModel {
     var searchResults: [QuranSearchResult] = []
     var isSearching: Bool = false
     var recentSearches: [String] = []
-    var selectedFilter: SearchFilter = .all
     private let repository: QuranRepositoryProtocol
-
-    enum SearchFilter: String, CaseIterable {
-        case all = "All"
-        case arabic = "Arabic"
-        case translation = "Translation"
-        case surahName = "Surah Name"
-    }
 
     init(repository: QuranRepositoryProtocol? = nil) {
         self.repository = repository ?? Dependencies.shared.quranRepository
@@ -44,68 +36,30 @@ final class QuranSearchViewModel {
         }
 
         do {
-            // Search based on filter
-            switch selectedFilter {
-            case .all:
-                // Search both Arabic and English via FTS, plus surah names
-                let ayahs = try await repository.searchAyahs(query: searchText)
-                let surahs = try await repository.getAllSurahs()
+            // Search both Arabic and English via FTS, plus surah names
+            let ayahs = try await repository.searchAyahs(query: searchText)
+            let surahs = try await repository.getAllSurahs()
 
-                searchResults = ayahs.map { ayah in
-                    let surahName = surahs.first(where: { $0.id == ayah.surahNumber })?.nameEnglish ?? "Unknown"
-                    return QuranSearchResult(
-                        surahNumber: ayah.surahNumber,
-                        surahName: surahName,
-                        ayahNumber: ayah.ayahNumber,
-                        arabicText: ayah.textArabic,
-                        translation: ayah.textTranslation
-                    )
-                }
+            searchResults = ayahs.map { ayah in
+                let surahName = surahs.first(where: { $0.id == ayah.surahNumber })?.nameEnglish ?? "Unknown"
+                return QuranSearchResult(
+                    surahNumber: ayah.surahNumber,
+                    surahName: surahName,
+                    ayahNumber: ayah.ayahNumber,
+                    arabicText: ayah.textArabic,
+                    translation: ayah.textTranslation
+                )
+            }
 
-                // Also search for matching surah names
-                let matchingSurahs = surahs.filter { surah in
-                    surah.nameEnglish.lowercased().contains(searchText.lowercased()) ||
-                    surah.nameTransliteration.lowercased().contains(searchText.lowercased())
-                }
+            // Also search for matching surah names
+            let matchingSurahs = surahs.filter { surah in
+                surah.nameEnglish.lowercased().contains(searchText.lowercased()) ||
+                surah.nameTransliteration.lowercased().contains(searchText.lowercased())
+            }
 
-                // Add first ayah of matching surahs
-                for surah in matchingSurahs {
-                    if !searchResults.contains(where: { $0.surahNumber == surah.id && $0.ayahNumber == 1 }) {
-                        if let firstAyah = try await repository.getAyah(surah: surah.id, ayah: 1) {
-                            searchResults.append(QuranSearchResult(
-                                surahNumber: surah.id,
-                                surahName: surah.nameEnglish,
-                                ayahNumber: 1,
-                                arabicText: firstAyah.textArabic,
-                                translation: firstAyah.textTranslation
-                            ))
-                        }
-                    }
-                }
-
-            case .arabic, .translation:
-                let ayahs = try await repository.searchAyahs(query: searchText)
-                let surahs = try await repository.getAllSurahs()
-                searchResults = ayahs.map { ayah in
-                    let surahName = surahs.first(where: { $0.id == ayah.surahNumber })?.nameEnglish ?? "Unknown"
-                    return QuranSearchResult(
-                        surahNumber: ayah.surahNumber,
-                        surahName: surahName,
-                        ayahNumber: ayah.ayahNumber,
-                        arabicText: ayah.textArabic,
-                        translation: ayah.textTranslation
-                    )
-                }
-
-            case .surahName:
-                let surahs = try await repository.getAllSurahs()
-                let matchingSurahs = surahs.filter { surah in
-                    surah.nameEnglish.lowercased().contains(searchText.lowercased()) ||
-                    surah.nameTransliteration.lowercased().contains(searchText.lowercased())
-                }
-
-                searchResults = []
-                for surah in matchingSurahs {
+            // Add first ayah of matching surahs
+            for surah in matchingSurahs {
+                if !searchResults.contains(where: { $0.surahNumber == surah.id && $0.ayahNumber == 1 }) {
                     if let firstAyah = try await repository.getAyah(surah: surah.id, ayah: 1) {
                         searchResults.append(QuranSearchResult(
                             surahNumber: surah.id,
@@ -166,9 +120,6 @@ struct QuranSearchView: View {
                 // Search bar
                 searchBar
 
-                // Filter pills
-                filterPills
-
                 // Content
                 if viewModel.searchText.isEmpty {
                     recentSearchesView
@@ -222,29 +173,6 @@ struct QuranSearchView: View {
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding()
-    }
-
-    // MARK: - Filter Pills
-
-    private var filterPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(QuranSearchViewModel.SearchFilter.allCases, id: \.self) { filter in
-                    FilterPill(
-                        title: filter.rawValue,
-                        isSelected: viewModel.selectedFilter == filter,
-                        action: {
-                            viewModel.selectedFilter = filter
-                            if !viewModel.searchText.isEmpty {
-                                Task { await viewModel.search() }
-                            }
-                        }
-                    )
-                }
-            }
-            .padding(.horizontal)
-        }
-        .padding(.bottom, 8)
     }
 
     // MARK: - Recent Searches
@@ -352,7 +280,6 @@ struct QuranSearchView: View {
 
             ForEach(viewModel.searchResults) { result in
                 NavigationLink {
-                    // Navigate to ayah reader
                     AyahDetailView(result: result)
                 } label: {
                     SearchResultRow(result: result, searchQuery: viewModel.searchText)
@@ -360,27 +287,6 @@ struct QuranSearchView: View {
             }
         }
         .listStyle(.plain)
-    }
-}
-
-// MARK: - Filter Pill
-
-struct FilterPill: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                .foregroundStyle(isSelected ? .white : .primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.green : Color(.secondarySystemBackground))
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -469,47 +375,12 @@ struct AyahDetailView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Actions
-                HStack(spacing: 16) {
-                    ActionButton(icon: "bookmark", title: "Bookmark")
-                    ActionButton(icon: "square.and.arrow.up", title: "Share")
-                    ActionButton(icon: "speaker.wave.2", title: "Play")
-                    ActionButton(icon: "doc.on.doc", title: "Copy")
-                }
-                .padding(.top)
-
                 Spacer()
             }
             .padding()
         }
         .navigationTitle(result.reference)
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-// MARK: - Action Button
-
-struct ActionButton: View {
-    let icon: String
-    let title: String
-
-    var body: some View {
-        Button {
-            // Action
-        } label: {
-            VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.title2)
-
-                Text(title)
-                    .font(.caption)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
     }
 }
 
