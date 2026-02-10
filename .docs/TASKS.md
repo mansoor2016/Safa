@@ -19,7 +19,8 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 ### UI Polish
 - [ ] Contextual navigation actions + sticky filter rail
 - [ ] Adaptive tab bar visibility (hide on deliberate downward scroll)
-- [ ] Home intent resolver (context-aware quick actions + resume cards)
+- [ ] Home intent resolver (context-aware quick actions based on time/streak)
+- [x] Resume-where-you-left-off card on Home (Quran reading progress)
 
 ### Dark Mode
 - [ ] Quran reading surface comfort tuning

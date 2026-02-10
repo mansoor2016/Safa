@@ -8,18 +8,20 @@ struct QuranView: View {
     @Environment(Dependencies.self) private var dependencies
     @State private var viewModel: QuranViewModel?
     @State private var path = NavigationPath()
+    @Namespace private var surahZoom
 
     var body: some View {
         NavigationStack(path: $path) {
             Group {
                 if let viewModel = viewModel {
-                    QuranContentView(viewModel: viewModel, path: $path)
+                    QuranContentView(viewModel: viewModel, path: $path, surahZoom: surahZoom)
                 } else {
                     QuranSkeletonView()
                 }
             }
             .navigationDestination(for: QuranNavigationTarget.self) { target in
                 AyahReaderView(surahNumber: target.surahNumber, startAyah: target.startAyah)
+                    .navigationTransition(.zoom(sourceID: target.surahNumber, in: surahZoom))
             }
         }
         .task {
@@ -38,12 +40,12 @@ struct QuranView: View {
 private struct QuranContentView: View {
     @Bindable var viewModel: QuranViewModel
     @Binding var path: NavigationPath
+    var surahZoom: Namespace.ID
     @State private var searchText = ""
     @State private var selectedTab = 0
     @State private var showingSearch = false
     @State private var editingBookmark: QuranBookmark?
     @State private var editNoteText = ""
-    @Namespace private var surahTransition
 
     var body: some View {
         VStack(spacing: 0) {
@@ -125,7 +127,7 @@ private struct QuranContentView: View {
                         SurahRow(surah: surah, isComplete: viewModel.completedSurahs.contains(surah.number))
                     }
                     .buttonStyle(.plain)
-                    .matchedTransitionSource(id: surah.id, in: surahTransition)
+                    .matchedTransitionSource(id: surah.number, in: surahZoom)
 
                     Divider()
                         .padding(.leading, SafaSpacing.xl + SafaSpacing.md)

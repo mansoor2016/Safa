@@ -14,6 +14,7 @@ struct HomeView: View {
     @State private var loggedPrayers: Set<PrayerType> = []
     @State private var hijriDate = ""
     @State private var dailyVerse: Ayah?
+    @State private var quranProgress: QuranProgress?
     @State private var isRamadan = false
     @State private var showRamadanBanner = true
     @State private var suhoorTime: Date?
@@ -56,6 +57,11 @@ struct HomeView: View {
 
                 // Quick actions
                 quickActions
+
+                // Resume where you left off
+                if let progress = quranProgress, progress.lastSurah > 0 {
+                    resumeQuranCard(progress)
+                }
 
                 // Ramadan banner (collapsible, reappears next day)
                 ramadanBannerSection
@@ -352,6 +358,36 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Resume Card
+
+    private func resumeQuranCard(_ progress: QuranProgress) -> some View {
+        InteractiveCard(action: {
+            router.selectedTab = "quran"
+        }) {
+            HStack(spacing: SafaSpacing.md) {
+                Image(systemName: "book.fill")
+                    .font(.title2)
+                    .foregroundStyle(.green)
+                    .frame(width: 40)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Continue Reading")
+                        .font(SafaTypography.labelMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                    Text("Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
+                        .font(SafaTypography.titleSmall)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
     // MARK: - Progress Card
 
     private var progressCard: some View {
@@ -484,6 +520,9 @@ struct HomeView: View {
         } catch {
             loadError = error
         }
+
+        // Load Quran reading progress for resume card
+        quranProgress = try? await dependencies.quranRepository.getReadingProgress()
 
         // Load daily verse
         dailyVerse = Ayah.alFatiha.randomElement()
