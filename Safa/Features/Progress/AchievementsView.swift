@@ -55,6 +55,7 @@ struct AchievementsView: View {
     @State private var viewModel = AchievementsViewModel()
     @State private var selectedAchievement: Achievement?
     @State private var showingDetail = false
+    @ScaledMetric(relativeTo: .title) private var badgeSize: CGFloat = 120
 
     var body: some View {
         ScrollView {
@@ -86,12 +87,12 @@ struct AchievementsView: View {
             ZStack {
                 Circle()
                     .stroke(Color(.systemGray4), lineWidth: 12)
-                    .frame(width: 120, height: 120)
+                    .frame(width: badgeSize, height: badgeSize)
 
                 Circle()
                     .trim(from: 0, to: viewModel.progressPercentage)
                     .stroke(Color.yellow, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                    .frame(width: 120, height: 120)
+                    .frame(width: badgeSize, height: badgeSize)
                     .rotationEffect(.degrees(-90))
 
                 VStack(spacing: 2) {

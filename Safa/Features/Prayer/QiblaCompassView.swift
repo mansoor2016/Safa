@@ -18,6 +18,7 @@ struct QiblaCompassView: View {
     @State private var compassAccuracy: CompassAccuracy = .good
     @State private var headingTimedOut = false
     @State private var lastHeadingUpdate = Date()
+    @ScaledMetric(relativeTo: .largeTitle) private var compassSize: CGFloat = 280
 
     private enum CompassAccuracy {
         case good       // headingAccuracy <= 25
@@ -97,7 +98,7 @@ struct QiblaCompassView: View {
             // Kaaba image/icon
             VStack(spacing: SafaSpacing.xs) {
                 Image(systemName: "building.columns.fill")
-                    .font(.system(size: 40))
+                    .font(SafaTypography.displaySmall)
                     .foregroundColor(.accentColor)
                     .accessibilityHidden(true)
 

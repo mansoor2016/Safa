@@ -185,6 +185,7 @@ struct WeeklyPrayerStats {
 struct PrayerLogView: View {
     @State private var viewModel = PrayerLogViewModel()
     @State private var selectedTab = 0
+    @ScaledMetric(relativeTo: .title) private var statsCircleSize: CGFloat = 140
 
     var body: some View {
         NavigationStack {
@@ -377,14 +378,14 @@ struct PrayerLogView: View {
 
                 VStack {
                     Text("\(Int(viewModel.weeklyStats.completionPercentage))%")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(SafaTypography.counterSmall)
 
                     Text("Complete")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 140, height: 140)
+            .frame(width: statsCircleSize, height: statsCircleSize)
 
             // Stats grid
             HStack(spacing: 0) {

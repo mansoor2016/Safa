@@ -37,7 +37,7 @@ struct DuaCategoriesView: View {
     private var headerView: some View {
         VStack(spacing: 8) {
             Text("أدعية وأذكار")
-                .font(.system(size: 28, weight: .bold, design: .serif))
+                .font(SafaTypography.arabicMedium)
                 .environment(\.layoutDirection, .rightToLeft)
                 .accessibilityArabic()
 

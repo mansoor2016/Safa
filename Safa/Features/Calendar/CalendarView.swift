@@ -138,6 +138,7 @@ struct CalendarView: View {
                     }
                 }
             }
+            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         }
         .padding()
         .background(Color(UIColor.secondarySystemBackground))

@@ -74,7 +74,7 @@ struct PrayerProgressIndicator: View {
 
             // Numeric count - always prominent
             Text("\(completedCount)/5")
-                .font(.system(size: 14, weight: .bold))
+                .font(SafaTypography.bodyMedium)
                 .foregroundColor(completedCount > 0 ? .green : .primary)
         }
         .padding(.horizontal, 10)
@@ -87,6 +87,7 @@ struct PrayerProgressIndicator: View {
             Capsule()
                 .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
         )
+        .dynamicTypeSize(...DynamicTypeSize.accessibility3)
     }
 
     private func compactDot(index: Int) -> some View {
@@ -168,7 +169,7 @@ struct PrayerProgressIndicator: View {
             // Numeric status
             HStack {
                 Text("\(completedCount) of 5 prayers completed")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(SafaTypography.bodyMedium)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
 
                 if completedCount == 5 {
@@ -224,7 +225,8 @@ struct PrayerProgressIndicator: View {
 
                 // Prayer name (full)
                 Text(prayerType.displayName)
-                    .font(.system(size: 10, weight: isNext ? .semibold : .regular))
+                    .font(SafaTypography.labelSmall)
+                    .fontWeight(isNext ? .semibold : .regular)
                     .foregroundColor(isLogged ? .green : (isNext ? .accentColor : SafaColors.Fallback.secondaryText))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)

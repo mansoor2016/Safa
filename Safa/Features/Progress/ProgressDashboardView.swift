@@ -86,6 +86,7 @@ final class ProgressDashboardViewModel {
 struct ProgressDashboardView: View {
     @State private var viewModel = ProgressDashboardViewModel()
     @State private var selectedTimeRange: TimeRange = .week
+    @ScaledMetric(relativeTo: .title) private var levelRingSize: CGFloat = 80
 
     enum TimeRange: String, CaseIterable {
         case week = "Week"
@@ -143,12 +144,12 @@ struct ProgressDashboardView: View {
                 ZStack {
                     Circle()
                         .stroke(Color.accentColor.opacity(0.2), lineWidth: 8)
-                        .frame(width: 80, height: 80)
+                        .frame(width: levelRingSize, height: levelRingSize)
 
                     Circle()
                         .trim(from: 0, to: viewModel.levelProgress)
                         .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                        .frame(width: 80, height: 80)
+                        .frame(width: levelRingSize, height: levelRingSize)
                         .rotationEffect(.degrees(-90))
 
                     Text("\(Int(viewModel.levelProgress * 100))%")

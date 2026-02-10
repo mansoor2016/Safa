@@ -257,6 +257,7 @@ struct RamadanView: View {
                         }
                     }
                 }
+                .dynamicTypeSize(...DynamicTypeSize.accessibility3)
 
                 if currentDay <= totalDays {
                     Button {

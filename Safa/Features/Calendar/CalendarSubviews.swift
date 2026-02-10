@@ -26,7 +26,7 @@ struct CalendarDayCell: View {
 
                 let (_, _, hijriDay) = hijriConverter.hijriComponents(from: date)
                 Text("\(hijriDay)")
-                    .font(.system(size: 8))
+                    .font(SafaTypography.labelSmall)
                     .foregroundColor(isSelected ? .white.opacity(0.7) : SafaColors.Fallback.tertiaryText)
 
                 if hasEvent {

@@ -14,6 +14,7 @@ struct TasbeehCounterView: View {
     @State private var targetCount: Int
     @State private var isComplete = false
     @State private var showSettings = false
+    @ScaledMetric(relativeTo: .largeTitle) private var ringSize: CGFloat = 250
 
     init(dhikr: CommonDhikr) {
         self.dhikr = dhikr
@@ -104,7 +105,7 @@ struct TasbeehCounterView: View {
             // Progress ring
             Circle()
                 .stroke(Color.gray.opacity(0.2), lineWidth: 12)
-                .frame(width: 250, height: 250)
+                .frame(width: ringSize, height: ringSize)
                 .accessibilityHidden(true)
 
             Circle()
@@ -113,7 +114,7 @@ struct TasbeehCounterView: View {
                     Color.accentColor,
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
-                .frame(width: 250, height: 250)
+                .frame(width: ringSize, height: ringSize)
                 .rotationEffect(.degrees(-90))
                 .animation(.easeInOut(duration: 0.2), value: count)
                 .accessibilityHidden(true)
@@ -157,7 +158,7 @@ struct TasbeehCounterView: View {
                 .frame(width: 120, height: 120)
                 .overlay(
                     Image(systemName: "plus")
-                        .font(.system(size: 40, weight: .medium))
+                        .font(.system(size: 36, weight: .medium))
                         .foregroundColor(.white)
                 )
                 .shadow(color: Color.accentColor.opacity(0.3), radius: 10, y: 5)

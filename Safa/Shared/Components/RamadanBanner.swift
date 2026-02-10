@@ -546,7 +546,7 @@ struct LastTenNightsBanner: View {
 
             if oddNights.contains(night) {
                 Image(systemName: "star.fill")
-                    .font(.system(size: 6))
+                    .font(SafaTypography.labelSmall)
                     .foregroundColor(.yellow.opacity(0.8))
             }
         }

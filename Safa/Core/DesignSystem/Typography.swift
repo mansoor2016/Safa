@@ -3,6 +3,9 @@
 // DEPENDENCIES: SwiftUI
 
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
 // MARK: - Font Configuration
 // ============================================================================
@@ -42,73 +45,121 @@ enum FontConfig {
 
 enum SafaTypography {
     // MARK: - Display Styles (Large headers, prayer times)
-    static let displayLarge = makeFont(size: 57, weight: .regular, design: FontConfig.displayDesign)
-    static let displayMedium = makeFont(size: 45, weight: .regular, design: FontConfig.displayDesign)
-    static let displaySmall = makeFont(size: 36, weight: .regular, design: FontConfig.displayDesign)
+    static var displayLarge: Font { makeFont(size: 57, weight: .regular, design: FontConfig.displayDesign, relativeTo: .largeTitle) }
+    static var displayMedium: Font { makeFont(size: 45, weight: .regular, design: FontConfig.displayDesign, relativeTo: .largeTitle) }
+    static var displaySmall: Font { makeFont(size: 36, weight: .regular, design: FontConfig.displayDesign, relativeTo: .largeTitle) }
 
     // MARK: - Headline Styles (Section headers)
-    static let headlineLarge = makeFont(size: 32, weight: .semibold, design: FontConfig.headlineDesign)
-    static let headlineMedium = makeFont(size: 28, weight: .semibold, design: FontConfig.headlineDesign)
-    static let headlineSmall = makeFont(size: 24, weight: .semibold, design: FontConfig.headlineDesign)
+    static var headlineLarge: Font { makeFont(size: 32, weight: .semibold, design: FontConfig.headlineDesign, relativeTo: .title1) }
+    static var headlineMedium: Font { makeFont(size: 28, weight: .semibold, design: FontConfig.headlineDesign, relativeTo: .title2) }
+    static var headlineSmall: Font { makeFont(size: 24, weight: .semibold, design: FontConfig.headlineDesign, relativeTo: .title3) }
 
     // MARK: - Title Styles (Card titles, list headers)
-    static let titleLarge = makeFont(size: 22, weight: .semibold, design: FontConfig.bodyDesign)
-    static let titleMedium = makeFont(size: 16, weight: .semibold, design: FontConfig.bodyDesign)
-    static let titleSmall = makeFont(size: 14, weight: .semibold, design: FontConfig.bodyDesign)
+    static var titleLarge: Font { makeFont(size: 22, weight: .semibold, design: FontConfig.bodyDesign, relativeTo: .headline) }
+    static var titleMedium: Font { makeFont(size: 16, weight: .semibold, design: FontConfig.bodyDesign, relativeTo: .headline) }
+    static var titleSmall: Font { makeFont(size: 14, weight: .semibold, design: FontConfig.bodyDesign, relativeTo: .subheadline) }
 
     // MARK: - Body Styles (General text)
-    static let bodyLarge = makeFont(size: 16, weight: .regular, design: FontConfig.bodyDesign)
-    static let bodyMedium = makeFont(size: 14, weight: .regular, design: FontConfig.bodyDesign)
-    static let bodySmall = makeFont(size: 12, weight: .regular, design: FontConfig.bodyDesign)
+    static var bodyLarge: Font { makeFont(size: 16, weight: .regular, design: FontConfig.bodyDesign, relativeTo: .body) }
+    static var bodyMedium: Font { makeFont(size: 14, weight: .regular, design: FontConfig.bodyDesign, relativeTo: .callout) }
+    static var bodySmall: Font { makeFont(size: 12, weight: .regular, design: FontConfig.bodyDesign, relativeTo: .footnote) }
 
     // MARK: - Label Styles (Buttons, captions)
-    static let labelLarge = makeFont(size: 14, weight: .medium, design: FontConfig.bodyDesign)
-    static let labelMedium = makeFont(size: 12, weight: .medium, design: FontConfig.bodyDesign)
-    static let labelSmall = makeFont(size: 11, weight: .medium, design: FontConfig.bodyDesign)
+    static var labelLarge: Font { makeFont(size: 14, weight: .medium, design: FontConfig.bodyDesign, relativeTo: .callout) }
+    static var labelMedium: Font { makeFont(size: 12, weight: .medium, design: FontConfig.bodyDesign, relativeTo: .footnote) }
+    static var labelSmall: Font { makeFont(size: 11, weight: .medium, design: FontConfig.bodyDesign, relativeTo: .caption1) }
 
     // MARK: - Quran Arabic Styles (Uthmanic script)
-    static let quranLarge = makeArabicFont(size: 36, forQuran: true)
-    static let quranMedium = makeArabicFont(size: 28, forQuran: true)
-    static let quranSmall = makeArabicFont(size: 22, forQuran: true)
+    static var quranLarge: Font { makeArabicFont(size: 36, forQuran: true, relativeTo: .title1) }
+    static var quranMedium: Font { makeArabicFont(size: 28, forQuran: true, relativeTo: .title2) }
+    static var quranSmall: Font { makeArabicFont(size: 22, forQuran: true, relativeTo: .title3) }
 
     // MARK: - General Arabic Styles (Duas, Hadith, UI)
-    static let arabicLarge = makeArabicFont(size: 32, forQuran: false)
-    static let arabicMedium = makeArabicFont(size: 24, forQuran: false)
-    static let arabicSmall = makeArabicFont(size: 18, forQuran: false)
+    static var arabicLarge: Font { makeArabicFont(size: 32, forQuran: false, relativeTo: .title1) }
+    static var arabicMedium: Font { makeArabicFont(size: 24, forQuran: false, relativeTo: .title3) }
+    static var arabicSmall: Font { makeArabicFont(size: 18, forQuran: false, relativeTo: .headline) }
 
     // MARK: - Counter Display (Tasbeeh, streaks)
-    static let counterLarge = makeFont(size: 72, weight: .bold, design: FontConfig.counterDesign)
-    static let counterMedium = makeFont(size: 48, weight: .bold, design: FontConfig.counterDesign)
-    static let counterSmall = makeFont(size: 36, weight: .bold, design: FontConfig.counterDesign)
+    static var counterLarge: Font { makeFont(size: 72, weight: .bold, design: FontConfig.counterDesign, relativeTo: .largeTitle) }
+    static var counterMedium: Font { makeFont(size: 48, weight: .bold, design: FontConfig.counterDesign, relativeTo: .largeTitle) }
+    static var counterSmall: Font { makeFont(size: 36, weight: .bold, design: FontConfig.counterDesign, relativeTo: .largeTitle) }
 
     // MARK: - Reading Styles (Translations, long content)
-    static let readingLarge = makeReadingFont(size: 18)
-    static let readingMedium = makeReadingFont(size: 16)
-    static let readingSmall = makeReadingFont(size: 14)
+    static var readingLarge: Font { makeReadingFont(size: 18, relativeTo: .body) }
+    static var readingMedium: Font { makeReadingFont(size: 16, relativeTo: .callout) }
+    static var readingSmall: Font { makeReadingFont(size: 14, relativeTo: .footnote) }
 
     // MARK: - Font Builders
 
-    private static func makeFont(size: CGFloat, weight: Font.Weight, design: Font.Design) -> Font {
+    private static func makeFont(size: CGFloat, weight: Font.Weight, design: Font.Design, relativeTo textStyle: UIFont.TextStyle = .body) -> Font {
         if let fontName = FontConfig.englishUIFontName {
-            return Font.custom(fontName, size: size).weight(weight)
+            return Font.custom(fontName, size: size, relativeTo: mapTextStyle(textStyle))
+                .weight(weight)
         }
-        return Font.system(size: size, weight: weight, design: design)
+        let uiWeight = weightMapping[weight] ?? .regular
+        var uiFont = UIFont.systemFont(ofSize: size, weight: uiWeight)
+        if let descriptor = uiFont.fontDescriptor.withDesign(designMapping[design] ?? .default) {
+            uiFont = UIFont(descriptor: descriptor, size: size)
+        }
+        return Font(UIFontMetrics(forTextStyle: textStyle).scaledFont(for: uiFont))
     }
 
-    private static func makeArabicFont(size: CGFloat, forQuran: Bool) -> Font {
-        let fontName = forQuran ? FontConfig.quranFontName : FontConfig.arabicFontName
-        if let name = fontName {
-            return Font.custom(name, size: size)
+    private static func makeArabicFont(size: CGFloat, forQuran: Bool, relativeTo textStyle: UIFont.TextStyle = .body) -> Font {
+        if let name = (forQuran ? FontConfig.quranFontName : FontConfig.arabicFontName) {
+            return Font.custom(name, size: size, relativeTo: mapTextStyle(textStyle))
         }
         // System Arabic with serif design for elegance
-        return Font.system(size: size, weight: .regular, design: .serif)
+        var uiFont = UIFont.systemFont(ofSize: size, weight: .regular)
+        if let descriptor = uiFont.fontDescriptor.withDesign(.serif) {
+            uiFont = UIFont(descriptor: descriptor, size: size)
+        }
+        return Font(UIFontMetrics(forTextStyle: textStyle).scaledFont(for: uiFont))
     }
 
-    private static func makeReadingFont(size: CGFloat) -> Font {
+    private static func makeReadingFont(size: CGFloat, relativeTo textStyle: UIFont.TextStyle = .body) -> Font {
         if let fontName = FontConfig.englishReadingFontName {
-            return Font.custom(fontName, size: size)
+            return Font.custom(fontName, size: size, relativeTo: mapTextStyle(textStyle))
         }
-        return Font.system(size: size, weight: .regular, design: .default)
+        let uiFont = UIFont.systemFont(ofSize: size, weight: .regular)
+        return Font(UIFontMetrics(forTextStyle: textStyle).scaledFont(for: uiFont))
+    }
+
+    // MARK: - Mapping Helpers
+
+    private static let weightMapping: [Font.Weight: UIFont.Weight] = [
+        .ultraLight: .ultraLight,
+        .thin: .thin,
+        .light: .light,
+        .regular: .regular,
+        .medium: .medium,
+        .semibold: .semibold,
+        .bold: .bold,
+        .heavy: .heavy,
+        .black: .black,
+    ]
+
+    private static let designMapping: [Font.Design: UIFontDescriptor.SystemDesign] = [
+        .default: .default,
+        .rounded: .rounded,
+        .serif: .serif,
+        .monospaced: .monospaced,
+    ]
+
+    private static func mapTextStyle(_ uiStyle: UIFont.TextStyle) -> Font.TextStyle {
+        switch uiStyle {
+        case .largeTitle: return .largeTitle
+        case .title1: return .title
+        case .title2: return .title2
+        case .title3: return .title3
+        case .headline: return .headline
+        case .subheadline: return .subheadline
+        case .body: return .body
+        case .callout: return .callout
+        case .footnote: return .footnote
+        case .caption1: return .caption
+        case .caption2: return .caption2
+        default: return .body
+        }
     }
 }
 
