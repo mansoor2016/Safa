@@ -355,7 +355,7 @@ extension MarkdownRenderer {
             while let match = text.firstMatch(of: codeRegex) {
                 if let range = result.range(of: String(match.0)) {
                     result[range].font = .system(.body, design: .monospaced)
-                    result[range].backgroundColor = .gray.opacity(0.2)
+                    result[range].backgroundColor = UIColor.tertiarySystemBackground
                 }
             }
         }

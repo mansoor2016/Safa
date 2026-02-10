@@ -59,7 +59,8 @@ struct LoadingOverlay: ViewModifier {
                 .disabled(isLoading)
 
             if isLoading {
-                Color.black.opacity(0.3)
+                Color.clear
+                    .background(.ultraThinMaterial)
                     .ignoresSafeArea()
 
                 ContentCard {

@@ -56,7 +56,7 @@ struct DisabledFeatureModifier: ViewModifier {
             .padding(.vertical, 3)
             .background {
                 Capsule()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color(.tertiarySystemBackground))
             }
     }
 }
@@ -99,7 +99,7 @@ struct SimpleDisabledModifier: ViewModifier {
             .padding(.vertical, 3)
             .background {
                 Capsule()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color(.tertiarySystemBackground))
             }
     }
 }
@@ -156,20 +156,9 @@ struct DisabledFeatureRow: View {
                 .frame(width: 32)
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
-                    Text(title)
-                        .font(.body)
-                        .foregroundStyle(isDisabled ? .secondary : .primary)
-
-                    if isDisabled {
-                        Text("Coming Soon")
-                            .font(.caption2.weight(.medium))
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.gray.opacity(0.2)))
-                    }
-                }
+                Text(title)
+                    .font(.body)
+                    .foregroundStyle(isDisabled ? .secondary : .primary)
 
                 if let subtitle {
                     Text(subtitle)
@@ -180,7 +169,14 @@ struct DisabledFeatureRow: View {
 
             Spacer()
 
-            if !isDisabled {
+            if isDisabled {
+                Text("Coming Soon")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color(.tertiarySystemBackground)))
+            } else {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tertiary)
