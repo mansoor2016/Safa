@@ -500,6 +500,7 @@ Or construct ViewModels with explicit injection:
 - **Do** use meaningful variable names
 - **Do** prefer `struct` over `class` unless you need reference semantics (mutable shared state, `@Observable`, inheritance, `NSObject`)
 - **Do** inject services through `Dependencies` container or init parameters for testability
+- **Do** place feature-specific settings close to the feature (inline controls, context menus, long-press options) rather than in the global Settings tab. Global Settings is for app-wide preferences only.
 - **Do** build and run tests immediately after changes (see below)
 
 ---
