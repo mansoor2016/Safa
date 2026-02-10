@@ -459,18 +459,12 @@ struct HomeView: View {
         // Load prayer times
         do {
             if let location = dependencies.locationService.coordinates {
-                // Use saved calculation method (same as PrayerViewModel)
-                let savedMethod: CalculationMethod
-                if let raw = UserDefaults.standard.string(forKey: "calculationMethod"),
-                   let method = CalculationMethod(rawValue: raw) {
-                    savedMethod = method
-                } else {
-                    savedMethod = AppDefaults.calculationMethod
-                }
+                let prefs = PreferencesManager.loadPreferencesSync()
                 todayPrayers = try await dependencies.prayerRepository.getPrayers(
                     for: Date(),
                     location: location,
-                    method: savedMethod
+                    method: prefs.calculationMethod,
+                    madhab: prefs.madhab
                 )
                 nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
 

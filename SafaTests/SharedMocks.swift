@@ -139,7 +139,7 @@ final class MockPrayerRepository: PrayerRepositoryProtocol {
 
     // MARK: - Protocol
 
-    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] {
+    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
         if let error = await errorToThrow { throw error }
         await MainActor.run { getPrayersCallCount += 1 }
         return await prayersToReturn

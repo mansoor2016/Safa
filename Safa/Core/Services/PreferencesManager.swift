@@ -125,4 +125,15 @@ final class PreferencesManager {
         }
         return await repo.getPreferences()
     }
+
+    /// Synchronous read for contexts where async is unavailable (init, computed properties).
+    /// Reads directly from UserDefaults using the same key as UserRepository.
+    static func loadPreferencesSync() -> UserPreferences {
+        let key = "\(AppConstants.StorageKeys.userPreferences).all"
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let prefs = try? JSONDecoder().decode(UserPreferences.self, from: data) else {
+            return UserPreferences()
+        }
+        return prefs
+    }
 }

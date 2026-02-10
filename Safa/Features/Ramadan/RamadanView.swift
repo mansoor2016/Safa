@@ -431,14 +431,8 @@ struct RamadanView: View {
 
         if let location = dependencies.locationService.coordinates {
             do {
-                let savedMethod: CalculationMethod
-                if let raw = UserDefaults.standard.string(forKey: AppConstants.StorageKeys.calculationMethod),
-                   let m = CalculationMethod(rawValue: raw) {
-                    savedMethod = m
-                } else {
-                    savedMethod = AppDefaults.calculationMethod
-                }
-                let prayers = try await dependencies.prayerRepository.getPrayers(for: Date(), location: location, method: savedMethod)
+                let prefs = PreferencesManager.loadPreferencesSync()
+                let prayers = try await dependencies.prayerRepository.getPrayers(for: Date(), location: location, method: prefs.calculationMethod, madhab: prefs.madhab)
                 todayPrayers = prayers
                 nextPrayer = prayers.first { $0.time > Date() && $0.type.isObligatory }
                 suhoorTime = prayers.first { $0.type == .fajr }?.time

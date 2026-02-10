@@ -167,7 +167,7 @@ private final class ExportTestMockQuranRepository: QuranRepositoryProtocol {
 
 @MainActor
 private final class ExportTestMockPrayerRepository: PrayerRepositoryProtocol {
-    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] { [] }
+    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] { [] }
     nonisolated func logPrayer(_ prayer: PrayerType, for date: Date, at time: Date, isOnTime: Bool) async throws {}
     nonisolated func getPrayerLogs(from: Date, to: Date) async throws -> [PrayerLog] { [] }
     nonisolated func getPrayerLogs(for date: Date) async throws -> [PrayerLog] { [] }

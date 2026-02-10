@@ -38,11 +38,9 @@ final class PrayerViewModel {
         self.userState = userState
         self.widgetDataService = widgetDataService
 
-        // Load saved calculation method
-        if let savedMethod = UserDefaults.standard.string(forKey: "calculationMethod"),
-           let method = CalculationMethod(rawValue: savedMethod) {
-            self.calculationMethod = method
-        }
+        // Load saved calculation method from canonical preferences
+        let prefs = PreferencesManager.loadPreferencesSync()
+        self.calculationMethod = prefs.calculationMethod
 
         // Default notification state (will be overwritten by async load in loadPrayerTimes)
         notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
@@ -75,10 +73,12 @@ final class PrayerViewModel {
             currentLocation = location
 
             // Calculate prayer times
+            let prefs = PreferencesManager.loadPreferencesSync()
             let prayers = try await prayerRepository.getPrayers(
                 for: currentDate,
                 location: location,
-                method: calculationMethod
+                method: calculationMethod,
+                madhab: prefs.madhab
             )
             todayPrayers = prayers
 
@@ -263,7 +263,7 @@ final class PrayerViewModel {
 
     func setCalculationMethod(_ method: CalculationMethod) async {
         calculationMethod = method
-        UserDefaults.standard.set(method.rawValue, forKey: "calculationMethod")
+        await PreferencesManager.shared.saveCalculationMethod(method)
         await loadPrayerTimes()
 
         // Re-schedule notifications with new prayer times

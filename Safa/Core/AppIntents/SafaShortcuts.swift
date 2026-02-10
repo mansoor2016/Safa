@@ -22,9 +22,9 @@ private enum IntentHelpers {
     /// Calculate today's prayer times using real data
     static func getTodayPrayers() async -> [PrayerTime] {
         let coords = getCoordinates()
-        let method = await getCalculationMethod()
+        let prefs = await PreferencesManager.shared.getPreferences()
         let calculator = PrayerTimeCalculator()
-        return calculator.calculatePrayerTimes(for: Date(), location: coords, method: method)
+        return calculator.calculatePrayerTimes(for: Date(), location: coords, method: prefs.calculationMethod, madhab: prefs.madhab)
     }
 
     /// Format a time for display

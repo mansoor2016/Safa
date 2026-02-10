@@ -94,14 +94,30 @@ final class LocationService: NSObject, ObservableObject, LocationServiceProtocol
     }
 
     var coordinates: Coordinates? {
+        // 1. Live GPS location (most accurate)
         if let location = currentLocation {
             return Coordinates(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude
             )
         }
-        // Fall back to default location (London, UK)
+
+        // 2. Saved user location from preferences (persists across restarts)
+        if let saved = savedCoordinatesFromPreferences {
+            return saved
+        }
+
+        // 3. Fall back to default location (London, UK)
         return AppDefaults.defaultCoordinates
+    }
+
+    /// Reads saved coordinates from UserPreferences without async
+    private var savedCoordinatesFromPreferences: Coordinates? {
+        guard let data = UserDefaults.standard.data(forKey: "com.safa.user.preferences.all"),
+              let prefs = try? JSONDecoder().decode(UserPreferences.self, from: data) else {
+            return nil
+        }
+        return prefs.savedCoordinates
     }
 
     /// Check if location permission is granted

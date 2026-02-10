@@ -565,7 +565,7 @@ final class TestablePrayerRepository: PrayerRepositoryProtocol {
     var logPrayerCallCount = 0
     var logPrayerCalled = false
 
-    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] {
+    nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
         let error = await errorToThrow
         if let error { throw error }
         await MainActor.run { getPrayersCallCount += 1 }

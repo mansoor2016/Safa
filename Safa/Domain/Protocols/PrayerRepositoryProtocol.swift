@@ -10,7 +10,7 @@ protocol PrayerRepositoryProtocol {
     ///   - location: The coordinates for calculation
     ///   - method: The calculation method to use
     /// - Returns: Array of prayer times for the day
-    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime]
+    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) async throws -> [PrayerTime]
 
     /// Logs a prayer as completed
     /// - Parameters:

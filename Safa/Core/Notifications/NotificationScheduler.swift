@@ -63,19 +63,12 @@ final class NotificationScheduler {
 
         guard let coords = Dependencies.shared.locationService.coordinates else { return }
 
-        let method: CalculationMethod
-        if let raw = UserDefaults.standard.string(forKey: "calculationMethod"),
-           let saved = CalculationMethod(rawValue: raw) {
-            method = saved
-        } else {
-            method = AppDefaults.calculationMethod
-        }
-
         do {
             let prayers = try await Dependencies.shared.prayerRepository.getPrayers(
                 for: Date(),
                 location: coords,
-                method: method
+                method: prefs.calculationMethod,
+                madhab: prefs.madhab
             )
 
             await cancelPrayerNotifications()

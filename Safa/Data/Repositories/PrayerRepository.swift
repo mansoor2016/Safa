@@ -17,8 +17,8 @@ final class PrayerRepository: PrayerRepositoryProtocol {
 
     // MARK: - Prayer Times
 
-    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] {
-        calculator.calculatePrayerTimes(for: date, location: location, method: method)
+    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
+        calculator.calculatePrayerTimes(for: date, location: location, method: method, madhab: madhab)
     }
 
     // MARK: - Prayer Logging

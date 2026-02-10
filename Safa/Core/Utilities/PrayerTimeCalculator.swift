@@ -14,7 +14,8 @@ struct PrayerTimeCalculator {
     func calculatePrayerTimes(
         for date: Date,
         location: Coordinates,
-        method: CalculationMethod
+        method: CalculationMethod,
+        madhab: Madhab? = nil
     ) -> [PrayerTime] {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day], from: date)
@@ -54,11 +55,12 @@ struct PrayerTimeCalculator {
             equationOfTime: eqTime
         )
 
+        let asrShadow = madhab?.shadowRatio ?? method.asrShadowRatio
         let asr = calculateAsr(
             latitude: location.latitude,
             sunDeclination: sunDec,
             dhuhr: dhuhr,
-            shadow: method.asrShadowRatio
+            shadow: asrShadow
         )
 
         let maghrib = calculateMaghrib(

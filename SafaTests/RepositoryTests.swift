@@ -40,7 +40,7 @@ final class PrayerRepositoryTests: XCTestCase {
 final class StatefulMockPrayerRepository: PrayerRepositoryProtocol {
     private var logs: [PrayerLog] = []
 
-    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod) async throws -> [PrayerTime] {
+    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
         let baseTime = Calendar.current.startOfDay(for: date)
 
         return [
