@@ -32,6 +32,8 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 - **Premium UI (Feb 9):** Nav bar material morph (Home/Prayer/Ramadan), 25 bottom sheets standardized with .compactSheet()/.fullSheet(), progress section marked coming soon.
 - **Ramadan (Feb 9):** Combined duplicate daily goals ("Read 1 Juz Quran"), Ramadan page restructured with iftar platter/prayer progress/fasting tracker/Khatm goal.
 - **App Intents (Feb 9):** 5 intents wired to real data (GetPrayerTimes, GetNextPrayer, LogPrayer, GetQiblaDirection, GetDailyVerse).
+- **Quran reader refinements (Feb 10):** Fixed "Continue Reading" bug (was always writing ayah 1), character-aware auto-scroll with new 0.25x-1x speed scale and per-ayah interval formula, bookmark toggle shows undo toast, auto-scroll settings toggle + 7s auto-hide control, green checkmark on completed surahs in list, auto-complete on scroll end, configurable progress ring (high-water mark vs current position) via long-press context menu with reset option. 8 new tests for progress ring, 4 updated auto-scroll tests. Design principle added: settings proximity (feature settings live close to feature, not in global Settings).
+- **Onboarding fix (Feb 10):** Page 3 overflow fix — content wrapped in ScrollView, "Get Started" button pinned to bottom, reduced icon/spacing, removed extra whitespace before Bismillah.
 
 ---
 
@@ -111,7 +113,7 @@ Code scaffolding exists, needs real multi-device testing:
 - [x] Screen state transitions (ErrorView component + wired into Prayer/Quran/Hadith/Home)
 - [x] Hero card compression + sticky context chip (Home)
 - [x] Optimistic action feedback with undo rail (prayer logging)
-- [ ] Matched-geometry card-to-detail transition (Quran list → reader)
+- [x] Matched-geometry card-to-detail transition (Quran list → reader)
 - [ ] Contextual navigation actions + sticky filter rail
 - [ ] Adaptive tab bar visibility
 - [ ] Zero-state quality pass + resume-where-you-left-off rails
@@ -219,5 +221,5 @@ Code scaffolding exists, needs real multi-device testing:
 
 ---
 
-*Last Updated: February 9, 2026*
+*Last Updated: February 10, 2026*
 *Completed-task archive: `.docs/TASKS_ARCHIVE_2026-02-08.md`*
