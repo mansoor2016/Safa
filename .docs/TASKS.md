@@ -30,11 +30,11 @@ Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature 
 ### Search & Sharing
 - [x] Unify search UI pattern across Quran/Hadith/Calendar
 - [x] Upgrade share cards with refined layout
-- [ ] Improve invite flow with confirmation states
+- [x] Improve invite flow with confirmation states
 
 ### Test Coverage
-- [ ] 90%+ unit test coverage for Domain layer
-- [ ] 80%+ unit test coverage for Repositories
+- [x] 90%+ unit test coverage for Domain layer
+- [x] 80%+ unit test coverage for Repositories
 
 ---
 
