@@ -90,7 +90,7 @@ struct AdhanPlayButton: View {
             do {
                 try dependencies.audioPlayerService.playBundled(
                     fileName: adhanSound.rawValue,
-                    fileExtension: "caf"
+                    fileExtension: "m4a"
                 )
                 isPlaying = true
             } catch {

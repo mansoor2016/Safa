@@ -49,7 +49,7 @@ final class SQLiteService {
     /// Call from SafaApp.task{} — safe to call multiple times (no-ops if already decompressed).
     func preWarmDatabases() async {
         await withTaskGroup(of: Void.self) { group in
-            for name in ["hadith"] {
+            for name in ["quran", "hadith"] {
                 group.addTask { [weak self] in
                     _ = self?.databasePath(for: name)
                 }
