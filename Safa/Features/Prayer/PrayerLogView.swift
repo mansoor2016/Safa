@@ -536,6 +536,7 @@ struct PrayerLogRow: View {
                 }
             }
             .padding(.vertical, 8)
+            .frame(minHeight: 40)
         }
         .buttonStyle(.plain)
     }

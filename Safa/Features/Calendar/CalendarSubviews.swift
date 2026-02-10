@@ -36,7 +36,7 @@ struct CalendarDayCell: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(minHeight: 44)
             .background(backgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }

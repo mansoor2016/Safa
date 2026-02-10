@@ -162,6 +162,7 @@ struct HadithContentView: View {
                     .lineLimit(3)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
 
                 Text(hadith.textEnglish)
                     .font(SafaTypography.bodySmall)
@@ -181,6 +182,8 @@ struct HadithContentView: View {
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Daily Hadith from \(hadith.collectionId). \(hadith.textEnglish). Narrated by \(hadith.narrator)")
     }
 
     // MARK: - Categories Section

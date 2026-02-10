@@ -91,6 +91,7 @@ struct NamesOfAllahView: View {
         VStack(spacing: 12) {
             Text("أسماء الله الحسنى")
                 .font(.system(size: 32, weight: .bold, design: .serif))
+                .accessibilityArabic(label: "Asma ul-Husna")
 
             Text("The Most Beautiful Names")
                 .font(.headline)
@@ -122,6 +123,7 @@ struct NameCard: View {
         VStack(spacing: 8) {
             Text(name.arabic)
                 .font(.system(size: 28, weight: .bold, design: .serif))
+                .accessibilityArabic()
 
             Text(name.transliteration)
                 .font(.subheadline)
@@ -137,6 +139,8 @@ struct NameCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Number \(name.id), \(name.transliteration), \(name.meaning)")
     }
 }
 
@@ -154,6 +158,7 @@ struct NameDetailView: View {
                     Text(name.arabic)
                         .font(.system(size: 72, weight: .bold, design: .serif))
                         .padding(.top, 32)
+                        .accessibilityArabic(label: name.transliteration)
 
                     // Transliteration
                     Text(name.transliteration)

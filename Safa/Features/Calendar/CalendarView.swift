@@ -134,7 +134,7 @@ struct CalendarView: View {
                         }
                     } else {
                         Color.clear
-                            .frame(height: 44)
+                            .frame(minHeight: 44)
                     }
                 }
             }

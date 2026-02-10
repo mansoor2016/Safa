@@ -371,6 +371,7 @@ struct HomeView: View {
                     .foregroundColor(SafaColors.Fallback.text)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
 
                 Text(verse.textTranslation)
                     .font(SafaTypography.bodySmall)
@@ -378,6 +379,8 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Daily Verse, Surah \(verse.surahNumber) Ayah \(verse.ayahNumber). \(verse.textTranslation)")
     }
 
     // MARK: - Resume Card
@@ -408,6 +411,9 @@ struct HomeView: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Continue Reading Quran, Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
+        .accessibilityHint("Double tap to open Quran")
     }
 
     // MARK: - Progress Card
@@ -605,6 +611,9 @@ private struct NextPrayerHomeCard: View {
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityText)
+        .accessibilityHint("Double tap to view prayer times")
         .onReceive(timer) { _ in
             updateCountdown()
         }
@@ -616,6 +625,15 @@ private struct NextPrayerHomeCard: View {
     private func updateCountdown() {
         let (hours, minutes, seconds) = prayer.time.countdown()
         countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    private var accessibilityText: String {
+        let (hours, minutes, _) = prayer.time.countdown()
+        return formatNextPrayerAccessibilityLabel(
+            prayerName: prayer.type.displayName,
+            hours: hours,
+            minutes: minutes
+        ) + " at \(prayer.time.formatted(date: .omitted, time: .shortened))"
     }
 }
 
@@ -653,6 +671,8 @@ private struct QuickActionCard: View {
             .background(Color(UIColor.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(subtitle)")
     }
 }
 
@@ -672,6 +692,8 @@ private struct HomeStatItem: View {
                 .font(SafaTypography.labelSmall)
                 .foregroundColor(SafaColors.Fallback.tertiaryText)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 
@@ -714,6 +736,8 @@ private struct ReminderCard: View {
         .padding(SafaSpacing.md)
         .background(Color(UIColor.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(title). \(message)")
     }
 }
 

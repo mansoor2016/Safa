@@ -121,6 +121,7 @@ private struct DhikrQuickButton: View {
                     .font(SafaTypography.arabicSmall)
                     .foregroundColor(SafaColors.Fallback.text)
                     .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
 
                 Text(dhikr.rawValue)
                     .font(SafaTypography.labelSmall)
@@ -135,6 +136,9 @@ private struct DhikrQuickButton: View {
             .background(Color(UIColor.tertiarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(formatDhikrAccessibilityLabel(name: dhikr.rawValue, count: dhikr.defaultCount, isCompleted: false))
+        .accessibilityHint("Double tap to start counting")
     }
 }
 
@@ -158,6 +162,7 @@ private struct AfterPrayerRow: View {
                         .font(SafaTypography.arabicSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                         .environment(\.layoutDirection, .rightToLeft)
+                        .accessibilityArabic()
                 }
 
                 Spacer()
@@ -167,6 +172,8 @@ private struct AfterPrayerRow: View {
                     .foregroundColor(.accentColor)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(formatDhikrAccessibilityLabel(name: title, count: count, isCompleted: false))
     }
 }
 
@@ -305,6 +312,8 @@ private struct DhikrRow: View {
                             .foregroundColor(isCompleted ? .green : SafaColors.Fallback.tertiaryText)
                     }
                     .disabled(isCompleted)
+                    .accessibilityLabel(isCompleted ? "Completed" : "Mark complete")
+                    .accessibilityHint(isCompleted ? "" : "Double tap to mark as completed")
                 }
 
                 // Arabic text
@@ -313,6 +322,7 @@ private struct DhikrRow: View {
                     .foregroundColor(SafaColors.Fallback.text)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
 
                 // Expandable content
                 if isExpanded {
@@ -372,6 +382,8 @@ private struct CircularProgressView: View {
                 .foregroundColor(SafaColors.Fallback.secondaryText)
         }
         .frame(width: 50, height: 50)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(Int(progress * 100)) percent complete")
     }
 }
 

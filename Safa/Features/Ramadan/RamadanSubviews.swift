@@ -127,6 +127,8 @@ struct DailyGoalRow: View {
         }
         .buttonStyle(.plain)
         .disabled(onToggle == nil)
+        .accessibilityLabel(formatGoalAccessibilityLabel(title: title, isCompleted: isCompleted))
+        .accessibilityHint(onToggle != nil ? (isCompleted ? "Double tap to undo" : "Double tap to complete") : "")
     }
 }
 

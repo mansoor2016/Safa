@@ -12,6 +12,9 @@ struct PrayerProgressIndicator: View {
     var style: Style = .compact
     var onLogPrayer: ((PrayerType) -> Void)?
 
+    @ScaledMetric(relativeTo: .body) private var compactDotSize: CGFloat = 16
+    @ScaledMetric(relativeTo: .body) private var expandedDotSize: CGFloat = 40
+
     enum Style {
         case compact    // For home page - dots + numeric count
         case expanded   // For prayer page - larger with labels
@@ -105,12 +108,12 @@ struct PrayerProgressIndicator: View {
                 // Main circle
                 Circle()
                     .fill(compactDotColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
-                    .frame(width: 16, height: 16)
+                    .frame(width: compactDotSize, height: compactDotSize)
 
                 // Checkmark for completed
                 if isLogged {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: compactDotSize * 0.56, weight: .bold))
                         .foregroundColor(.white)
                 }
 
@@ -118,13 +121,20 @@ struct PrayerProgressIndicator: View {
                 if isNext && !isLogged {
                     Circle()
                         .stroke(Color.accentColor, lineWidth: 2)
-                        .frame(width: 20, height: 20)
+                        .frame(width: compactDotSize + 4, height: compactDotSize + 4)
                 }
             }
-            .frame(width: 22, height: 22)
+            .frame(width: compactDotSize + 6, height: compactDotSize + 6)
         }
         .buttonStyle(.plain)
         .disabled(!canTap)
+        .accessibilityLabel(formatPrayerDotAccessibilityLabel(
+            prayerName: prayerType.displayName,
+            isLogged: isLogged,
+            isNext: isNext,
+            isPast: isPast && !isLogged
+        ))
+        .accessibilityHint(canTap ? (isLogged ? "Double tap to unlog" : "Double tap to log") : "")
     }
 
     private func compactDotColor(isLogged: Bool, isNext: Bool, isPast: Bool) -> Color {
@@ -166,6 +176,7 @@ struct PrayerProgressIndicator: View {
                         .foregroundColor(.green)
                 }
             }
+            .accessibilityProgress(label: "Prayer progress", current: completedCount, total: 5)
         }
         .padding(.vertical, 8)
     }
@@ -190,23 +201,23 @@ struct PrayerProgressIndicator: View {
                     // Background circle
                     Circle()
                         .fill(expandedDotColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
-                        .frame(width: 40, height: 40)
+                        .frame(width: expandedDotSize, height: expandedDotSize)
 
                     // Border for next prayer
                     if isNext && !isLogged {
                         Circle()
                             .stroke(Color.accentColor, lineWidth: 3)
-                            .frame(width: 46, height: 46)
+                            .frame(width: expandedDotSize + 6, height: expandedDotSize + 6)
                     }
 
                     // Content
                     if isLogged {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: expandedDotSize * 0.45, weight: .bold))
                             .foregroundColor(.white)
                     } else {
                         Text("\(index + 1)")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: expandedDotSize * 0.4, weight: .semibold))
                             .foregroundColor(expandedTextColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
                     }
                 }
@@ -221,6 +232,13 @@ struct PrayerProgressIndicator: View {
         }
         .buttonStyle(.plain)
         .disabled(!canTap)
+        .accessibilityLabel(formatPrayerDotAccessibilityLabel(
+            prayerName: prayerType.displayName,
+            isLogged: isLogged,
+            isNext: isNext,
+            isPast: isPast && !isLogged
+        ))
+        .accessibilityHint(canTap ? (isLogged ? "Double tap to unlog" : "Double tap to log") : "")
     }
 
     private func expandedConnectingLine(fromIndex: Int) -> some View {

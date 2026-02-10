@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI, AyahReaderViewModel
 
 import SwiftUI
+import UIKit
 
 struct AyahReaderView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -135,6 +136,7 @@ private struct AyahReaderContent: View {
                         ForEach(Array(viewModel.ayahs.enumerated()), id: \.element.id) { index, ayah in
                             AyahRow(
                                 ayah: ayah,
+                                surahName: surah.nameEnglish,
                                 showTranslation: viewModel.showTranslation,
                                 isBookmarked: viewModel.isBookmarked(ayah),
                                 arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
@@ -166,6 +168,22 @@ private struct AyahReaderContent: View {
                     }
                 }
                 .background(SafaSurface.quranReading.color)
+                .accessibilityRotor("Ayahs") {
+                    ForEach(viewModel.ayahs, id: \.id) { ayah in
+                        AccessibilityRotorEntry(
+                            "Ayah \(ayah.ayahNumber)",
+                            id: ayah.ayahNumber
+                        )
+                    }
+                }
+                .accessibilityRotor("Bookmarks") {
+                    ForEach(viewModel.ayahs.filter { viewModel.isBookmarked($0) }, id: \.id) { ayah in
+                        AccessibilityRotorEntry(
+                            "Ayah \(ayah.ayahNumber), bookmarked",
+                            id: ayah.ayahNumber
+                        )
+                    }
+                }
 
                 // Auto-scroll control (only visible if enabled in settings)
                 if autoScrollEnabled {
@@ -245,6 +263,7 @@ private struct AyahReaderContent: View {
         isAutoScrollControlVisible = true // Keep visible while scrolling
         autoHideTask?.cancel()
         scheduleNextAyahScroll(proxy: proxy)
+        UIAccessibility.post(notification: .announcement, argument: "Auto scroll started")
     }
 
     private func restartAutoScroll(proxy: ScrollViewProxy) {
@@ -271,6 +290,7 @@ private struct AyahReaderContent: View {
         viewModel.isAutoScrolling = false
         autoScrollTimer?.invalidate()
         autoScrollTimer = nil
+        UIAccessibility.post(notification: .announcement, argument: "Auto scroll stopped")
     }
 
     private func scrollToNextAyah(proxy: ScrollViewProxy) {
@@ -294,11 +314,13 @@ private struct AyahReaderContent: View {
             Text(surah.nameArabic)
                 .font(SafaTypography.arabicLarge)
                 .foregroundColor(SafaColors.Fallback.text)
+                .accessibilityArabic()
 
             Text(IslamicConstants.Phrases.bismillah)
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
                 .padding(.vertical, SafaSpacing.md)
+                .accessibilityArabic(label: "Bismillah ir-Rahman ir-Raheem")
 
             HStack(spacing: SafaSpacing.md) {
                 Label(surah.revelationType.rawValue, systemImage: "mappin.circle")
@@ -310,6 +332,7 @@ private struct AyahReaderContent: View {
         .frame(maxWidth: .infinity)
         .padding(SafaSpacing.xl)
         .background(Color.accentColor.opacity(0.05))
+        .accessibilityGrouped(label: "\(surah.nameEnglish), \(surah.revelationType.rawValue), \(surah.ayahCount) ayahs")
     }
 
     // MARK: - End of Surah
@@ -319,6 +342,7 @@ private struct AyahReaderContent: View {
             Image(systemName: viewModel.isSurahComplete ? "checkmark.circle.fill" : "star.fill")
                 .font(.system(size: 48))
                 .foregroundColor(viewModel.isSurahComplete ? .green : SafaColors.Fallback.tertiaryText)
+                .accessibilityHidden(true)
 
             Text("End of \(surah.nameEnglish)")
                 .font(SafaTypography.titleMedium)
@@ -336,6 +360,8 @@ private struct AyahReaderContent: View {
             }
         }
         .padding(SafaSpacing.xl)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("End of \(surah.nameEnglish)\(viewModel.isSurahComplete ? ", reading complete" : "")")
     }
 
     // MARK: - Error View
@@ -365,6 +391,7 @@ private struct AyahReaderContent: View {
 
 private struct AyahRow: View {
     let ayah: Ayah
+    let surahName: String
     let showTranslation: Bool
     let isBookmarked: Bool
     let arabicFontSize: CGFloat
@@ -403,6 +430,7 @@ private struct AyahRow: View {
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             // Translation
             if showTranslation {
@@ -413,6 +441,12 @@ private struct AyahRow: View {
             }
         }
         .padding(SafaSpacing.md)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(formatAyahAccessibilityLabel(
+            surahName: surahName,
+            ayahNumber: ayah.ayahNumber,
+            translation: showTranslation ? ayah.textTranslation : nil
+        ))
     }
 }
 

@@ -39,12 +39,15 @@ struct DuaCategoriesView: View {
             Text("أدعية وأذكار")
                 .font(.system(size: 28, weight: .bold, design: .serif))
                 .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             Text("Supplications & Remembrances")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 20)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Supplications and Remembrances")
     }
 
     private var quickAccessSection: some View {
@@ -336,8 +339,11 @@ struct QuickAccessButton: View {
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
         }
         .frame(width: 80)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title) duas")
     }
 }
 
@@ -366,6 +372,7 @@ struct CategoryRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
             }
 
             Spacer()
@@ -385,6 +392,8 @@ struct CategoryRow: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(category.name), \(category.duaCount) duas")
     }
 }
 
@@ -434,6 +443,7 @@ struct DuaCard: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .lineSpacing(12)
                 .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             if !dua.textTransliteration.isEmpty {
                 Text(dua.textTransliteration)

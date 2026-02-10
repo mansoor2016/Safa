@@ -46,6 +46,8 @@ struct AdhanPlayButton: View {
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(isPlaying ? "Stop adhan" : "Play adhan")
+        .accessibilityHint(isPlaying ? "Double tap to stop" : "Double tap to play")
     }
 
     // MARK: - Banner Style (Ramadan banner on Home)
@@ -67,6 +69,8 @@ struct AdhanPlayButton: View {
             .background(Color.white.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
         }
+        .accessibilityLabel(isPlaying ? "Stop adhan" : "Play adhan")
+        .accessibilityHint(isPlaying ? "Double tap to stop" : "Double tap to play")
     }
 
     // MARK: - Toggle Logic (single source of truth)

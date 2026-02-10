@@ -22,6 +22,7 @@ struct HadithCollectionRow: View {
                         .font(SafaTypography.arabicSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                         .environment(\.layoutDirection, .rightToLeft)
+                        .accessibilityArabic()
                 }
 
                 Spacer()
@@ -41,6 +42,8 @@ struct HadithCollectionRow: View {
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(collection.nameEnglish), \(collection.totalHadiths) hadith")
     }
 }
 
@@ -86,6 +89,8 @@ struct HadithSearchResultRow: View {
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(hadith.collectionId) number \(hadith.hadithNumber). \(hadith.textEnglish). \(hadith.narrator)")
     }
 }
 
