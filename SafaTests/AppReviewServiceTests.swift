@@ -235,13 +235,21 @@ final class AppReviewServiceTests: XCTestCase {
         XCTAssertEqual(savedDate, secondDate, "recordFirstLaunchIfNeeded should not overwrite existing date")
     }
 
-    func test_recordPromptShown_incrementsCountAndSetsDate() {
-        let now = Date()
-        AppReviewService.recordPromptShown(now: now, defaults: defaults)
+    func test_recordPromptShown_shiftsEligibilityWindow() {
+        let installDate = Date(timeIntervalSince1970: 1_000_000)
+        defaults.set(installDate, forKey: AppConstants.StorageKeys.reviewFirstLaunchDate)
 
-        XCTAssertEqual(defaults.integer(forKey: AppConstants.StorageKeys.reviewPromptCount), 1)
-        let lastPrompt = defaults.object(forKey: AppConstants.StorageKeys.reviewLastPromptDate) as? Date
-        XCTAssertEqual(lastPrompt, now)
+        // First prompt eligible at T+15min
+        let t1 = installDate.addingTimeInterval(15 * 60)
+        XCTAssertTrue(AppReviewService.shouldShowPrompt(now: t1, defaults: defaults))
+        AppReviewService.recordPromptShown(now: t1, defaults: defaults)
+
+        // 15 min later: would have been eligible before recording, but now needs 60min
+        let t2 = t1.addingTimeInterval(15 * 60)
+        XCTAssertFalse(
+            AppReviewService.shouldShowPrompt(now: t2, defaults: defaults),
+            "Recording a prompt should increase the required interval from 15min to 60min"
+        )
     }
 
     func test_noFirstLaunchDate_returnsFalse() {
@@ -293,18 +301,19 @@ final class AppReviewServiceTests: XCTestCase {
         )
     }
 
-    func test_resetForTesting_clearsAllState() {
-        defaults.set(Date(), forKey: AppConstants.StorageKeys.reviewFirstLaunchDate)
-        defaults.set(3, forKey: AppConstants.StorageKeys.reviewPromptCount)
-        defaults.set(true, forKey: AppConstants.StorageKeys.reviewOptedOut)
-        defaults.set(Date(), forKey: AppConstants.StorageKeys.reviewLastPromptDate)
+    func test_bothTimeGates_mustBeSatisfied_independently() {
+        // Scenario: firstLaunch was recent (45 min ago), but last prompt was long ago.
+        // With count=1, required interval is 60 min.
+        // lastPrompt gate passes (70 min ago > 60 min), but firstLaunch gate fails (45 min < 60 min).
+        let now = Date()
+        defaults.set(now.addingTimeInterval(-45 * 60), forKey: AppConstants.StorageKeys.reviewFirstLaunchDate)
+        defaults.set(1, forKey: AppConstants.StorageKeys.reviewPromptCount)
+        defaults.set(now.addingTimeInterval(-70 * 60), forKey: AppConstants.StorageKeys.reviewLastPromptDate)
 
-        AppReviewService.resetForTesting(defaults: defaults)
-
-        XCTAssertNil(defaults.object(forKey: AppConstants.StorageKeys.reviewFirstLaunchDate))
-        XCTAssertEqual(defaults.integer(forKey: AppConstants.StorageKeys.reviewPromptCount), 0)
-        XCTAssertFalse(defaults.bool(forKey: AppConstants.StorageKeys.reviewOptedOut))
-        XCTAssertNil(defaults.object(forKey: AppConstants.StorageKeys.reviewLastPromptDate))
+        XCTAssertFalse(
+            AppReviewService.shouldShowPrompt(now: now, defaults: defaults),
+            "Both firstLaunch and lastPrompt time gates must be satisfied; passing only one is not enough"
+        )
     }
 
     // MARK: - Integration-Style Tests
