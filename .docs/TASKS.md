@@ -29,20 +29,24 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 - [x] Minimal Motion profile — 18 ReduceMotionTests verifying SafaMotion tokens + critical animation audit
 
 ### Phase 2: Widgets & Platform Integration
-**Why second:** Widgets are the #1 daily engagement driver. Lock screen prayer times is a killer feature vs competitors. Code is complete — just needs device verification.
+**Why second:** Widgets are the #1 daily engagement driver. Lock screen prayer times is a killer feature vs competitors. Code is complete — needs device verification for visual/interaction aspects.
 
-- [ ] Widgets (Lock Screen, Home Screen, interactive, StandBy) — verify rendering, tap targets, data freshness
-- [ ] Spotlight search result tap → navigation — verify deep links resolve to correct screens
-- [ ] Siri Shortcuts invocation testing — verify 5 wired intents work end-to-end
-- [ ] Focus Mode integration — low effort, niche value but quick win
+- [ ] Widgets (Lock Screen, Home Screen, interactive, StandBy) — verify rendering, tap targets, data freshness *(manual device test)*
+- [x] Spotlight indexing + deep links — SpotlightIndexService (469 lines), 5 content types, handleSpotlightResult in AppRouter
+- [ ] Spotlight search result tap → navigation — verify deep links resolve to correct screens *(manual device test)*
+- [x] Siri Shortcuts — 5 App Intents wired to real data via IntentHelpers
+- [ ] Siri Shortcuts invocation testing — verify intents work end-to-end *(manual device test)*
+- [x] Focus Mode integration — FocusModeService (382 lines) + SleepFocusService (393 lines), 7 notification categories, interrupt levels
 - [x] Platform integration verification tests — 40 tests covering widget data, Spotlight parsing, Siri intents, Focus modes
 
 ### Phase 3: Audio (Core Islamic Experience)
-**Why third:** Hearing the adhan is deeply important culturally. Silent prayer notifications feel incomplete. One bundled adhan + AVFoundation wiring enables the core sound experience.
+**Why third:** Hearing the adhan is deeply important culturally. Silent prayer notifications feel incomplete. Audio pipeline is fully implemented — needs device verification.
 
-- [ ] Bundle Maghrib adhan audio file — ship one high-quality adhan sound
-- [ ] Connect audio player to AVFoundation — wire existing AudioService to real playback
+- [x] Bundle adhan audio files — 11 `.m4a` files in Resources/Audio/Adhan/ (35 MB)
+- [x] Connect audio player to AVFoundation — AudioPlayerService with playBundled(), interrupt handling, remote controls
+- [x] Audio background mode — `audio` added to UIBackgroundModes in Info.plist
 - [ ] Dua audio pronunciations (needs audio files) — defer if files unavailable, wire player now
+- [ ] Audio playback verification — test adhan plays, backgrounding works *(manual device test)*
 
 ### Phase 4: Live Activities
 **Why fourth:** Highly visible differentiating feature. Prayer countdown on Dynamic Island / lock screen keeps users aware without opening the app. Strong retention signal.
@@ -52,10 +56,10 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 ### Phase 5: Performance
 **Why fifth:** Slow launch = uninstall. Profile after features are stable, not before. Quick wins likely in lazy loading and deferred init.
 
-- [ ] AppLaunchPerformanceTests (target < 2s)
-- [ ] Memory profiling (target < 200MB)
-- [ ] Precompute home context for instant rendering
-- [ ] Battery impact test
+- [x] AppLaunchPerformanceTests (target < 2s) — XCTApplicationLaunchMetric + home data load benchmark
+- [ ] Memory profiling (target < 200MB) *(manual — Instruments profiling)*
+- [x] Precompute home context for instant rendering — prayer times cached at app launch, HomeView uses cache
+- [ ] Battery impact test *(manual — device with Live Activity running)*
 
 ### Phase 6: TestFlight & Launch
 **Why last:** Ship to real users once accessibility, widgets, audio, and performance are solid.
@@ -119,4 +123,4 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 
 ---
 
-*Last Updated: February 11, 2026*
+*Last Updated: February 11, 2026 (Phase 2/3 audit, performance pass)*

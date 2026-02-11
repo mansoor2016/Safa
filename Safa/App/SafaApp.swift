@@ -65,6 +65,17 @@ struct SafaApp: App {
                 let prefs = await dependencies.userRepository.getPreferences()
                 hasCompletedOnboarding = prefs.hasCompletedOnboarding
 
+                // Precompute today's prayer times for instant home screen rendering
+                if prefs.hasCompletedOnboarding, let location = dependencies.locationService.coordinates {
+                    let userPrefs = PreferencesManager.loadPreferencesSync()
+                    dependencies.cachedTodayPrayers = try? await dependencies.prayerRepository.getPrayers(
+                        for: Date(),
+                        location: location,
+                        method: userPrefs.calculationMethod,
+                        madhab: userPrefs.madhab
+                    )
+                }
+
                 // Index Spotlight content on first launch (after onboarding)
                 if prefs.hasCompletedOnboarding && spotlightService.lastIndexDate == nil {
                     await spotlightService.indexAllContent()

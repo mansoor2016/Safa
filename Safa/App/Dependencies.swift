@@ -33,6 +33,9 @@ final class Dependencies {
     // MARK: - Global State
     let userState: UserStateManager
 
+    // MARK: - Launch Cache (precomputed at app startup for instant home rendering)
+    var cachedTodayPrayers: [PrayerTime]?
+
     // MARK: - Init
     init() {
         // Initialize Core Data stack

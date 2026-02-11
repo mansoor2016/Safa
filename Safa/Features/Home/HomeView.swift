@@ -740,9 +740,12 @@ struct HomeView: View {
         showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
         isEidBannerExpanded = currentEidType != nil
 
-        // Load prayer times
+        // Load prayer times (use launch cache if available)
         do {
-            if let location = dependencies.locationService.coordinates {
+            if let cached = dependencies.cachedTodayPrayers {
+                todayPrayers = cached
+                dependencies.cachedTodayPrayers = nil // consumed
+            } else if let location = dependencies.locationService.coordinates {
                 let prefs = PreferencesManager.loadPreferencesSync()
                 todayPrayers = try await dependencies.prayerRepository.getPrayers(
                     for: Date(),
@@ -750,6 +753,8 @@ struct HomeView: View {
                     method: prefs.calculationMethod,
                     madhab: prefs.madhab
                 )
+            }
+            if !todayPrayers.isEmpty {
                 nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
 
                 // Load logged prayers for today
