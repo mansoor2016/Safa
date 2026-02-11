@@ -56,6 +56,33 @@ struct HomeView: View {
         return "resume_card_dismissed_\(dateFormatter.string(from: Date()))"
     }
 
+    // MARK: - Banner Resolver Inputs
+
+    private var calendarState: HomeBannerResolver.IslamicCalendarState {
+        HomeBannerResolver.IslamicCalendarState(
+            isRamadan: isRamadan,
+            currentRamadanDay: currentRamadanDay,
+            isLastTenNights: isLastTenNights,
+            daysUntilRamadan: daysUntilRamadan,
+            currentEidType: currentEidType,
+            eidDayNumber: eidDayNumber,
+            nextEidType: nextEidType,
+            daysUntilNextEid: daysUntilNextEid,
+            isForceRamadanMode: FeatureFlags.shared.isEnabled(.ramadanMode),
+            isForceEidAlFitr: FeatureFlags.shared.isEnabled(.forceEidAlFitr),
+            isForceEidAlAdha: FeatureFlags.shared.isEnabled(.forceEidAlAdha)
+        )
+    }
+
+    private var dismissState: HomeBannerResolver.DismissState {
+        HomeBannerResolver.DismissState(
+            isRamadanBannerDismissedToday: !showRamadanBanner || UserDefaults.standard.bool(forKey: bannerDismissKey),
+            isEidBannerDismissedToday: !showEidBanner || UserDefaults.standard.bool(forKey: eidBannerDismissKey),
+            isShareBannerDismissedPermanently: !showShareBanner,
+            isResumeCardDismissedToday: hideResumeCard || UserDefaults.standard.bool(forKey: resumeCardDismissKey)
+        )
+    }
+
     var body: some View {
         ScrollableScreen(stickyContent: nextPrayerChip) {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
@@ -88,9 +115,11 @@ struct HomeView: View {
                 quickActions
 
                 // Resume where you left off (dismissable, reappears next day)
-                if let progress = quranProgress, progress.lastSurah > 0,
-                   !hideResumeCard,
-                   !UserDefaults.standard.bool(forKey: resumeCardDismissKey) {
+                if let progress = quranProgress,
+                   case .visible = HomeBannerResolver.resolveResumeCard(
+                       quran: .init(lastSurah: progress.lastSurah, lastAyah: progress.lastAyah),
+                       dismiss: dismissState
+                   ) {
                     resumeQuranCard(progress)
                 }
 
@@ -106,7 +135,7 @@ struct HomeView: View {
                 contextualReminders
 
                 // Share app banner (hidden once user shares)
-                if showShareBanner {
+                if HomeBannerResolver.resolveShareBanner(dismiss: dismissState) == .visible {
                     ShareBanner {
                         withAnimation {
                             showShareBanner = false
@@ -176,11 +205,12 @@ struct HomeView: View {
 
     @ViewBuilder
     private var ramadanBannerSection: some View {
-        let shouldShow = showRamadanBanner
-            && !UserDefaults.standard.bool(forKey: bannerDismissKey)
-            && (isRamadan || (daysUntilRamadan ?? 0 > 0 && daysUntilRamadan ?? 0 <= 30))
+        let visibility = HomeBannerResolver.resolveRamadanBanner(
+            calendar: calendarState,
+            dismiss: dismissState
+        )
 
-        if shouldShow {
+        if visibility != .hidden {
             VStack(spacing: 0) {
                 // Collapsed header row (always visible)
                 ramadanBannerCollapsedRow
@@ -292,11 +322,12 @@ struct HomeView: View {
 
     @ViewBuilder
     private var eidBannerSection: some View {
-        let shouldShow = showEidBanner
-            && !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
-            && (currentEidType != nil || (daysUntilNextEid ?? 0 > 0 && daysUntilNextEid ?? 0 <= 7))
+        let eidVisibility = HomeBannerResolver.resolveEidBanner(
+            calendar: calendarState,
+            dismiss: dismissState
+        )
 
-        if shouldShow {
+        if eidVisibility != .hidden {
             VStack(spacing: 0) {
                 // Collapsed header row
                 eidBannerCollapsedRow
