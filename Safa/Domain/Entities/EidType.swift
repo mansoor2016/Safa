@@ -71,12 +71,12 @@ enum EidType: String, CaseIterable, Identifiable {
         switch self {
         case .fitr:
             return [
-                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer"),
+                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend Eid prayer"),
                 EidReminder(icon: "sterlingsign.circle", title: "Fitrana (Zakat al-Fitr)", subtitle: "Pay before Eid prayer — approx. \u{00A3}5-7/person"),
             ]
         case .adha:
             return [
-                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer"),
+                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend Eid prayer"),
                 EidReminder(icon: "gift", title: "Qurbani", subtitle: "Arrange Qurbani for 10th-12th Dhul Hijjah"),
             ]
         }
