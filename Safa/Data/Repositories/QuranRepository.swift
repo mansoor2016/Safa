@@ -239,6 +239,11 @@ final class QuranRepository: QuranRepositoryProtocol {
         return completed
     }
 
+    func resetSurahProgress(surahNumber: Int) async throws {
+        let key = "\(surahReadProgressKeyPrefix)\(surahNumber)"
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
     // MARK: - Juz
 
     func getJuz(number: Int) async throws -> Juz? {

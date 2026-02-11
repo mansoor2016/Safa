@@ -113,11 +113,6 @@
 			path = SafaWidgetExtension;
 			sourceTree = "<group>";
 		};
-		76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SafaWidgetTests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,7 +165,6 @@
 				76F09F972F32DE72007EB798 /* SafaTests */,
 				76F09FA12F32DE72007EB798 /* SafaUITests */,
 				76F0B06B2F37B493007EB798 /* SafaWidgetExtension */,
-				76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */,
 				76F0B0662F37B493007EB798 /* Frameworks */,
 				76F09F842F32DE70007EB798 /* Products */,
 			);
@@ -308,9 +302,6 @@
 			);
 			dependencies = (
 				76F0B0B22F37D6C2007EB798 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				76F0B0AE2F37D6C2007EB798 /* SafaWidgetTests */,
 			);
 			name = SafaWidgetTests;
 			packageProductDependencies = (

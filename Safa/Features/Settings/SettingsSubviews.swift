@@ -843,7 +843,7 @@ struct FeedbackView: View {
             MailComposerView(
                 subject: "[\(feedbackType.rawValue)] \(selectedCategory.rawValue): \(feedbackTitle)",
                 body: feedbackDescription,
-                recipient: "feedback@safaapp.com"
+                recipient: "helpmesafa@gmail.com"
             )
         }
     }
@@ -860,7 +860,7 @@ struct FeedbackView: View {
             \(feedbackDescription)
             """
             UIPasteboard.general.string = text
-            alertMessage = "Email is not configured. Your feedback has been copied to your clipboard. Please email it to feedback@safaapp.com"
+            alertMessage = "Email is not configured. Your feedback has been copied to your clipboard. Please email it to helpmesafa@gmail.com"
             showAlert = true
         }
     }

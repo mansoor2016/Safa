@@ -147,6 +147,37 @@ final class QuranViewModel {
         }
     }
 
+    // MARK: - Surah Completion Toggle
+
+    func toggleSurahCompletion(_ surahNumber: Int) async {
+        if completedSurahs.contains(surahNumber) {
+            // Un-complete: reset progress
+            completedSurahs.remove(surahNumber)
+            do {
+                try await quranRepository.resetSurahProgress(surahNumber: surahNumber)
+            } catch {
+                // Revert on failure
+                completedSurahs.insert(surahNumber)
+            }
+        } else {
+            // Mark complete: mark all ayahs as read
+            guard let surah = surahs.first(where: { $0.number == surahNumber }) else { return }
+            completedSurahs.insert(surahNumber)
+            do {
+                for ayah in 1...surah.ayahCount {
+                    try await quranRepository.markAyahRead(
+                        surahNumber: surahNumber,
+                        ayahNumber: ayah,
+                        totalAyahs: surah.ayahCount
+                    )
+                }
+            } catch {
+                // Revert on failure
+                completedSurahs.remove(surahNumber)
+            }
+        }
+    }
+
     // MARK: - Juz Navigation Helper
 
     func navigationTargetForJuz(_ juzNumber: Int) -> QuranNavigationTarget? {

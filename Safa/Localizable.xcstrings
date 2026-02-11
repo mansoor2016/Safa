@@ -676,6 +676,9 @@
         }
       }
     },
+    "Continue Reading Quran" : {
+
+    },
     "Continue Reading Quran, Surah %lld, Ayah %lld" : {
       "localizations" : {
         "en" : {
@@ -857,9 +860,6 @@
     "Dismiss" : {
 
     },
-    "Dismiss continue reading card" : {
-
-    },
     "Don't forget your Taraweeh prayers tonight. May your worship be accepted." : {
 
     },
@@ -881,6 +881,9 @@
     "Double tap to edit bookmark note" : {
 
     },
+    "Double tap to expand, then tap to open Quran" : {
+
+    },
     "Double tap to go to this ayah" : {
 
     },
@@ -891,9 +894,6 @@
 
     },
     "Double tap to open %@" : {
-
-    },
-    "Double tap to open Quran" : {
 
     },
     "Double tap to play" : {
@@ -1307,6 +1307,16 @@
     },
     "Juz %lld" : {
 
+    },
+    "Juz %lld · %lld%% complete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Juz %1$lld · %2$lld%% complete"
+          }
+        }
+      }
     },
     "Juz %lld, from Surah %lld ayah %lld to Surah %lld ayah %lld" : {
       "localizations" : {

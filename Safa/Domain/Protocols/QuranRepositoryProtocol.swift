@@ -90,4 +90,8 @@ protocol QuranRepositoryProtocol {
     /// Gets the set of completed surah numbers
     /// - Returns: Set of surah numbers (1-114) that have been completed
     func getCompletedSurahNumbers() async throws -> Set<Int>
+
+    /// Resets read progress for a surah (marks as unread)
+    /// - Parameter surahNumber: The surah number to reset
+    func resetSurahProgress(surahNumber: Int) async throws
 }

@@ -105,16 +105,8 @@ struct QuranSearchResult: Identifiable {
 
 // MARK: - Quran Search View
 
-enum QuranSearchFilter: String, Hashable {
-    case all = "All"
-    case arabic = "Arabic"
-    case translation = "Translation"
-    case surahName = "Surah Name"
-}
-
 struct QuranSearchView: View {
     @State private var viewModel: QuranSearchViewModel
-    @State private var selectedFilter: QuranSearchFilter = .all
     @Environment(\.dismiss) private var dismiss
     @Environment(Dependencies.self) private var dependencies
 
@@ -122,28 +114,11 @@ struct QuranSearchView: View {
         _viewModel = State(initialValue: QuranSearchViewModel(repository: repository))
     }
 
-    private var filterOptions: [FilterOption<QuranSearchFilter>] {
-        [
-            FilterOption(label: "All", value: .all),
-            FilterOption(label: "Arabic", value: .arabic),
-            FilterOption(label: "Translation", value: .translation),
-            FilterOption(label: "Surah Name", value: .surahName),
-        ]
-    }
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Search bar
                 searchBar
-
-                // Filter pills (visible when there's a search query)
-                if !viewModel.searchText.isEmpty {
-                    FilterPillsView(options: filterOptions, selected: $selectedFilter)
-                        .onChange(of: selectedFilter) { _, _ in
-                            Task { await viewModel.search() }
-                        }
-                }
 
                 // Content
                 if viewModel.searchText.isEmpty {

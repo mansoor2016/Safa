@@ -41,7 +41,6 @@ private struct QuranContentView: View {
     @Bindable var viewModel: QuranViewModel
     @Binding var path: NavigationPath
     var surahZoom: Namespace.ID
-    @State private var searchText = ""
     @State private var selectedTab = 0
     @State private var showingSearch = false
     @State private var editingBookmark: QuranBookmark?
@@ -85,12 +84,6 @@ private struct QuranContentView: View {
             QuranSearchView()
                 .fullSheet()
         }
-        .searchable(text: $searchText, prompt: "Search surahs...")
-        .onChange(of: searchText) { _, newValue in
-            Task {
-                await viewModel.search(query: newValue)
-            }
-        }
         .task {
             await viewModel.loadSurahs()
         }
@@ -122,9 +115,15 @@ private struct QuranContentView: View {
                     .padding()
                 }
 
-                ForEach(viewModel.filteredSurahs) { surah in
+                ForEach(viewModel.surahs) { surah in
                     NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
-                        SurahRow(surah: surah, isComplete: viewModel.completedSurahs.contains(surah.number))
+                        SurahRow(
+                            surah: surah,
+                            isComplete: viewModel.completedSurahs.contains(surah.number),
+                            onToggleComplete: {
+                                Task { await viewModel.toggleSurahCompletion(surah.number) }
+                            }
+                        )
                     }
                     .buttonStyle(.plain)
                     .matchedTransitionSource(id: surah.number, in: surahZoom)
@@ -256,6 +255,7 @@ private struct ResumeReadingCard: View {
 private struct SurahRow: View {
     let surah: Surah
     let isComplete: Bool
+    let onToggleComplete: () -> Void
 
     var body: some View {
         HStack(spacing: SafaSpacing.md) {
@@ -284,12 +284,17 @@ private struct SurahRow: View {
 
             Spacer()
 
-            // Completion indicator
-            if isComplete {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+            // Completion indicator (tappable to toggle)
+            Button {
+                onToggleComplete()
+            } label: {
+                Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isComplete ? .green : SafaColors.Fallback.tertiaryText)
                     .font(.system(size: 18))
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isComplete ? "Completed" : "Not completed")
+            .accessibilityHint("Double tap to mark as \(isComplete ? "unread" : "read")")
 
             // Arabic name
             Text(surah.nameArabic)
@@ -300,7 +305,7 @@ private struct SurahRow: View {
         .padding(.vertical, SafaSpacing.sm)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Surah \(surah.number), \(surah.nameEnglish), \(surah.revelationType.rawValue), \(surah.ayahCount) verses")
+        .accessibilityLabel("Surah \(surah.number), \(surah.nameEnglish), \(surah.revelationType.rawValue), \(surah.ayahCount) verses\(isComplete ? ", completed" : "")")
         .accessibilityHint("Double tap to read this surah")
     }
 }

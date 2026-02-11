@@ -488,6 +488,8 @@ final class TestableQuranRepository: QuranRepositoryProtocol {
     nonisolated func getCompletedSurahNumbers() async throws -> Set<Int> {
         return []
     }
+
+    nonisolated func resetSurahProgress(surahNumber: Int) async throws {}
 }
 
 // MARK: - Stub User Repository
