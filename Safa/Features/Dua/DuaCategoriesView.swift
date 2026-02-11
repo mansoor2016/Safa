@@ -24,7 +24,6 @@ struct DuaCategoriesView: View {
             LazyVStack(spacing: 12) {
                 headerView
                 quickAccessSection
-                searchBar
                 categoriesSection
             }
             .padding(.bottom, 100)
@@ -32,6 +31,7 @@ struct DuaCategoriesView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Duas")
         .navigationBarTitleDisplayMode(.large)
+        .searchable(text: $searchText, prompt: "Search duas...")
     }
 
     private var headerView: some View {
@@ -83,13 +83,6 @@ struct DuaCategoriesView: View {
                 .padding(.horizontal)
             }
         }
-    }
-
-    private var searchBar: some View {
-        SearchBar(
-            text: $searchText,
-            placeholder: "Search duas..."
-        )
     }
 
     private var categoriesSection: some View {
@@ -181,12 +174,17 @@ struct DuaData {
             textTranslation: "Glory be to Allah, All praise is due to Allah, Allah is the Greatest.",
             source: "Muslim", occasion: "After each obligatory prayer", repetitions: 33),
         Dua(id: "p2", categoryId: "prayer", titleEnglish: "Ayatul Kursi",
-            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
-            textTransliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum",
-            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining.",
-            source: "Bukhari", occasion: "After each obligatory prayer — whoever recites it will enter Paradise", repetitions: 1),
+            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+            textTransliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum. La ta'khudhhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydeehim wa ma khalfahum. Wa la yuheetuna bishay'in min 'ilmihi illa bima sha'. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifdhuhuma. Wa Huwal-'Aliyyul-'Adheem.",
+            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+            source: "Quran 2:255", occasion: "After each obligatory prayer — whoever recites it will enter Paradise", repetitions: 1),
 
         // MARK: Sleep
+        Dua(id: "s_ayatul_kursi", categoryId: "sleep", titleEnglish: "Ayatul Kursi",
+            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+            textTransliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum. La ta'khudhhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydeehim wa ma khalfahum. Wa la yuheetuna bishay'in min 'ilmihi illa bima sha'. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifdhuhuma. Wa Huwal-'Aliyyul-'Adheem.",
+            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+            source: "Quran 2:255", occasion: "Recite before sleep — Allah appoints a guardian and no devil comes near until morning", repetitions: 1),
         Dua(id: "s1", categoryId: "sleep", titleEnglish: "Before Sleeping",
             textArabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
             textTransliteration: "Bismika Allahumma amootu wa ahya",
@@ -226,6 +224,11 @@ struct DuaData {
             source: "Ibn Majah", occasion: "After drinking water or any beverage", repetitions: 1),
 
         // MARK: Protection
+        Dua(id: "pr_ayatul_kursi", categoryId: "protection", titleEnglish: "Ayatul Kursi",
+            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+            textTransliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum. La ta'khudhhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydeehim wa ma khalfahum. Wa la yuheetuna bishay'in min 'ilmihi illa bima sha'. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifdhuhuma. Wa Huwal-'Aliyyul-'Adheem.",
+            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+            source: "Quran 2:255", occasion: "Recite for protection — whoever recites it at night, a guardian is appointed for them", repetitions: 1),
         Dua(id: "pr1", categoryId: "protection", titleEnglish: "Seeking Refuge from Evil",
             textArabic: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
             textTransliteration: "A'udhu bikalimatillahit-tammaati min sharri ma khalaq",

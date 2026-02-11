@@ -84,6 +84,7 @@ struct PrayerLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PrayerActivityAttributes.self) { context in
             PrayerLiveActivityView(context: context)
+                .widgetURL(URL(string: "safa://prayer"))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -129,6 +130,7 @@ struct PrayerLiveActivityWidget: Widget {
             } minimal: {
                 PrayerMinimalView(context: context)
             }
+            .widgetURL(URL(string: "safa://prayer"))
         }
     }
 }

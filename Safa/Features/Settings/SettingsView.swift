@@ -529,23 +529,55 @@ struct SettingsView: View {
 
     #if DEBUG
     @State private var forceRamadan = false
+    @State private var forceEidAlFitr = false
+    @State private var forceEidAlAdha = false
+    @State private var isDeveloperExpanded = false
 
     private var debugSection: some View {
         Section {
-            Toggle("Force Ramadan Mode", isOn: $forceRamadan)
-                .onAppear {
-                    forceRamadan = FeatureFlags.shared.isEnabled(.ramadanMode)
-                }
-                .onChange(of: forceRamadan) { _, newValue in
-                    if newValue {
-                        FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
-                    } else {
-                        FeatureFlags.shared.removeOverride(.ramadanMode)
+            DisclosureGroup("Developer Settings", isExpanded: $isDeveloperExpanded) {
+                Toggle("Force Ramadan Mode", isOn: $forceRamadan)
+                    .onAppear {
+                        forceRamadan = FeatureFlags.shared.isEnabled(.ramadanMode)
                     }
-                }
+                    .onChange(of: forceRamadan) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.ramadanMode)
+                        }
+                    }
 
-        } header: {
-            Text("Developer")
+                Toggle("Force Eid al-Fitr", isOn: $forceEidAlFitr)
+                    .onAppear {
+                        forceEidAlFitr = FeatureFlags.shared.isEnabled(.forceEidAlFitr)
+                    }
+                    .onChange(of: forceEidAlFitr) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.forceEidAlFitr, enabled: true)
+                            // Turn off conflicting Eid
+                            forceEidAlAdha = false
+                            FeatureFlags.shared.removeOverride(.forceEidAlAdha)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.forceEidAlFitr)
+                        }
+                    }
+
+                Toggle("Force Eid al-Adha", isOn: $forceEidAlAdha)
+                    .onAppear {
+                        forceEidAlAdha = FeatureFlags.shared.isEnabled(.forceEidAlAdha)
+                    }
+                    .onChange(of: forceEidAlAdha) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.forceEidAlAdha, enabled: true)
+                            // Turn off conflicting Eid
+                            forceEidAlFitr = false
+                            FeatureFlags.shared.removeOverride(.forceEidAlFitr)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.forceEidAlAdha)
+                        }
+                    }
+            }
         } footer: {
             Text("Debug options only visible in development builds.")
         }

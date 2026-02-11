@@ -19,6 +19,8 @@ enum Feature: String, CaseIterable {
     case learning = "learning"
     case familyCircle = "family_circle"
     case ramadanMode = "ramadan_mode"
+    case forceEidAlFitr = "force_eid_al_fitr"
+    case forceEidAlAdha = "force_eid_al_adha"
     case windDown = "wind_down"
     case zakatCalculator = "zakat_calculator"
     case namesOfAllah = "names_of_allah"
@@ -61,6 +63,8 @@ enum Feature: String, CaseIterable {
         case .learning: return "Learning"
         case .familyCircle: return "Family Circle"
         case .ramadanMode: return "Ramadan Mode"
+        case .forceEidAlFitr: return "Force Eid al-Fitr"
+        case .forceEidAlAdha: return "Force Eid al-Adha"
         case .windDown: return "Wind Down"
         case .zakatCalculator: return "Zakat Calculator"
         case .namesOfAllah: return "99 Names of Allah"
@@ -93,8 +97,8 @@ enum Feature: String, CaseIterable {
         // Content not yet ready
         case .learning:
             return false
-        // Debug override — not a user-facing feature
-        case .ramadanMode:
+        // Debug overrides — not user-facing features
+        case .ramadanMode, .forceEidAlFitr, .forceEidAlAdha:
             return false
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets,

@@ -31,6 +31,16 @@
     "%@" : {
 
     },
+    "%@ %lld AH" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld AH"
+          }
+        }
+      }
+    },
     "%@ at %@%@" : {
       "localizations" : {
         "en" : {
@@ -45,6 +55,9 @@
 
     },
     "%@ duas" : {
+
+    },
+    "%@ is coming!" : {
 
     },
     "%@ is in %lld day(s). %@" : {
@@ -147,6 +160,16 @@
     },
     "%lld day streak" : {
 
+    },
+    "%lld day%@ until %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld day%2$@ until %3$@"
+          }
+        }
+      }
     },
     "%lld days" : {
 
@@ -588,6 +611,9 @@
     "Category" : {
 
     },
+    "Choose a Greeting" : {
+
+    },
     "Circle name" : {
 
     },
@@ -935,6 +961,12 @@
     "Eid al-Fitr & Eid al-Adha" : {
 
     },
+    "EID MUBARAK" : {
+
+    },
+    "Eid Mubarak!" : {
+
+    },
     "Eid Mubarak! 🎉" : {
 
     },
@@ -1084,6 +1116,12 @@
 
     },
     "Font Settings" : {
+
+    },
+    "Force Eid al-Adha" : {
+
+    },
+    "Force Eid al-Fitr" : {
 
     },
     "Force Ramadan Mode" : {
@@ -1793,6 +1831,9 @@
     "Reflect on the Year" : {
 
     },
+    "Remember to %@" : {
+
+    },
     "Remove Log" : {
 
     },
@@ -2285,6 +2326,9 @@
     "Update Location" : {
 
     },
+    "Urgent" : {
+
+    },
     "Use Adhan Sound" : {
 
     },
@@ -2429,10 +2473,13 @@
     "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" : {
 
     },
-    "تَقَبَّلَ اللهُ مِنَّا وَمِنْكُمْ" : {
+    "صفا" : {
 
     },
-    "صفا" : {
+    "صفا · Safa" : {
+
+    },
+    "عيد مبارك" : {
 
     }
   },

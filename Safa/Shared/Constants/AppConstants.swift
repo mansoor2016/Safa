@@ -163,6 +163,9 @@ enum AppConstants {
         static let spotlightIndexDate = "com.safa.spotlight.indexDate"
         static let spotlightIndexCount = "com.safa.spotlight.indexCount"
 
+        // Eid
+        static let eidBannerDismissedPrefix = "eid_banner_dismissed_"
+
         // Storage Cleanup
         static let storageAudioMetadata = "com.safa.storage.audioMetadata"
         static let storageAutoCleanup = "com.safa.storage.autoCleanup"
@@ -186,6 +189,12 @@ enum AppConstants {
         static let isha = "notification_isha"
         static let suhoor = "notification_suhoor"
         static let iftar = "notification_iftar"
+    }
+
+    // MARK: - Quick Actions
+    enum QuickActions {
+        static let shareApp = "com.safa.quickaction.shareApp"
+        static let prayerTimes = "com.safa.quickaction.prayerTimes"
     }
 
     // MARK: - Limits

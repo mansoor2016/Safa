@@ -16,6 +16,7 @@ enum ShareableContent {
     case dailyProgress(hasanat: Int, streak: Int)
     case dua(title: String, arabic: String, translation: String)
     case inviteLink(code: String)
+    case eidGreeting(eidType: EidType, message: String)
 }
 
 // MARK: - Share Card Style
@@ -53,6 +54,18 @@ struct ShareCardStyle {
         backgroundColor: Color(red: 0.05, green: 0.20, blue: 0.35),
         textColor: .white,
         accentColor: Color(red: 0.4, green: 0.7, blue: 0.9)
+    )
+
+    static let eidFitr = ShareCardStyle(
+        backgroundColor: Color(red: 0.11, green: 0.37, blue: 0.13),
+        textColor: .white,
+        accentColor: Color(red: 0.75, green: 0.88, blue: 0.75)
+    )
+
+    static let eidAdha = ShareCardStyle(
+        backgroundColor: Color(red: 0.90, green: 0.32, blue: 0.0),
+        textColor: .white,
+        accentColor: Color(red: 0.95, green: 0.82, blue: 0.65)
     )
 }
 
@@ -138,6 +151,17 @@ final class ShareService {
             Or download Safa - Your Islamic Companion:
             [App Store Link]
             """
+
+        case .eidGreeting(let eidType, let message):
+            return """
+            \(message)
+
+            \(eidType.acceptanceDuaArabic)
+            \(eidType.acceptanceDua)
+
+            Shared via Safa - Your Islamic Companion
+            \(AppConstants.URLs.appStore.absoluteString)
+            """
         }
     }
 
@@ -210,6 +234,15 @@ final class ShareService {
         }
     }
 
+    /// Share an Eid greeting card with a selected message
+    @MainActor
+    func shareEidGreeting(eidType: EidType, message: String, hijriYear: Int) {
+        let card = EidGreetingCard(eidType: eidType, message: message, hijriYear: hijriYear)
+        let image = card.renderImage()
+        let content = ShareableContent.eidGreeting(eidType: eidType, message: message)
+        shareWithCard(content, card: image)
+    }
+
     // MARK: - Private Methods
 
     private func awardSharingHasanat(for content: ShareableContent) {
@@ -229,6 +262,8 @@ final class ShareService {
                 await HasanatTracker.awardOnce(.share, key: "share_achievement_\(dateString)", via: userState)
             case .inviteLink:
                 await HasanatTracker.awardOnce(.share, key: "share_invite_\(dateString)", via: userState)
+            case .eidGreeting:
+                await HasanatTracker.awardOnce(.share, key: "share_eid_\(dateString)", via: userState)
             default:
                 await HasanatTracker.awardOnce(.share, key: "share_other_\(dateString)", via: userState)
             }

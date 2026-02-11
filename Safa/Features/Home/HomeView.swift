@@ -26,12 +26,34 @@ struct HomeView: View {
     @State private var showShareBanner = !ShareBanner.isDismissed
     @State private var loadError: Error?
     @State private var resolvedActions: [HomeAction] = []
+    @State private var hideResumeCard = false
+
+    // Eid state
+    @State private var currentEidType: EidType?
+    @State private var eidDayNumber: Int = 0
+    @State private var showEidBanner = true
+    @State private var isEidBannerExpanded = false
+    @State private var daysUntilNextEid: Int?
+    @State private var nextEidType: EidType?
+    @State private var showEidMessagePicker = false
 
     // Banner dismiss key (reappears next day)
     private var bannerDismissKey: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
+    }
+
+    private var eidBannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "\(AppConstants.StorageKeys.eidBannerDismissedPrefix)\(dateFormatter.string(from: Date()))"
+    }
+
+    private var resumeCardDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "resume_card_dismissed_\(dateFormatter.string(from: Date()))"
     }
 
     var body: some View {
@@ -56,16 +78,21 @@ struct HomeView: View {
                     }
                 }
 
+                // Ramadan banner (collapsible, reappears next day)
+                ramadanBannerSection
+
+                // Eid banner (during Eid or 7 days before)
+                eidBannerSection
+
                 // Quick actions
                 quickActions
 
-                // Resume where you left off
-                if let progress = quranProgress, progress.lastSurah > 0 {
+                // Resume where you left off (dismissable, reappears next day)
+                if let progress = quranProgress, progress.lastSurah > 0,
+                   !hideResumeCard,
+                   !UserDefaults.standard.bool(forKey: resumeCardDismissKey) {
                     resumeQuranCard(progress)
                 }
-
-                // Ramadan banner (collapsible, reappears next day)
-                ramadanBannerSection
 
                 // Daily verse
                 if let verse = dailyVerse {
@@ -132,6 +159,9 @@ struct HomeView: View {
             }
             // Re-check banner dismiss state (synced with Settings toggle)
             showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
+            // Re-check Eid state (respects Force Eid Mode toggles)
+            updateEidState()
+            showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
             // Re-resolve quick actions (time/prayer may have changed)
             resolvedActions = HomeIntentResolver.resolve(
                 currentDate: Date(),
@@ -253,6 +283,142 @@ struct HomeView: View {
         withAnimation {
             UserDefaults.standard.set(true, forKey: bannerDismissKey)
             showRamadanBanner = false
+        }
+    }
+
+    // MARK: - Eid Banner Section
+
+    @ViewBuilder
+    private var eidBannerSection: some View {
+        let shouldShow = showEidBanner
+            && !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
+            && (currentEidType != nil || (daysUntilNextEid ?? 0 > 0 && daysUntilNextEid ?? 0 <= 7))
+
+        if shouldShow {
+            VStack(spacing: 0) {
+                // Collapsed header row
+                eidBannerCollapsedRow
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isEidBannerExpanded.toggle()
+                        }
+                    }
+
+                // Expanded content
+                if isEidBannerExpanded {
+                    eidBannerExpandedContent
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+            .sheet(isPresented: $showEidMessagePicker) {
+                if let eidType = currentEidType ?? nextEidType {
+                    EidMessagePickerSheet(eidType: eidType) { message in
+                        let hijriYear = HijriDateConverter.shared.hijriComponents(from: Date()).year
+                        let shareService = ShareService(userState: dependencies.userState)
+                        shareService.shareEidGreeting(eidType: eidType, message: message, hijriYear: hijriYear)
+                    }
+                }
+            }
+        }
+    }
+
+    private var eidBannerCollapsedRow: some View {
+        HStack(spacing: SafaSpacing.sm) {
+            Image(systemName: currentEidType?.icon ?? nextEidType?.icon ?? "sparkles")
+                .font(.body)
+                .foregroundColor(currentEidType != nil ? .green : .accentColor)
+
+            Text(eidBannerSummaryText)
+                .font(SafaTypography.titleSmall)
+                .foregroundColor(SafaColors.Fallback.text)
+
+            Spacer()
+
+            Image(systemName: isEidBannerExpanded ? "chevron.down" : "chevron.right")
+                .font(.caption)
+                .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+            Button {
+                dismissEidBanner()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    .padding(SafaSpacing.xxs)
+            }
+        }
+        .padding(.horizontal, SafaSpacing.md)
+        .padding(.vertical, SafaSpacing.sm)
+        .background(Color(UIColor.secondarySystemBackground))
+    }
+
+    @ViewBuilder
+    private var eidBannerExpandedContent: some View {
+        if let eidType = currentEidType {
+            EidBanner(
+                eidType: eidType,
+                dayNumber: eidDayNumber,
+                eidPrayerTime: nil,
+                onShare: { showEidMessagePicker = true },
+                onDismiss: dismissEidBanner
+            )
+        } else if let eidType = nextEidType, let days = daysUntilNextEid, days <= 7, days > 0 {
+            PreEidBanner(
+                eidType: eidType,
+                daysUntil: days,
+                onDismiss: dismissEidBanner
+            )
+        }
+    }
+
+    private var eidBannerSummaryText: String {
+        if let eidType = currentEidType {
+            return "\(eidType.displayName) - Day \(eidDayNumber)"
+        } else if let eidType = nextEidType, let days = daysUntilNextEid, days <= 7, days > 0 {
+            return "\(days) day\(days == 1 ? "" : "s") until \(eidType.displayName)"
+        }
+        return "Eid"
+    }
+
+    private func dismissEidBanner() {
+        withAnimation {
+            UserDefaults.standard.set(true, forKey: eidBannerDismissKey)
+            showEidBanner = false
+        }
+    }
+
+    private func updateEidState() {
+        // Check for forced Eid mode (developer options)
+        if FeatureFlags.shared.isEnabled(.forceEidAlFitr) {
+            currentEidType = .fitr
+            eidDayNumber = 1
+            daysUntilNextEid = nil
+            nextEidType = nil
+            return
+        }
+        if FeatureFlags.shared.isEnabled(.forceEidAlAdha) {
+            currentEidType = .adha
+            eidDayNumber = 1
+            daysUntilNextEid = nil
+            nextEidType = nil
+            return
+        }
+
+        currentEidType = HijriDateConverter.shared.currentEidType()
+        eidDayNumber = HijriDateConverter.shared.eidDayNumber() ?? 0
+
+        if currentEidType == nil {
+            if let nearest = HijriDateConverter.shared.nearestUpcomingEid() {
+                nextEidType = nearest.type
+                daysUntilNextEid = nearest.daysUntil
+            } else {
+                nextEidType = nil
+                daysUntilNextEid = nil
+            }
+        } else {
+            nextEidType = nil
+            daysUntilNextEid = nil
         }
     }
 
@@ -411,6 +577,20 @@ struct HomeView: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .overlay(alignment: .topTrailing) {
+            Button {
+                withAnimation {
+                    UserDefaults.standard.set(true, forKey: resumeCardDismissKey)
+                    hideResumeCard = true
+                }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .padding(SafaSpacing.xs)
+            }
+            .accessibilityLabel("Dismiss continue reading card")
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Continue Reading Quran, Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
         .accessibilityHint("Double tap to open Quran")
@@ -519,6 +699,11 @@ struct HomeView: View {
 
         // Check if banner was dismissed today
         showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
+
+        // Load Eid state
+        updateEidState()
+        showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
+        isEidBannerExpanded = currentEidType != nil
 
         // Load prayer times
         do {

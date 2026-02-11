@@ -414,57 +414,6 @@ struct PreRamadanBanner: View {
     }
 }
 
-// MARK: - Eid Banner
-
-struct EidBanner: View {
-    let eidPrayerTime: Date?
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(spacing: SafaSpacing.sm) {
-            HStack {
-                Text("Eid Mubarak! 🎉")
-                    .font(SafaTypography.titleMedium)
-                    .foregroundColor(.white)
-
-                Spacer()
-
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
-                }
-            }
-
-            Text("تَقَبَّلَ اللهُ مِنَّا وَمِنْكُمْ")
-                .font(SafaTypography.arabicMedium)
-                .foregroundColor(.white.opacity(0.9))
-
-            if let time = eidPrayerTime {
-                HStack {
-                    Image(systemName: "clock")
-                        .foregroundColor(.white.opacity(0.7))
-
-                    Text("Eid Prayer: \(time.formatted(date: .omitted, time: .shortened))")
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.white.opacity(0.9))
-                }
-            }
-        }
-        .padding(SafaSpacing.md)
-        .background(
-            LinearGradient(
-                colors: [Color.green.opacity(0.9), Color.teal.opacity(0.8)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
-    }
-}
-
 // MARK: - Last 10 Nights Banner
 
 struct LastTenNightsBanner: View {
@@ -573,7 +522,7 @@ struct LastTenNightsBanner: View {
 
         PreRamadanBanner(daysUntil: 7, onDismiss: {})
 
-        EidBanner(eidPrayerTime: Date().addingTimeInterval(3600), onDismiss: {})
+        EidBanner(eidType: .fitr, dayNumber: 1, eidPrayerTime: Date().addingTimeInterval(3600), onShare: {}, onDismiss: {})
 
         LastTenNightsBanner(currentNight: 25, onDismiss: {})
             .environment(AppRouter())

@@ -116,20 +116,96 @@ final class HijriDateConverter {
     }
 
     func isEid(on date: Date = Date()) -> Bool {
+        currentEidType(on: date) != nil
+    }
+
+    /// Check if the date falls within Eid al-Fitr (Shawwal 1-3)
+    func isEidAlFitr(on date: Date = Date()) -> Bool {
         let components = hijriDate(from: date)
         guard let month = components.month, let day = components.day else { return false }
+        return month == 10 && (1...3).contains(day)
+    }
 
-        // Eid al-Fitr: Shawwal 1-3
+    /// Check if the date falls within Eid al-Adha (Dhu al-Hijjah 10-13)
+    func isEidAlAdha(on date: Date = Date()) -> Bool {
+        let components = hijriDate(from: date)
+        guard let month = components.month, let day = components.day else { return false }
+        return month == 12 && (10...13).contains(day)
+    }
+
+    /// Returns the current Eid type if the date is during an Eid period, nil otherwise
+    func currentEidType(on date: Date = Date()) -> EidType? {
+        if isEidAlFitr(on: date) { return .fitr }
+        if isEidAlAdha(on: date) { return .adha }
+        return nil
+    }
+
+    /// Returns 1-based day number within the Eid period (e.g. Day 2 of Eid al-Fitr)
+    func eidDayNumber(on date: Date = Date()) -> Int? {
+        let components = hijriDate(from: date)
+        guard let month = components.month, let day = components.day else { return nil }
+
         if month == 10 && (1...3).contains(day) {
-            return true
+            return day  // Fitr: Shawwal 1=Day1, 2=Day2, 3=Day3
         }
-
-        // Eid al-Adha: Dhu al-Hijjah 10-13
         if month == 12 && (10...13).contains(day) {
-            return true
+            return day - 9  // Adha: Dhul Hijjah 10=Day1, 11=Day2, 12=Day3, 13=Day4
         }
+        return nil
+    }
 
-        return false
+    /// Days until Eid al-Fitr (Shawwal 1) from the given date
+    func daysUntilEidAlFitr(from date: Date = Date()) -> Int? {
+        daysUntilHijriDate(month: 10, day: 1, from: date)
+    }
+
+    /// Days until Eid al-Adha (Dhu al-Hijjah 10) from the given date
+    func daysUntilEidAlAdha(from date: Date = Date()) -> Int? {
+        daysUntilHijriDate(month: 12, day: 10, from: date)
+    }
+
+    /// Returns the nearest upcoming Eid with days until it (nil if currently during an Eid)
+    func nearestUpcomingEid(from date: Date = Date()) -> (type: EidType, daysUntil: Int)? {
+        // If currently during Eid, no "upcoming" Eid
+        if currentEidType(on: date) != nil { return nil }
+
+        let fitrDays = daysUntilEidAlFitr(from: date)
+        let adhaDays = daysUntilEidAlAdha(from: date)
+
+        switch (fitrDays, adhaDays) {
+        case let (f?, a?) where f <= 0 && a <= 0:
+            return nil
+        case let (f?, a?):
+            let validF = f > 0 ? f : Int.max
+            let validA = a > 0 ? a : Int.max
+            return validF <= validA ? (type: .fitr, daysUntil: validF) : (type: .adha, daysUntil: validA)
+        case let (f?, nil) where f > 0:
+            return (type: .fitr, daysUntil: f)
+        case let (nil, a?) where a > 0:
+            return (type: .adha, daysUntil: a)
+        default:
+            return nil
+        }
+    }
+
+    /// Private helper: days from `date` to the next occurrence of a given Hijri month/day
+    private func daysUntilHijriDate(month targetMonth: Int, day targetDay: Int, from date: Date) -> Int? {
+        let current = hijriDate(from: date)
+        guard let currentYear = current.year else { return nil }
+
+        // Try this Hijri year first, then next year
+        for yearOffset in 0...1 {
+            var target = DateComponents()
+            target.year = currentYear + yearOffset
+            target.month = targetMonth
+            target.day = targetDay
+
+            if let targetDate = gregorianDate(from: target) {
+                let days = gregorianCalendar.dateComponents([.day], from: date, to: targetDate).day ?? 0
+                if days > 0 { return days }
+            }
+        }
+        return nil
     }
 
     func isBlessedNight(on date: Date = Date()) -> Bool {

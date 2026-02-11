@@ -109,14 +109,15 @@ private struct PrayerContentView: View {
 
     private var dateHeader: some View {
         VStack(spacing: SafaSpacing.sm) {
-            VStack(spacing: SafaSpacing.xxs) {
-                Text(viewModel.currentDate.formatted(date: .complete, time: .omitted))
-                    .font(SafaTypography.titleMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
+            HStack {
+                Text(viewModel.currentDate.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
 
                 Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .full))
-                    .font(SafaTypography.bodySmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                    .font(.subheadline.weight(.medium))
             }
 
             // Location fallback indicator

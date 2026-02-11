@@ -5,9 +5,24 @@
 import SwiftUI
 import CoreSpotlight
 
+// MARK: - Quick Action Delegate
+
+final class QuickActionDelegate: NSObject, UIApplicationDelegate {
+    static var pendingAction: UIApplicationShortcutItem?
+
+    func application(_ application: UIApplication,
+                     performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        Self.pendingAction = shortcutItem
+        completionHandler(true)
+    }
+}
+
 @main
 struct SafaApp: App {
     // MARK: - State
+    @UIApplicationDelegateAdaptor(QuickActionDelegate.self) private var quickActionDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
     @State private var themeManager = ThemeManager()
@@ -73,11 +88,56 @@ struct SafaApp: App {
 
                 // Pre-warm compressed databases in background (non-blocking)
                 await SQLiteService.shared.preWarmDatabases()
+
+                // Handle quick action from cold launch
+                if let shortcutItem = QuickActionDelegate.pendingAction {
+                    QuickActionDelegate.pendingAction = nil
+                    handleQuickAction(shortcutItem)
+                }
             }
             .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
                 // Handle Spotlight search result tap
                 router.handleSpotlightResult(userActivity)
             }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active, let shortcutItem = QuickActionDelegate.pendingAction {
+                    QuickActionDelegate.pendingAction = nil
+                    handleQuickAction(shortcutItem)
+                }
+            }
+        }
+    }
+
+    // MARK: - Quick Action Handling
+
+    private func handleQuickAction(_ shortcutItem: UIApplicationShortcutItem) {
+        switch shortcutItem.type {
+        case AppConstants.QuickActions.prayerTimes:
+            router.selectedTab = "prayer"
+
+        case AppConstants.QuickActions.shareApp:
+            let text = "Check out Safa — Your Islamic Companion\n\(AppConstants.URLs.appStore.absoluteString)"
+            let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let window = windowScene.windows.first,
+                  let rootVC = window.rootViewController else { return }
+
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = rootVC.view
+                popover.sourceRect = CGRect(
+                    x: rootVC.view.bounds.midX,
+                    y: rootVC.view.bounds.midY,
+                    width: 0,
+                    height: 0
+                )
+                popover.permittedArrowDirections = []
+            }
+
+            rootVC.present(activityVC, animated: true)
+
+        default:
+            break
         }
     }
 }

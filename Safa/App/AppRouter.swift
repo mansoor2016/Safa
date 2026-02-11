@@ -175,6 +175,10 @@ final class AppRouter {
             navigate(to: .ramadan)
             return true
 
+        case "eid":
+            selectedTab = "home"
+            return true
+
         case "settings":
             navigate(to: .settings)
             return true

@@ -804,12 +804,18 @@ struct FeedbackView: View {
             }
 
             Section {
-                TextEditor(text: $feedbackDescription)
-                    .frame(minHeight: 150)
+                ZStack(alignment: .topLeading) {
+                    if feedbackDescription.isEmpty {
+                        Text("What were you doing when you noticed this?\nWhich page or feature were you using?\nWhat did you expect to happen?\nWhat happened instead?")
+                            .foregroundColor(Color(.placeholderText))
+                            .padding(.top, 8)
+                            .padding(.leading, 5)
+                    }
+                    TextEditor(text: $feedbackDescription)
+                        .frame(minHeight: 150)
+                }
             } header: {
                 Text("Description")
-            } footer: {
-                Text("Please provide as much detail as possible so we can understand your feedback.")
             }
 
             Section {
@@ -823,7 +829,7 @@ struct FeedbackView: View {
                         Spacer()
                     }
                 }
-                .disabled(feedbackTitle.isEmpty || feedbackDescription.isEmpty)
+                .disabled(feedbackDescription.isEmpty)
             }
         }
         .navigationTitle("Send Feedback")
