@@ -832,7 +832,7 @@
     "Description" : {
 
     },
-    "Developer" : {
+    "Developer Settings" : {
 
     },
     "Dhikr" : {
@@ -845,6 +845,9 @@
 
     },
     "Dismiss" : {
+
+    },
+    "Dismiss continue reading card" : {
 
     },
     "Don't forget your Taraweeh prayers tonight. May your worship be accepted." : {
@@ -1635,9 +1638,6 @@
     "Playback Speed" : {
 
     },
-    "Please provide as much detail as possible so we can understand your feedback." : {
-
-    },
     "Please read these terms carefully before using Safa." : {
 
     },
@@ -1880,6 +1880,9 @@
 
     },
     "Schedule" : {
+
+    },
+    "Search duas..." : {
 
     },
     "Search Quran" : {
@@ -2373,6 +2376,9 @@
 
     },
     "Well Done!" : {
+
+    },
+    "What were you doing when you noticed this?\nWhich page or feature were you using?\nWhat did you expect to happen?\nWhat happened instead?" : {
 
     },
     "What's included in JSON export:" : {

@@ -35,7 +35,6 @@ struct HomeView: View {
     @State private var isEidBannerExpanded = false
     @State private var daysUntilNextEid: Int?
     @State private var nextEidType: EidType?
-    @State private var showEidMessagePicker = false
 
     // Banner dismiss key (reappears next day)
     private var bannerDismissKey: String {
@@ -311,15 +310,6 @@ struct HomeView: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
-            .sheet(isPresented: $showEidMessagePicker) {
-                if let eidType = currentEidType ?? nextEidType {
-                    EidMessagePickerSheet(eidType: eidType) { message in
-                        let hijriYear = HijriDateConverter.shared.hijriComponents(from: Date()).year
-                        let shareService = ShareService(userState: dependencies.userState)
-                        shareService.shareEidGreeting(eidType: eidType, message: message, hijriYear: hijriYear)
-                    }
-                }
-            }
         }
     }
 
@@ -360,7 +350,7 @@ struct HomeView: View {
                 eidType: eidType,
                 dayNumber: eidDayNumber,
                 eidPrayerTime: nil,
-                onShare: { showEidMessagePicker = true },
+                onShare: { shareEidGreeting(eidType: eidType) },
                 onDismiss: dismissEidBanner
             )
         } else if let eidType = nextEidType, let days = daysUntilNextEid, days <= 7, days > 0 {
@@ -386,6 +376,13 @@ struct HomeView: View {
             UserDefaults.standard.set(true, forKey: eidBannerDismissKey)
             showEidBanner = false
         }
+    }
+
+    private func shareEidGreeting(eidType: EidType) {
+        guard let message = eidType.shareMessages.randomElement() else { return }
+        let hijriYear = HijriDateConverter.shared.hijriComponents(from: Date()).year
+        let shareService = ShareService(userState: dependencies.userState)
+        shareService.shareEidGreeting(eidType: eidType, message: message, hijriYear: hijriYear)
     }
 
     private func updateEidState() {

@@ -26,8 +26,8 @@ struct PreEidBanner: View {
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
 
-                if let urgentReminder = eidType.reminders.first(where: { $0.isUrgent }) {
-                    Text("Remember to \(urgentReminder.title.lowercased())")
+                if let firstReminder = eidType.reminders.first {
+                    Text("Remember to \(firstReminder.title.lowercased())")
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(isUrgent ? .orange : SafaColors.Fallback.tertiaryText)
                 }

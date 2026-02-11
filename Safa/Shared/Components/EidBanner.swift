@@ -11,6 +11,8 @@ struct EidBanner: View {
     let onShare: () -> Void
     let onDismiss: () -> Void
 
+    @State private var completedReminders: Set<String> = []
+
     var body: some View {
         VStack(spacing: SafaSpacing.sm) {
             header
@@ -80,7 +82,12 @@ struct EidBanner: View {
     // MARK: - Reminders
 
     private var reminders: some View {
-        VStack(spacing: SafaSpacing.xs) {
+        VStack(alignment: .leading, spacing: SafaSpacing.xs) {
+            Text("Reminders")
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(.white.opacity(0.6))
+                .textCase(.uppercase)
+
             if let time = eidPrayerTime {
                 HStack(spacing: SafaSpacing.xs) {
                     Image(systemName: "clock")
@@ -96,28 +103,33 @@ struct EidBanner: View {
             }
 
             ForEach(eidType.reminders) { reminder in
-                HStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: reminder.icon)
-                        .font(.caption)
-                        .foregroundColor(reminder.isUrgent && dayNumber == 1 ? .yellow : .white.opacity(0.8))
+                let isCompleted = completedReminders.contains(reminder.title)
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        if isCompleted {
+                            completedReminders.remove(reminder.title)
+                        } else {
+                            completedReminders.insert(reminder.title)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: SafaSpacing.xs) {
+                        Image(systemName: isCompleted ? "checkmark.square.fill" : "square")
+                            .font(.caption)
+                            .foregroundColor(isCompleted ? .white : .white.opacity(0.8))
 
-                    Text(reminder.subtitle)
-                        .font(SafaTypography.labelSmall)
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(2)
-
-                    Spacer()
-
-                    if reminder.isUrgent && dayNumber == 1 {
-                        Text("Urgent")
+                        Text(reminder.subtitle)
                             .font(SafaTypography.labelSmall)
-                            .foregroundColor(.yellow)
-                            .padding(.horizontal, SafaSpacing.xs)
-                            .padding(.vertical, 2)
-                            .background(Color.yellow.opacity(0.2))
-                            .clipShape(Capsule())
+                            .foregroundColor(.white.opacity(isCompleted ? 0.5 : 0.9))
+                            .strikethrough(isCompleted, color: .white.opacity(0.5))
+                            .lineLimit(2)
+
+                        Spacer()
                     }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(reminder.title), \(isCompleted ? "completed" : "not completed")")
+                .accessibilityHint("Double tap to \(isCompleted ? "unmark" : "mark as done")")
             }
         }
     }

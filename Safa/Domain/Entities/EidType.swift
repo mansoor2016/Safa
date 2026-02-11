@@ -71,15 +71,13 @@ enum EidType: String, CaseIterable, Identifiable {
         switch self {
         case .fitr:
             return [
-                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer", isUrgent: false),
-                EidReminder(icon: "sterlingsign.circle", title: "Zakat al-Fitr", subtitle: "Pay before Eid prayer — approx. \u{00A3}4-7/person", isUrgent: true),
-                EidReminder(icon: "speaker.wave.2", title: "Takbeer", subtitle: "Recite Takbeer from Maghrib until Eid prayer", isUrgent: false),
+                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer"),
+                EidReminder(icon: "sterlingsign.circle", title: "Fitrana (Zakat al-Fitr)", subtitle: "Pay before Eid prayer — approx. \u{00A3}5-7/person"),
             ]
         case .adha:
             return [
-                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer", isUrgent: false),
-                EidReminder(icon: "gift", title: "Qurbani", subtitle: "Arrange Qurbani for 10th-12th Dhul Hijjah", isUrgent: false),
-                EidReminder(icon: "speaker.wave.2", title: "Takbeer", subtitle: "From Fajr 9th to Asr 13th Dhul Hijjah", isUrgent: false),
+                EidReminder(icon: "clock", title: "Eid Prayer", subtitle: "Attend the congregational Eid prayer"),
+                EidReminder(icon: "gift", title: "Qurbani", subtitle: "Arrange Qurbani for 10th-12th Dhul Hijjah"),
             ]
         }
     }
@@ -91,12 +89,16 @@ enum EidType: String, CaseIterable, Identifiable {
                 "Wishing you and your family a joyous Eid al-Fitr! May the blessings of Ramadan continue throughout the year.",
                 "Eid Mubarak! May Allah accept our fasts, prayers, and good deeds. Wishing you a blessed celebration.",
                 "As we celebrate the end of Ramadan, may this Eid bring you peace, happiness, and endless blessings.",
+                "Eid al-Fitr Mubarak! May this day of celebration bring joy to your heart and light to your home.",
+                "Taqabbal Allahu minna wa minkum. Wishing you a wonderful Eid filled with love, laughter, and togetherness.",
             ]
         case .adha:
             return [
                 "Wishing you a blessed Eid al-Adha! May the spirit of sacrifice bring you closer to Allah.",
                 "Eid Mubarak! May Allah accept your sacrifices and shower you with His mercy and blessings.",
                 "On this blessed day of sacrifice, may Allah grant you and your loved ones peace, joy, and prosperity.",
+                "Eid al-Adha Mubarak! May the lessons of devotion and sacrifice guide us all throughout the year.",
+                "Taqabbal Allahu minna wa minkum. Wishing you and your family a joyful and blessed Eid al-Adha.",
             ]
         }
     }
@@ -109,5 +111,4 @@ struct EidReminder: Identifiable {
     let icon: String
     let title: String
     let subtitle: String
-    let isUrgent: Bool
 }

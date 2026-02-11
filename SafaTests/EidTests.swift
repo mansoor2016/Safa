@@ -41,15 +41,12 @@ final class EidTypeTests: XCTestCase {
 
     // MARK: - Reminder Content Correctness
 
-    func test_fitr_reminders_includeFitranaAsUrgent() {
-        // Zakat al-Fitr must be paid before Eid prayer — marking it as urgent prevents users missing it
-        let urgentReminders = EidType.fitr.reminders.filter { $0.isUrgent }
-        XCTAssertEqual(urgentReminders.count, 1, "Fitr should have exactly one urgent reminder (Fitrana)")
-        XCTAssertTrue(
-            urgentReminders.first?.title.contains("Fitr") == true
-            || urgentReminders.first?.title.contains("Zakat") == true,
-            "The urgent reminder should be about Zakat al-Fitr"
-        )
+    func test_fitr_reminders_includeFitrana() {
+        // Fitrana (Zakat al-Fitr) must be present in reminders
+        let hasFitrana = EidType.fitr.reminders.contains {
+            $0.title.contains("Fitrana") || $0.title.contains("Zakat")
+        }
+        XCTAssertTrue(hasFitrana, "Fitr reminders must include Fitrana")
     }
 
     func test_adha_reminders_includeQurbani() {
@@ -58,20 +55,25 @@ final class EidTypeTests: XCTestCase {
         XCTAssertTrue(hasQurbani, "Adha reminders must include Qurbani")
     }
 
-    func test_adha_hasNoUrgentReminders() {
-        // Unlike Fitr (where Fitrana has a strict deadline), Adha reminders are all preparatory
-        let urgentCount = EidType.adha.reminders.filter { $0.isUrgent }.count
-        XCTAssertEqual(urgentCount, 0, "Adha should have no urgent reminders")
+    func test_bothEids_doNotIncludeTakbeer() {
+        // Takbeer was removed as it is not a widely applied practice
+        for eidType in EidType.allCases {
+            let hasTakbeer = eidType.reminders.contains {
+                $0.title.lowercased().contains("takbeer")
+            }
+            XCTAssertFalse(hasTakbeer,
+                "\(eidType.displayName) should not include Takbeer reminder")
+        }
     }
 
     // MARK: - Share Messages
 
     func test_shareMessages_eachEidHasAtLeastThree() {
-        // Message picker shows 3 options — fewer would leave an empty list
+        // Random selection needs a good pool of messages
         for eidType in EidType.allCases {
             XCTAssertGreaterThanOrEqual(
                 eidType.shareMessages.count, 3,
-                "\(eidType.displayName) should have at least 3 share messages for the picker"
+                "\(eidType.displayName) should have at least 3 share messages"
             )
         }
     }
