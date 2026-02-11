@@ -27,6 +27,7 @@ struct HomeView: View {
     @State private var loadError: Error?
     @State private var resolvedActions: [HomeAction] = []
     @State private var hideResumeCard = false
+    @State private var isResumeCardExpanded = false
 
     // Eid state
     @State private var currentEidType: EidType?
@@ -549,48 +550,106 @@ struct HomeView: View {
     // MARK: - Resume Card
 
     private func resumeQuranCard(_ progress: QuranProgress) -> some View {
-        InteractiveCard(action: {
-            router.selectedTab = "quran"
-        }) {
-            HStack(spacing: SafaSpacing.md) {
+        VStack(spacing: 0) {
+            // Collapsed header row (matches Ramadan banner style)
+            HStack(spacing: SafaSpacing.sm) {
                 Image(systemName: "book.fill")
-                    .font(.title2)
-                    .foregroundStyle(.green)
-                    .frame(width: 40)
+                    .font(.body)
+                    .foregroundColor(.green)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Continue Reading")
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                    Text("Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
-                        .font(SafaTypography.titleSmall)
-                }
+                Text("Continue Reading Quran")
+                    .font(SafaTypography.titleSmall)
+                    .foregroundColor(SafaColors.Fallback.text)
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: isResumeCardExpanded ? "chevron.down" : "chevron.right")
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .overlay(alignment: .topTrailing) {
-            Button {
-                withAnimation {
-                    UserDefaults.standard.set(true, forKey: resumeCardDismissKey)
-                    hideResumeCard = true
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+                Button {
+                    withAnimation {
+                        UserDefaults.standard.set(true, forKey: resumeCardDismissKey)
+                        hideResumeCard = true
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption2)
+                        .foregroundColor(SafaColors.Fallback.tertiaryText)
+                        .padding(SafaSpacing.xxs)
                 }
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .padding(SafaSpacing.xs)
             }
-            .accessibilityLabel("Dismiss continue reading card")
+            .padding(.horizontal, SafaSpacing.md)
+            .padding(.vertical, SafaSpacing.sm)
+            .background(Color(UIColor.secondarySystemBackground))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isResumeCardExpanded.toggle()
+                }
+            }
+
+            // Expanded content (tap to navigate)
+            if isResumeCardExpanded {
+                Button {
+                    router.selectedTab = "quran"
+                } label: {
+                    HStack(spacing: SafaSpacing.md) {
+                        VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                            Text("Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.text)
+
+                            Text("Juz \(juzForSurah(progress.lastSurah)) · \(Int(progress.progressPercentage))% complete")
+                                .font(SafaTypography.labelSmall)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.green)
+                    }
+                    .padding(.horizontal, SafaSpacing.md)
+                    .padding(.vertical, SafaSpacing.sm)
+                    .background(Color(UIColor.secondarySystemBackground))
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Continue Reading Quran, Surah \(progress.lastSurah), Ayah \(progress.lastAyah)")
-        .accessibilityHint("Double tap to open Quran")
+        .accessibilityHint("Double tap to expand, then tap to open Quran")
+    }
+
+    /// Approximate juz number from surah number (rough mapping for display)
+    private func juzForSurah(_ surahNumber: Int) -> Int {
+        // Simplified juz lookup: each juz covers roughly 2-3 surahs early, more later
+        let juzStarts: [(surah: Int, juz: Int)] = [
+            (1, 1), (2, 1), (3, 3), (4, 4), (5, 6), (6, 7), (7, 8),
+            (8, 9), (9, 10), (10, 11), (11, 12), (12, 12), (13, 13),
+            (14, 13), (15, 14), (16, 14), (17, 15), (18, 15), (19, 16),
+            (20, 16), (21, 17), (22, 17), (23, 18), (24, 18), (25, 18),
+            (26, 19), (27, 19), (28, 20), (29, 20), (30, 21), (31, 21),
+            (32, 21), (33, 21), (34, 22), (35, 22), (36, 22), (37, 23),
+            (38, 23), (39, 23), (40, 24), (41, 24), (42, 25), (43, 25),
+            (44, 25), (45, 25), (46, 26), (47, 26), (48, 26), (49, 26),
+            (50, 26), (51, 27), (52, 27), (53, 27), (54, 27), (55, 27),
+            (56, 27), (57, 27), (58, 28), (59, 28), (60, 28), (61, 28),
+            (62, 28), (63, 28), (64, 28), (65, 28), (66, 28), (67, 29),
+            (68, 29), (69, 29), (70, 29), (71, 29), (72, 29), (73, 29),
+            (74, 29), (75, 29), (76, 29), (77, 29), (78, 30), (79, 30),
+            (80, 30), (81, 30), (82, 30), (83, 30), (84, 30), (85, 30),
+            (86, 30), (87, 30), (88, 30), (89, 30), (90, 30), (91, 30),
+            (92, 30), (93, 30), (94, 30), (95, 30), (96, 30), (97, 30),
+            (98, 30), (99, 30), (100, 30), (101, 30), (102, 30), (103, 30),
+            (104, 30), (105, 30), (106, 30), (107, 30), (108, 30), (109, 30),
+            (110, 30), (111, 30), (112, 30), (113, 30), (114, 30),
+        ]
+        return juzStarts.last(where: { $0.surah <= surahNumber })?.juz ?? 1
     }
 
     // MARK: - Progress Card
