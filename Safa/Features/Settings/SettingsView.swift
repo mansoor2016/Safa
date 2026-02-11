@@ -559,6 +559,8 @@ struct SettingsView: View {
                     .onChange(of: forceRamadan) { _, newValue in
                         if newValue {
                             FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
+                            // Clear dismiss key so banner appears on Home
+                            UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.ramadanMode)
                         }
@@ -574,6 +576,8 @@ struct SettingsView: View {
                             // Turn off conflicting Eid
                             forceEidAlAdha = false
                             FeatureFlags.shared.removeOverride(.forceEidAlAdha)
+                            // Clear dismiss key so banner appears on Home
+                            UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.forceEidAlFitr)
                         }
@@ -589,6 +593,8 @@ struct SettingsView: View {
                             // Turn off conflicting Eid
                             forceEidAlFitr = false
                             FeatureFlags.shared.removeOverride(.forceEidAlFitr)
+                            // Clear dismiss key so banner appears on Home
+                            UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.forceEidAlAdha)
                         }

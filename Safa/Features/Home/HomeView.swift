@@ -283,6 +283,8 @@ struct HomeView: View {
         withAnimation {
             UserDefaults.standard.set(true, forKey: bannerDismissKey)
             showRamadanBanner = false
+            // Turn off Force Ramadan flag so Settings toggle reflects dismissal
+            FeatureFlags.shared.removeOverride(.ramadanMode)
         }
     }
 
@@ -376,6 +378,9 @@ struct HomeView: View {
         withAnimation {
             UserDefaults.standard.set(true, forKey: eidBannerDismissKey)
             showEidBanner = false
+            // Turn off Force Eid flags so Settings toggle reflects dismissal
+            FeatureFlags.shared.removeOverride(.forceEidAlFitr)
+            FeatureFlags.shared.removeOverride(.forceEidAlAdha)
         }
     }
 
