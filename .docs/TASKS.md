@@ -21,11 +21,12 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 ### Phase 1: Accessibility & Layout Confidence
 **Why first:** Apple rejects apps with broken accessibility. Layout bugs on small/large screens generate 1-star reviews immediately. These are non-negotiable for a quality v1.
 
-- [ ] Dynamic Type scaling audit — ensure all screens render correctly at AX1-AX5 sizes
+- [x] Dynamic Type scaling audit — SafaTypography uses UIFontMetrics, 15 hardcoded sizes replaced, 5 @ScaledMetric containers, DT caps on grids
 - [ ] iPhone SE + Pro Max boundary testing — catch layout overflow/clipping on extreme sizes
-- [ ] VoiceOver rotor flow for Quran navigation — critical for visually impaired Muslims (underserved audience)
-- [ ] UI tests for large content size + VoiceOver labels — automated regression safety net
-- [ ] Minimal Motion profile — respect `accessibilityReduceMotion` (already partially handled via SafaMotion)
+- [x] VoiceOver rotor flow for Quran navigation — critical for visually impaired Muslims (underserved audience)
+- [x] Accessibility labels on 13 high-traffic screens + View+Accessibility.swift helpers + 21 tests
+- [x] UI tests for large content size + VoiceOver labels — 18 DynamicTypeScalingTests + VoiceOver label tests
+- [x] Minimal Motion profile — 18 ReduceMotionTests verifying SafaMotion tokens + critical animation audit
 
 ### Phase 2: Widgets & Platform Integration
 **Why second:** Widgets are the #1 daily engagement driver. Lock screen prayer times is a killer feature vs competitors. Code is complete — just needs device verification.
@@ -34,6 +35,7 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 - [ ] Spotlight search result tap → navigation — verify deep links resolve to correct screens
 - [ ] Siri Shortcuts invocation testing — verify 5 wired intents work end-to-end
 - [ ] Focus Mode integration — low effort, niche value but quick win
+- [x] Platform integration verification tests — 40 tests covering widget data, Spotlight parsing, Siri intents, Focus modes
 
 ### Phase 3: Audio (Core Islamic Experience)
 **Why third:** Hearing the adhan is deeply important culturally. Silent prayer notifications feel incomplete. One bundled adhan + AVFoundation wiring enables the core sound experience.

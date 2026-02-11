@@ -44,6 +44,9 @@
     "%@ Dhikr" : {
 
     },
+    "%@ duas" : {
+
+    },
     "%@ is in %lld day(s). %@" : {
       "localizations" : {
         "en" : {
@@ -54,14 +57,64 @@
         }
       }
     },
+    "%@ number %lld. %@. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ number %2$lld. %3$@. %4$@"
+          }
+        }
+      }
+    },
     "%@ prayer is already logged for today." : {
 
     },
     "%@ Time" : {
 
     },
+    "%@, %lld duas" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld duas"
+          }
+        }
+      }
+    },
+    "%@, %lld hadith" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld hadith"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
     "%@: 0 min" : {
 
+    },
+    "%@. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@. %2$@"
+          }
+        }
+      }
     },
     "%lld" : {
 
@@ -478,6 +531,9 @@
     "Ayah %lld, bookmarked" : {
 
     },
+    "Ayahs" : {
+
+    },
     "Back" : {
 
     },
@@ -584,6 +640,16 @@
         }
       }
     },
+    "Continue Reading Quran, Surah %lld, Ayah %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Continue Reading Quran, Surah %1$lld, Ayah %2$lld"
+          }
+        }
+      }
+    },
     "Conversation not found." : {
 
     },
@@ -632,6 +698,16 @@
     "Daily Hadith" : {
 
     },
+    "Daily Hadith from %@. %@. Narrated by %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Daily Hadith from %1$@. %2$@. Narrated by %3$@"
+          }
+        }
+      }
+    },
     "Daily Practice" : {
 
     },
@@ -640,6 +716,16 @@
     },
     "Daily Verse" : {
 
+    },
+    "Daily Verse, Surah %lld Ayah %lld. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Daily Verse, Surah %1$lld Ayah %2$lld. %3$@"
+          }
+        }
+      }
     },
     "Data & Privacy" : {
 
@@ -744,6 +830,9 @@
     "Double tap to bookmark" : {
 
     },
+    "Double tap to complete" : {
+
+    },
     "Double tap to count one %@" : {
 
     },
@@ -753,7 +842,19 @@
     "Double tap to go to this ayah" : {
 
     },
+    "Double tap to log" : {
+
+    },
+    "Double tap to mark as completed" : {
+
+    },
     "Double tap to open %@" : {
+
+    },
+    "Double tap to open Quran" : {
+
+    },
+    "Double tap to play" : {
 
     },
     "Double tap to read this juz" : {
@@ -774,10 +875,25 @@
     "Double tap to resume reading" : {
 
     },
+    "Double tap to start counting" : {
+
+    },
+    "Double tap to stop" : {
+
+    },
     "Double tap to subtract one from the counter" : {
 
     },
     "Double tap to toggle notification" : {
+
+    },
+    "Double tap to undo" : {
+
+    },
+    "Double tap to unlog" : {
+
+    },
+    "Double tap to view prayer times" : {
 
     },
     "Download failed" : {
@@ -842,6 +958,16 @@
     },
     "End of %@" : {
 
+    },
+    "End of %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "End of %1$@%2$@"
+          }
+        }
+      }
     },
     "English - Sahih International" : {
 
@@ -1260,6 +1386,9 @@
     "Mark as Prayed" : {
 
     },
+    "Mark complete" : {
+
+    },
     "Mark Complete" : {
 
     },
@@ -1404,6 +1533,16 @@
     "Notifications" : {
 
     },
+    "Number %lld, %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Number %1$lld, %2$@, %3$@"
+          }
+        }
+      }
+    },
     "Observance" : {
 
     },
@@ -1447,6 +1586,9 @@
 
     },
     "Permission denied to access this data." : {
+
+    },
+    "Play adhan" : {
 
     },
     "Play auto-scroll" : {
@@ -1852,6 +1994,9 @@
     "Stay connected to your prayers" : {
 
     },
+    "Stop adhan" : {
+
+    },
     "Stop Adhan" : {
 
     },
@@ -1880,6 +2025,9 @@
 
     },
     "Supplications & Remembrances" : {
+
+    },
+    "Supplications and Remembrances" : {
 
     },
     "Support" : {

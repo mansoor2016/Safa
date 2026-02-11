@@ -99,6 +99,9 @@ final class PrayerViewModel {
             // Ensure notifications are scheduled (skips if already done today)
             await NotificationScheduler.shared.scheduleIfNeeded()
 
+            // Update Live Activity with next prayer context
+            updateLiveActivity()
+
         } catch {
             self.error = error
         }
@@ -155,6 +158,9 @@ final class PrayerViewModel {
             if wasFirstPrayer {
                 await userState.checkAndUnlockAchievement("prayer_first")
             }
+
+            // Update Live Activity (next prayer context may have changed)
+            updateLiveActivity()
         } catch {
             // Revert optimistic state on failure
             loggedPrayers.remove(prayerType)
@@ -311,6 +317,25 @@ final class PrayerViewModel {
             todayPrayers[i].isNext = todayPrayers[i].time > now &&
                                      todayPrayers[i].type.isObligatory &&
                                      (i == 0 || todayPrayers[i - 1].time <= now)
+        }
+    }
+
+    private func updateLiveActivity() {
+        guard let next = nextPrayer else {
+            Task { await PrayerLiveActivityManager.shared.endActivity() }
+            return
+        }
+        let prefs = PreferencesManager.loadPreferencesSync()
+        let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
+        let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
+
+        Task {
+            await PrayerLiveActivityManager.shared.updateActivity(
+                prayerName: next.type.displayName,
+                prayerTime: next.time,
+                hijriDate: hijri,
+                locationName: location
+            )
         }
     }
 

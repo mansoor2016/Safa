@@ -65,6 +65,9 @@ struct SafaApp: App {
                     await dependencies.userState.recordActivity(type: .daily)
                 }
 
+                // Clean up stale Live Activities from previous session
+                await PrayerLiveActivityManager.shared.endAllActivities()
+
                 // Prune old hasanat tracker entries (prevents UserDefaults bloat)
                 HasanatTracker.pruneOldEntries()
 
