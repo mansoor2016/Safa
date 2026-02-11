@@ -806,7 +806,7 @@ struct FeedbackView: View {
             Section {
                 ZStack(alignment: .topLeading) {
                     if feedbackDescription.isEmpty {
-                        Text("What were you doing when you noticed this?\nWhich page or feature were you using?\nWhat did you expect to happen?\nWhat happened instead?")
+                        Text("What happened?\nWhich page were you on?\nWhat did you expect instead?")
                             .foregroundColor(Color(.placeholderText))
                             .padding(.top, 8)
                             .padding(.leading, 5)
