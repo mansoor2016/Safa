@@ -38,6 +38,7 @@ struct SettingsView: View {
     @State private var showLocationRecommendations = false
     @State private var showInviteFriendsSheet = false
     @State private var showRamadanBanner = true
+    @State private var showEidBanner = true
 
     private let prefsManager = PreferencesManager.shared
 
@@ -45,6 +46,12 @@ struct SettingsView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
+    }
+
+    private var eidBannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "\(AppConstants.StorageKeys.eidBannerDismissedPrefix)\(dateFormatter.string(from: Date()))"
     }
 
     var body: some View {
@@ -388,6 +395,15 @@ struct SettingsView: View {
                         UserDefaults.standard.set(true, forKey: ramadanBannerDismissKey)
                     }
                 }
+
+            Toggle("Show Eid Banner", isOn: $showEidBanner)
+                .onChange(of: showEidBanner) { _, newValue in
+                    if newValue {
+                        UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
+                    } else {
+                        UserDefaults.standard.set(true, forKey: eidBannerDismissKey)
+                    }
+                }
         } header: {
             Text("Appearance")
         }
@@ -604,8 +620,9 @@ struct SettingsView: View {
         }
         selectedAccentColor = themeManager.accentColor
 
-        // Load Ramadan banner state (synced with HomeView dismiss key)
+        // Load banner states (synced with HomeView dismiss keys)
         showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
+        showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
 
         // Load adhan settings
         adhanEnabled = prefs.adhanEnabled
