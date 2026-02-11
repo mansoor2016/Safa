@@ -42,7 +42,6 @@ private struct QuranContentView: View {
     @Binding var path: NavigationPath
     var surahZoom: Namespace.ID
     @State private var selectedTab = 0
-    @State private var showingSearch = false
     @State private var editingBookmark: QuranBookmark?
     @State private var editNoteText = ""
 
@@ -71,19 +70,7 @@ private struct QuranContentView: View {
         }
         .navigationTitle("Quran")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingSearch = true
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                }
-            }
-        }
-        .sheet(isPresented: $showingSearch) {
-            QuranSearchView()
-                .fullSheet()
-        }
+        .searchable(text: $viewModel.searchQuery, prompt: "Search surahs...")
         .task {
             await viewModel.loadSurahs()
         }
@@ -115,7 +102,7 @@ private struct QuranContentView: View {
                     .padding()
                 }
 
-                ForEach(viewModel.surahs) { surah in
+                ForEach(viewModel.filteredSurahs) { surah in
                     NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
                         SurahRow(
                             surah: surah,

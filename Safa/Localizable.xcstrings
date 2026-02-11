@@ -890,6 +890,9 @@
     "Double tap to log" : {
 
     },
+    "Double tap to mark as %@" : {
+
+    },
     "Double tap to mark as completed" : {
 
     },
@@ -1573,6 +1576,9 @@
     "Normal" : {
 
     },
+    "Not completed" : {
+
+    },
     "Not set" : {
 
     },
@@ -1914,9 +1920,6 @@
     "Search Quran" : {
 
     },
-    "Search surahs..." : {
-
-    },
     "Searching..." : {
 
     },
@@ -2112,12 +2115,12 @@
     "Surah %lld" : {
 
     },
-    "Surah %lld, %@, %@, %lld verses" : {
+    "Surah %lld, %@, %@, %lld verses%@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Surah %1$lld, %2$@, %3$@, %4$lld verses"
+            "value" : "Surah %1$lld, %2$@, %3$@, %4$lld verses%5$@"
           }
         }
       }
@@ -2404,7 +2407,7 @@
     "Well Done!" : {
 
     },
-    "What were you doing when you noticed this?\nWhich page or feature were you using?\nWhat did you expect to happen?\nWhat happened instead?" : {
+    "What happened?\nWhich page were you on?\nWhat did you expect instead?" : {
 
     },
     "What's included in JSON export:" : {
