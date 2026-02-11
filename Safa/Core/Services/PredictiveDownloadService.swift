@@ -195,7 +195,7 @@ final class PredictiveDownloadService {
         }
 
         // 2. Same Juz Prediction
-        let currentJuz = juzForSurah(surahNumber)
+        let currentJuz = surahNumber.juzNumber
         let sameJuzSurahs = surahsInJuz(currentJuz)
             .filter { $0 != surahNumber && $0 > surahNumber }
             .prefix(3)
@@ -361,29 +361,6 @@ final class PredictiveDownloadService {
         NetworkMonitor.shared.isOnWiFi
     }
 
-    private func juzForSurah(_ surahNumber: Int) -> Int {
-        // Simplified juz mapping
-        switch surahNumber {
-        case 1...2: return 1
-        case 3: return 3
-        case 4: return 4
-        case 5: return 6
-        case 6: return 7
-        case 7: return 8
-        case 8...9: return 9
-        case 10: return 11
-        case 78...114: return 30
-        default: return (surahNumber / 4) + 1
-        }
-    }
-
-    private func surahsInJuz(_ juzNumber: Int) -> [Int] {
-        // Simplified - returns surahs in the juz
-        switch juzNumber {
-        case 30: return Array(78...114)
-        default: return []
-        }
-    }
 }
 
 // MARK: - Feature Flag Integration
