@@ -23,6 +23,10 @@ struct PrayerLiveActivityView: View {
                     .font(.title2)
                     .fontWeight(.bold)
 
+                Text(context.state.nextPrayerTime, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
                 Text(context.state.locationName)
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -30,15 +34,9 @@ struct PrayerLiveActivityView: View {
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(context.state.nextPrayerTime, style: .time)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-
-                Text(context.state.nextPrayerTime, style: .relative)
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
-            }
+            Text(context.state.nextPrayerTime, style: .time)
+                .font(.title)
+                .fontWeight(.semibold)
         }
         .padding()
     }
