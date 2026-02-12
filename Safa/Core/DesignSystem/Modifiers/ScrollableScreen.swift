@@ -26,14 +26,10 @@ struct ScrollableScreen<Content: View, StickyContent: View>: View {
     var body: some View {
         ScrollView {
             content()
-                .onScrollGeometryChange(for: Bool.self) { geometry in
-                    geometry.contentOffset.y > 50
-                } action: { _, isPast in
-                    scrolledPastThreshold = isPast
-                }
+                .modifier(ScrollGeometryChangeModifier(scrolledPastThreshold: $scrolledPastThreshold))
         }
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackgroundVisibility(scrolledPastThreshold ? .visible : .hidden, for: .navigationBar)
+        .modifier(ToolbarVisibilityModifier(scrolledPastThreshold: scrolledPastThreshold))
         .toolbar {
             if scrolledPastThreshold, let stickyContent {
                 ToolbarItem(placement: .principal) {
@@ -55,5 +51,41 @@ extension ScrollableScreen where StickyContent == EmptyView {
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.stickyContent = nil
+    }
+}
+
+// MARK: - iOS 18+ Availability Wrappers
+
+/// Wraps `onScrollGeometryChange` which requires iOS 18+.
+/// On iOS 17, the toolbar stays visible (no scroll-based morph).
+private struct ScrollGeometryChangeModifier: ViewModifier {
+    @Binding var scrolledPastThreshold: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content
+                .onScrollGeometryChange(for: Bool.self) { geometry in
+                    geometry.contentOffset.y > 50
+                } action: { _, isPast in
+                    scrolledPastThreshold = isPast
+                }
+        } else {
+            content
+        }
+    }
+}
+
+/// Wraps `toolbarBackgroundVisibility` which requires iOS 18+.
+/// On iOS 17, the toolbar material is always visible.
+private struct ToolbarVisibilityModifier: ViewModifier {
+    let scrolledPastThreshold: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content
+                .toolbarBackgroundVisibility(scrolledPastThreshold ? .visible : .hidden, for: .navigationBar)
+        } else {
+            content
+        }
     }
 }

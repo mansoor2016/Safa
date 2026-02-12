@@ -42,7 +42,7 @@ struct EidGreetingCard: View {
             frontSide
             backSide
         }
-        .frame(width: 350)
+        .frame(maxWidth: 350)
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 

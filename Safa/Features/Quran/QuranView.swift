@@ -21,7 +21,7 @@ struct QuranView: View {
             }
             .navigationDestination(for: QuranNavigationTarget.self) { target in
                 AyahReaderView(surahNumber: target.surahNumber, startAyah: target.startAyah)
-                    .navigationTransition(.zoom(sourceID: target.surahNumber, in: surahZoom))
+                    .modifier(ZoomTransitionModifier(sourceID: target.surahNumber, namespace: surahZoom))
             }
         }
         .task {
@@ -113,7 +113,7 @@ private struct QuranContentView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .matchedTransitionSource(id: surah.number, in: surahZoom)
+                    .modifier(MatchedTransitionSourceModifier(id: surah.number, namespace: surahZoom))
 
                     Divider()
                         .padding(.leading, SafaSpacing.xl + SafaSpacing.md)
@@ -388,6 +388,40 @@ private struct BookmarkRow: View {
         }
         label += ", bookmarked \(bookmark.createdAt.relativeString)"
         return label
+    }
+}
+
+// MARK: - iOS 18+ Transition Wrappers
+
+/// Wraps `.navigationTransition(.zoom())` which requires iOS 18+.
+/// On iOS 17, navigation uses the default push transition.
+private struct ZoomTransitionModifier: ViewModifier {
+    let sourceID: Int
+    let namespace: Namespace.ID
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content
+                .navigationTransition(.zoom(sourceID: sourceID, in: namespace))
+        } else {
+            content
+        }
+    }
+}
+
+/// Wraps `.matchedTransitionSource()` which requires iOS 18+.
+/// On iOS 17, no matched geometry source is set (standard navigation).
+private struct MatchedTransitionSourceModifier: ViewModifier {
+    let id: Int
+    let namespace: Namespace.ID
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content
+                .matchedTransitionSource(id: id, in: namespace)
+        } else {
+            content
+        }
     }
 }
 

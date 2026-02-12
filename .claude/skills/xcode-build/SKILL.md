@@ -49,6 +49,10 @@ If no action is provided, default to `build`.
 - `build --platform "iOS Simulator,name=iPad Air 11-inch (M3)"` — Build for iPad
 - `build --scheme SafaWidgets` — Build widget extension
 - `test --platform "iOS Simulator,name=iPhone Air"` — Test on different simulator
+- `build --matrix` — Quick matrix: build on 3 configs (iOS 17 SE, iOS 18 Pro Max, iOS 26 Pro)
+- `test --matrix` — Quick matrix: test on 3 configs
+- `build --matrix-full` — Full matrix: build on 7 configs across all iOS versions and screen sizes
+- `test --matrix-full` — Full matrix: test on 7 configs
 
 ## Build Workflow
 
@@ -122,19 +126,67 @@ Then count passed/failed from those lines.
 
 For reference, these simulators are available on this machine:
 
-| Name | Type |
-|------|------|
-| iPhone 17 Pro (default) | iPhone |
-| iPhone 17 | iPhone |
-| iPhone 17 Pro Max | iPhone |
-| iPhone Air | iPhone |
-| iPhone 16e | iPhone |
-| iPad Air 11-inch (M3) | iPad |
-| iPad Air 13-inch (M3) | iPad |
-| iPad Pro 11-inch (M5) | iPad |
-| iPad Pro 13-inch (M5) | iPad |
-| iPad mini (A17 Pro) | iPad |
-| iPad (A16) | iPad |
+| iOS | Name | Width | Type |
+|-----|------|-------|------|
+| 17.5 | iPhone SE (3rd generation) | 375pt | iPhone |
+| 17.5 | iPhone 15 | 393pt | iPhone |
+| 17.5 | iPhone 15 Plus | 393pt | iPhone |
+| 17.5 | iPhone 15 Pro | 393pt | iPhone |
+| 17.5 | iPhone 15 Pro Max | 430pt | iPhone |
+| 18.6 | iPhone 16e | 375pt | iPhone |
+| 18.6 | iPhone 16 | 393pt | iPhone |
+| 18.6 | iPhone 16 Plus | 393pt | iPhone |
+| 18.6 | iPhone 16 Pro | 402pt | iPhone |
+| 18.6 | iPhone 16 Pro Max | 430pt | iPhone |
+| 26.2 | iPhone 16e | 375pt | iPhone |
+| 26.2 | iPhone 17 | 393pt | iPhone |
+| 26.2 | iPhone Air | 393pt | iPhone |
+| 26.2 | iPhone 17 Pro (default) | 402pt | iPhone |
+| 26.2 | iPhone 17 Pro Max | 430pt | iPhone |
+| 26.2 | iPad Air 11-inch (M3) | — | iPad |
+| 26.2 | iPad Air 13-inch (M3) | — | iPad |
+| 26.2 | iPad Pro 11-inch (M5) | — | iPad |
+| 26.2 | iPad Pro 13-inch (M5) | — | iPad |
+| 26.2 | iPad mini (A17 Pro) | — | iPad |
+| 26.2 | iPad (A16) | — | iPad |
+
+## Matrix Modes
+
+### Quick matrix (`--matrix`)
+
+Covers each iOS version boundary + screen width extremes in 3 runs:
+1. `platform=iOS Simulator,name=iPhone SE (3rd generation),OS=17.5` (375pt — oldest OS + smallest)
+2. `platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.6` (430pt — middle OS + largest)
+3. `platform=iOS Simulator,name=iPhone 17 Pro` (402pt — latest OS + default)
+
+Use for every layout/UI change. ~1 minute.
+
+### Full matrix (`--matrix-full`)
+
+Covers all iOS versions, popular models (14/15/16/17 generation), and all screen sizes in 7 runs:
+1. `platform=iOS Simulator,name=iPhone SE (3rd generation),OS=17.5` (375pt)
+2. `platform=iOS Simulator,name=iPhone 15 Pro,OS=17.5` (393pt)
+3. `platform=iOS Simulator,name=iPhone 16,OS=18.6` (393pt)
+4. `platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.6` (430pt)
+5. `platform=iOS Simulator,name=iPhone 16e` (375pt — iOS 26)
+6. `platform=iOS Simulator,name=iPhone 17 Pro` (402pt — iOS 26)
+7. `platform=iOS Simulator,name=iPhone 17 Pro Max` (430pt — iOS 26)
+
+Use before releases or after significant changes. ~2 minutes.
+
+### Report format (both modes)
+
+Report a summary table:
+
+```
+| iOS | Device | Width | Result |
+|-----|--------|-------|--------|
+| 17.5 | iPhone SE (3rd gen) | 375pt | Build succeeded / All N tests passed |
+| 18.6 | iPhone 16 Pro Max | 430pt | Build succeeded / All N tests passed |
+| 26.2 | iPhone 17 Pro | 402pt | Build succeeded / All N tests passed |
+```
+
+Stop on the first failure and report errors. If all pass: "Quick/Full matrix passed (N/N)."
 
 ## Rules
 

@@ -13,25 +13,30 @@ struct AdaptiveTabBarModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         if isEnabled {
-            content
-                .toolbar(tabBarVisible ? .visible : .hidden, for: .tabBar)
-                .animation(.easeInOut(duration: 0.25), value: tabBarVisible)
-                .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                    geometry.contentOffset.y
-                } action: { oldValue, newValue in
-                    let delta = newValue - oldValue
+            if #available(iOS 18.0, *) {
+                content
+                    .toolbar(tabBarVisible ? .visible : .hidden, for: .tabBar)
+                    .animation(.easeInOut(duration: 0.25), value: tabBarVisible)
+                    .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                        geometry.contentOffset.y
+                    } action: { oldValue, newValue in
+                        let delta = newValue - oldValue
 
-                    // Only react to meaningful scrolls (ignore tiny jitter)
-                    guard abs(delta) > 5 else { return }
+                        // Only react to meaningful scrolls (ignore tiny jitter)
+                        guard abs(delta) > 5 else { return }
 
-                    if delta > 0 {
-                        // Scrolling down — hide tab bar
-                        tabBarVisible = false
-                    } else {
-                        // Scrolling up — show tab bar
-                        tabBarVisible = true
+                        if delta > 0 {
+                            // Scrolling down — hide tab bar
+                            tabBarVisible = false
+                        } else {
+                            // Scrolling up — show tab bar
+                            tabBarVisible = true
+                        }
                     }
-                }
+            } else {
+                // iOS 17: tab bar always visible (no scroll-based hiding)
+                content
+            }
         } else {
             content
         }

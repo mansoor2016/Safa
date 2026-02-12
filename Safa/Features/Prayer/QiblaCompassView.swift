@@ -112,7 +112,8 @@ struct QiblaCompassView: View {
             // Compass
             CompassView(
                 qiblaDirection: qiblaDirection,
-                deviceHeading: deviceHeading
+                deviceHeading: deviceHeading,
+                size: compassSize
             )
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(compassAccessibilityLabel)
@@ -310,6 +311,7 @@ struct QiblaCompassView: View {
 private struct CompassView: View {
     let qiblaDirection: Double
     let deviceHeading: Double
+    let size: CGFloat
 
     @State private var currentHeading: Double = 0
 
@@ -318,7 +320,7 @@ private struct CompassView: View {
             // Compass background
             Circle()
                 .stroke(Color.gray.opacity(0.2), lineWidth: 2)
-                .frame(width: 280, height: 280)
+                .frame(width: size, height: size)
 
             // Cardinal directions
             ForEach(0..<4, id: \.self) { index in
@@ -328,7 +330,7 @@ private struct CompassView: View {
                 Text(direction)
                     .font(SafaTypography.labelLarge)
                     .foregroundColor(direction == "N" ? .red : SafaColors.Fallback.secondaryText)
-                    .offset(y: -120)
+                    .offset(y: -(size * 0.43))
                     .rotationEffect(.degrees(angle))
             }
             .rotationEffect(.degrees(-currentHeading))
@@ -338,7 +340,7 @@ private struct CompassView: View {
                 Rectangle()
                     .fill(index % 9 == 0 ? Color.gray : Color.gray.opacity(0.3))
                     .frame(width: index % 9 == 0 ? 2 : 1, height: index % 9 == 0 ? 15 : 8)
-                    .offset(y: -130)
+                    .offset(y: -(size * 0.46))
                     .rotationEffect(.degrees(Double(index) * 10))
             }
             .rotationEffect(.degrees(-currentHeading))

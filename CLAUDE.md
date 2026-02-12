@@ -13,7 +13,7 @@ Safa is an iOS Islamic companion app built with Swift and SwiftUI. This document
 
 **Tech Stack:**
 - Swift 5.9+
-- SwiftUI (iOS 26+)
+- SwiftUI (iOS 17+, deployment target 17.0)
 - Core Data + CloudKit
 - Core ML (on-device LLM)
 - WidgetKit, ActivityKit
@@ -595,6 +595,14 @@ Use this local-first model until CI exists:
    - `/build`
    - `/test`
    - Run formatter/linter validation once configured
+
+3. **Quick matrix** (when touching layout, frames, sizing, or UI components):
+   - `/build --matrix` — builds on iOS 17 SE (375pt), iOS 18 Pro Max (430pt), iOS 26 Pro (402pt)
+   - `/test --matrix` — runs full test suite on same 3 configs sequentially
+
+4. **Full matrix** (before releases or after significant changes):
+   - `/build --matrix-full` — builds on 7 configs across iOS 17/18/26 and all screen sizes
+   - `/test --matrix-full` — runs full test suite on all 7 configs sequentially
 
 Terminology note: use **`full checks`** (this replaces `fast-ci` wording).
 

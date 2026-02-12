@@ -995,6 +995,12 @@
     "Eid Mubarak! 🎉" : {
 
     },
+    "Eid Mubarak! A time for sacrifice, charity, and reflection." : {
+
+    },
+    "Eid Mubarak! Taqabbal Allahu minna wa minkum." : {
+
+    },
     "Eid Prayer: %@" : {
 
     },
@@ -1137,12 +1143,6 @@
     "Feedback" : {
 
     },
-    "Festival of Breaking the Fast. Taqabbal Allahu minna wa minkum." : {
-
-    },
-    "Festival of Sacrifice. Eid Mubarak!" : {
-
-    },
     "Font Settings" : {
 
     },
@@ -1258,6 +1258,9 @@
 
     },
     "Iftar Time!" : {
+
+    },
+    "Important day of the Hajj pilgrimage. Fasting is highly recommended." : {
 
     },
     "In the meantime, explore:" : {
@@ -2259,9 +2262,6 @@
     "The beginning of a new Islamic year." : {
 
     },
-    "The best day on which the sun rises. Fasting is highly recommended." : {
-
-    },
     "The blessed month of fasting begins." : {
 
     },
@@ -2283,7 +2283,7 @@
     "The Night Journey and Ascension of Prophet Muhammad ﷺ" : {
 
     },
-    "The Night of Power, better than a thousand months." : {
+    "The Night of Power." : {
 
     },
     "The requested record was not found." : {
