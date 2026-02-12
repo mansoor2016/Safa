@@ -4,29 +4,6 @@
 <dict>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
-	<key>UIApplicationShortcutItems</key>
-	<array>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.safa.quickaction.prayerTimes</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Prayer Times</string>
-			<key>UIApplicationShortcutItemSubtitle</key>
-			<string>View today's prayer times</string>
-			<key>UIApplicationShortcutItemIconSymbolName</key>
-			<string>clock.fill</string>
-		</dict>
-		<dict>
-			<key>UIApplicationShortcutItemType</key>
-			<string>com.safa.quickaction.shareApp</string>
-			<key>UIApplicationShortcutItemTitle</key>
-			<string>Share Safa</string>
-			<key>UIApplicationShortcutItemSubtitle</key>
-			<string>Invite friends to Safa</string>
-			<key>UIApplicationShortcutItemIconSymbolName</key>
-			<string>square.and.arrow.up</string>
-		</dict>
-	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
