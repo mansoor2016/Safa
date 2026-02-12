@@ -278,6 +278,7 @@ private struct SurahRow: View {
                 Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isComplete ? .green : SafaColors.Fallback.tertiaryText)
                     .font(.system(size: 18))
+                    .frame(width: 24)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(isComplete ? "Completed" : "Not completed")
@@ -287,6 +288,7 @@ private struct SurahRow: View {
             Text(surah.nameArabic)
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
+                .frame(width: 90, alignment: .trailing)
         }
         .padding(.horizontal, SafaSpacing.md)
         .padding(.vertical, SafaSpacing.sm)

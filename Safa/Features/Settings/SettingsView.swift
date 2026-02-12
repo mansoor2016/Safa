@@ -583,8 +583,6 @@ struct SettingsView: View {
                         }
                     }
 
-                Divider()
-
                 Toggle("Basic Inline Header", isOn: $useBasicInlineHeader)
                     .onAppear {
                         useBasicInlineHeader = FeatureFlags.shared.isEnabled(.basicInlineHeader)
@@ -608,8 +606,6 @@ struct SettingsView: View {
                             FeatureFlags.shared.removeOverride(.adaptiveTabBar)
                         }
                     }
-
-                Divider()
 
                 Button("Reset Onboarding") {
                     Task {
