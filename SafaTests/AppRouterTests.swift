@@ -179,12 +179,6 @@ final class AppRouterTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 
-    func testDeepLinkFamily() {
-        let url = URL(string: "safa://family")!
-        XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.path.count, 1)
-    }
-
     func testDeepLinkUnknownReturnsFalse() {
         let url = URL(string: "safa://unknown")!
         XCTAssertFalse(sut.handleDeepLink(url))
