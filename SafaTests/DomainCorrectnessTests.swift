@@ -107,7 +107,6 @@ final class HasanatAwardPointTests: XCTestCase {
     func test_socialPoints_matchExpected() {
         XCTAssertEqual(HasanatAward.share.points, 5)
         XCTAssertEqual(HasanatAward.inviteAccepted.points, 25)
-        XCTAssertEqual(HasanatAward.familyJoined.points, 15)
     }
 
     func test_dailyPoints_matchExpected() {
@@ -133,7 +132,7 @@ final class HasanatAwardPointTests: XCTestCase {
             .prayerLogged, .prayerAllFive, .quranPage, .quranSurah, .quranJuz,
             .lessonComplete, .lessonPerfect, .pronunciationPass, .tajweedModule,
             .morningDhikr, .eveningDhikr, .tasbeehSession, .dailyOpen, .dailyVerse,
-            .dailyHadith, .share, .inviteAccepted, .familyJoined, .fastingDay, .taraweeh
+            .dailyHadith, .share, .inviteAccepted, .fastingDay, .taraweeh
         ]
         for award in allAwards {
             XCTAssertGreaterThan(award.points, 0, "All awards must be positive")

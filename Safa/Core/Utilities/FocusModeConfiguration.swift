@@ -69,7 +69,6 @@ final class FocusModeService {
         case quranReminder = "QURAN_REMINDER"
         case streakReminder = "STREAK_REMINDER"
         case achievementUnlocked = "ACHIEVEMENT_UNLOCKED"
-        case familyActivity = "FAMILY_ACTIVITY"
         case generalReminder = "GENERAL_REMINDER"
 
         /// Whether this category should be allowed during Prayer Focus
@@ -199,15 +198,6 @@ final class FocusModeService {
             options: []
         )
         categories.insert(achievementCategory)
-
-        // Family Activity Category
-        let familyCategory = UNNotificationCategory(
-            identifier: NotificationCategory.familyActivity.rawValue,
-            actions: [],
-            intentIdentifiers: [],
-            options: []
-        )
-        categories.insert(familyCategory)
 
         // General Reminder Category
         let generalCategory = UNNotificationCategory(

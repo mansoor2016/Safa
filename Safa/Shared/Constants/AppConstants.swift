@@ -34,7 +34,6 @@ enum AppConstants {
         static let quran = "quran"
         static let learn = "learn"
         static let chat = "chat"
-        static let family = "family"
         static let settings = "settings"
     }
 
@@ -82,13 +81,6 @@ enum AppConstants {
         static let chatMessagesPrefix = "com.safa.chat.messages."
         static let chatActiveConversation = "com.safa.chat.active"
 
-        // Family
-        static let familyCircle = "com.safa.family.circle"
-        static let familyMembers = "com.safa.family.members"
-        static let familyActivity = "com.safa.family.activity"
-        static let familyPrivacy = "com.safa.family.privacy"
-        static let familyNotifications = "com.safa.family.notifications"
-
         // Learning
         static let learningProgress = "com.safa.learning.progress"
         static let learningCompleted = "com.safa.learning.completed"
@@ -123,10 +115,6 @@ enum AppConstants {
 
         // Calendar
         static let calendarIdentifier = "com.safa.calendarIdentifier"
-
-        // CloudKit
-        static let cloudKitChangeToken = "cloudKitServerChangeToken"
-        static let cloudKitPendingChanges = "pendingCloudKitChanges"
 
         // Core Data
         static let coreDataModelVersion = "com.safa.coredata.modelVersion"
@@ -202,7 +190,6 @@ enum AppConstants {
         static let maxChatMessageLength = 2000
         static let maxBookmarks = 100
         static let maxConversations = 50
-        static let maxFamilyMembers = 10
     }
 
     // MARK: - Timing

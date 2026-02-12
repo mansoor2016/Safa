@@ -3,7 +3,7 @@
 // DEPENDENCIES: XCTest, Safa
 
 import XCTest
-import CloudKit
+
 @testable import Safa
 
 // MARK: - NetworkMonitor Tests
@@ -108,33 +108,6 @@ final class CompassAccuracyTests: XCTestCase {
         let lastUpdate = Date().addingTimeInterval(-2)
         let timeSince = Date().timeIntervalSince(lastUpdate)
         XCTAssertLessThanOrEqual(timeSince, 5, "Within 5 seconds, heading is fresh")
-    }
-}
-
-// MARK: - CloudKit Quota Tests
-
-final class CloudKitQuotaTests: XCTestCase {
-
-    func test_quotaExceededError_isDetected() {
-        let error = CKError(CKError.quotaExceeded)
-        XCTAssertEqual(error.code, .quotaExceeded)
-    }
-
-    func test_networkError_isNotQuotaExceeded() {
-        let error = CKError(CKError.networkUnavailable)
-        XCTAssertNotEqual(error.code, .quotaExceeded)
-    }
-
-    func test_syncErrorQuotaExceeded_hasDescription() {
-        let error = SyncError.quotaExceeded
-        XCTAssertNotNil(error.errorDescription)
-        XCTAssertTrue(error.errorDescription!.contains("iCloud"))
-    }
-
-    func test_syncErrorNetworkUnavailable_hasDescription() {
-        let error = SyncError.networkUnavailable
-        XCTAssertNotNil(error.errorDescription)
-        XCTAssertTrue(error.errorDescription!.contains("internet") || error.errorDescription!.contains("online"))
     }
 }
 

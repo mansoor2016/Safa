@@ -380,8 +380,6 @@ extension HasanatAward {
             return .sharedVerse
         case .inviteAccepted:
             return .invitedFriend
-        case .familyJoined:
-            return .friendJoined
         case .fastingDay:
             return .morningDhikrCompleted
         case .taraweeh:

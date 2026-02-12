@@ -55,12 +55,12 @@ struct SystemStatusView: View {
                 )
             }
 
-            Section("Sync") {
+            Section("Storage") {
                 statusRow(
-                    icon: "icloud",
-                    title: "CloudKit Sync",
-                    status: AppDefaults.useCloudKit ? "Enabled" : "Disabled (local only)",
-                    color: AppDefaults.useCloudKit ? .green : .secondary
+                    icon: "internaldrive",
+                    title: "Data Storage",
+                    status: "Local",
+                    color: .green
                 )
             }
 

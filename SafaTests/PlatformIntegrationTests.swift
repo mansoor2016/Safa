@@ -306,12 +306,11 @@ final class FocusModeIntegrationTests: XCTestCase {
             "quranReminder",
             "streakReminder",
             "achievementUnlocked",
-            "familyActivity",
             "generalReminder"
         ]
 
-        XCTAssertEqual(categories.count, 7,
-                       "Should have 7 notification categories for Focus filtering")
+        XCTAssertEqual(categories.count, 6,
+                       "Should have 6 notification categories for Focus filtering")
     }
 
     func test_prayerTime_isTimeSensitive() {

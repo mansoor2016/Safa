@@ -1,9 +1,8 @@
 // MARK: - CoreDataStack.swift
-// PURPOSE: Core Data stack configuration with optional CloudKit sync and App Group support
-// DEPENDENCIES: CoreData, CloudKit
+// PURPOSE: Core Data stack configuration with App Group support
+// DEPENDENCIES: CoreData
 
 import CoreData
-import CloudKit
 
 final class CoreDataStack {
     // MARK: - Shared Instance
@@ -19,12 +18,7 @@ final class CoreDataStack {
 
     // MARK: - Container
     lazy var persistentContainer: NSPersistentContainer = {
-        let container: NSPersistentContainer
-        if AppDefaults.useCloudKit {
-            container = NSPersistentCloudKitContainer(name: Self.modelName)
-        } else {
-            container = NSPersistentContainer(name: Self.modelName)
-        }
+        let container = NSPersistentContainer(name: Self.modelName)
 
         // Configure store URL for App Group (shared with widgets)
         if let appGroupURL = FileManager.default.containerURL(
@@ -32,18 +26,6 @@ final class CoreDataStack {
         ) {
             let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
             let storeDescription = NSPersistentStoreDescription(url: storeURL)
-
-            if AppDefaults.useCloudKit {
-                // Enable CloudKit sync
-                storeDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                    containerIdentifier: "iCloud.com.safa.app"
-                )
-
-                // Enable persistent history tracking for CloudKit
-                storeDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-                storeDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-            }
-
             container.persistentStoreDescriptions = [storeDescription]
         } else {
             // App Group unavailable — fall back to in-memory store

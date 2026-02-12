@@ -169,7 +169,6 @@ final class DisabledFeatureTests: XCTestCase {
             .tasbeehCounter,
             .islamicCalendar,
             .gamification,
-            .familyCircle,
             .windDown,
             .zakatCalculator,
             .namesOfAllah

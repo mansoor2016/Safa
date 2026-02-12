@@ -147,7 +147,6 @@ final class HasanatTrackingTests: XCTestCase {
         XCTAssertEqual(HasanatAward.dailyHadith.points, 3)
         XCTAssertEqual(HasanatAward.share.points, 5)
         XCTAssertEqual(HasanatAward.inviteAccepted.points, 25)
-        XCTAssertEqual(HasanatAward.familyJoined.points, 15)
         XCTAssertEqual(HasanatAward.fastingDay.points, 20)
         XCTAssertEqual(HasanatAward.taraweeh.points, 25)
     }

@@ -37,7 +37,6 @@ enum AchievementRequirement {
     case lessonsCompleted(count: Int)
     case trackCompleted(trackId: String)
     case allTracksCompleted
-    case familySize(members: Int)
     case shareCount(count: Int)
     case dhikrCompleted(type: DhikrType, count: Int)
     case tasbeehCount(total: Int)
@@ -185,7 +184,7 @@ final class CheckAchievementsUseCase: CheckAchievementsUseCaseProtocol {
         case .trackCompleted, .allTracksCompleted:
             return false // Would need learning progress data
 
-        case .familySize, .shareCount:
+        case .shareCount:
             return false // Would need tracking data
 
         case .dhikrCompleted:
@@ -245,9 +244,6 @@ final class CheckAchievementsUseCase: CheckAchievementsUseCaseProtocol {
 
         case .allTracksCompleted:
             return (0, 4)
-
-        case .familySize(let members):
-            return (0, members)
 
         case .shareCount(let count):
             return (0, count)

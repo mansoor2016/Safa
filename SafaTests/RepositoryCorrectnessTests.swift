@@ -243,49 +243,6 @@ final class LearningProgressTests: XCTestCase {
     }
 }
 
-// MARK: - Family Repository Privacy Tests
-
-final class FamilyPrivacyTests: XCTestCase {
-
-    var sut: MockFamilyRepository!
-
-    override func setUp() {
-        super.setUp()
-        sut = MockFamilyRepository()
-    }
-
-    override func tearDown() {
-        sut = nil
-        super.tearDown()
-    }
-
-    func test_updatePrivacySettings_persists() async throws {
-        let hidden = FamilyPrivacySettings.hidden
-        try await sut.updatePrivacySettings(hidden)
-
-        let settings = try await sut.getPrivacySettings()
-        XCTAssertFalse(settings.shareStreak)
-        XCTAssertFalse(settings.sharePrayers)
-        XCTAssertFalse(settings.shareQuranProgress)
-    }
-
-    func test_activityFeed_respectsLimit() async throws {
-        let memberId = UUID()
-        for i in 0..<10 {
-            let activity = FamilyActivity(
-                memberId: memberId,
-                memberName: "Test",
-                type: .prayerLogged,
-                details: "Activity \(i)"
-            )
-            try await sut.shareActivity(activity)
-        }
-
-        let feed = try await sut.getActivityFeed(limit: 3)
-        XCTAssertLessThanOrEqual(feed.count, 3, "Should respect limit parameter")
-    }
-}
-
 // MARK: - Hadith Repository Daily Selection Tests
 
 final class HadithDailySelectionTests: XCTestCase {

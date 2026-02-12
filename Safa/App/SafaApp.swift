@@ -253,11 +253,9 @@ struct MainTabView: View {
             WindDownView()
         case .settings:
             SettingsView()
-        case .family:
-            FamilyView()
         }
     }
 }
 
 // MoreView extracted to Features/More/MoreView.swift
-// Placeholder views (SurahDetailView, LessonDetailView, FamilyView) extracted to their feature folders
+// Placeholder views (SurahDetailView, LessonDetailView) extracted to their feature folders

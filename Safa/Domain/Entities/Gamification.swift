@@ -277,7 +277,6 @@ enum HasanatAward {
     case dailyHadith
     case share
     case inviteAccepted
-    case familyJoined
     case fastingDay
     case taraweeh
 
@@ -300,7 +299,6 @@ enum HasanatAward {
         case .dailyHadith: return 3
         case .share: return 5
         case .inviteAccepted: return 25
-        case .familyJoined: return 15
         case .fastingDay: return 20
         case .taraweeh: return 25
         }

@@ -26,30 +26,3 @@ struct LessonDetailView: View {
             .navigationTitle("Lesson")
     }
 }
-
-// MARK: - Family View Placeholder
-
-struct FamilyView: View {
-    var body: some View {
-        VStack(spacing: SafaSpacing.lg) {
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.blue)
-
-            Text("Family Circle")
-                .font(SafaTypography.headlineMedium)
-
-            Text("Share your spiritual journey with family members.")
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-                .multilineTextAlignment(.center)
-
-            Button("Invite Family Member") {
-                // Invite action
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
-        .navigationTitle("Family")
-    }
-}

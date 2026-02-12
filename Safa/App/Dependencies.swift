@@ -20,7 +20,6 @@ final class Dependencies {
     let userRepository: UserRepositoryProtocol
     let learningRepository: LearningRepositoryProtocol
     let chatRepository: ChatRepositoryProtocol
-    let familyRepository: FamilyRepositoryProtocol
 
     // MARK: - Services
     let locationService: LocationService
@@ -48,7 +47,6 @@ final class Dependencies {
         self.duaRepository = DuaRepository(coreData: coreDataStack)
         self.userRepository = UserRepository(coreData: coreDataStack)
         self.learningRepository = LearningRepository(coreData: coreDataStack)
-        self.familyRepository = FamilyRepository(coreData: coreDataStack)
 
         // Initialize services
         self.locationService = LocationService()

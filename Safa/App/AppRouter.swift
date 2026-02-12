@@ -51,9 +51,6 @@ final class AppRouter {
 
         // Settings
         case settings
-
-        // Family
-        case family
     }
 
     // MARK: - Sheet Enum
@@ -182,10 +179,6 @@ final class AppRouter {
 
         case "settings":
             navigate(to: .settings)
-            return true
-
-        case "family":
-            navigate(to: .family)
             return true
 
         default:

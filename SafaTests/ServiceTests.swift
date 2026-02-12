@@ -207,55 +207,6 @@ final class RamadanServiceTests: XCTestCase {
 
 // HapticFeedbackServiceTests moved to dedicated HapticFeedbackServiceTests.swift
 
-// MARK: - CloudKitSyncService Tests
-
-final class CloudKitSyncServiceTests: XCTestCase {
-
-    func testSyncStatusExists() {
-        // Test that SyncStatus enum exists
-        let status = SyncStatus.idle
-        XCTAssertEqual(status, .idle)
-    }
-
-    func testAllSyncStatusCases() {
-        XCTAssertEqual(SyncStatus.idle, .idle)
-        XCTAssertEqual(SyncStatus.syncing, .syncing)
-        XCTAssertEqual(SyncStatus.synced, .synced)
-        XCTAssertEqual(SyncStatus.offline, .offline)
-
-        // Error case has associated value
-        let errorStatus = SyncStatus.error("test")
-        if case .error(let message) = errorStatus {
-            XCTAssertEqual(message, "test")
-        } else {
-            XCTFail("Should be error case")
-        }
-    }
-
-    func testSyncStatusEquatable() {
-        XCTAssertEqual(SyncStatus.idle, SyncStatus.idle)
-        XCTAssertNotEqual(SyncStatus.idle, SyncStatus.syncing)
-        XCTAssertNotEqual(SyncStatus.synced, SyncStatus.offline)
-    }
-
-    func testSyncErrorDescriptions() {
-        XCTAssertNotNil(SyncError.notAuthenticated.errorDescription)
-        XCTAssertNotNil(SyncError.networkUnavailable.errorDescription)
-        XCTAssertNotNil(SyncError.quotaExceeded.errorDescription)
-        XCTAssertNotNil(SyncError.serverError("test").errorDescription)
-        XCTAssertNotNil(SyncError.conflictDetected.errorDescription)
-        XCTAssertNotNil(SyncError.recordNotFound.errorDescription)
-        XCTAssertNotNil(SyncError.permissionDenied.errorDescription)
-    }
-
-    func testConflictResolutionStrategies() {
-        XCTAssertEqual(ConflictResolutionStrategy.serverWins, .serverWins)
-        XCTAssertEqual(ConflictResolutionStrategy.clientWins, .clientWins)
-        XCTAssertEqual(ConflictResolutionStrategy.merge, .merge)
-        XCTAssertEqual(ConflictResolutionStrategy.askUser, .askUser)
-    }
-}
-
 // MARK: - SleepFocusService Tests
 
 final class SleepFocusServiceTests: XCTestCase {
