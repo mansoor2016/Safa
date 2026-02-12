@@ -111,9 +111,6 @@ struct HomeView: View {
                 // Eid banner (during Eid or 7 days before)
                 eidBannerSection
 
-                // Quick actions
-                quickActions
-
                 // Resume where you left off (dismissable, reappears next day)
                 if let progress = quranProgress,
                    case .visible = HomeBannerResolver.resolveResumeCard(
@@ -122,6 +119,9 @@ struct HomeView: View {
                    ) {
                     resumeQuranCard(progress)
                 }
+
+                // Quick actions
+                quickActions
 
                 // Daily verse
                 if let verse = dailyVerse {
@@ -628,6 +628,10 @@ struct HomeView: View {
             // Expanded content (tap to navigate)
             if isResumeCardExpanded {
                 Button {
+                    router.pendingQuranTarget = QuranNavigationTarget(
+                        surahNumber: progress.lastSurah,
+                        startAyah: progress.lastAyah
+                    )
                     router.selectedTab = "quran"
                 } label: {
                     HStack(spacing: SafaSpacing.md) {

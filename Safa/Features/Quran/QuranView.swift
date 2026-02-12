@@ -6,6 +6,7 @@ import SwiftUI
 
 struct QuranView: View {
     @Environment(Dependencies.self) private var dependencies
+    @Environment(AppRouter.self) private var router
     @State private var viewModel: QuranViewModel?
     @State private var path = NavigationPath()
     @Namespace private var surahZoom
@@ -24,6 +25,12 @@ struct QuranView: View {
                     .modifier(ZoomTransitionModifier(sourceID: target.surahNumber, namespace: surahZoom))
             }
         }
+        .onChange(of: router.pendingQuranTarget) { _, target in
+            consumePendingTarget(target)
+        }
+        .onAppear {
+            consumePendingTarget(router.pendingQuranTarget)
+        }
         .task {
             if viewModel == nil {
                 viewModel = QuranViewModel(
@@ -31,6 +38,13 @@ struct QuranView: View {
                     userState: dependencies.userState
                 )
             }
+        }
+    }
+
+    private func consumePendingTarget(_ target: QuranNavigationTarget?) {
+        if let target {
+            path.append(target)
+            router.pendingQuranTarget = nil
         }
     }
 }
@@ -430,4 +444,5 @@ private struct MatchedTransitionSourceModifier: ViewModifier {
 #Preview {
     QuranView()
         .environment(Dependencies())
+        .environment(AppRouter())
 }

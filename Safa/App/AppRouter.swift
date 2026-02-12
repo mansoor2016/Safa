@@ -12,6 +12,7 @@ final class AppRouter {
     var selectedTab: String = "home"
     var activeSheet: Sheet?
     var activeAlert: AlertType?
+    var pendingQuranTarget: QuranNavigationTarget?
 
 
     // MARK: - Destination Enum
