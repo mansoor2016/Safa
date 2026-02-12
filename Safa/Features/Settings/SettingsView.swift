@@ -175,7 +175,7 @@ struct SettingsView: View {
     private var prayerSettingsSection: some View {
         Section {
             HStack {
-                Picker("Calculation Method", selection: $selectedCalculationMethod) {
+                Picker("Method", selection: $selectedCalculationMethod) {
                     ForEach(CalculationMethod.allCases, id: \.self) { method in
                         Text(method.displayName).tag(method)
                     }

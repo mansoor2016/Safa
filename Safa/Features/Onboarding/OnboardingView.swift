@@ -103,9 +103,9 @@ struct OnboardingView: View {
 
                 // Quick features list
                 VStack(alignment: .leading, spacing: SafaSpacing.sm) {
-                    featureItem(icon: "clock", text: "Accurate prayer times")
-                    featureItem(icon: "book", text: "Quran with audio")
-                    featureItem(icon: "sparkles", text: "AI Islamic assistant")
+                    featureItem(icon: "nosign", text: "No ads, ever")
+                    featureItem(icon: "hand.tap", text: "Easy to navigate")
+                    featureItem(icon: "sparkles", text: "Islamic AI assistant")
                 }
                 .padding(.vertical, SafaSpacing.md)
 
@@ -445,7 +445,7 @@ struct OnboardingView: View {
         NavigationStack {
             Form {
                 Section("Prayer Calculation") {
-                    Picker("Calculation Method", selection: $selectedMethod) {
+                    Picker("Method", selection: $selectedMethod) {
                         ForEach(CalculationMethod.allCases, id: \.self) { method in
                             Text(method.displayName).tag(method)
                         }
