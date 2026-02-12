@@ -7,7 +7,9 @@ import SwiftUI
 // MARK: - Dua Categories View
 
 struct DuaCategoriesView: View {
+    @Environment(Dependencies.self) private var dependencies
     @State private var searchText = ""
+    @State private var favoriteIds: Set<String> = []
 
     private var filteredCategories: [DuaCategoryData] {
         if searchText.isEmpty {
@@ -32,6 +34,10 @@ struct DuaCategoriesView: View {
         .navigationTitle("Duas")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search duas...")
+        .task {
+            let storedIds = UserDefaults.standard.stringArray(forKey: AppConstants.StorageKeys.duaFavorites) ?? []
+            favoriteIds = Set(storedIds)
+        }
     }
 
     private var headerView: some View {
@@ -60,22 +66,27 @@ struct DuaCategoriesView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.morning)) {
+                    NavigationLink(destination: FavouriteDuasListView(favoriteIds: $favoriteIds)) {
+                        QuickAccessButton(title: "Favourites", arabicTitle: "المفضلة", iconName: "heart.fill", color: .pink)
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.morning, favoriteIds: $favoriteIds)) {
                         QuickAccessButton(title: "Morning", arabicTitle: "أذكار الصباح", iconName: "sunrise.fill", color: .orange)
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.prayer)) {
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.prayer, favoriteIds: $favoriteIds)) {
                         QuickAccessButton(title: "After Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.food)) {
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.food, favoriteIds: $favoriteIds)) {
                         QuickAccessButton(title: "Food & Drink", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink(destination: DuaListView(category: DuaCategoryData.sleep)) {
+                    NavigationLink(destination: DuaListView(category: DuaCategoryData.sleep, favoriteIds: $favoriteIds)) {
                         QuickAccessButton(title: "Sleep", arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .purple)
                     }
                     .buttonStyle(.plain)
@@ -94,7 +105,7 @@ struct DuaCategoriesView: View {
                 .padding(.horizontal)
 
             ForEach(filteredCategories) { category in
-                NavigationLink(destination: DuaListView(category: category)) {
+                NavigationLink(destination: DuaListView(category: category, favoriteIds: $favoriteIds)) {
                     CategoryRow(category: category)
                 }
                 .buttonStyle(.plain)
@@ -404,6 +415,8 @@ struct CategoryRow: View {
 
 struct DuaListView: View {
     let category: DuaCategoryData
+    @Environment(Dependencies.self) private var dependencies
+    @Binding var favoriteIds: Set<String>
 
     private var duas: [Dua] {
         DuaData.allDuas.filter { $0.categoryId == category.id }
@@ -413,7 +426,11 @@ struct DuaListView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(duas) { dua in
-                    DuaCard(dua: dua)
+                    DuaCard(
+                        dua: dua,
+                        isFavorite: favoriteIds.contains(dua.id),
+                        onToggleFavorite: { toggleFavorite(dua) }
+                    )
                 }
 
                 if duas.isEmpty {
@@ -430,12 +447,26 @@ struct DuaListView: View {
         .navigationTitle(category.name)
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    private func toggleFavorite(_ dua: Dua) {
+        Task {
+            if favoriteIds.contains(dua.id) {
+                try? await dependencies.duaRepository.removeFromFavorites(dua)
+                favoriteIds.remove(dua.id)
+            } else {
+                try? await dependencies.duaRepository.addToFavorites(dua)
+                favoriteIds.insert(dua.id)
+            }
+        }
+    }
 }
 
 // MARK: - Dua Card
 
 struct DuaCard: View {
     let dua: Dua
+    var isFavorite: Bool = false
+    var onToggleFavorite: (() -> Void)? = nil
     @State private var isExpanded = false
 
     var body: some View {
@@ -481,6 +512,16 @@ struct DuaCard: View {
 
                 Spacer()
 
+                if let onToggleFavorite {
+                    Button {
+                        onToggleFavorite()
+                        HapticFeedbackService.shared.play(.selection)
+                    } label: {
+                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                            .foregroundColor(isFavorite ? .pink : .secondary)
+                    }
+                }
+
                 Button {
                     withAnimation { isExpanded.toggle() }
                 } label: {
@@ -493,6 +534,55 @@ struct DuaCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
+    }
+}
+
+// MARK: - Favourite Duas List View
+
+struct FavouriteDuasListView: View {
+    @Environment(Dependencies.self) private var dependencies
+    @Binding var favoriteIds: Set<String>
+
+    private var duas: [Dua] {
+        DuaData.allDuas.filter { favoriteIds.contains($0.id) }
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                ForEach(duas) { dua in
+                    DuaCard(
+                        dua: dua,
+                        isFavorite: true,
+                        onToggleFavorite: { toggleFavorite(dua) }
+                    )
+                }
+
+                if duas.isEmpty {
+                    ContentUnavailableView(
+                        "No Favourites Yet",
+                        systemImage: "heart.slash",
+                        description: Text("Tap the heart on any dua to save it here.")
+                    )
+                }
+            }
+            .padding()
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Favourites")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func toggleFavorite(_ dua: Dua) {
+        Task {
+            if favoriteIds.contains(dua.id) {
+                try? await dependencies.duaRepository.removeFromFavorites(dua)
+                favoriteIds.remove(dua.id)
+            } else {
+                try? await dependencies.duaRepository.addToFavorites(dua)
+                favoriteIds.insert(dua.id)
+            }
+        }
     }
 }
 
