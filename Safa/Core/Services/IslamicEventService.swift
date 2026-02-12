@@ -366,7 +366,7 @@ extension IslamicEvent {
             id: "laylat_al_qadr",
             name: String(localized: "Laylat al-Qadr"),
             nameArabic: "ليلة القدر",
-            description: String(localized: "The Night of Power, better than a thousand months."),
+            description: String(localized: "The Night of Power."),
             type: .laylatAlQadr,
             hijriMonth: 9,
             hijriDay: 27
@@ -375,7 +375,7 @@ extension IslamicEvent {
             id: "eid_al_fitr",
             name: String(localized: "Eid al-Fitr"),
             nameArabic: "عيد الفطر",
-            description: String(localized: "Festival of Breaking the Fast. Taqabbal Allahu minna wa minkum."),
+            description: String(localized: "Eid Mubarak! Taqabbal Allahu minna wa minkum."),
             type: .eidAlFitr,
             hijriMonth: 10,
             hijriDay: 1
@@ -384,7 +384,7 @@ extension IslamicEvent {
             id: "arafah",
             name: String(localized: "Day of Arafah"),
             nameArabic: "يوم عرفة",
-            description: String(localized: "The best day on which the sun rises. Fasting is highly recommended."),
+            description: String(localized: "Important day of the Hajj pilgrimage. Fasting is highly recommended."),
             type: .arafah,
             hijriMonth: 12,
             hijriDay: 9
@@ -393,7 +393,7 @@ extension IslamicEvent {
             id: "eid_al_adha",
             name: String(localized: "Eid al-Adha"),
             nameArabic: "عيد الأضحى",
-            description: String(localized: "Festival of Sacrifice. Eid Mubarak!"),
+            description: String(localized: "Eid Mubarak! A time for sacrifice, charity, and reflection."),
             type: .eidAlAdha,
             hijriMonth: 12,
             hijriDay: 10
