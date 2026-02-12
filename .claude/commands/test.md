@@ -17,12 +17,12 @@ Parse any arguments. Use defaults for anything not specified.
 
 **All tests (no class specified):**
 ```
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests -parallel-testing-enabled NO test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
 ```
 
 **Specific test class:**
 ```
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} -parallel-testing-enabled NO test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
 ```
 
 - If all pass: "All N tests passed."

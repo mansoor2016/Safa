@@ -537,7 +537,8 @@ After **every** code change:
 
 1. **Run existing tests** to ensure no regressions:
    ```bash
-   xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 15' test
+   xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+     -only-testing:SafaTests -parallel-testing-enabled NO test
    ```
 
 2. **Write new tests** for new/modified code:
@@ -547,14 +548,15 @@ After **every** code change:
 
 3. **Run specific test file** (faster feedback):
    ```bash
-   xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 15' \
-     -only-testing:SafaTests/{TestClassName} test
+   xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+     -only-testing:SafaTests/{TestClassName} -parallel-testing-enabled NO test
    ```
 
 ### Simulator Resource Management
 
-**IMPORTANT: Run simulator tests in SERIES, not parallel.**
+**IMPORTANT: Run simulator tests in SERIES, not parallel. Only ONE simulator instance at a time.**
 
+- **ALWAYS** pass `-parallel-testing-enabled NO` to `xcodebuild test` — without this flag, Xcode spawns multiple simulator clones that cause "Safa quit unexpectedly" crashes (SIGABRT / memory corruption)
 - This machine has limited resources - spawning multiple simulators can cause failures
 - Do NOT run multiple `xcodebuild test` commands in parallel
 - When running tests, wait for one test run to complete before starting another
@@ -605,7 +607,7 @@ Use `/build` and `/test` (or xcode-build skill equivalents). Alternatively:
 ```bash
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:SafaTests test
+  -only-testing:SafaTests -parallel-testing-enabled NO test
 ```
 
 - Build and unit tests must pass before committing

@@ -390,6 +390,19 @@ final class MockDuaRepository: DuaRepositoryProtocol {
         ]
     }
 
+    func getAllDuas() async throws -> [Dua] {
+        return [
+            Dua(
+                id: "test_1",
+                categoryId: "morning",
+                titleEnglish: "Morning Dua",
+                textArabic: "Arabic dua",
+                textTransliteration: "Transliteration",
+                textTranslation: "Translation"
+            )
+        ]
+    }
+
     func getDuas(forCategory categoryId: String) async throws -> [Dua] {
         return [
             Dua(

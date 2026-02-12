@@ -1,43 +1,32 @@
 // MARK: - RamadanDuasView.swift
 // PURPOSE: Collection of Ramadan-specific duas (Iftar, Suhoor, Taraweeh, Laylatul Qadr)
-// DEPENDENCIES: SwiftUI
+// DEPENDENCIES: SwiftUI, DuaRepositoryProtocol
 
 import SwiftUI
 
-// MARK: - Ramadan Dua Model
+// MARK: - Ramadan Dua Occasion
 
-struct RamadanDua: Identifiable {
-    let id: String
-    let title: String
-    let titleArabic: String
-    let arabic: String
-    let transliteration: String
-    let translation: String
-    let occasion: RamadanDuaOccasion
-    let reference: String?
+enum RamadanDuaOccasion: String, CaseIterable {
+    case iftar = "Iftar"
+    case suhoor = "Suhoor"
+    case taraweeh = "Taraweeh"
+    case laylatulQadr = "Laylatul Qadr"
 
-    enum RamadanDuaOccasion: String, CaseIterable {
-        case iftar = "Iftar"
-        case suhoor = "Suhoor"
-        case taraweeh = "Taraweeh"
-        case laylatulQadr = "Laylatul Qadr"
-
-        var iconName: String {
-            switch self {
-            case .iftar: return "sunset.fill"
-            case .suhoor: return "sunrise.fill"
-            case .taraweeh: return "moon.stars.fill"
-            case .laylatulQadr: return "sparkles"
-            }
+    var iconName: String {
+        switch self {
+        case .iftar: return "sunset.fill"
+        case .suhoor: return "sunrise.fill"
+        case .taraweeh: return "moon.stars.fill"
+        case .laylatulQadr: return "sparkles"
         }
+    }
 
-        var color: Color {
-            switch self {
-            case .iftar: return .orange
-            case .suhoor: return .blue
-            case .taraweeh: return .purple
-            case .laylatulQadr: return .yellow
-            }
+    var color: Color {
+        switch self {
+        case .iftar: return .orange
+        case .suhoor: return .blue
+        case .taraweeh: return .purple
+        case .laylatulQadr: return .yellow
         }
     }
 }
@@ -45,19 +34,17 @@ struct RamadanDua: Identifiable {
 // MARK: - Ramadan Duas View
 
 struct RamadanDuasView: View {
-    @State private var selectedOccasion: RamadanDua.RamadanDuaOccasion = .iftar
-
-    private let duas: [RamadanDua] = RamadanDuasView.allDuas
+    @Environment(Dependencies.self) private var dependencies
+    @State private var selectedOccasion: RamadanDuaOccasion = .iftar
+    @State private var ramadanDuas: [Dua] = []
 
     var body: some View {
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
-                // Occasion picker
                 occasionPicker
 
-                // Duas for selected occasion
                 ForEach(filteredDuas) { dua in
-                    RamadanDuaCard(dua: dua)
+                    RamadanDuaCard(dua: dua, occasion: occasionFor(dua))
                 }
             }
             .padding()
@@ -65,6 +52,9 @@ struct RamadanDuasView: View {
         .navigationTitle("Ramadan Duas")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemGroupedBackground))
+        .task {
+            ramadanDuas = (try? await dependencies.duaRepository.getDuas(forCategory: "ramadan")) ?? []
+        }
     }
 
     // MARK: - Occasion Picker
@@ -72,7 +62,7 @@ struct RamadanDuasView: View {
     private var occasionPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: SafaSpacing.sm) {
-                ForEach(RamadanDua.RamadanDuaOccasion.allCases, id: \.self) { occasion in
+                ForEach(RamadanDuaOccasion.allCases, id: \.self) { occasion in
                     occasionButton(occasion)
                 }
             }
@@ -80,7 +70,7 @@ struct RamadanDuasView: View {
         }
     }
 
-    private func occasionButton(_ occasion: RamadanDua.RamadanDuaOccasion) -> some View {
+    private func occasionButton(_ occasion: RamadanDuaOccasion) -> some View {
         Button {
             withAnimation {
                 selectedOccasion = occasion
@@ -111,154 +101,39 @@ struct RamadanDuasView: View {
 
     // MARK: - Filtered Duas
 
-    private var filteredDuas: [RamadanDua] {
-        duas.filter { $0.occasion == selectedOccasion }
+    private var filteredDuas: [Dua] {
+        ramadanDuas.filter { $0.occasion == selectedOccasion.rawValue }
     }
 
-    // MARK: - All Duas Data
-
-    static let allDuas: [RamadanDua] = [
-        // Iftar Duas
-        RamadanDua(
-            id: "iftar_thirst",
-            title: "Dua When Breaking Fast",
-            titleArabic: "دعاء الإفطار",
-            arabic: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ",
-            transliteration: "Dhahaba ath-thama'u wab-tallat al-'urooqu wa thabat al-ajru in sha Allah",
-            translation: "The thirst has gone, the veins are moistened and the reward is confirmed, if Allah wills.",
-            occasion: .iftar,
-            reference: "Abu Dawud"
-        ),
-        RamadanDua(
-            id: "iftar_bismillah",
-            title: "Before Eating",
-            titleArabic: "قبل الأكل",
-            arabic: "بِسْمِ اللَّهِ",
-            transliteration: "Bismillah",
-            translation: "In the name of Allah.",
-            occasion: .iftar,
-            reference: nil
-        ),
-        RamadanDua(
-            id: "iftar_accepted",
-            title: "Asking for Acceptance",
-            titleArabic: "طلب القبول",
-            arabic: "اللَّهُمَّ لَكَ صُمْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ",
-            transliteration: "Allahumma laka sumtu wa 'ala rizqika aftartu",
-            translation: "O Allah, for You I have fasted and upon Your provision I have broken my fast.",
-            occasion: .iftar,
-            reference: "Abu Dawud"
-        ),
-
-        // Suhoor Duas
-        RamadanDua(
-            id: "suhoor_intention",
-            title: "Intention for Fasting",
-            titleArabic: "نية الصيام",
-            arabic: "نَوَيْتُ صَوْمَ غَدٍ مِنْ شَهْرِ رَمَضَانَ",
-            transliteration: "Nawaytu sawma ghadin min shahri Ramadan",
-            translation: "I intend to fast tomorrow in the month of Ramadan.",
-            occasion: .suhoor,
-            reference: nil
-        ),
-        RamadanDua(
-            id: "suhoor_blessing",
-            title: "Blessing of Suhoor",
-            titleArabic: "بركة السحور",
-            arabic: "اللَّهُمَّ بَارِكْ لَنَا فِي السُّحُورِ",
-            transliteration: "Allahumma barik lana fis-suhoor",
-            translation: "O Allah, bless us in the Suhoor.",
-            occasion: .suhoor,
-            reference: nil
-        ),
-
-        // Taraweeh Duas
-        RamadanDua(
-            id: "taraweeh_opening",
-            title: "Opening Supplication",
-            titleArabic: "دعاء الاستفتاح",
-            arabic: "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ",
-            transliteration: "Subhanaka Allahumma wa bihamdika wa tabarakasmuka wa ta'ala jadduka wa la ilaha ghayruk",
-            translation: "Glory be to You, O Allah, and praise. Blessed is Your name, exalted is Your majesty, and there is no deity worthy of worship except You.",
-            occasion: .taraweeh,
-            reference: "Abu Dawud, Tirmidhi"
-        ),
-        RamadanDua(
-            id: "taraweeh_witr",
-            title: "Dua Qunoot (Witr)",
-            titleArabic: "دعاء القنوت",
-            arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ وَعَافِنِي فِيمَنْ عَافَيْتَ وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ وَبَارِكْ لِي فِيمَا أَعْطَيْتَ وَقِنِي شَرَّ مَا قَضَيْتَ إِنَّكَ تَقْضِي وَلَا يُقْضَى عَلَيْكَ",
-            transliteration: "Allahumma-hdini fiman hadayt, wa 'afini fiman 'afayt, wa tawallani fiman tawallayt, wa barik li fima a'tayt, wa qini sharra ma qadayt, innaka taqdi wa la yuqda 'alayk",
-            translation: "O Allah, guide me among those You have guided, pardon me among those You have pardoned, turn to me among those You have turned, bless me in what You have given, and protect me from the evil of what You have decreed. For You decree and none can decree over You.",
-            occasion: .taraweeh,
-            reference: "Abu Dawud, Tirmidhi"
-        ),
-
-        // Laylatul Qadr Duas
-        RamadanDua(
-            id: "laylatul_qadr_main",
-            title: "Dua for Laylatul Qadr",
-            titleArabic: "دعاء ليلة القدر",
-            arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
-            transliteration: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni",
-            translation: "O Allah, You are forgiving and love forgiveness, so forgive me.",
-            occasion: .laylatulQadr,
-            reference: "Tirmidhi - Prophet ﷺ taught this to Aisha (RA)"
-        ),
-        RamadanDua(
-            id: "laylatul_qadr_mercy",
-            title: "Seeking Mercy",
-            titleArabic: "طلب الرحمة",
-            arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْجَنَّةَ وَأَعُوذُ بِكَ مِنَ النَّارِ",
-            transliteration: "Allahumma inni as'alukal-jannata wa a'udhu bika minan-nar",
-            translation: "O Allah, I ask You for Paradise and seek refuge in You from the Fire.",
-            occasion: .laylatulQadr,
-            reference: "Abu Dawud"
-        ),
-        RamadanDua(
-            id: "laylatul_qadr_guidance",
-            title: "Seeking Guidance",
-            titleArabic: "طلب الهداية",
-            arabic: "اللَّهُمَّ اهْدِنِي وَسَدِّدْنِي",
-            transliteration: "Allahumma-hdini wa saddidni",
-            translation: "O Allah, guide me and keep me on the right path.",
-            occasion: .laylatulQadr,
-            reference: "Muslim"
-        ),
-        RamadanDua(
-            id: "laylatul_qadr_protection",
-            title: "Protection from Evil",
-            titleArabic: "الحماية من الشر",
-            arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
-            transliteration: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar",
-            translation: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
-            occasion: .laylatulQadr,
-            reference: "Quran 2:201"
-        )
-    ]
+    private func occasionFor(_ dua: Dua) -> RamadanDuaOccasion {
+        RamadanDuaOccasion(rawValue: dua.occasion ?? "") ?? .iftar
+    }
 }
 
 // MARK: - Ramadan Dua Card
 
 struct RamadanDuaCard: View {
-    let dua: RamadanDua
+    let dua: Dua
+    let occasion: RamadanDuaOccasion
     @State private var isExpanded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: SafaSpacing.md) {
             // Header
             HStack {
-                Image(systemName: dua.occasion.iconName)
-                    .foregroundColor(dua.occasion.color)
+                Image(systemName: occasion.iconName)
+                    .foregroundColor(occasion.color)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(dua.title)
+                    Text(dua.titleEnglish)
                         .font(SafaTypography.titleSmall)
                         .foregroundColor(SafaColors.Fallback.text)
 
-                    Text(dua.titleArabic)
-                        .font(SafaTypography.arabicSmall)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                    if let titleArabic = dua.titleArabic {
+                        Text(titleArabic)
+                            .font(SafaTypography.arabicSmall)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                    }
                 }
 
                 Spacer()
@@ -274,7 +149,7 @@ struct RamadanDuaCard: View {
             }
 
             // Arabic text
-            Text(dua.arabic)
+            Text(dua.textArabic)
                 .font(SafaTypography.arabicMedium)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -289,7 +164,7 @@ struct RamadanDuaCard: View {
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(SafaColors.Fallback.tertiaryText)
 
-                    Text(dua.transliteration)
+                    Text(dua.textTransliteration)
                         .font(SafaTypography.bodyMedium)
                         .italic()
                         .foregroundColor(SafaColors.Fallback.secondaryText)
@@ -301,14 +176,14 @@ struct RamadanDuaCard: View {
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(SafaColors.Fallback.tertiaryText)
 
-                    Text(dua.translation)
+                    Text(dua.textTranslation)
                         .font(SafaTypography.bodyMedium)
                         .foregroundColor(SafaColors.Fallback.text)
                 }
 
-                // Reference
-                if let reference = dua.reference {
-                    Text("Source: \(reference)")
+                // Source
+                if let source = dua.source {
+                    Text("Source: \(source)")
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(SafaColors.Fallback.tertiaryText)
                 }

@@ -11,45 +11,32 @@ struct DuaCategory: Identifiable, Codable, Hashable {
     let iconName: String
     let duaCount: Int
 
-    static let dailyLife = DuaCategory(
-        id: "daily",
-        nameEnglish: "Daily Life",
-        nameArabic: "الحياة اليومية",
-        iconName: "sun.max",
-        duaCount: 0
-    )
+    init(
+        id: String,
+        nameEnglish: String,
+        nameArabic: String,
+        iconName: String,
+        duaCount: Int = 0
+    ) {
+        self.id = id
+        self.nameEnglish = nameEnglish
+        self.nameArabic = nameArabic
+        self.iconName = iconName
+        self.duaCount = duaCount
+    }
 
-    static let salah = DuaCategory(
-        id: "salah",
-        nameEnglish: "Prayer (Salah)",
-        nameArabic: "الصلاة",
-        iconName: "figure.stand",
-        duaCount: 0
-    )
+    private enum CodingKeys: String, CodingKey {
+        case id, nameEnglish, nameArabic, iconName, duaCount
+    }
 
-    static let protection = DuaCategory(
-        id: "protection",
-        nameEnglish: "Protection",
-        nameArabic: "الحماية",
-        iconName: "shield",
-        duaCount: 0
-    )
-
-    static let forgiveness = DuaCategory(
-        id: "forgiveness",
-        nameEnglish: "Forgiveness",
-        nameArabic: "الاستغفار",
-        iconName: "heart",
-        duaCount: 0
-    )
-
-    static let hardship = DuaCategory(
-        id: "hardship",
-        nameEnglish: "Hardship & Anxiety",
-        nameArabic: "الشدة والقلق",
-        iconName: "cloud.rain",
-        duaCount: 0
-    )
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        nameEnglish = try container.decode(String.self, forKey: .nameEnglish)
+        nameArabic = try container.decode(String.self, forKey: .nameArabic)
+        iconName = try container.decode(String.self, forKey: .iconName)
+        duaCount = try container.decodeIfPresent(Int.self, forKey: .duaCount) ?? 0
+    }
 }
 
 // MARK: - Dua
@@ -93,6 +80,28 @@ struct Dua: Identifiable, Codable, Hashable {
         self.repetitions = repetitions
         self.audioFileName = audioFileName
         self.isFavorite = isFavorite
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, categoryId, titleEnglish, titleArabic, textArabic
+        case textTransliteration, textTranslation, source, occasion
+        case repetitions, audioFileName, isFavorite
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        categoryId = try container.decode(String.self, forKey: .categoryId)
+        titleEnglish = try container.decode(String.self, forKey: .titleEnglish)
+        titleArabic = try container.decodeIfPresent(String.self, forKey: .titleArabic)
+        textArabic = try container.decode(String.self, forKey: .textArabic)
+        textTransliteration = try container.decode(String.self, forKey: .textTransliteration)
+        textTranslation = try container.decode(String.self, forKey: .textTranslation)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        occasion = try container.decodeIfPresent(String.self, forKey: .occasion)
+        repetitions = try container.decodeIfPresent(Int.self, forKey: .repetitions) ?? 1
+        audioFileName = try container.decodeIfPresent(String.self, forKey: .audioFileName)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
     }
 }
 
@@ -144,44 +153,6 @@ enum DhikrType: String, Codable, CaseIterable {
         }
     }
 }
-
-// MARK: - Simple Dua Category Enum (for views)
-enum DuaCategoryEnum: String, Codable, CaseIterable {
-    case morning
-    case evening
-    case prayer
-    case sleep
-    case food
-    case travel
-    case general
-
-    var displayName: String {
-        switch self {
-        case .morning: return "Morning"
-        case .evening: return "Evening"
-        case .prayer: return "Prayer"
-        case .sleep: return "Sleep"
-        case .food: return "Food"
-        case .travel: return "Travel"
-        case .general: return "General"
-        }
-    }
-}
-
-// MARK: - Simple Dua Model (for views)
-struct SimpleDua: Identifiable, Codable, Hashable {
-    let id: String
-    let category: DuaCategoryEnum
-    let arabic: String
-    let transliteration: String
-    let translation: String
-    let reference: String
-    let repeatCount: Int
-    let benefit: String?
-}
-
-// Type alias for backward compatibility
-typealias DuaCategoryType = DuaCategoryEnum
 
 // MARK: - Common Dhikr
 enum CommonDhikr: String, CaseIterable {

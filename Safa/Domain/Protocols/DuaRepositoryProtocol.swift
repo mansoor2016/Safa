@@ -8,6 +8,10 @@ protocol DuaRepositoryProtocol {
     /// - Returns: Array of dua categories
     func getCategories() async throws -> [DuaCategory]
 
+    /// Fetches all duas
+    /// - Returns: Array of all duas
+    func getAllDuas() async throws -> [Dua]
+
     /// Fetches duas in a category
     /// - Parameter categoryId: The category identifier
     /// - Returns: Array of duas

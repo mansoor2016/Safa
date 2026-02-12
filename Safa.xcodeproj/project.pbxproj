@@ -86,11 +86,25 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		076D854F8A359A5251BFA234 /* Exceptions for "Safa" folder in "SafaTests" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			attributesByRelativePath = {
+				"Resources/Data/duas.json" = (CodeSignOnCopy, );
+			};
+			membershipExceptions = (
+				"Resources/Data/duas.json",
+			);
+			target = 76F09F932F32DE72007EB798 /* SafaTests */;
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		76F09F852F32DE70007EB798 /* Safa */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				76F09FA62F32DE72007EB798 /* Exceptions for "Safa" folder in "Safa" target */,
+				076D854F8A359A5251BFA234 /* Exceptions for "Safa" folder in "SafaTests" target */,
 			);
 			path = Safa;
 			sourceTree = "<group>";

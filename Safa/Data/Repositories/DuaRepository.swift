@@ -1,6 +1,6 @@
 // MARK: - DuaRepository.swift
 // PURPOSE: Implementation of Dua and Dhikr data access
-// DEPENDENCIES: CoreData, DuaRepositoryProtocol
+// DEPENDENCIES: CoreData, DuaRepositoryProtocol, DuaDataLoader
 
 import Foundation
 import CoreData
@@ -8,6 +8,7 @@ import CoreData
 final class DuaRepository: DuaRepositoryProtocol {
     // MARK: - Dependencies
     private let coreData: CoreDataStack
+    private let duaBundle: DuaDataLoader.DuaBundle
 
     // MARK: - Storage Keys
     private let favoritesKey = AppConstants.StorageKeys.duaFavorites
@@ -15,48 +16,50 @@ final class DuaRepository: DuaRepositoryProtocol {
     private let dhikrDateKey = AppConstants.StorageKeys.dhikrDate
 
     // MARK: - Init
-    init(coreData: CoreDataStack) {
+    init(coreData: CoreDataStack, bundle: Bundle = .main) {
         self.coreData = coreData
+        // Load bundled JSON data; fatal error if file is missing (bundled resource)
+        // swiftlint:disable:next force_try
+        self.duaBundle = try! DuaDataLoader.load(from: bundle)
     }
 
     // MARK: - Categories
 
     func getCategories() async throws -> [DuaCategory] {
-        // TODO: Load from bundled JSON
-        return DuaCategory.allCategories
+        duaBundle.categories
+    }
+
+    func getAllDuas() async throws -> [Dua] {
+        duaBundle.duas
     }
 
     func getDuas(forCategory categoryId: String) async throws -> [Dua] {
-        // TODO: Load from bundled JSON
-        return Dua.allDuas.filter { $0.categoryId == categoryId }
+        duaBundle.duas.filter { $0.categoryId == categoryId }
     }
 
     func getDua(id: String) async throws -> Dua? {
-        return Dua.allDuas.first { $0.id == id }
+        duaBundle.duas.first { $0.id == id }
     }
 
     // MARK: - Dhikr
 
     func getMorningDhikr() async throws -> [Dua] {
-        // TODO: Load from bundled JSON
-        return Dua.morningDhikr
+        duaBundle.duas.filter { $0.categoryId == "morning" }
     }
 
     func getEveningDhikr() async throws -> [Dua] {
-        // TODO: Load from bundled JSON
-        return Dua.eveningDhikr
+        duaBundle.duas.filter { $0.categoryId == "evening" }
     }
 
     func getSleepDhikr() async throws -> [Dua] {
-        // TODO: Load from bundled JSON
-        return Dua.sleepDhikr
+        duaBundle.duas.filter { $0.categoryId == "sleep" }
     }
 
     // MARK: - Favorites
 
     func getFavorites() async throws -> [Dua] {
         let favoriteIds = getFavoriteIds()
-        return Dua.allDuas.filter { favoriteIds.contains($0.id) }
+        return duaBundle.duas.filter { favoriteIds.contains($0.id) }
             .map { dua in
                 var favorite = dua
                 favorite.isFavorite = true
@@ -80,7 +83,7 @@ final class DuaRepository: DuaRepositoryProtocol {
     // MARK: - Search
 
     func searchDuas(query: String) async throws -> [Dua] {
-        return Dua.allDuas.filter { dua in
+        duaBundle.duas.filter { dua in
             dua.titleEnglish.localizedCaseInsensitiveContains(query) ||
             dua.textTranslation.localizedCaseInsensitiveContains(query) ||
             dua.textArabic.contains(query)
@@ -147,143 +150,4 @@ final class DuaRepository: DuaRepositoryProtocol {
             UserDefaults.standard.set(Date(), forKey: dhikrDateKey)
         }
     }
-}
-
-// MARK: - Static Data Extensions
-
-extension DuaCategory {
-    static let allCategories: [DuaCategory] = [
-        .dailyLife,
-        .salah,
-        .protection,
-        .forgiveness,
-        .hardship,
-        DuaCategory(id: "travel", nameEnglish: "Travel", nameArabic: "السفر", iconName: "airplane", duaCount: 0),
-        DuaCategory(id: "food", nameEnglish: "Food & Drink", nameArabic: "الطعام والشراب", iconName: "fork.knife", duaCount: 0),
-        DuaCategory(id: "sleep", nameEnglish: "Sleep", nameArabic: "النوم", iconName: "moon.zzz", duaCount: 0),
-    ]
-}
-
-extension Dua {
-    static let allDuas: [Dua] = morningDhikr + eveningDhikr + sleepDhikr + dailyDuas
-
-    static let morningDhikr: [Dua] = [
-        Dua(
-            id: "morning_1",
-            categoryId: "morning",
-            titleEnglish: "Waking Up Dua",
-            titleArabic: "دعاء الاستيقاظ",
-            textArabic: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
-            textTransliteration: "Alhamdu lillahil-lathee ahyana ba'da ma amatana wa ilayhin-nushoor",
-            textTranslation: "All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection.",
-            source: "Sahih al-Bukhari 6324",
-            occasion: "Upon waking up",
-            repetitions: 1
-        ),
-        Dua(
-            id: "morning_2",
-            categoryId: "morning",
-            titleEnglish: "Morning Remembrance",
-            titleArabic: "أذكار الصباح",
-            textArabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
-            textTransliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah",
-            textTranslation: "We have reached the morning and at this very time the whole kingdom belongs to Allah. All praise is for Allah.",
-            source: "Muslim 2723",
-            occasion: "In the morning",
-            repetitions: 1
-        ),
-        Dua(
-            id: "morning_3",
-            categoryId: "morning",
-            titleEnglish: "Seeking Protection - Morning",
-            titleArabic: "طلب الحماية - صباحاً",
-            textArabic: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ",
-            textTransliteration: "Allahumma bika asbahna, wa bika amsayna, wa bika nahya, wa bika namootu, wa ilaykan-nushoor",
-            textTranslation: "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening, by Your leave we live and die and unto You is our resurrection.",
-            source: "Tirmidhi 3391",
-            occasion: "In the morning",
-            repetitions: 1
-        ),
-    ]
-
-    static let eveningDhikr: [Dua] = [
-        Dua(
-            id: "evening_1",
-            categoryId: "evening",
-            titleEnglish: "Evening Remembrance",
-            titleArabic: "أذكار المساء",
-            textArabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
-            textTransliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah",
-            textTranslation: "We have reached the evening and at this very time the whole kingdom belongs to Allah. All praise is for Allah.",
-            source: "Muslim 2723",
-            occasion: "In the evening",
-            repetitions: 1
-        ),
-        Dua(
-            id: "evening_2",
-            categoryId: "evening",
-            titleEnglish: "Seeking Protection - Evening",
-            titleArabic: "طلب الحماية - مساءً",
-            textArabic: "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ",
-            textTransliteration: "Allahumma bika amsayna, wa bika asbahna, wa bika nahya, wa bika namootu, wa ilaykal-maseer",
-            textTranslation: "O Allah, by Your leave we have reached the evening and by Your leave we have reached the morning, by Your leave we live and die and unto You is our return.",
-            source: "Tirmidhi 3391",
-            occasion: "In the evening",
-            repetitions: 1
-        ),
-    ]
-
-    static let sleepDhikr: [Dua] = [
-        Dua(
-            id: "sleep_1",
-            categoryId: "sleep",
-            titleEnglish: "Before Sleeping",
-            titleArabic: "قبل النوم",
-            textArabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
-            textTransliteration: "Bismika Allahumma amootu wa ahya",
-            textTranslation: "In Your name O Allah, I die and I live.",
-            source: "Sahih al-Bukhari 6324",
-            occasion: "Before sleeping",
-            repetitions: 1
-        ),
-        Dua(
-            id: "sleep_2",
-            categoryId: "sleep",
-            titleEnglish: "Ayat al-Kursi",
-            titleArabic: "آية الكرسي",
-            textArabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ",
-            textTransliteration: "Allahu la ilaha illa huwal-Hayyul-Qayyum, la ta'khuthuhu sinatun wa la nawm",
-            textTranslation: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep.",
-            source: "Quran 2:255",
-            occasion: "Before sleeping",
-            repetitions: 1
-        ),
-    ]
-
-    static let dailyDuas: [Dua] = [
-        Dua(
-            id: "daily_eating",
-            categoryId: "daily",
-            titleEnglish: "Before Eating",
-            titleArabic: "قبل الأكل",
-            textArabic: "بِسْمِ اللَّهِ",
-            textTransliteration: "Bismillah",
-            textTranslation: "In the name of Allah.",
-            source: "Sahih al-Bukhari",
-            occasion: "Before eating",
-            repetitions: 1
-        ),
-        Dua(
-            id: "daily_after_eating",
-            categoryId: "daily",
-            titleEnglish: "After Eating",
-            titleArabic: "بعد الأكل",
-            textArabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَٰذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
-            textTransliteration: "Alhamdu lillahil-lathee at'amani hatha wa razaqanihi min ghayri hawlin minni wa la quwwah",
-            textTranslation: "All praise is for Allah who has given me this food and provided it without any effort or power on my part.",
-            source: "Tirmidhi 3458",
-            occasion: "After eating",
-            repetitions: 1
-        ),
-    ]
 }

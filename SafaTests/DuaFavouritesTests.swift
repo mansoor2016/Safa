@@ -7,24 +7,27 @@ import XCTest
 
 final class DuaFavouritesTests: XCTestCase {
     private var sut: DuaRepository!
+    private var allDuas: [Dua]!
     private let favoritesKey = AppConstants.StorageKeys.duaFavorites
 
     override func setUp() {
         super.setUp()
         UserDefaults.standard.removeObject(forKey: favoritesKey)
         sut = DuaRepository(coreData: CoreDataStack.shared)
+        allDuas = try! DuaDataLoader.load(from: Bundle.main).duas
     }
 
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: favoritesKey)
         sut = nil
+        allDuas = nil
         super.tearDown()
     }
 
     // MARK: - Add Favourite
 
     func test_addFavourite_thenGetFavourites_returnsThatDua() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
 
         try await sut.addToFavorites(dua)
         let favourites = try await sut.getFavorites()
@@ -36,7 +39,7 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - Remove Favourite
 
     func test_removeFavourite_noLongerInFavourites() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
 
         try await sut.addToFavorites(dua)
         try await sut.removeFromFavorites(dua)
@@ -49,7 +52,7 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - Idempotent Add
 
     func test_addDuplicate_countStaysOne() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
 
         try await sut.addToFavorites(dua)
         try await sut.addToFavorites(dua)
@@ -63,7 +66,7 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - Toggle On Then Off
 
     func test_toggleOnThenOff_emptyFavourites() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
 
         try await sut.addToFavorites(dua)
         try await sut.removeFromFavorites(dua)
@@ -76,9 +79,9 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - Multiple Favourites
 
     func test_multipleFavourites_allReturned() async throws {
-        let dua1 = Dua.allDuas[0]
-        let dua2 = Dua.allDuas[1]
-        let dua3 = Dua.allDuas[2]
+        let dua1 = allDuas[0]
+        let dua2 = allDuas[1]
+        let dua3 = allDuas[2]
 
         try await sut.addToFavorites(dua1)
         try await sut.addToFavorites(dua2)
@@ -96,7 +99,7 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - Persistence Across Instances
 
     func test_favouritePersistsAcrossNewRepositoryInstance() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
 
         try await sut.addToFavorites(dua)
 
@@ -111,7 +114,7 @@ final class DuaFavouritesTests: XCTestCase {
     // MARK: - UI State Tests
 
     func test_favoriteIdsSetContainsIdAfterAdd() async throws {
-        let dua = Dua.allDuas[0]
+        let dua = allDuas[0]
         var favoriteIds: Set<String> = []
 
         try await sut.addToFavorites(dua)
@@ -125,17 +128,16 @@ final class DuaFavouritesTests: XCTestCase {
 
     func test_emptyFavourites_filterReturnsEmptyList() async throws {
         let favourites = try await sut.getFavorites()
-        let filtered = Dua.allDuas.filter { favourites.map(\.id).contains($0.id) }
+        let filtered = allDuas.filter { favourites.map(\.id).contains($0.id) }
 
         XCTAssertTrue(filtered.isEmpty,
                       "With no favourites, filtered list should be empty")
     }
 
     func test_favouritesFromDifferentCategories_allAppearInCombinedList() async throws {
-        // Pick duas from different categories available in Dua.allDuas
-        let morningDua = Dua.allDuas.first { $0.categoryId == "morning" }!
-        let eveningDua = Dua.allDuas.first { $0.categoryId == "evening" }!
-        let sleepDua = Dua.allDuas.first { $0.categoryId == "sleep" }!
+        let morningDua = allDuas.first { $0.categoryId == "morning" }!
+        let eveningDua = allDuas.first { $0.categoryId == "evening" }!
+        let sleepDua = allDuas.first { $0.categoryId == "sleep" }!
 
         try await sut.addToFavorites(morningDua)
         try await sut.addToFavorites(eveningDua)

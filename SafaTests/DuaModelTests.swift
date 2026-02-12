@@ -24,19 +24,33 @@ final class DuaModelTests: XCTestCase {
         XCTAssertEqual(category.duaCount, 5)
     }
 
-    func testStaticDuaCategories() {
-        XCTAssertEqual(DuaCategory.dailyLife.id, "daily")
-        XCTAssertEqual(DuaCategory.salah.id, "salah")
-        XCTAssertEqual(DuaCategory.protection.id, "protection")
-        XCTAssertEqual(DuaCategory.forgiveness.id, "forgiveness")
-        XCTAssertEqual(DuaCategory.hardship.id, "hardship")
+    func testDuaCategoryDefaultDuaCount() {
+        let category = DuaCategory(
+            id: "test",
+            nameEnglish: "Test",
+            nameArabic: "اختبار",
+            iconName: "star"
+        )
+        XCTAssertEqual(category.duaCount, 0,
+                       "duaCount should default to 0")
     }
 
     func testDuaCategoryHashable() {
-        let category1 = DuaCategory.dailyLife
-        let category2 = DuaCategory.dailyLife
+        let category1 = DuaCategory(id: "test", nameEnglish: "Test", nameArabic: "اختبار", iconName: "star", duaCount: 5)
+        let category2 = DuaCategory(id: "test", nameEnglish: "Test", nameArabic: "اختبار", iconName: "star", duaCount: 5)
 
         XCTAssertEqual(category1, category2)
+    }
+
+    func testDuaCategoryDecodingWithoutDuaCount() throws {
+        let json = """
+        {"id":"morning","nameEnglish":"Morning","nameArabic":"الصباح","iconName":"sunrise"}
+        """
+        let data = json.data(using: .utf8)!
+        let category = try JSONDecoder().decode(DuaCategory.self, from: data)
+
+        XCTAssertEqual(category.id, "morning")
+        XCTAssertEqual(category.duaCount, 0, "duaCount should default to 0 when absent from JSON")
     }
 
     // MARK: - Dua Tests
@@ -106,6 +120,17 @@ final class DuaModelTests: XCTestCase {
 
         XCTAssertEqual(decoded.id, dua.id)
         XCTAssertEqual(decoded.textArabic, dua.textArabic)
+    }
+
+    func testDuaDecodingDefaultsIsFavoriteToFalse() throws {
+        let json = """
+        {"id":"t1","categoryId":"test","titleEnglish":"Test","textArabic":"ت","textTransliteration":"t","textTranslation":"t"}
+        """
+        let data = json.data(using: .utf8)!
+        let dua = try JSONDecoder().decode(Dua.self, from: data)
+
+        XCTAssertFalse(dua.isFavorite, "isFavorite should default to false when absent from JSON")
+        XCTAssertEqual(dua.repetitions, 1, "repetitions should default to 1 when absent from JSON")
     }
 
     // MARK: - TasbeehSession Tests
@@ -189,22 +214,6 @@ final class DuaModelTests: XCTestCase {
         XCTAssertEqual(DhikrType.sleep.rawValue, "sleep")
     }
 
-    // MARK: - DuaCategoryEnum Tests
-
-    func testDuaCategoryEnumAllCases() {
-        XCTAssertEqual(DuaCategoryEnum.allCases.count, 7)
-    }
-
-    func testDuaCategoryEnumDisplayNames() {
-        XCTAssertEqual(DuaCategoryEnum.morning.displayName, "Morning")
-        XCTAssertEqual(DuaCategoryEnum.evening.displayName, "Evening")
-        XCTAssertEqual(DuaCategoryEnum.prayer.displayName, "Prayer")
-        XCTAssertEqual(DuaCategoryEnum.sleep.displayName, "Sleep")
-        XCTAssertEqual(DuaCategoryEnum.food.displayName, "Food")
-        XCTAssertEqual(DuaCategoryEnum.travel.displayName, "Travel")
-        XCTAssertEqual(DuaCategoryEnum.general.displayName, "General")
-    }
-
     // MARK: - CommonDhikr Tests
 
     func testCommonDhikrAllCases() {
@@ -239,26 +248,5 @@ final class DuaModelTests: XCTestCase {
         XCTAssertEqual(CommonDhikr.subhanAllah.rawValue, "SubhanAllah")
         XCTAssertEqual(CommonDhikr.alhamdulillah.rawValue, "Alhamdulillah")
         XCTAssertEqual(CommonDhikr.allahuAkbar.rawValue, "Allahu Akbar")
-    }
-
-    // MARK: - SimpleDua Tests
-
-    func testSimpleDuaCreation() {
-        let dua = SimpleDua(
-            id: "simple1",
-            category: .morning,
-            arabic: "بِسْمِ اللَّهِ",
-            transliteration: "Bismillah",
-            translation: "In the name of Allah",
-            reference: "Sahih Bukhari",
-            repeatCount: 1,
-            benefit: "Protection"
-        )
-
-        XCTAssertEqual(dua.id, "simple1")
-        XCTAssertEqual(dua.category, .morning)
-        XCTAssertEqual(dua.arabic, "بِسْمِ اللَّهِ")
-        XCTAssertEqual(dua.repeatCount, 1)
-        XCTAssertEqual(dua.benefit, "Protection")
     }
 }
