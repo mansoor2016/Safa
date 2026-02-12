@@ -23,7 +23,6 @@ struct SettingsView: View {
     @State private var selectedTranslation = AppDefaults.translationLanguage
     @State private var autoScrollEnabled = false
     @State private var selectedAppearance: AppearanceOption = .system
-    @State private var selectedAccentColor: AccentColorOption = .teal
     @State private var showDeleteConfirmation = false
 
     // Accessibility state
@@ -274,7 +273,7 @@ struct SettingsView: View {
                 }
             }
 
-            Toggle("Iftar Adhan (Ramadan)", isOn: $iftarAdhanEnabled)
+            Toggle("Iftar Adhan (Ramadan Only)", isOn: $iftarAdhanEnabled)
                 .onChange(of: iftarAdhanEnabled) { _, newValue in
                     Task {
                         await prefsManager.update(\.iftarAdhanEnabled, to: newValue)
@@ -348,24 +347,6 @@ struct SettingsView: View {
             }
             .onChange(of: selectedAppearance) { _, newValue in
                 themeManager.setColorScheme(newValue.colorScheme)
-            }
-
-            Picker("Accent Color", selection: $selectedAccentColor) {
-                ForEach(AccentColorOption.allCases, id: \.self) { option in
-                    HStack {
-                        Circle()
-                            .fill(option.color)
-                            .frame(width: 20, height: 20)
-                        Text(option.displayName)
-                    }
-                    .tag(option)
-                }
-            }
-            .onChange(of: selectedAccentColor) { _, newValue in
-                themeManager.setAccentColor(newValue)
-                Task {
-                    await prefsManager.update(\.accentColorName, to: newValue.rawValue)
-                }
             }
 
             Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
@@ -547,6 +528,8 @@ struct SettingsView: View {
     @State private var forceRamadan = false
     @State private var forceEidAlFitr = false
     @State private var forceEidAlAdha = false
+    @State private var useBasicInlineHeader = false
+    @State private var useAdaptiveTabBar = false
     @State private var isDeveloperExpanded = false
 
     private var debugSection: some View {
@@ -599,6 +582,43 @@ struct SettingsView: View {
                             FeatureFlags.shared.removeOverride(.forceEidAlAdha)
                         }
                     }
+
+                Divider()
+
+                Toggle("Basic Inline Header", isOn: $useBasicInlineHeader)
+                    .onAppear {
+                        useBasicInlineHeader = FeatureFlags.shared.isEnabled(.basicInlineHeader)
+                    }
+                    .onChange(of: useBasicInlineHeader) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.basicInlineHeader, enabled: true)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.basicInlineHeader)
+                        }
+                    }
+
+                Toggle("Adaptive Tab Bar", isOn: $useAdaptiveTabBar)
+                    .onAppear {
+                        useAdaptiveTabBar = FeatureFlags.shared.isEnabled(.adaptiveTabBar)
+                    }
+                    .onChange(of: useAdaptiveTabBar) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.adaptiveTabBar, enabled: true)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.adaptiveTabBar)
+                        }
+                    }
+
+                Divider()
+
+                Button("Reset Onboarding") {
+                    Task {
+                        var prefs = await dependencies.userRepository.getPreferences()
+                        prefs.hasCompletedOnboarding = false
+                        try? await dependencies.userRepository.updatePreferences(prefs)
+                    }
+                }
+                .foregroundColor(.red)
             }
         } footer: {
             Text("Debug options only visible in development builds.")
@@ -624,8 +644,6 @@ struct SettingsView: View {
         } else {
             selectedAppearance = .system
         }
-        selectedAccentColor = themeManager.accentColor
-
         // Load banner states (synced with HomeView dismiss keys)
         showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
         showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
