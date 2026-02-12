@@ -101,6 +101,7 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 - [ ] watchOS companion app
 - [ ] Assistive Access Mode (simplified 3-tab layout)
 - [ ] Core Data fetch + LLM inference memory optimization
+- [ ] Islamic event notification deep links — tap notification to open Quranic reference (e.g., Surah Al-Qadr 97:3 for Laylat al-Qadr) or dedicated event info screen
 
 ---
 
