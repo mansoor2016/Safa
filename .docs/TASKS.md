@@ -10,7 +10,7 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
 ## Completed
 
-Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature pattern, location intelligence. Prayer times (7 methods), Qibla compass, prayer logging with optimistic undo, notification scheduling (single NotificationScheduler). Full Quran (6,236 ayahs) with FTS search, surah reader with bookmarks/reading progress/auto-scroll/progress ring, matched-geometry zoom transitions, native `.searchable()` on Quran page (matches Dua page UX). Hadith (34,178 entries) with SQLite FTS. Gamification: hasanat (20 award types with HasanatTracker dedup), streaks (5 types), 24 achievements, levels 1-10. Widgets (lock screen + streak), App Group sharing, Spotlight indexing (SpotlightIndexService, 5 content types, deep links). 5 App Intents wired to real data (IntentHelpers). Live Activities: prayer countdown on lock screen + Dynamic Island (ActivityKit), lifecycle wiring in SafaApp. Haptics, skeleton loaders, degraded state banners, theme/dark mode foundation. JSON/CSV data export, per-category deletion. Analytics schema, privacy-safe logging. Onboarding 3-page flow with location intelligence. Ramadan mode with iftar platter/prayer progress/fasting tracker. Premium UI: nav bar material morph, bottom sheet standardization, hero card compression, sticky context chip, screen state transitions (ErrorView), zero-state quality pass, motion tokens (SafaMotion), elevation/surface tokens (SafaElevation/SafaSurface). Location settings correctness: saved coords on cold start, calculationMethod consolidated to PreferencesManager, madhab wired into PrayerTimeCalculator. Localization: 5 locales configured, ~960 strings in String Catalog (213 bulk-added Feb 11), all user-facing strings registered. Learning scaffolding (feature-flagged). Chat scaffolding (feature-flagged). Family circle scaffolding. UI polish (contextual nav, adaptive tab bar, home intent resolver, resume card). Dark mode (Quran surface, screen-by-screen pass, banners/alerts/sheets). Search unification + share card upgrade + invite flow. Test coverage backfill (Domain 90%+, Repositories 80%+, conformance cleanup). Accessibility: Dynamic Type audit (UIFontMetrics, 15 sizes replaced, 5 @ScaledMetric, DT caps), VoiceOver rotor for Quran, accessibility labels (13 screens + helpers + 21 tests), large content + VoiceOver UI tests (18 DynamicTypeScalingTests), Minimal Motion profile (18 ReduceMotionTests). Platform integration: Focus Mode (FocusModeService + SleepFocusService, 7 notification categories), Siri Shortcuts (5 intents via IntentHelpers), platform verification tests (40 tests). Audio pipeline: 11 adhan files bundled (35 MB), AudioPlayerService (AVFoundation, interrupt handling, remote controls), audio background mode. Performance: AppLaunchPerformanceTests (< 2s target), home context precomputation. Dua favourites (quick access button + heart toggle), in-app review prompt (exponential backoff), banner visibility logic (HomeBannerResolver), developer settings (UX variant toggles, reset onboarding). Dua data migration to bundled JSON (57 duas across 12 categories, DuaDataLoader, DuaCategoriesViewModel, ~27 new authentic duas with Arabic/transliteration/translation/sources), Ramadan duas loaded from repository with occasion filter, Islamic event notification message polish.
+Foundation, Core Data, Dependencies, AppRouter, design system, disabled feature pattern, location intelligence. Prayer times (7 methods), Qibla compass, prayer logging with optimistic undo, notification scheduling (single NotificationScheduler). Full Quran (6,236 ayahs) with FTS search, surah reader with bookmarks/reading progress/auto-scroll/progress ring, matched-geometry zoom transitions, native `.searchable()` on Quran page (matches Dua page UX), Quran deep link from Home resume card. Hadith (34,178 entries) with SQLite FTS. Gamification: hasanat (19 award types with HasanatTracker dedup), streaks (5 types), 24 achievements, levels 1-10. Widgets (lock screen + streak), App Group sharing, Spotlight indexing (SpotlightIndexService, 5 content types, deep links). 5 App Intents wired to real data (IntentHelpers). Live Activities: prayer countdown on lock screen + Dynamic Island (ActivityKit), lifecycle wiring in SafaApp. Haptics, skeleton loaders, degraded state banners, theme/dark mode foundation. JSON/CSV data export, per-category deletion. Analytics schema, privacy-safe logging. Onboarding 3-page flow with location intelligence. Ramadan mode with iftar platter/prayer progress/fasting tracker. Premium UI: nav bar material morph, bottom sheet standardization, hero card compression, sticky context chip, screen state transitions (ErrorView), zero-state quality pass, motion tokens (SafaMotion), elevation/surface tokens (SafaElevation/SafaSurface). Location settings correctness: saved coords on cold start, calculationMethod consolidated to PreferencesManager, madhab wired into PrayerTimeCalculator. Localization: 5 locales configured, ~960 strings in String Catalog (213 bulk-added Feb 11), all user-facing strings registered. Learning scaffolding (feature-flagged). Chat scaffolding (feature-flagged). UI polish (contextual nav, adaptive tab bar, home intent resolver, resume card adjacent to banners). Dark mode (Quran surface, screen-by-screen pass, banners/alerts/sheets). Search unification + share card upgrade + invite flow. Test coverage backfill (Domain 90%+, Repositories 80%+, conformance cleanup). Accessibility: Dynamic Type audit (UIFontMetrics, 15 sizes replaced, 5 @ScaledMetric, DT caps), VoiceOver rotor for Quran, accessibility labels (13 screens + helpers + 21 tests), large content + VoiceOver UI tests (18 DynamicTypeScalingTests), Minimal Motion profile (18 ReduceMotionTests). Platform integration: Focus Mode (FocusModeService + SleepFocusService, 6 notification categories), Siri Shortcuts (5 intents via IntentHelpers), platform verification tests (40 tests). Audio pipeline: 11 adhan files bundled (35 MB), AudioPlayerService (AVFoundation, interrupt handling, remote controls), audio background mode. Performance: AppLaunchPerformanceTests (< 2s target), home context precomputation. Dua favourites (quick access button + heart toggle), in-app review prompt (exponential backoff), banner visibility logic (HomeBannerResolver), developer settings (UX variant toggles, reset onboarding). Dua data migration to bundled JSON (57 duas across 12 categories, DuaDataLoader, DuaCategoriesViewModel, ~27 new authentic duas with Arabic/transliteration/translation/sources), Ramadan duas loaded from repository with occasion filter, Islamic event notification message polish. CloudKit/iCloud stripped (local-only Core Data). Family Circle feature removed (not needed for v1 or post-v1). Backwards compatibility verified: build + test matrix passes on iOS 17.5 (SE), iOS 18.6 (Pro Max), iOS 26 (17 Pro).
 
 ---
 
@@ -25,11 +25,11 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
   - Fixed EidGreetingCard overflow on 375pt screens (`.frame(width:)` → `.frame(maxWidth:)`)
   - Fixed CompassView hardcoded sizes — now derives from `@ScaledMetric compassSize`
   - Build-verified on iPhone 16e (375pt), iPhone 17 Pro (393pt), iPhone 17 Pro Max (430pt)
-- [ ] Backwards compatibility testing — verify app builds and tests pass on iOS 17, 18, and 26 simulators
+- [x] Backwards compatibility testing — verified builds and tests pass on iOS 17, 18, and 26 simulators
   - Deployment target lowered from 26.2 → 17.0 (all APIs are iOS 17+ compatible)
   - AI Companion (Foundation Models) already gated with `#available(iOS 18.4, *)`
-  - Download iOS 17 and 18 simulator runtimes, then run `/build` and `/test` on each
-  - Use `/build --matrix` or `/test --matrix` to verify across all device sizes
+  - Matrix build: iOS 17.5 SE, iOS 18.6 Pro Max, iOS 26 17 Pro — all pass
+  - Matrix test: 2098 tests on iOS 17.5/18.6, 390 on iOS 26 — all pass, 0 failures
 
 ### Phase 2: Widgets & Platform Integration
 **Why second:** Widgets are the #1 daily engagement driver. Lock screen prayer times is a killer feature vs competitors. Code is complete — needs device verification for visual/interaction aspects.
@@ -76,13 +76,6 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 - [ ] Apple Foundation Models integration (requires iOS 26 SDK + device)
 - [ ] Response streaming + quality acceptance testing
 
-### Social Features
-**Why deferred:** Requires multi-device testing + paid Apple Developer account for CloudKit. Social features are engagement boosters, not core value proposition.
-
-- [ ] CloudKit sync between two devices
-- [ ] Family circle create/join/privacy flows
-- [ ] Update appStoreURL with real App ID
-
 ### Audio Expansion
 **Why deferred:** Full recitation audio requires large downloads, caching infrastructure, and offline queue. Ship basic adhan in v1, expand audio post-launch.
 
@@ -101,7 +94,7 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 
 - [ ] Additional App Intents (PlayAdhan, OpenSurah, StartTasbeeh, location automations)
 - [ ] Achievement badge assets + weekly reflection summary + progress dashboard
-- [ ] Quran: transliteration data, CloudKit bookmark migration
+- [ ] Quran: transliteration data
 - [ ] Prayer quality logs (on-time, congregation, focus rating)
 - [ ] Ringer mode detection for Smart Adhan (no public iOS API)
 - [ ] Manual backup/restore
@@ -110,7 +103,8 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 - [ ] Assistive Access Mode (simplified 3-tab layout)
 - [ ] Core Data fetch + LLM inference memory optimization
 - [ ] Islamic event notification deep links — tap notification to open Quranic reference (e.g., Surah Al-Qadr 97:3 for Laylat al-Qadr) or dedicated event info screen
+- [ ] Update appStoreURL with real App ID
 
 ---
 
-*Last Updated: February 12, 2026 (SE/Pro Max layout fixes, deployment target 26.2→17.0, build/test --matrix commands)*
+*Last Updated: February 12, 2026 (backwards compat verified, CloudKit/Family stripped, Quran deep link from Home)*
