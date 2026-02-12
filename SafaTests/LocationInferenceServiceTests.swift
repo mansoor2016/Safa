@@ -2,6 +2,7 @@
 // PURPOSE: Unit tests for LocationInferenceService
 
 import XCTest
+import CoreLocation
 @testable import Safa
 
 final class LocationInferenceServiceTests: XCTestCase {
@@ -216,6 +217,60 @@ final class LocationInferenceServiceTests: XCTestCase {
         )
 
         XCTAssertEqual(context.regionName, "Saudi Arabia")
+    }
+
+    // MARK: - Fast Context Region Name Tests
+
+    func testFastContext_regionName_isNotGeneric() {
+        // inferContextFast should never return "Your Location" — it should
+        // at least show "Unknown Location" or a coordinate-based description
+        let london = Coordinates(latitude: 51.5074, longitude: -0.1278)
+        let context = sut.inferContextFast(from: london)
+
+        XCTAssertNotEqual(context.regionName, "Your Location",
+                          "Fast context should not use generic 'Your Location' as region name")
+    }
+
+    func testFastContext_hasNilCityAndCountry() {
+        // Without geocoding, city and country are nil
+        let coords = Coordinates(latitude: 40.7128, longitude: -74.0060)
+        let context = sut.inferContextFast(from: coords)
+
+        XCTAssertNil(context.city, "Fast context has no reverse geocoding, city should be nil")
+        XCTAssertNil(context.country, "Fast context has no reverse geocoding, country should be nil")
+    }
+
+    func testFastContext_stillInfersMethod() {
+        // Even without geocoding, method should be inferred from coordinates
+        let newYork = Coordinates(latitude: 40.7128, longitude: -74.0060)
+        let context = sut.inferContextFast(from: newYork)
+
+        XCTAssertEqual(context.recommendedMethod, .isna,
+                       "US coordinates should infer ISNA method")
+    }
+
+    func testInferContext_returnsRealRegionName() async {
+        // Full inferContext with CLGeocoder should return a real city/country
+        let london = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        let context = await sut.inferContext(from: london)
+
+        // CLGeocoder should resolve to something containing "London" or "United Kingdom"
+        XCTAssertNotEqual(context.regionName, "Your Location",
+                          "Full inference should return a real region name")
+        XCTAssertNotEqual(context.regionName, "Unknown Location",
+                          "Full inference for London should resolve to a real name")
+        XCTAssertFalse(context.regionName.isEmpty,
+                       "Region name should not be empty")
+    }
+
+    func testInferContext_populatesCityOrCountry() async {
+        let makkah = CLLocation(latitude: 21.4225, longitude: 39.8262)
+        let context = await sut.inferContext(from: makkah)
+
+        // At least one of city or country should be populated by geocoder
+        let hasLocation = context.city != nil || context.country != nil
+        XCTAssertTrue(hasLocation,
+                      "Geocoded context should have city or country populated")
     }
 
     // MARK: - Coordinates Tests

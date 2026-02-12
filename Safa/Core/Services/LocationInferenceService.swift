@@ -4,7 +4,7 @@
 
 import Foundation
 import CoreLocation
-import MapKit
+
 
 // MARK: - Location Context
 
@@ -94,7 +94,11 @@ final class LocationInferenceService {
             recommendedMethod: method,
             recommendedMadhab: madhab,
             recommendedLanguage: language,
-            regionName: "Your Location"
+            regionName: String(format: "%.1f°%@, %.1f°%@",
+                              abs(coordinates.latitude),
+                              coordinates.latitude >= 0 ? "N" : "S",
+                              abs(coordinates.longitude),
+                              coordinates.longitude >= 0 ? "E" : "W")
         )
     }
 
@@ -343,20 +347,11 @@ final class LocationInferenceService {
     // MARK: - Reverse Geocoding (MapKit)
 
     private func reverseGeocode(_ location: CLLocation) async -> (countryCode: String?, country: String?, city: String?) {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = nil
-        request.region = MKCoordinateRegion(
-            center: location.coordinate,
-            latitudinalMeters: 1000,
-            longitudinalMeters: 1000
-        )
-
-        // Use MKLocalSearch to get placemark data
+        // Use CLGeocoder for reliable reverse geocoding
         do {
-            let search = MKLocalSearch(request: request)
-            let response = try await search.start()
-            if let item = response.mapItems.first {
-                let placemark = item.placemark
+            let geocoder = CLGeocoder()
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
+            if let placemark = placemarks.first {
                 return (
                     placemark.isoCountryCode?.uppercased(),
                     placemark.country,

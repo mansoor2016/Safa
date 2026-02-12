@@ -76,9 +76,10 @@ struct OnboardingView: View {
     // MARK: - Page 1: Welcome + Location
 
     private var welcomeLocationPage: some View {
+        GeometryReader { geo in
         ScrollView {
-            VStack(spacing: SafaSpacing.lg) {
-                Spacer(minLength: SafaSpacing.xl)
+            VStack(spacing: SafaSpacing.md) {
+                Spacer(minLength: SafaSpacing.md)
 
                 // App branding
                 ZStack {
@@ -107,66 +108,86 @@ struct OnboardingView: View {
                     featureItem(icon: "hand.tap", text: "Easy to navigate")
                     featureItem(icon: "sparkles", text: "Islamic AI assistant")
                 }
-                .padding(.vertical, SafaSpacing.md)
-
-                Divider()
-                    .padding(.horizontal, SafaSpacing.xl)
+                .padding(.vertical, SafaSpacing.sm)
 
                 // Location section
-                VStack(spacing: SafaSpacing.md) {
-                    Image(systemName: "location.circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.accentColor)
-
-                    Text("Enable location for accurate prayer times")
-                        .font(SafaTypography.bodyMedium)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                        .multilineTextAlignment(.center)
-
-                    // Location status
+                VStack(spacing: SafaSpacing.sm) {
                     if let context = locationContext {
-                        detectedLocationBadge(context)
-                    } else if let error = locationError {
-                        Text(error)
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(.orange)
-                    }
+                        // Location detected state
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.green)
 
-                    // High latitude warning
-                    if let warning = highLatitudeWarning {
-                        Text(warning)
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(.orange)
-                            .multilineTextAlignment(.center)
-                    }
+                        Text(context.regionName)
+                            .font(SafaTypography.titleMedium)
+                            .foregroundColor(SafaColors.Fallback.text)
 
-                    // Location button
-                    Button {
-                        requestLocationPermission()
-                    } label: {
-                        HStack {
-                            if isLoadingLocation {
-                                ProgressView()
-                                    .tint(.white)
-                                    .padding(.trailing, 4)
-                            }
-                            Text(locationButtonText)
+                        // High latitude warning
+                        if let warning = highLatitudeWarning {
+                            Text(warning)
+                                .font(SafaTypography.bodySmall)
+                                .foregroundColor(.orange)
+                                .multilineTextAlignment(.center)
                         }
-                        .font(SafaTypography.bodyMedium)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, SafaSpacing.xl)
-                        .padding(.vertical, SafaSpacing.sm)
-                        .background(locationContext != nil ? Color.green : Color.accentColor)
-                        .clipShape(Capsule())
-                    }
-                    .disabled(isLoadingLocation || locationContext != nil)
-                }
-                .padding()
 
-                Spacer(minLength: SafaSpacing.xl)
+                        Button {
+                            locationContext = nil
+                            highLatitudeWarning = nil
+                            requestLocationPermission()
+                        } label: {
+                            HStack(spacing: SafaSpacing.xs) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                Text("Update Location")
+                            }
+                            .font(SafaTypography.bodySmall)
+                            .foregroundColor(.accentColor)
+                        }
+                    } else {
+                        // No location state
+                        Image(systemName: "location.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.accentColor)
+
+                        Text("Enable location for accurate prayer times")
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                            .multilineTextAlignment(.center)
+
+                        if let error = locationError {
+                            Text(error)
+                                .font(SafaTypography.bodySmall)
+                                .foregroundColor(.orange)
+                        }
+
+                        Button {
+                            requestLocationPermission()
+                        } label: {
+                            HStack {
+                                if isLoadingLocation {
+                                    ProgressView()
+                                        .tint(.white)
+                                        .padding(.trailing, 4)
+                                }
+                                Text(isLoadingLocation ? "Detecting..." : "Enable Location")
+                            }
+                            .font(SafaTypography.bodyMedium)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, SafaSpacing.xl)
+                            .padding(.vertical, SafaSpacing.sm)
+                            .background(Color.accentColor)
+                            .clipShape(Capsule())
+                        }
+                        .disabled(isLoadingLocation)
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer(minLength: SafaSpacing.md)
             }
             .padding()
+            .frame(minHeight: geo.size.height)
+        }
         }
     }
 
@@ -185,30 +206,6 @@ struct OnboardingView: View {
         .padding(.horizontal, SafaSpacing.lg)
     }
 
-    private func detectedLocationBadge(_ context: LocationContext) -> some View {
-        HStack(spacing: SafaSpacing.xs) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
-
-            Text(context.regionName)
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.text)
-        }
-        .padding(.horizontal, SafaSpacing.md)
-        .padding(.vertical, SafaSpacing.xs)
-        .background(Color.green.opacity(0.1))
-        .clipShape(Capsule())
-    }
-
-    private var locationButtonText: String {
-        if isLoadingLocation {
-            return "Detecting..."
-        } else if locationContext != nil {
-            return "Location Set"
-        } else {
-            return "Enable Location"
-        }
-    }
 
     // MARK: - Page 2: Quick Setup (Simplified - trust smart defaults)
 
