@@ -198,7 +198,7 @@ struct RamadanBanner: View {
                 .foregroundColor(.white.opacity(0.7))
 
             Text(countdown)
-                .font(SafaTypography.counterSmall)
+                .font(SafaTypography.headlineMedium)
                 .foregroundColor(.white)
                 .monospacedDigit()
 
