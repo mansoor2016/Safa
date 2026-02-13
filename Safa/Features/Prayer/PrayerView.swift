@@ -317,6 +317,7 @@ private struct QuickActionButton: View {
                 Image(systemName: icon)
                     .font(.title2)
                     .foregroundColor(.accentColor)
+                    .frame(height: 28)
 
                 Text(title)
                     .font(SafaTypography.labelSmall)

@@ -38,6 +38,7 @@ struct AdhanPlayButton: View {
                 Image(systemName: isPlaying ? "stop.fill" : "speaker.wave.2.fill")
                     .font(.title2)
                     .foregroundColor(isPlaying ? .red : .accentColor)
+                    .frame(height: 28)
                 Text(isPlaying ? "Stop Adhan" : "Adhan")
                     .font(SafaTypography.labelSmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
