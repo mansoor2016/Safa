@@ -117,6 +117,44 @@ final class SpotlightIndexTests: XCTestCase {
         XCTAssertNil(destination)
     }
 
+    // MARK: - Prayer Identifier Parsing Tests
+
+    func testParsePrayerIdentifier() {
+        let identifier = "prayer_fajr"
+        let destination = SpotlightIndexService.parseIdentifier(identifier)
+
+        XCTAssertNotNil(destination)
+        if case .prayer(let id) = destination {
+            XCTAssertEqual(id, "fajr")
+        } else {
+            XCTFail("Expected prayer destination, got \(String(describing: destination))")
+        }
+    }
+
+    func testParseFeatureIdentifier() {
+        let identifier = "feature_qibla"
+        let destination = SpotlightIndexService.parseIdentifier(identifier)
+
+        XCTAssertNotNil(destination)
+        if case .feature(let id) = destination {
+            XCTAssertEqual(id, "qibla")
+        } else {
+            XCTFail("Expected feature destination, got \(String(describing: destination))")
+        }
+    }
+
+    func testParseFeatureIdentifierWithCompoundId() {
+        let identifier = "feature_prayer_times"
+        let destination = SpotlightIndexService.parseIdentifier(identifier)
+
+        XCTAssertNotNil(destination)
+        if case .feature(let id) = destination {
+            XCTAssertEqual(id, "prayer_times")
+        } else {
+            XCTFail("Expected feature destination, got \(String(describing: destination))")
+        }
+    }
+
     // MARK: - SpotlightContentType Tests
 
     func testSpotlightContentTypeDomainIdentifiers() {
@@ -125,6 +163,8 @@ final class SpotlightIndexTests: XCTestCase {
         XCTAssertEqual(SpotlightContentType.hadith.domainIdentifier, "com.safa.hadith")
         XCTAssertEqual(SpotlightContentType.dua.domainIdentifier, "com.safa.dua")
         XCTAssertEqual(SpotlightContentType.namesOfAllah.domainIdentifier, "com.safa.names_of_allah")
+        XCTAssertEqual(SpotlightContentType.prayer.domainIdentifier, "com.safa.prayer")
+        XCTAssertEqual(SpotlightContentType.feature.domainIdentifier, "com.safa.feature")
     }
 
     func testSpotlightContentTypeActivityTypes() {
@@ -132,6 +172,8 @@ final class SpotlightIndexTests: XCTestCase {
         XCTAssertEqual(SpotlightContentType.ayah.activityType, "com.safa.activity.ayah")
         XCTAssertEqual(SpotlightContentType.hadith.activityType, "com.safa.activity.hadith")
         XCTAssertEqual(SpotlightContentType.dua.activityType, "com.safa.activity.dua")
+        XCTAssertEqual(SpotlightContentType.prayer.activityType, "com.safa.activity.prayer")
+        XCTAssertEqual(SpotlightContentType.feature.activityType, "com.safa.activity.feature")
     }
 
     // MARK: - SpotlightDestination Tests
@@ -158,6 +200,24 @@ final class SpotlightIndexTests: XCTestCase {
         let dest1 = SpotlightDestination.hadith(collection: "bukhari", id: "1")
         let dest2 = SpotlightDestination.hadith(collection: "bukhari", id: "1")
         let dest3 = SpotlightDestination.hadith(collection: "muslim", id: "1")
+
+        XCTAssertEqual(dest1, dest2)
+        XCTAssertNotEqual(dest1, dest3)
+    }
+
+    func testSpotlightDestinationPrayerEquality() {
+        let dest1 = SpotlightDestination.prayer(id: "fajr")
+        let dest2 = SpotlightDestination.prayer(id: "fajr")
+        let dest3 = SpotlightDestination.prayer(id: "isha")
+
+        XCTAssertEqual(dest1, dest2)
+        XCTAssertNotEqual(dest1, dest3)
+    }
+
+    func testSpotlightDestinationFeatureEquality() {
+        let dest1 = SpotlightDestination.feature(id: "qibla")
+        let dest2 = SpotlightDestination.feature(id: "qibla")
+        let dest3 = SpotlightDestination.feature(id: "quran")
 
         XCTAssertEqual(dest1, dest2)
         XCTAssertNotEqual(dest1, dest3)

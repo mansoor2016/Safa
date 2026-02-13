@@ -150,6 +150,7 @@ enum AppConstants {
         static let spotlightIndexed = "com.safa.spotlight.indexed"
         static let spotlightIndexDate = "com.safa.spotlight.indexDate"
         static let spotlightIndexCount = "com.safa.spotlight.indexCount"
+        static let spotlightIndexVersion = "com.safa.spotlight.indexVersion"
 
         // Eid
         static let eidBannerDismissedPrefix = "eid_banner_dismissed_"

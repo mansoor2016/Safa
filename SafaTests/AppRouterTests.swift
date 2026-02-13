@@ -222,6 +222,45 @@ final class AppRouterTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 
+    func testSpotlightIdentifierPrayer() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("prayer_fajr"))
+        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertTrue(sut.path.isEmpty, "Prayer should switch tab, not push")
+    }
+
+    func testSpotlightIdentifierFeatureQibla() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("feature_qibla"))
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func testSpotlightIdentifierFeaturePrayerTimes() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("feature_prayer_times"))
+        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertTrue(sut.path.isEmpty, "Prayer times should switch tab, not push")
+    }
+
+    func testSpotlightIdentifierFeatureQuran() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("feature_quran"))
+        XCTAssertEqual(sut.selectedTab, "quran")
+        XCTAssertTrue(sut.path.isEmpty, "Quran should switch tab, not push")
+    }
+
+    func testSpotlightIdentifierFeatureDua() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("feature_dua"))
+        XCTAssertEqual(sut.selectedTab, "duas")
+        XCTAssertTrue(sut.path.isEmpty, "Dua should switch tab, not push")
+    }
+
+    func testSpotlightIdentifierFeatureCalendar() {
+        XCTAssertTrue(sut.handleSpotlightIdentifier("feature_calendar"))
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func testSpotlightIdentifierFeatureUnknown() {
+        XCTAssertFalse(sut.handleSpotlightIdentifier("feature_nonexistent"))
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
     // MARK: - Destination Enum Tests
 
     func testDestinationIsHashable() {

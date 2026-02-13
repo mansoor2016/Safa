@@ -241,6 +241,32 @@ final class AppRouter {
             navigate(to: .dhikr)
             return true
 
+        case "prayer":
+            selectedTab = "prayer"
+            return true
+
+        case "feature":
+            let featureId = components.dropFirst().joined(separator: "_")
+            switch featureId {
+            case "prayer_times":
+                selectedTab = "prayer"
+            case "qibla":
+                navigate(to: .qibla)
+            case "quran":
+                selectedTab = "quran"
+            case "hadith":
+                navigate(to: .hadith(collection: nil, hadithId: nil))
+            case "dhikr":
+                navigate(to: .dhikr)
+            case "calendar":
+                navigate(to: .calendar)
+            case "dua":
+                selectedTab = "duas"
+            default:
+                return false
+            }
+            return true
+
         default:
             return false
         }

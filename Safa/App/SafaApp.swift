@@ -4,6 +4,7 @@
 
 import SwiftUI
 import CoreSpotlight
+import AppIntents
 
 @main
 struct SafaApp: App {
@@ -62,9 +63,14 @@ struct SafaApp: App {
                     )
                 }
 
-                // Index Spotlight content on first launch (after onboarding)
-                if prefs.hasCompletedOnboarding && spotlightService.lastIndexDate == nil {
+                // Index Spotlight content on first launch or after version bump
+                if prefs.hasCompletedOnboarding && spotlightService.needsReindex {
                     await spotlightService.indexAllContent()
+                }
+
+                // Ensure Siri shortcuts stay registered
+                if prefs.hasCompletedOnboarding {
+                    SafaShortcuts.updateAppShortcutParameters()
                 }
 
                 // Re-schedule prayer notifications daily on app launch

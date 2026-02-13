@@ -15,6 +15,8 @@ enum SpotlightContentType: String {
     case hadith = "hadith"
     case dua = "dua"
     case namesOfAllah = "names_of_allah"
+    case prayer = "prayer"
+    case feature = "feature"
 
     var domainIdentifier: String {
         "com.safa.\(rawValue)"
@@ -44,11 +46,20 @@ final class SpotlightIndexService {
     private let indexedKey = AppConstants.StorageKeys.spotlightIndexed
     private let indexDateKey = AppConstants.StorageKeys.spotlightIndexDate
     private let indexCountKey = AppConstants.StorageKeys.spotlightIndexCount
+    private let indexVersionKey = AppConstants.StorageKeys.spotlightIndexVersion
+
+    /// Bump this when adding new indexed content types to trigger re-index on existing installs
+    private static let currentIndexVersion = 2
 
     // MARK: - Init
 
     private init() {
         loadIndexState()
+    }
+
+    /// Returns true when Spotlight index needs rebuilding (first launch or version bump)
+    var needsReindex: Bool {
+        lastIndexDate == nil || userDefaults.integer(forKey: indexVersionKey) < Self.currentIndexVersion
     }
 
     // MARK: - Public Methods
@@ -81,6 +92,14 @@ final class SpotlightIndexService {
         // Index Hadith Collections
         let hadithCount = await indexHadithCollections()
         totalIndexed += hadithCount
+
+        // Index Prayers
+        let prayerCount = await indexPrayers()
+        totalIndexed += prayerCount
+
+        // Index App Features
+        let featureCount = await indexAppFeatures()
+        totalIndexed += featureCount
 
         indexedItemCount = totalIndexed
         lastIndexDate = Date()
@@ -155,6 +174,14 @@ final class SpotlightIndexService {
         case "name":
             guard let number = Int(components[1]) else { return nil }
             return .nameOfAllah(number: number)
+
+        case "prayer":
+            let id = String(components[1])
+            return .prayer(id: id)
+
+        case "feature":
+            let id = components.dropFirst().joined(separator: "_")
+            return .feature(id: id)
 
         default:
             return nil
@@ -436,6 +463,88 @@ final class SpotlightIndexService {
         }
     }
 
+    // MARK: - Index Prayers
+
+    private func indexPrayers() async -> Int {
+        let prayers: [(String, String, String, String, [String])] = [
+            ("prayer_fajr", "Fajr Prayer", "الفجر", "Fajr prayer time - Open Safa to see today's Fajr time",
+             ["fajr", "dawn", "morning prayer", "salat al-fajr", "salah", "namaz"]),
+            ("prayer_dhuhr", "Dhuhr Prayer", "الظهر", "Dhuhr prayer time - Open Safa to see today's Dhuhr time",
+             ["dhuhr", "zuhr", "noon prayer", "midday", "salah", "namaz"]),
+            ("prayer_asr", "Asr Prayer", "العصر", "Asr prayer time - Open Safa to see today's Asr time",
+             ["asr", "afternoon prayer", "salah", "namaz"]),
+            ("prayer_maghrib", "Maghrib Prayer", "المغرب", "Maghrib prayer time - Open Safa to see today's Maghrib time",
+             ["maghrib", "sunset prayer", "evening", "salah", "namaz"]),
+            ("prayer_isha", "Isha Prayer", "العشاء", "Isha prayer time - Open Safa to see today's Isha time",
+             ["isha", "night prayer", "salah", "namaz"])
+        ]
+
+        var items: [CSSearchableItem] = []
+
+        for (id, name, arabic, description, keywords) in prayers {
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+            attributeSet.title = "\(name) (\(arabic))"
+            attributeSet.contentDescription = description
+            attributeSet.keywords = keywords + ["prayer", "salah", "islamic"]
+
+            items.append(CSSearchableItem(
+                uniqueIdentifier: id,
+                domainIdentifier: SpotlightContentType.prayer.domainIdentifier,
+                attributeSet: attributeSet
+            ))
+        }
+
+        do {
+            try await searchableIndex.indexSearchableItems(items)
+            return items.count
+        } catch {
+            return 0
+        }
+    }
+
+    // MARK: - Index App Features
+
+    private func indexAppFeatures() async -> Int {
+        let features: [(String, String, String, [String])] = [
+            ("feature_prayer_times", "Prayer Times", "View today's prayer times for your location",
+             ["prayer times", "salah times", "namaz times", "prayer schedule"]),
+            ("feature_qibla", "Qibla Compass", "Find the direction of the Kaaba in Mecca",
+             ["qibla", "mecca", "makkah", "compass", "kaaba", "direction"]),
+            ("feature_quran", "Quran Reader", "Read and listen to the Holy Quran",
+             ["quran", "koran", "reading", "recitation", "holy book"]),
+            ("feature_hadith", "Hadith Collection", "Browse authentic hadith collections",
+             ["hadith", "sunnah", "prophet", "bukhari", "muslim"]),
+            ("feature_dhikr", "Dhikr & Tasbeeh", "Remembrance of Allah with counters",
+             ["dhikr", "tasbeeh", "tasbih", "zikr", "remembrance", "counter"]),
+            ("feature_calendar", "Islamic Calendar", "Hijri calendar and important dates",
+             ["hijri", "islamic calendar", "hijri date", "muslim calendar"]),
+            ("feature_dua", "Duas & Supplications", "Collection of daily duas and supplications",
+             ["dua", "supplication", "prayer", "invocation"])
+        ]
+
+        var items: [CSSearchableItem] = []
+
+        for (id, name, description, keywords) in features {
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+            attributeSet.title = name
+            attributeSet.contentDescription = description
+            attributeSet.keywords = keywords + ["safa", "islamic"]
+
+            items.append(CSSearchableItem(
+                uniqueIdentifier: id,
+                domainIdentifier: SpotlightContentType.feature.domainIdentifier,
+                attributeSet: attributeSet
+            ))
+        }
+
+        do {
+            try await searchableIndex.indexSearchableItems(items)
+            return items.count
+        } catch {
+            return 0
+        }
+    }
+
     // MARK: - Persistence
 
     private func loadIndexState() {
@@ -446,6 +555,7 @@ final class SpotlightIndexService {
     private func saveIndexState() {
         userDefaults.set(indexedItemCount, forKey: indexCountKey)
         userDefaults.set(lastIndexDate, forKey: indexDateKey)
+        userDefaults.set(Self.currentIndexVersion, forKey: indexVersionKey)
     }
 }
 
@@ -457,6 +567,8 @@ enum SpotlightDestination: Hashable {
     case hadith(collection: String, id: String?)
     case dua(id: String)
     case nameOfAllah(number: Int)
+    case prayer(id: String)
+    case feature(id: String)
 }
 
 // MARK: - Feature Flag Integration
