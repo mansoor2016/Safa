@@ -98,6 +98,7 @@ struct DailyGoalRow: View {
     let icon: String
     let title: String
     let isCompleted: Bool
+    var isEnabled: Bool = true
     var onToggle: (() -> Void)? = nil
 
     var body: some View {
@@ -126,9 +127,13 @@ struct DailyGoalRow: View {
             .animation(.easeInOut(duration: 0.2), value: isCompleted)
         }
         .buttonStyle(.plain)
-        .disabled(onToggle == nil)
+        .disabled(onToggle == nil || !isEnabled)
+        .opacity(isEnabled ? 1 : 0.4)
         .accessibilityLabel(formatGoalAccessibilityLabel(title: title, isCompleted: isCompleted))
-        .accessibilityHint(onToggle != nil ? (isCompleted ? "Double tap to undo" : "Double tap to complete") : "")
+        .accessibilityHint(
+            !isEnabled ? "Available after Asr prayer" :
+            onToggle != nil ? (isCompleted ? "Double tap to undo" : "Double tap to complete") : ""
+        )
     }
 }
 

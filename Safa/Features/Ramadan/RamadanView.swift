@@ -39,7 +39,7 @@ struct RamadanView: View {
                 prayerProgressCard
 
                 // 3. Daily goals
-                DailyGoalsCard(isRamadan: true, loggedPrayers: loggedPrayers)
+                DailyGoalsCard(isRamadan: true, loggedPrayers: loggedPrayers, todayPrayers: todayPrayers)
 
                 // 4. Ramadan quick actions (Quran, Taraweeh, Zakat, Duas)
                 quickActionsGrid

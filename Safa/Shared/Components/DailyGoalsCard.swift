@@ -7,12 +7,20 @@ import SwiftUI
 struct DailyGoalsCard: View {
     let isRamadan: Bool
     let loggedPrayers: Set<PrayerType>
+    var todayPrayers: [PrayerTime] = []
 
     // Manually toggleable goals (persisted per day via UserDefaults)
     @State private var completedGoals: Set<String> = []
 
     private var allPrayersLogged: Bool {
         PrayerType.obligatoryPrayers.allSatisfy { loggedPrayers.contains($0) }
+    }
+
+    private var isEveningDhikrAvailable: Bool {
+        DailyGoalsHelpers.isEveningDhikrAvailable(
+            now: Date(),
+            todayPrayers: todayPrayers
+        )
     }
 
     private var dateKey: String {
@@ -39,7 +47,12 @@ struct DailyGoalsCard: View {
                     goalRow("quran", icon: "book", title: "Read Quran")
                 }
                 goalRow("morning_dhikr", icon: "hands.sparkles", title: "Morning Dhikr")
-                goalRow("evening_dhikr", icon: "hands.sparkles", title: "Evening Dhikr")
+                goalRow(
+                    "evening_dhikr",
+                    icon: "hands.sparkles",
+                    title: "Evening Dhikr",
+                    isEnabled: isEveningDhikrAvailable
+                )
 
                 // Ramadan-only goals
                 if isRamadan {
@@ -52,11 +65,12 @@ struct DailyGoalsCard: View {
 
     // MARK: - Goal Row Helper
 
-    private func goalRow(_ id: String, icon: String, title: String) -> some View {
+    private func goalRow(_ id: String, icon: String, title: String, isEnabled: Bool = true) -> some View {
         DailyGoalRow(
             icon: icon,
             title: title,
             isCompleted: completedGoals.contains(id),
+            isEnabled: isEnabled,
             onToggle: { toggleGoal(id) }
         )
     }
