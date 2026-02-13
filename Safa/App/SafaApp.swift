@@ -3,12 +3,29 @@
 // DEPENDENCIES: SwiftUI, Dependencies, AppRouter
 
 import SwiftUI
+import UIKit
 import CoreSpotlight
 import AppIntents
+
+// MARK: - AppDelegate
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    static var pendingShortcutType: String?
+
+    func application(
+        _ application: UIApplication,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        Self.pendingShortcutType = shortcutItem.type
+        completionHandler(true)
+    }
+}
 
 @main
 struct SafaApp: App {
     // MARK: - State
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
     @State private var themeManager = ThemeManager()
@@ -106,9 +123,28 @@ struct SafaApp: App {
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
+                    if let shortcutType = AppDelegate.pendingShortcutType {
+                        AppDelegate.pendingShortcutType = nil
+                        handleShortcut(shortcutType)
+                    }
                     Task { await checkLocationChange() }
                 }
             }
+        }
+    }
+
+    // MARK: - Home Screen Quick Actions
+
+    private func handleShortcut(_ type: String) {
+        switch type {
+        case "com.safa.prayer":
+            router.selectedTab = "prayer"
+        case "com.safa.qibla":
+            router.selectedTab = "home"
+            router.popToRoot()
+            router.navigate(to: .qibla)
+        default:
+            break
         }
     }
 
