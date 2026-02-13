@@ -211,56 +211,11 @@ struct HomeView: View {
         )
 
         if visibility != .hidden {
-            VStack(spacing: 0) {
-                // Collapsed header row (always visible)
-                ramadanBannerCollapsedRow
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isRamadanBannerExpanded.toggle()
-                        }
-                    }
-
-                // Expanded content (tap to open Ramadan page)
-                if isRamadanBannerExpanded {
-                    ramadanBannerExpandedContent
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                        .onTapGesture {
-                            router.navigate(to: .ramadan)
-                        }
+            ramadanBannerExpandedContent
+                .onTapGesture {
+                    router.navigate(to: .ramadan)
                 }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
         }
-    }
-
-    private var ramadanBannerCollapsedRow: some View {
-        HStack(spacing: SafaSpacing.sm) {
-            Image(systemName: ramadanBannerIcon)
-                .font(.body)
-                .foregroundColor(ramadanBannerIconColor)
-
-            Text(ramadanBannerSummaryText)
-                .font(SafaTypography.titleSmall)
-                .foregroundColor(SafaColors.Fallback.text)
-
-            Spacer()
-
-            Image(systemName: isRamadanBannerExpanded ? "chevron.down" : "chevron.right")
-                .font(.caption)
-                .foregroundColor(SafaColors.Fallback.tertiaryText)
-
-            Button {
-                dismissBanner()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.caption2)
-                    .foregroundColor(SafaColors.Fallback.tertiaryText)
-                    .padding(SafaSpacing.xxs)
-            }
-        }
-        .padding(.horizontal, SafaSpacing.md)
-        .padding(.vertical, SafaSpacing.sm)
-        .background(Color(UIColor.secondarySystemBackground))
     }
 
     @ViewBuilder
@@ -284,29 +239,6 @@ struct HomeView: View {
                 onDismiss: dismissBanner
             )
         }
-    }
-
-    private var ramadanBannerSummaryText: String {
-        if isRamadan {
-            if isLastTenNights {
-                return "Last 10 Nights - Night \(currentRamadanDay)"
-            }
-            return "Ramadan - Day \(currentRamadanDay)"
-        } else if let days = daysUntilRamadan, days <= 30, days > 0 {
-            return "\(days) days until Ramadan"
-        }
-        return "Ramadan"
-    }
-
-    private var ramadanBannerIcon: String {
-        if isRamadan && isLastTenNights {
-            return "sparkles"
-        }
-        return "moon.stars.fill"
-    }
-
-    private var ramadanBannerIconColor: Color {
-        isRamadan ? .purple : .accentColor
     }
 
     private func dismissBanner() {
