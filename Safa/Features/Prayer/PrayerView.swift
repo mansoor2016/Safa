@@ -185,7 +185,7 @@ private struct NextPrayerCard: View {
                     .foregroundColor(SafaColors.Fallback.secondaryText)
 
                 Text(countdown)
-                    .font(SafaTypography.counterMedium)
+                    .font(SafaTypography.counterSmall)
                     .foregroundColor(SafaColors.Fallback.text)
                     .monospacedDigit()
                     .contentTransition(.numericText())
