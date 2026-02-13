@@ -100,12 +100,12 @@ struct RamadanBanner: View {
     // MARK: - Day Progress
 
     private var dayProgress: some View {
-        VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+        VStack(spacing: SafaSpacing.xxs) {
             Text("Day \(ramadanService.currentRamadanDay) of \(ramadanService.totalRamadanDays)")
                 .font(SafaTypography.labelMedium)
                 .foregroundColor(.white)
 
-            // Progress bar
+            // Progress bar (full width)
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Capsule()
@@ -122,7 +122,6 @@ struct RamadanBanner: View {
             }
             .frame(height: 6)
         }
-        .frame(maxWidth: 120)
     }
 
     // MARK: - Quran Khatm Progress
@@ -198,7 +197,7 @@ struct RamadanBanner: View {
                 .foregroundColor(.white.opacity(0.7))
 
             Text(countdown)
-                .font(SafaTypography.headlineMedium)
+                .font(SafaTypography.counterSmall)
                 .foregroundColor(.white)
                 .monospacedDigit()
 
