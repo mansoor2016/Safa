@@ -16,19 +16,13 @@ struct QiblaCompassView: View {
     @State private var isLoading = true
     @State private var error: Error?
     @State private var isSimulatedHeading = false
-    @State private var compassAccuracy: CompassAccuracy = .good
+    @State private var compassAccuracy: QiblaCompassHelpers.CompassAccuracy = .good
     @State private var headingTimedOut = false
     @State private var lastHeadingUpdate = Date()
     @State private var hasReceivedHeading = false
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
     @State private var locationSource: LocationSource = .fallback(name: AppDefaults.defaultLocationName)
     @ScaledMetric(relativeTo: .largeTitle) private var compassSize: CGFloat = 280
-
-    private enum CompassAccuracy {
-        case good       // headingAccuracy <= 25
-        case low        // headingAccuracy > 25
-        case unreliable // headingAccuracy < 0
-    }
 
     private enum LocationSource: Equatable {
         case live
@@ -73,26 +67,10 @@ struct QiblaCompassView: View {
     }
 
     // Haptic feedback state
-    @State private var previousAlignmentZone: AlignmentZone = .far
+    @State private var previousAlignmentZone: QiblaCompassHelpers.AlignmentZone = .far
     @State private var hapticFeedbackEnabled = true
 
-    // Alignment zones for directional haptic feedback
-    private enum AlignmentZone {
-        case perfect    // Within 5 degrees
-        case close      // Within 15 degrees
-        case near       // Within 30 degrees
-        case far        // More than 30 degrees
-
-        static func from(angle: Double) -> AlignmentZone {
-            let normalizedAngle = min(angle, 360 - angle)
-            switch normalizedAngle {
-            case 0..<5: return .perfect
-            case 5..<15: return .close
-            case 15..<30: return .near
-            default: return .far
-            }
-        }
-    }
+    private typealias AlignmentZone = QiblaCompassHelpers.AlignmentZone
 
     var body: some View {
         VStack(spacing: SafaSpacing.xl) {
@@ -210,6 +188,19 @@ struct QiblaCompassView: View {
             .foregroundColor(locationSource.color)
             .accessibilityLabel(locationSource.message)
 
+            if locationSource != .live {
+                Button {
+                    Task { await loadQiblaDirection() }
+                } label: {
+                    HStack(spacing: SafaSpacing.xs) {
+                        Image(systemName: "location.fill")
+                        Text("Refresh Location")
+                    }
+                    .font(SafaTypography.labelSmall)
+                    .foregroundColor(.accentColor)
+                }
+            }
+
             // Alignment indicator
             alignmentIndicator
 
@@ -264,7 +255,7 @@ struct QiblaCompassView: View {
     // MARK: - Alignment Indicator
 
     private var alignmentIndicator: some View {
-        let relativeAngle = (qiblaDirection - deviceHeading + 360).truncatingRemainder(dividingBy: 360)
+        let relativeAngle = QiblaCompassHelpers.relativeAngle(qiblaDirection: qiblaDirection, deviceHeading: deviceHeading)
         let zone = AlignmentZone.from(angle: relativeAngle)
 
         return HStack(spacing: SafaSpacing.xs) {
@@ -296,7 +287,7 @@ struct QiblaCompassView: View {
     }
 
     private var compassAccessibilityLabel: String {
-        let relativeAngle = (qiblaDirection - deviceHeading + 360).truncatingRemainder(dividingBy: 360)
+        let relativeAngle = QiblaCompassHelpers.relativeAngle(qiblaDirection: qiblaDirection, deviceHeading: deviceHeading)
 
         if relativeAngle < 10 || relativeAngle > 350 {
             return "You are facing the Qibla direction"
@@ -421,36 +412,18 @@ struct QiblaCompassView: View {
     }
 
     private func applyHeadingUpdate(_ heading: CLHeading) {
-        let headingValue = heading.trueHeading >= 0 ? heading.trueHeading : heading.magneticHeading
-        let normalizedHeading = normalizeDegrees(headingValue)
+        let normalizedHeading = QiblaCompassHelpers.headingValue(from: heading)
 
         if hasReceivedHeading {
-            deviceHeading = smoothHeading(from: deviceHeading, to: normalizedHeading, factor: 0.25)
+            deviceHeading = QiblaCompassHelpers.smoothHeading(from: deviceHeading, to: normalizedHeading, factor: 0.25)
         } else {
             deviceHeading = normalizedHeading
             hasReceivedHeading = true
         }
 
-        compassAccuracy = compassAccuracy(for: heading.headingAccuracy)
+        compassAccuracy = QiblaCompassHelpers.compassAccuracy(for: heading.headingAccuracy)
         lastHeadingUpdate = Date()
         headingTimedOut = false
-    }
-
-    private func normalizeDegrees(_ value: Double) -> Double {
-        let normalized = value.truncatingRemainder(dividingBy: 360)
-        return normalized >= 0 ? normalized : normalized + 360
-    }
-
-    /// Smooth heading transitions while correctly handling 0/360 wrap-around.
-    private func smoothHeading(from current: Double, to target: Double, factor: Double) -> Double {
-        let shortestDelta = ((target - current + 540).truncatingRemainder(dividingBy: 360)) - 180
-        return normalizeDegrees(current + shortestDelta * factor)
-    }
-
-    private func compassAccuracy(for headingAccuracy: CLLocationDirectionAccuracy) -> CompassAccuracy {
-        if headingAccuracy < 0 { return .unreliable }
-        if headingAccuracy > 25 { return .low }
-        return .good
     }
 
     private var isPermissionDenied: Bool {
