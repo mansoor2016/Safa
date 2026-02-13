@@ -20,7 +20,7 @@ Safa is an Islamic companion app that provides:
 - Quran text with translations
 - Hadith collections
 - Dhikr and dua references
-- An AI companion for Islamic questions
+- An AI companion for Islamic questions (on-device)
 - Learning tools for Arabic and Tajweed
 - Progress tracking and gamification features
 
@@ -62,7 +62,6 @@ You agree to use Safa only for lawful purposes consistent with Islamic ethics. Y
 - Reverse engineer, decompile, or modify the App
 - Use the App to spread misinformation about Islam
 - Redistribute the App's content without permission
-- Attempt to access other users' data (not that we have any)
 - Use the App in any way that violates applicable law
 
 ---
@@ -112,11 +111,12 @@ You agree to indemnify and hold harmless Safa's developers from any claims, dama
 
 ## Third-Party Services
 
-The App may integrate with:
+The App integrates with:
 
-- **Apple iCloud** for data sync (governed by Apple's terms)
-- **Apple Maps/MapKit** for Qibla direction and mosque finding (governed by Apple's terms)
-- **System location services** for prayer time calculation (governed by Apple's privacy policy)
+- **Apple HealthKit** for optional fasting data sync (governed by Apple's terms)
+- **Apple MapKit/CoreLocation** for prayer times and Qibla direction (governed by Apple's terms)
+- **Apple Speech Recognition** for optional pronunciation practice (governed by Apple's terms)
+- **Quran audio CDNs** (quranicaudio.com, islamic.network) for recitation audio downloads
 
 We are not responsible for third-party services' availability, accuracy, or policies.
 

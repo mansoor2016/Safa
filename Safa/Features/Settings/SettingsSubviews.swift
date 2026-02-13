@@ -13,25 +13,25 @@ struct PrivacyPolicyView: View {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
 
-                section(title: "Information We Collect") {
-                    bulletPoint("Location data (for prayer times calculation) - stored on-device only")
-                    bulletPoint("User preferences (calculation method, theme) - stored locally")
-                    bulletPoint("Prayer logs and reading progress - synced via your personal iCloud")
-                    bulletPoint("Chat conversations with AI - processed on-device, never sent to servers")
+                section(title: "Data Stored on Your Device") {
+                    bulletPoint("Location coordinates (for prayer times) — saved locally, never sent to servers")
+                    bulletPoint("User preferences (calculation method, theme) — stored locally")
+                    bulletPoint("Prayer logs, Quran progress, streaks — stored locally")
+                    bulletPoint("Chat conversations with AI — processed on-device, never sent to servers")
                 }
 
-                section(title: "How We Use Your Information") {
-                    bulletPoint("Calculate accurate prayer times for your location")
-                    bulletPoint("Track your progress and streaks")
-                    bulletPoint("Sync your data across your Apple devices via iCloud")
-                    bulletPoint("Provide personalized reminders")
+                section(title: "Permissions") {
+                    bulletPoint("Location: calculates prayer times and Qibla direction")
+                    bulletPoint("Microphone & Speech: optional Arabic pronunciation practice (on-device only)")
+                    bulletPoint("HealthKit: optional Ramadan fasting sync (write-only, never shared)")
+                    bulletPoint("Notifications: local prayer reminders (no marketing)")
                 }
 
-                section(title: "Data Storage & Security") {
-                    bulletPoint("All data is stored locally on your device or in your personal iCloud")
-                    bulletPoint("We do not operate any servers that store your data")
-                    bulletPoint("AI processing happens entirely on-device using Apple's technology")
-                    bulletPoint("No third-party analytics or advertising SDKs are used")
+                section(title: "Network Connections") {
+                    bulletPoint("Core features work entirely offline")
+                    bulletPoint("Quran audio downloaded from quranicaudio.com and islamic.network")
+                    bulletPoint("No personal data is sent — only audio files are downloaded")
+                    bulletPoint("No analytics, advertising, or tracking SDKs")
                 }
 
                 section(title: "Data Sharing") {
@@ -40,9 +40,9 @@ struct PrivacyPolicyView: View {
                 }
 
                 section(title: "Your Rights") {
-                    bulletPoint("Delete all your data at any time from Settings")
-                    bulletPoint("Export your data for personal backup")
-                    bulletPoint("Revoke location permissions without losing core functionality")
+                    bulletPoint("Delete specific data categories from Settings > Data Management")
+                    bulletPoint("Export all data as JSON or prayer logs as CSV")
+                    bulletPoint("Revoke any permission without losing core functionality")
                 }
 
                 section(title: "Contact") {

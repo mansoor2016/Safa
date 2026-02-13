@@ -489,7 +489,7 @@ struct SettingsView: View {
         } header: {
             Text("Data & Privacy")
         } footer: {
-            Text("Your data is stored locally and synced via iCloud. Safa does not collect or share personal data.")
+            Text("Your data is stored locally on your device. Safa does not collect or share personal data.")
         }
     }
 

@@ -8,115 +8,144 @@
 
 ## Overview
 
-Safa is designed with privacy as a core principle. We believe your spiritual journey is deeply personal, and your data should remain yours.
+Safa is designed with privacy as a core principle. Your spiritual journey is personal, and your data stays on your device.
 
-**The short version:** We don't collect your data. Your information stays on your device and your personal iCloud account. We never see it.
-
----
-
-## Data We Do NOT Collect
-
-- Email addresses
-- Names or personal identifiers
-- Location history
-- Prayer logs or religious practice data
-- Quran reading history
-- Conversation history with the AI companion
-- Usage patterns tied to your identity
-- Device identifiers for tracking
+**The short version:** Your data lives on your iPhone. We do not operate servers, we do not have accounts, and we cannot see your information.
 
 ---
 
-## Data Storage
+## Data Stored on Your Device
 
-### On Your Device
+Safa stores the following data locally on your iPhone:
 
-All your data is stored locally on your iPhone:
+| Data | Purpose | Stored Where |
+|------|---------|--------------|
+| Prayer logs | Track prayer completion and streaks | On-device (Core Data) |
+| Quran bookmarks and reading progress | Resume reading, track progress | On-device (Core Data) |
+| Dhikr counts and streaks | Track daily remembrance goals | On-device (Core Data) |
+| Hasanat (points) and achievements | Gamification and motivation | On-device (Core Data) |
+| App preferences and settings | Calculation method, theme, madhab | On-device (UserDefaults) |
+| Saved location coordinates | Calculate prayer times without GPS | On-device (UserDefaults) |
+| Ramadan fasting and taraweeh logs | Track Ramadan worship | On-device (UserDefaults) |
 
-- Prayer times and logged prayers
-- Quran bookmarks and reading progress
-- Dhikr counts and streak data
-- Hasanat (points) and achievements
-- AI companion conversation history
-- App preferences and settings
+This data never leaves your device unless you explicitly export it (see "Your Rights" below).
 
-### iCloud Sync (Optional)
+---
 
-If you have iCloud enabled on your device, your Safa data may sync to your personal iCloud account. This sync is:
+## Permissions We Request
 
-- **Controlled by Apple**, not Safa
-- **Encrypted** using your Apple ID credentials
-- **Private** - Safa cannot access your iCloud data
-- **Optional** - You can disable iCloud sync in your device settings
+### Location (When In Use)
 
-Apple's privacy policy governs iCloud data: https://www.apple.com/legal/privacy/
+Safa requests location access to calculate prayer times and determine Qibla direction. Your location is:
+
+- Used on-device only for prayer time calculation
+- Saved locally as coordinates so the app works without repeated GPS access
+- Never sent to any server
+- Not required — the app falls back to a default location if you decline
+
+### Microphone and Speech Recognition
+
+Safa requests microphone and speech recognition access for Arabic pronunciation practice. Audio is:
+
+- Processed entirely on-device using Apple's speech recognition framework
+- Never recorded, stored, or transmitted
+- Not required — pronunciation practice is optional
+
+### Notifications
+
+Safa requests notification permission to send prayer time reminders. Notifications are:
+
+- Scheduled locally on your device
+- Never used for marketing or advertising
+- Not required — all features work without notifications
+
+### HealthKit (Optional)
+
+If you enable HealthKit sync, Safa writes Ramadan fasting sessions to Apple Health. This data is:
+
+- Written only when you explicitly enable the feature
+- Governed by Apple's HealthKit privacy protections
+- Never used for advertising, marketing, or data mining
+- Never shared with third parties
+
+Safa does not read any data from HealthKit.
+
+---
+
+## Network Connections
+
+Safa's core features (prayer times, Quran, hadith, dhikr) work entirely offline. The app makes network connections only for:
+
+- **Quran audio:** Recitation audio is downloaded from quranicaudio.com and cdn.islamic.network when you play or pre-download audio. No personal data is sent — only the audio file is downloaded.
+
+No other network connections are made. There are no analytics servers, no crash reporting services, and no tracking pixels.
 
 ---
 
 ## AI Companion
 
-The AI companion in Safa runs **entirely on your device**. Your questions and conversations:
+The AI companion in Safa runs entirely on your device using Apple's on-device machine learning. Your questions and conversations:
 
-- Are processed locally using on-device machine learning
+- Are processed locally
 - Are never sent to external servers
 - Are never used to train AI models
 - Remain completely private
 
 ---
 
-## Analytics
+## Data We Do NOT Collect
 
-We use only Apple's built-in App Analytics to understand aggregate, anonymous usage patterns (such as which features are popular). This data:
-
-- Is collected and anonymized by Apple
-- Cannot be used to identify individual users
-- Does not track you across apps or websites
-- Is governed by Apple's privacy practices
-
-We do **not** use third-party analytics services like Google Analytics, Firebase Analytics, Mixpanel, or similar tools.
-
----
-
-## Advertising
-
-Safa does not display advertisements. We do not:
-
-- Show banner ads, video ads, or pop-ups
-- Sell or share data with advertisers
-- Use tracking pixels or advertising SDKs
-- Participate in ad networks
+- Email addresses, names, or personal identifiers
+- Location history or movement patterns
+- Browsing or search history
+- Device identifiers for tracking
+- Usage patterns tied to your identity
 
 ---
 
 ## Third-Party Services
 
-Safa does not integrate with third-party services that collect personal data. The app functions entirely offline, with optional iCloud sync through Apple's services.
+Safa does not integrate with any third-party analytics, advertising, or tracking services. The only external connections are to Quran audio CDNs (see "Network Connections" above), which do not receive any personal data.
+
+We use Apple's built-in App Analytics to understand aggregate, anonymous usage patterns. This data is collected and anonymized by Apple and cannot identify individual users.
+
+---
+
+## Advertising
+
+Safa does not display advertisements. We do not sell or share data with advertisers, use tracking pixels, or participate in ad networks.
 
 ---
 
 ## Children's Privacy
 
-Safa does not knowingly collect personal information from children under 13. Since we don't collect personal information from any users, this concern does not apply to our app.
+Safa does not collect personal information from any users, including children. Since no data leaves the device and no accounts are required, children's privacy concerns do not apply.
 
 ---
 
-## Data Requests
+## Your Rights
 
-Since we don't collect or store your data on our servers, we cannot:
+You have full control over your data:
 
-- Provide copies of your data (it's already on your device)
-- Delete your data from our servers (we don't have it)
-- Share your data with authorities (we don't have access to it)
+- **Delete selectively:** Remove specific categories (prayer logs, Quran progress, streaks, etc.) from Settings > Data Management
+- **Delete everything:** Remove all app data from Settings > Data Management > Delete All Data
+- **Export your data:** Export all data as JSON or prayer logs as CSV from Settings > Export Data
+- **Revoke permissions:** Disable location, microphone, HealthKit, or notifications at any time without losing core functionality
+- **Delete the app:** Removing Safa deletes all local data
 
-To delete your Safa data, simply delete the app from your device. To delete iCloud-synced data, manage it through your iPhone's Settings > [Your Name] > iCloud.
+---
+
+## Calendar Export
+
+Safa can export Islamic calendar events and prayer times to your device's Calendar app. These events are written to your local or iCloud calendar (depending on your device settings) and are managed by you through the Calendar app.
 
 ---
 
 ## International Users
 
-Safa operates the same way regardless of your location. Since data remains on your device and we don't process personal data, international data transfer concerns do not apply.
+Safa operates the same way regardless of your location. Since data remains on your device and we do not process personal data on servers, international data transfer concerns do not apply.
 
-For users in the European Union: We do not process personal data as defined under GDPR. Your data remains under your control on your device and Apple's iCloud services.
+For users in the European Union: We do not process personal data as defined under GDPR. Your data remains under your control on your device.
 
 ---
 
@@ -132,7 +161,7 @@ If we make changes to this privacy policy, we will:
 
 ## Contact
 
-If you have questions about this privacy policy or Safa's privacy practices:
+If you have questions about this privacy policy:
 
 - Email: helpmesafa@gmail.com
 
@@ -147,8 +176,9 @@ If you have questions about this privacy policy or Safa's privacy practices:
 | Do you show ads? | No |
 | Can you see my prayers/Quran progress? | No |
 | Is the AI sending my questions somewhere? | No, it runs on-device |
-| Where is my data? | On your device and your iCloud |
-| How do I delete my data? | Delete the app |
+| Where is my data? | On your device only |
+| Does the app need the internet? | Only for Quran audio downloads |
+| How do I delete my data? | Settings > Data Management, or delete the app |
 
 ---
 
