@@ -7,37 +7,30 @@ import SwiftUI
 struct QuranView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
-    @State private var viewModel: QuranViewModel?
+    @State private var viewModel: QuranViewModel
     @State private var path = NavigationPath()
     @Namespace private var surahZoom
 
+    init() {
+        _viewModel = State(initialValue: QuranViewModel(
+            quranRepository: Dependencies.shared.quranRepository,
+            userState: Dependencies.shared.userState
+        ))
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
-            Group {
-                if let viewModel = viewModel {
-                    QuranContentView(viewModel: viewModel, path: $path, surahZoom: surahZoom)
-                } else {
-                    QuranSkeletonView()
+            QuranContentView(viewModel: viewModel, path: $path, surahZoom: surahZoom)
+                .navigationDestination(for: QuranNavigationTarget.self) { target in
+                    AyahReaderView(surahNumber: target.surahNumber, startAyah: target.startAyah)
+                        .modifier(ZoomTransitionModifier(sourceID: target.surahNumber, namespace: surahZoom))
                 }
-            }
-            .navigationDestination(for: QuranNavigationTarget.self) { target in
-                AyahReaderView(surahNumber: target.surahNumber, startAyah: target.startAyah)
-                    .modifier(ZoomTransitionModifier(sourceID: target.surahNumber, namespace: surahZoom))
-            }
         }
         .onChange(of: router.pendingQuranTarget) { _, target in
             consumePendingTarget(target)
         }
         .onAppear {
             consumePendingTarget(router.pendingQuranTarget)
-        }
-        .task {
-            if viewModel == nil {
-                viewModel = QuranViewModel(
-                    quranRepository: dependencies.quranRepository,
-                    userState: dependencies.userState
-                )
-            }
         }
     }
 
