@@ -248,7 +248,19 @@ struct SettingsView: View {
         Section {
             Toggle("Prayer Notifications", isOn: $notificationsEnabled)
                 .onChange(of: notificationsEnabled) { _, newValue in
-                    Task { await prefsManager.saveNotificationsEnabled(newValue) }
+                    Task {
+                        let result = await NotificationToggleHandler.handle(
+                            enabled: newValue,
+                            preferenceSaver: prefsManager,
+                            scheduler: NotificationScheduler.shared
+                        )
+                        if result.showDisabledToast {
+                            ToastService.shared.show(Toast(
+                                message: String(localized: "All prayer notifications disabled"),
+                                type: .info
+                            ))
+                        }
+                    }
                 }
 
             if notificationsEnabled {

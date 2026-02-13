@@ -277,7 +277,7 @@ Page 1: Welcome + Location     Page 2: Quick Setup         Page 3: Ready
 
 **Key principles:**
 - Trust smart location-based defaults (no manual method/madhab selection)
-- Notifications **OFF by default** (user opts in, respects attention)
+- Notifications **ON by default** (user can opt out during onboarding)
 - Only essential choices: notifications toggle + mosque mode
 - "Skip → Home" on page 1 applies smart defaults and goes straight to home
 - "Customize Settings" link for power users (goes to Settings)
@@ -1787,7 +1787,7 @@ A feature is "done" only when it satisfies:
 - [x] Feature requests: **In Settings** - users can suggest features
 - [x] Widgets v1: **Prayer (S), Prayer Times (M), Dashboard (L)** - Streak (S) if time permits
 - [x] Onboarding: **3 pages** (Welcome+Location, Quick Setup, Done) - trust smart defaults
-- [x] Notifications default: **OFF** (user opts in, respects attention)
+- [x] Notifications default: **ON** (user can opt out during onboarding)
 - [x] Skip onboarding: **Goes straight to home** with smart defaults applied
 - [x] Ramadan banner: **Dismissible with swipe**, reappears next day, includes Iftar adhan
 - [x] Iftar adhan: **Bundled recording** (configurable Qari in v1.1)

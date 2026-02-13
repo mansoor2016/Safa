@@ -12,7 +12,7 @@ struct SafaApp: App {
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter()
     @State private var themeManager = ThemeManager()
-    @State private var hasCompletedOnboarding = false
+    @State private var launchState: LaunchState = .loading
     @Environment(\.scenePhase) private var scenePhase
 
     // Spotlight service
@@ -27,10 +27,17 @@ struct SafaApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if hasCompletedOnboarding {
+                switch launchState {
+                case .loading:
+                    Color(UIColor.systemBackground)
+                        .ignoresSafeArea()
+                case .onboarding:
+                    OnboardingView(isOnboardingComplete: Binding(
+                        get: { launchState == .ready },
+                        set: { if $0 { launchState = .ready } }
+                    ))
+                case .ready:
                     MainTabView()
-                } else {
-                    OnboardingView(isOnboardingComplete: $hasCompletedOnboarding)
                 }
             }
             .safaTheme(themeManager)
@@ -42,15 +49,13 @@ struct SafaApp: App {
                 router.handleDeepLink(url)
             }
             .task {
-                // Skip onboarding in UI tests
-                if isUITesting {
-                    hasCompletedOnboarding = true
-                    return
-                }
-
-                // Check if onboarding is complete
+                // Determine launch state
                 let prefs = await dependencies.userRepository.getPreferences()
-                hasCompletedOnboarding = prefs.hasCompletedOnboarding
+                launchState = LaunchStateResolver.resolve(
+                    isUITesting: isUITesting,
+                    hasCompletedOnboarding: prefs.hasCompletedOnboarding
+                )
+                guard launchState == .ready else { return }
 
                 // Precompute today's prayer times for instant home screen rendering
                 if prefs.hasCompletedOnboarding, let location = dependencies.locationService.coordinates {

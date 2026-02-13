@@ -156,6 +156,18 @@ struct OnboardingView: View {
                             Text(error)
                                 .font(SafaTypography.bodySmall)
                                 .foregroundColor(.orange)
+
+                            if OnboardingHelpers.shouldShowSettingsLink(locationStatus: locationStatus) {
+                                Button {
+                                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    Text("Open Settings")
+                                        .font(SafaTypography.bodySmall)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
                         }
 
                         Button {
@@ -234,7 +246,7 @@ struct OnboardingView: View {
                         detectedSettingsSummary
                     }
 
-                    // Notifications toggle (OFF by default per spec)
+                    // Notifications toggle (ON by default — user can opt out)
                     Toggle(isOn: $notificationsEnabled) {
                         HStack {
                             Image(systemName: "bell")
@@ -267,7 +279,7 @@ struct OnboardingView: View {
                                 .font(SafaTypography.bodyMedium)
                                 .foregroundColor(SafaColors.Fallback.text)
 
-                            Text("Auto-silence at prayer times")
+                            Text("Location based auto-silence")
                                 .font(SafaTypography.bodySmall)
                                 .foregroundColor(SafaColors.Fallback.tertiaryText)
                         }
@@ -556,16 +568,20 @@ struct OnboardingView: View {
     }
 
     private func skipOnboarding() {
-        // Per spec: skip goes straight to home with smart defaults applied
+        // Skip = accept all defaults and proceed. Use inferred values if location was detected.
         Task {
-            var prefs = await dependencies.userRepository.getPreferences()
-            prefs.calculationMethod = AppDefaults.calculationMethod
-            prefs.madhab = AppDefaults.madhab
-            prefs.selectedTranslation = AppDefaults.translationLanguage
-            prefs.notificationsEnabled = false
-            prefs.hasCompletedOnboarding = true
-
+            let current = await dependencies.userRepository.getPreferences()
+            let prefs = OnboardingHelpers.buildSkipPreferences(
+                current: current,
+                locationContext: locationContext
+            )
             try? await dependencies.userRepository.updatePreferences(prefs)
+
+            // Request notification authorization (default is ON)
+            if prefs.notificationsEnabled {
+                _ = await NotificationScheduler.shared.requestAuthorization()
+                await NotificationScheduler.shared.forceReschedule()
+            }
 
             await MainActor.run {
                 withAnimation {
@@ -595,9 +611,10 @@ struct OnboardingView: View {
 
             try? await dependencies.userRepository.updatePreferences(prefs)
 
-            // Request notification permission if enabled
+            // Request notification permission and schedule immediately
             if notificationsEnabled {
                 _ = await NotificationScheduler.shared.requestAuthorization()
+                await NotificationScheduler.shared.forceReschedule()
             }
 
             await MainActor.run {

@@ -37,27 +37,59 @@ final class NotificationScheduler {
     /// Call from SafaApp.task{} to ensure notifications are scheduled for today.
     /// Skips if already scheduled today.
     func scheduleIfNeeded() async {
-        await checkAuthorizationStatus()
-        guard isAuthorized else { return }
-
-        // Check if we already scheduled today
-        if let lastDate = UserDefaults.standard.object(forKey: lastScheduledDateKey) as? Date,
-           Calendar.current.isDateInToday(lastDate) {
-            return
+        let prefs = await PreferencesManager.shared.getPreferences()
+        // Only check auth if notifications are enabled (cancel doesn't need auth)
+        if prefs.notificationsEnabled {
+            await checkAuthorizationStatus()
         }
+        let lastDate = UserDefaults.standard.object(forKey: lastScheduledDateKey) as? Date
 
-        await scheduleTodaysPrayerNotifications()
+        switch NotificationSchedulerHelpers.determineAction(
+            notificationsEnabled: prefs.notificationsEnabled,
+            isAuthorized: isAuthorized,
+            lastScheduledDate: lastDate,
+            isForceReschedule: false
+        ) {
+        case .cancelAll:
+            await cancelPrayerNotifications()
+        case .skipNotAuthorized, .skipAlreadyScheduled:
+            return
+        case .schedule:
+            await scheduleTodaysPrayerNotifications()
+        }
     }
 
     /// Force re-schedule (e.g. when calculation method changes)
     func forceReschedule() async {
-        await checkAuthorizationStatus()
-        guard isAuthorized else { return }
-        await scheduleTodaysPrayerNotifications()
+        let prefs = await PreferencesManager.shared.getPreferences()
+        if prefs.notificationsEnabled {
+            await checkAuthorizationStatus()
+        }
+
+        switch NotificationSchedulerHelpers.determineAction(
+            notificationsEnabled: prefs.notificationsEnabled,
+            isAuthorized: isAuthorized,
+            lastScheduledDate: nil,
+            isForceReschedule: true
+        ) {
+        case .cancelAll:
+            await cancelPrayerNotifications()
+        case .skipNotAuthorized, .skipAlreadyScheduled:
+            return
+        case .schedule:
+            await scheduleTodaysPrayerNotifications()
+        }
     }
 
     private func scheduleTodaysPrayerNotifications() async {
         let prefs = await PreferencesManager.shared.getPreferences()
+
+        // Defense in depth — callers should check this, but guard here too
+        guard prefs.notificationsEnabled else {
+            await cancelPrayerNotifications()
+            return
+        }
+
         let enabledPrayers = Set(prefs.notificationEnabledPrayers.compactMap { PrayerType(rawValue: $0) })
         guard !enabledPrayers.isEmpty else { return }
 
