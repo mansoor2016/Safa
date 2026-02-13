@@ -1,6 +1,6 @@
 // MARK: - OnboardingView.swift
 // PURPOSE: Streamlined 3-page onboarding flow with location-based recommendations
-// DEPENDENCIES: SwiftUI, CoreLocation
+// DEPENDENCIES: SwiftUI, CoreLocation, UserNotifications
 
 import SwiftUI
 import CoreLocation
@@ -14,7 +14,7 @@ struct OnboardingView: View {
     @State private var selectedMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
-    @State private var notificationsEnabled = AppDefaults.notificationsEnabled // Default ON
+    @State private var notificationsEnabled = AppDefaults.notificationsEnabled
     @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
@@ -27,6 +27,8 @@ struct OnboardingView: View {
 
     private let totalPages = 3
 
+    // MARK: - Body
+
     var body: some View {
         ZStack {
             // Background
@@ -37,23 +39,24 @@ struct OnboardingView: View {
             )
             .ignoresSafeArea()
 
-            VStack {
-                // Progress indicator
+            // Stable 3-region scaffold: progress → pages → bottom bar
+            VStack(spacing: 0) {
                 progressIndicator
                     .padding(.top)
+                    .padding(.bottom, SafaSpacing.sm)
 
-                // Page content
+                // Page content — TabView handles its own height, no GeometryReader
                 TabView(selection: $currentPage) {
                     welcomeLocationPage.tag(0)
                     quickSetupPage.tag(1)
                     readyPage.tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.easeInOut, value: currentPage)
 
-                // Navigation buttons
-                navigationButtons
-                    .padding()
+                // Unified bottom bar (all pages share this)
+                bottomBar
+                    .padding(.horizontal)
+                    .padding(.bottom, SafaSpacing.sm)
             }
         }
         .onAppear {
@@ -83,11 +86,8 @@ struct OnboardingView: View {
     // MARK: - Page 1: Welcome + Location
 
     private var welcomeLocationPage: some View {
-        GeometryReader { geo in
         ScrollView {
             VStack(spacing: SafaSpacing.md) {
-                Spacer(minLength: SafaSpacing.md)
-
                 // App branding
                 ZStack {
                     Circle()
@@ -98,6 +98,7 @@ struct OnboardingView: View {
                         .font(.system(size: 48))
                         .foregroundColor(.accentColor)
                 }
+                .padding(.top, SafaSpacing.xl)
 
                 VStack(spacing: SafaSpacing.xs) {
                     Text("صفا")
@@ -118,95 +119,93 @@ struct OnboardingView: View {
                 .padding(.vertical, SafaSpacing.sm)
 
                 // Location section
-                VStack(spacing: SafaSpacing.sm) {
-                    if let context = locationContext {
-                        // Location detected state
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(.green)
-
-                        Text(context.regionName)
-                            .font(SafaTypography.titleMedium)
-                            .foregroundColor(SafaColors.Fallback.text)
-
-                        // High latitude warning
-                        if let warning = highLatitudeWarning {
-                            Text(warning)
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(.orange)
-                                .multilineTextAlignment(.center)
-                        }
-
-                        Button {
-                            locationContext = nil
-                            highLatitudeWarning = nil
-                            requestLocationPermission()
-                        } label: {
-                            HStack(spacing: SafaSpacing.xs) {
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                                Text("Update Location")
-                            }
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(.accentColor)
-                        }
-                    } else {
-                        // No location state
-                        Image(systemName: "location.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(.accentColor)
-
-                        Text("Enable location for accurate prayer times")
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                            .multilineTextAlignment(.center)
-
-                        if let error = locationError {
-                            Text(error)
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(.orange)
-
-                            if OnboardingHelpers.shouldShowSettingsLink(locationStatus: locationStatus) {
-                                Button {
-                                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                                        UIApplication.shared.open(url)
-                                    }
-                                } label: {
-                                    Text("Open Settings")
-                                        .font(SafaTypography.bodySmall)
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
-                        }
-
-                        Button {
-                            requestLocationPermission()
-                        } label: {
-                            HStack {
-                                if isLoadingLocation {
-                                    ProgressView()
-                                        .tint(.white)
-                                        .padding(.trailing, 4)
-                                }
-                                Text(isLoadingLocation ? "Detecting..." : "Enable Location")
-                            }
-                            .font(SafaTypography.bodyMedium)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, SafaSpacing.xl)
-                            .padding(.vertical, SafaSpacing.sm)
-                            .background(Color.accentColor)
-                            .clipShape(Capsule())
-                        }
-                        .disabled(isLoadingLocation)
-                    }
-                }
-                .padding(.horizontal)
-
-                Spacer(minLength: SafaSpacing.md)
+                locationSection
+                    .padding(.horizontal)
             }
             .padding()
-            .frame(minHeight: geo.size.height)
         }
+    }
+
+    @ViewBuilder
+    private var locationSection: some View {
+        VStack(spacing: SafaSpacing.sm) {
+            if let context = locationContext {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.green)
+
+                Text(context.regionName)
+                    .font(SafaTypography.titleMedium)
+                    .foregroundColor(SafaColors.Fallback.text)
+
+                if let warning = highLatitudeWarning {
+                    Text(warning)
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(.orange)
+                        .multilineTextAlignment(.center)
+                }
+
+                Button {
+                    locationContext = nil
+                    highLatitudeWarning = nil
+                    requestLocationPermission()
+                } label: {
+                    HStack(spacing: SafaSpacing.xs) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text("Update Location")
+                    }
+                    .font(SafaTypography.bodySmall)
+                    .foregroundColor(.accentColor)
+                }
+            } else {
+                Image(systemName: "location.circle.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.accentColor)
+
+                Text("Enable location for accurate prayer times")
+                    .font(SafaTypography.bodyMedium)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                    .multilineTextAlignment(.center)
+
+                if let error = locationError {
+                    Text(error)
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(.orange)
+
+                    if OnboardingHelpers.shouldShowSettingsLink(locationStatus: locationStatus) {
+                        Button {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        } label: {
+                            Text("Open Settings")
+                                .font(SafaTypography.bodySmall)
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+
+                Button {
+                    requestLocationPermission()
+                } label: {
+                    HStack {
+                        if isLoadingLocation {
+                            ProgressView()
+                                .tint(.white)
+                                .padding(.trailing, 4)
+                        }
+                        Text(isLoadingLocation ? "Detecting..." : "Enable Location")
+                    }
+                    .font(SafaTypography.bodyMedium)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, SafaSpacing.xl)
+                    .padding(.vertical, SafaSpacing.sm)
+                    .background(Color.accentColor)
+                    .clipShape(Capsule())
+                }
+                .disabled(isLoadingLocation)
+            }
         }
     }
 
@@ -225,18 +224,15 @@ struct OnboardingView: View {
         .padding(.horizontal, SafaSpacing.lg)
     }
 
-
-    // MARK: - Page 2: Quick Setup (Simplified - trust smart defaults)
+    // MARK: - Page 2: Quick Setup
 
     private var quickSetupPage: some View {
-        GeometryReader { geo in
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
-                Spacer(minLength: SafaSpacing.lg)
-
                 Image(systemName: "bell.badge")
                     .font(.system(size: 48))
                     .foregroundColor(.accentColor)
+                    .padding(.top, SafaSpacing.xl)
 
                 VStack(spacing: SafaSpacing.xs) {
                     Text("Notifications")
@@ -249,7 +245,6 @@ struct OnboardingView: View {
                 }
 
                 VStack(spacing: SafaSpacing.md) {
-                    // Show detected settings (read-only summary)
                     if locationContext != nil {
                         detectedSettingsSummary
                     }
@@ -322,22 +317,16 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal)
 
-                // Tip about customization
                 Text("You can customize calculation methods and more in the Settings")
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, SafaSpacing.xl)
-
-                Spacer(minLength: SafaSpacing.xl)
             }
             .padding()
-            .frame(minHeight: geo.size.height)
-        }
         }
     }
 
-    // Shows detected settings from location (read-only)
     private var detectedSettingsSummary: some View {
         VStack(alignment: .leading, spacing: SafaSpacing.sm) {
             HStack {
@@ -374,81 +363,58 @@ struct OnboardingView: View {
     // MARK: - Page 3: Ready
 
     private var readyPage: some View {
-        VStack(spacing: 0) {
-            GeometryReader { geo in
-            ScrollView {
-                VStack(spacing: SafaSpacing.lg) {
-                    Spacer(minLength: SafaSpacing.md)
+        ScrollView {
+            VStack(spacing: SafaSpacing.lg) {
+                ZStack {
+                    Circle()
+                        .fill(Color.green.opacity(0.1))
+                        .frame(width: 100, height: 100)
 
-                    ZStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.1))
-                            .frame(width: 100, height: 100)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.green)
+                }
+                .padding(.top, SafaSpacing.xl)
 
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundColor(.green)
-                    }
+                VStack(spacing: SafaSpacing.xs) {
+                    Text("Ready to Begin")
+                        .font(SafaTypography.headlineMedium)
+                        .foregroundColor(SafaColors.Fallback.text)
 
-                    VStack(spacing: SafaSpacing.xs) {
-                        Text("Ready to Begin")
-                            .font(SafaTypography.headlineMedium)
-                            .foregroundColor(SafaColors.Fallback.text)
-
-                        Text("May your journey with Safa be blessed")
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                    }
-
-                    // Brief summary
-                    VStack(spacing: SafaSpacing.xs) {
-                        if let context = locationContext {
-                            summaryItem(icon: "mappin", value: context.regionName)
-                        }
-                        summaryItem(icon: "clock", value: selectedMethod.displayName)
-                        summaryItem(icon: "person", value: selectedMadhab.displayName)
-                        if notificationsEnabled {
-                            summaryItem(icon: "bell", value: "Notifications On")
-                        }
-                    }
-                    .padding()
-                    .background(Color(UIColor.tertiarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    .padding(.horizontal, SafaSpacing.xl)
-
-                    // Customize Settings link
-                    Button {
-                        showCustomizeSettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "slider.horizontal.3")
-                            Text("Customize Settings")
-                        }
+                    Text("May your journey with Safa be blessed")
                         .font(SafaTypography.bodyMedium)
-                        .foregroundColor(.accentColor)
-                    }
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                }
 
+                // Brief summary
+                VStack(spacing: SafaSpacing.xs) {
+                    if let context = locationContext {
+                        summaryItem(icon: "mappin", value: context.regionName)
+                    }
+                    summaryItem(icon: "clock", value: selectedMethod.displayName)
+                    summaryItem(icon: "person", value: selectedMadhab.displayName)
+                    if notificationsEnabled {
+                        summaryItem(icon: "bell", value: "Notifications On")
+                    }
                 }
                 .padding()
-                .frame(minHeight: geo.size.height)
-            }
-            }
+                .background(Color(UIColor.tertiarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                .padding(.horizontal, SafaSpacing.xl)
 
-            // Pinned button at bottom
-            Button {
-                completeOnboarding()
-            } label: {
-                Text("Get Started")
-                    .font(SafaTypography.bodyLarge)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+                // Customize Settings link
+                Button {
+                    showCustomizeSettings = true
+                } label: {
+                    HStack {
+                        Image(systemName: "slider.horizontal.3")
+                        Text("Customize Settings")
+                    }
+                    .font(SafaTypography.bodyMedium)
+                    .foregroundColor(.accentColor)
+                }
             }
-            .padding(.horizontal)
-            .padding(.bottom, SafaSpacing.sm)
+            .padding()
         }
         .sheet(isPresented: $showCustomizeSettings) {
             customizeSettingsSheet
@@ -496,10 +462,6 @@ struct OnboardingView: View {
         }
     }
 
-    private var availableLanguages: [String] {
-        ["English", "Arabic", "Urdu", "Turkish", "French", "Indonesian", "Bengali"]
-    }
-
     private func summaryItem(icon: String, value: String) -> some View {
         HStack {
             Image(systemName: icon)
@@ -514,41 +476,58 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Navigation Buttons
+    // MARK: - Unified Bottom Bar
 
-    private var navigationButtons: some View {
-        HStack {
-            // Skip/Back button
-            if currentPage > 0 && currentPage < totalPages - 1 {
-                Button("Back") {
-                    withAnimation {
-                        currentPage -= 1
-                    }
+    private var bottomBar: some View {
+        VStack(spacing: SafaSpacing.sm) {
+            // "Get Started" CTA on page 3
+            if currentPage == totalPages - 1 {
+                Button {
+                    completeOnboarding()
+                } label: {
+                    Text("Get Started")
+                        .font(SafaTypography.bodyLarge)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.accentColor)
+                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
                 }
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-            } else if currentPage == 0 {
-                Button("Skip") {
-                    skipOnboarding()
-                }
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-            } else {
-                Spacer()
             }
 
-            Spacer()
+            // Skip / Back / Next row
+            HStack {
+                if currentPage > 0 && currentPage < totalPages - 1 {
+                    Button("Back") {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            currentPage -= 1
+                        }
+                    }
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                } else if currentPage == 0 {
+                    Button("Skip") {
+                        skipOnboarding()
+                    }
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                } else {
+                    Spacer()
+                }
 
-            // Next button (hidden on last page)
-            if currentPage < totalPages - 1 {
-                Button {
-                    withAnimation {
-                        currentPage += 1
+                Spacer()
+
+                if currentPage < totalPages - 1 {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            currentPage += 1
+                        }
+                    } label: {
+                        HStack {
+                            Text("Next")
+                            Image(systemName: "arrow.right")
+                        }
+                        .foregroundColor(.accentColor)
                     }
-                } label: {
-                    HStack {
-                        Text("Next")
-                        Image(systemName: "arrow.right")
-                    }
-                    .foregroundColor(.accentColor)
                 }
             }
         }
@@ -577,12 +556,10 @@ struct OnboardingView: View {
                     self.locationContext = context
                     self.locationStatus = dependencies.locationService.authorizationStatus
 
-                    // Apply recommended settings
                     self.selectedMethod = context.recommendedMethod
                     self.selectedMadhab = context.recommendedMadhab
                     self.selectedLanguage = context.recommendedLanguage
 
-                    // Check for high latitude warning
                     self.highLatitudeWarning = LocationInferenceService.shared.highLatitudeWarning(for: context.coordinates)
 
                     self.isLoadingLocation = false
@@ -598,7 +575,6 @@ struct OnboardingView: View {
     }
 
     private func skipOnboarding() {
-        // Skip = accept all defaults and proceed. Use inferred values if location was detected.
         Task {
             let current = await dependencies.userRepository.getPreferences()
             let prefs = OnboardingHelpers.buildSkipPreferences(
@@ -607,7 +583,6 @@ struct OnboardingView: View {
             )
             try? await dependencies.userRepository.updatePreferences(prefs)
 
-            // Request notification authorization (default is ON)
             if prefs.notificationsEnabled {
                 _ = await NotificationScheduler.shared.requestAuthorization()
                 await NotificationScheduler.shared.forceReschedule()
@@ -630,7 +605,6 @@ struct OnboardingView: View {
             prefs.notificationsEnabled = notificationsEnabled
             prefs.hasCompletedOnboarding = true
 
-            // Save location data if available
             if let context = locationContext {
                 prefs.savedLocationName = context.regionName
                 prefs.savedLatitude = context.coordinates.latitude
@@ -641,7 +615,6 @@ struct OnboardingView: View {
 
             try? await dependencies.userRepository.updatePreferences(prefs)
 
-            // Request notification permission and schedule immediately
             if notificationsEnabled {
                 _ = await NotificationScheduler.shared.requestAuthorization()
                 await NotificationScheduler.shared.forceReschedule()
