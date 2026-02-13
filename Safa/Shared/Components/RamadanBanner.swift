@@ -31,11 +31,10 @@ struct RamadanBanner: View {
             Divider()
                 .background(Color.white.opacity(0.2))
 
-            // Countdown then day progress (stacked vertically)
-            VStack(spacing: SafaSpacing.sm) {
-                countdownView
-                dayProgress
-            }
+            // Countdown (centered) then day progress (left-aligned to match Quran line)
+            countdownView
+                .frame(maxWidth: .infinity)
+            dayProgress
 
             // Quran khatm progress
             if let progress = quranProgress {
@@ -100,7 +99,7 @@ struct RamadanBanner: View {
     // MARK: - Day Progress
 
     private var dayProgress: some View {
-        VStack(spacing: SafaSpacing.xxs) {
+        VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
             Text("Day \(ramadanService.currentRamadanDay) of \(ramadanService.totalRamadanDays)")
                 .font(SafaTypography.labelMedium)
                 .foregroundColor(.white)
@@ -215,11 +214,11 @@ struct RamadanBanner: View {
     private var quickActions: some View {
         HStack(spacing: SafaSpacing.sm) {
             bannerQuickAction(icon: "hands.sparkles", title: "Duas") {
-                router.navigate(to: .dhikr)
+                router.selectedTab = "duas"
             }
 
             bannerQuickAction(icon: "book.fill", title: "Quran") {
-                router.navigate(to: .quran)
+                router.selectedTab = "quran"
             }
 
             AdhanPlayButton(style: .banner)
