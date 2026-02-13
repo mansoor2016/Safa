@@ -39,7 +39,7 @@ struct OnboardingView: View {
             )
             .ignoresSafeArea()
 
-            // Stable 3-region scaffold: progress → pages → bottom bar
+            // Stable 3-region scaffold: progress → pages, footer in safe area inset
             VStack(spacing: 0) {
                 progressIndicator
                     .padding(.top)
@@ -52,12 +52,9 @@ struct OnboardingView: View {
                     readyPage.tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-
-                // Unified bottom bar (all pages share this)
-                bottomBar
-                    .padding(.horizontal)
-                    .padding(.bottom, SafaSpacing.sm)
-                    .animation(.easeInOut(duration: 0.3), value: currentPage)
+            }
+            .safeAreaInset(edge: .bottom) {
+                onboardingFooter
             }
         }
         .onAppear {
@@ -477,9 +474,9 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Unified Bottom Bar
+    // MARK: - Onboarding Footer
 
-    private var bottomBar: some View {
+    private var onboardingFooter: some View {
         VStack(spacing: SafaSpacing.sm) {
             // "Get Started" CTA on page 3
             if currentPage == totalPages - 1 {
@@ -491,47 +488,68 @@ struct OnboardingView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .frame(minHeight: SafaSpacing.ButtonHeight.lg)
                         .background(Color.accentColor)
                         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
                 }
             }
 
             // Skip / Back / Next row
-            HStack {
-                if currentPage > 0 && currentPage < totalPages - 1 {
-                    Button("Back") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            currentPage -= 1
+            if currentPage < totalPages - 1 {
+                HStack {
+                    if currentPage > 0 {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                currentPage -= 1
+                            }
+                        } label: {
+                            Text("Back")
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                                .frame(minWidth: 60, minHeight: SafaSpacing.ButtonHeight.md)
+                                .contentShape(Rectangle())
+                        }
+                    } else {
+                        Button {
+                            skipOnboarding()
+                        } label: {
+                            Text("Skip")
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                                .frame(minWidth: 60, minHeight: SafaSpacing.ButtonHeight.md)
+                                .contentShape(Rectangle())
                         }
                     }
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                } else if currentPage == 0 {
-                    Button("Skip") {
-                        skipOnboarding()
-                    }
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                } else {
+
                     Spacer()
-                }
 
-                Spacer()
-
-                if currentPage < totalPages - 1 {
                     Button {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             currentPage += 1
                         }
                     } label: {
-                        HStack {
+                        HStack(spacing: SafaSpacing.xxs) {
                             Text("Next")
                             Image(systemName: "arrow.right")
                         }
+                        .font(SafaTypography.bodyMedium)
+                        .fontWeight(.medium)
                         .foregroundColor(.accentColor)
+                        .frame(minWidth: 80, minHeight: SafaSpacing.ButtonHeight.md)
+                        .contentShape(Rectangle())
                     }
                 }
             }
         }
+        .padding(.horizontal, SafaSpacing.xl)
+        .padding(.vertical, SafaSpacing.md)
+        .frame(maxWidth: 560)
+        .background(
+            RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.xl)
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea(edges: .bottom)
+        )
+        .animation(.easeInOut(duration: 0.3), value: currentPage)
     }
 
     // MARK: - Methods
