@@ -21,7 +21,6 @@ struct OnboardingView: View {
     @State private var isLoadingLocation = false
     @State private var locationError: String?
     @State private var highLatitudeWarning: String?
-    @State private var wasInvitedByFriend = false
     @State private var showCustomizeSettings = false
 
     private let totalPages = 3
@@ -210,6 +209,7 @@ struct OnboardingView: View {
     // MARK: - Page 2: Quick Setup (Simplified - trust smart defaults)
 
     private var quickSetupPage: some View {
+        GeometryReader { geo in
         ScrollView {
             VStack(spacing: SafaSpacing.lg) {
                 Spacer(minLength: SafaSpacing.lg)
@@ -267,7 +267,7 @@ struct OnboardingView: View {
                                 .font(SafaTypography.bodyMedium)
                                 .foregroundColor(SafaColors.Fallback.text)
 
-                            Text("Auto-silence during prayer times")
+                            Text("Auto-silence at prayer times")
                                 .font(SafaTypography.bodySmall)
                                 .foregroundColor(SafaColors.Fallback.tertiaryText)
                         }
@@ -282,7 +282,7 @@ struct OnboardingView: View {
                 .padding(.horizontal)
 
                 // Tip about customization
-                Text("You can customize calculation methods and more in Settings anytime")
+                Text("You can customize calculation methods and more in the Settings")
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
                     .multilineTextAlignment(.center)
@@ -291,6 +291,8 @@ struct OnboardingView: View {
                 Spacer(minLength: SafaSpacing.xl)
             }
             .padding()
+            .frame(minHeight: geo.size.height)
+        }
         }
     }
 
@@ -332,6 +334,7 @@ struct OnboardingView: View {
 
     private var readyPage: some View {
         VStack(spacing: 0) {
+            GeometryReader { geo in
             ScrollView {
                 VStack(spacing: SafaSpacing.lg) {
                     Spacer(minLength: SafaSpacing.md)
@@ -384,34 +387,14 @@ struct OnboardingView: View {
                         .foregroundColor(.accentColor)
                     }
 
-                    // "I was invited" toggle (honor system for Hasanat)
-                    Toggle(isOn: $wasInvitedByFriend) {
-                        HStack(spacing: SafaSpacing.sm) {
-                            Image(systemName: "person.badge.plus")
-                                .foregroundColor(.accentColor)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("I was invited by a friend")
-                                    .font(SafaTypography.bodyMedium)
-                                    .foregroundColor(SafaColors.Fallback.text)
-
-                                Text("+\(InviteFriendsService.hasanatPerInvite) Hasanat bonus")
-                                    .font(SafaTypography.bodySmall)
-                                    .foregroundColor(SafaColors.Fallback.tertiaryText)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color(UIColor.tertiarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    .padding(.horizontal, SafaSpacing.xl)
-
                     Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
                         .font(SafaTypography.arabicMedium)
                         .foregroundColor(SafaColors.Fallback.text)
                         .environment(\.layoutDirection, .rightToLeft)
                 }
                 .padding()
+                .frame(minHeight: geo.size.height)
+            }
             }
 
             // Pinned button at bottom
@@ -615,11 +598,6 @@ struct OnboardingView: View {
             // Request notification permission if enabled
             if notificationsEnabled {
                 _ = await NotificationScheduler.shared.requestAuthorization()
-            }
-
-            // Record if user was invited (honor system)
-            if wasInvitedByFriend {
-                InviteFriendsService.shared.wasInvited = true
             }
 
             await MainActor.run {

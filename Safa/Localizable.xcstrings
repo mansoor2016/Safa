@@ -22,9 +22,6 @@
     "(%lld days from now)" : {
 
     },
-    "(You)" : {
-
-    },
     "#%lld" : {
 
     },
@@ -166,9 +163,6 @@
 
     },
     "%lld Ayahs" : {
-
-    },
-    "%lld day streak" : {
 
     },
     "%lld day%@ until %@" : {
@@ -350,13 +344,7 @@
     "• User statistics" : {
 
     },
-    "+%lld" : {
-
-    },
     "+%lld Hasanat" : {
-
-    },
-    "+%lld Hasanat bonus" : {
 
     },
     "+15 Hasanat" : {
@@ -408,9 +396,6 @@
 
     },
     "99 Names of Allah" : {
-
-    },
-    "A sync conflict was detected and resolved." : {
 
     },
     "About" : {
@@ -539,10 +524,13 @@
     "Auto-Scroll Reader" : {
 
     },
-    "Auto-silence during prayer times" : {
+    "Auto-silence at prayer times" : {
 
     },
     "Auto-Update Content" : {
+
+    },
+    "Auto-update prayer times" : {
 
     },
     "Available" : {
@@ -627,12 +615,6 @@
     "Choose a Greeting" : {
 
     },
-    "Circle name" : {
-
-    },
-    "Circle Settings" : {
-
-    },
     "Clear" : {
 
     },
@@ -704,9 +686,6 @@
     "Copy" : {
 
     },
-    "Copy Code" : {
-
-    },
     "Core Location" : {
 
     },
@@ -720,12 +699,6 @@
 
     },
     "Could not play adhan." : {
-
-    },
-    "Create Family Circle" : {
-
-    },
-    "Create or join a family circle to share your spiritual journey with loved ones." : {
 
     },
     "Current: %@" : {
@@ -846,6 +819,9 @@
 
     },
     "Description" : {
+
+    },
+    "Detecting..." : {
 
     },
     "Developer Settings" : {
@@ -1004,10 +980,10 @@
     "Eid Prayer: %@" : {
 
     },
-    "Email address" : {
+    "Enable Fajr Alarm" : {
 
     },
-    "Enable Fajr Alarm" : {
+    "Enable Location" : {
 
     },
     "Enable location for accurate prayer times" : {
@@ -1036,9 +1012,6 @@
 
     },
     "Enjoying Safa?" : {
-
-    },
-    "Enter their email to send an invite" : {
 
     },
     "Enter your assets and liabilities to calculate the Zakat due" : {
@@ -1119,12 +1092,6 @@
     "Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\"." : {
 
     },
-    "Family" : {
-
-    },
-    "Family Circle" : {
-
-    },
     "Fasted today" : {
 
     },
@@ -1188,9 +1155,6 @@
     "Get today's verse of the day" : {
 
     },
-    "Give your family circle a name" : {
-
-    },
     "hadith" : {
 
     },
@@ -1230,13 +1194,7 @@
     "I built Safa because I couldn't find an Islamic app I actually enjoyed using. Free, private, and made with care." : {
 
     },
-    "I was invited by a friend" : {
-
-    },
     "I'm your Islamic knowledge companion. Ask me about:" : {
-
-    },
-    "iCloud storage is full. Please free up space." : {
 
     },
     "Iftar" : {
@@ -1275,25 +1233,7 @@
     "Increment Tasbeeh" : {
 
     },
-    "Invite" : {
-
-    },
-    "Invite Family Member" : {
-
-    },
     "Invite Friends" : {
-
-    },
-    "Invite Friends to Download" : {
-
-    },
-    "Invite Friends to Safa" : {
-
-    },
-    "Invite Member" : {
-
-    },
-    "Invite Sent!" : {
 
     },
     "Islamic Calendar" : {
@@ -1350,9 +1290,6 @@
 
     },
     "Keep going to unlock this achievement!" : {
-
-    },
-    "Know someone who'd love Safa?" : {
 
     },
     "Knowledge & Tools" : {
@@ -1450,9 +1387,6 @@
     "Logged %@ prayer. +10 Hasanat earned!" : {
 
     },
-    "Lv.%lld" : {
-
-    },
     "Made with love for the Ummah" : {
 
     },
@@ -1492,9 +1426,6 @@
     "Meaning" : {
 
     },
-    "Members" : {
-
-    },
     "Message is too long. Please shorten it." : {
 
     },
@@ -1529,9 +1460,6 @@
 
     },
     "New Chat" : {
-
-    },
-    "New Circle" : {
 
     },
     "Next" : {
@@ -1573,19 +1501,10 @@
     "No events matching \"%@\"" : {
 
     },
-    "No Family Circle" : {
-
-    },
     "No Favourites Yet" : {
 
     },
-    "No internet connection. Changes will sync when online." : {
-
-    },
     "No mapping model found for migration." : {
-
-    },
-    "No recent activity" : {
 
     },
     "No Results" : {
@@ -1646,9 +1565,6 @@
     "OK" : {
 
     },
-    "Only the circle owner can perform this action." : {
-
-    },
     "Open iOS Accessibility Settings" : {
 
     },
@@ -1676,9 +1592,6 @@
     "Pause auto-scroll" : {
 
     },
-    "Permission denied to access this data." : {
-
-    },
     "Play adhan" : {
 
     },
@@ -1689,9 +1602,6 @@
 
     },
     "Please read these terms carefully before using Safa." : {
-
-    },
-    "Please sign in to iCloud to sync your data." : {
 
     },
     "Point the top of your phone towards the arrow to face the Qibla" : {
@@ -1974,9 +1884,6 @@
     "Send Salawat" : {
 
     },
-    "Server error: %@" : {
-
-    },
     "Set Iftar Reminder" : {
 
     },
@@ -2002,12 +1909,6 @@
 
     },
     "Share the app with friends and family" : {
-
-    },
-    "Share this code:" : {
-
-    },
-    "Share your spiritual journey with family members." : {
 
     },
     "Shared!" : {
@@ -2190,9 +2091,6 @@
     "SwiftUI" : {
 
     },
-    "Sync" : {
-
-    },
     "Sync to Apple Health" : {
 
     },
@@ -2271,9 +2169,6 @@
     "The data model could not be found." : {
 
     },
-    "The invite code is invalid or expired." : {
-
-    },
     "The Most Beautiful Names" : {
 
     },
@@ -2284,9 +2179,6 @@
 
     },
     "The Night of Power." : {
-
-    },
-    "The requested record was not found." : {
 
     },
     "The required health data type is not available." : {
@@ -2349,9 +2241,6 @@
     "Total fasting hours" : {
 
     },
-    "Total Hasanat" : {
-
-    },
     "Translation" : {
 
     },
@@ -2392,6 +2281,9 @@
 
     },
     "Upcoming: %@" : {
+
+    },
+    "Update automatically when you travel to a new city" : {
 
     },
     "Update Location" : {
@@ -2464,13 +2356,7 @@
     "Wind Down" : {
 
     },
-    "You are already a member of this circle." : {
-
-    },
-    "You are not part of a family circle." : {
-
-    },
-    "You can customize calculation methods and more in Settings anytime" : {
+    "You can customize calculation methods and more in the Settings" : {
 
     },
     "You can deduct immediate debts and expenses that are due within the year from your total assets." : {

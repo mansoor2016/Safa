@@ -18,6 +18,7 @@ final class LocationService: NSObject, ObservableObject, LocationServiceProtocol
     private let locationManager = CLLocationManager()
     private let inferenceService = LocationInferenceService.shared
     private var locationContinuation: CheckedContinuation<CLLocation, Error>?
+    private var lastChangeCheckDate: Date?
 
     // MARK: - Init
     override init() {
@@ -82,6 +83,43 @@ final class LocationService: NSObject, ObservableObject, LocationServiceProtocol
 
         let coords = Coordinates(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
         return inferenceService.inferContextFast(from: coords)
+    }
+
+    /// Checks if the user has moved significantly since the last saved location.
+    /// Default threshold: 30km (city-level). Throttled to avoid excessive GPS calls.
+    /// Normal throttle: 15 minutes. Near prayer (within 30 min): 5 minutes.
+    /// Returns a LocationContext if a significant move was detected, nil otherwise.
+    /// Always persists the new location internally when movement is detected.
+    func checkForSignificantLocationChange(
+        threshold: Double = 30_000,
+        nearPrayerTime: Bool = false
+    ) async -> LocationContext? {
+        let throttleInterval: TimeInterval = nearPrayerTime ? 300 : 900
+        if let last = lastChangeCheckDate, Date().timeIntervalSince(last) < throttleInterval {
+            return nil
+        }
+        lastChangeCheckDate = Date()
+
+        guard let fresh = try? await getCurrentLocation() else { return nil }
+
+        let prefs = PreferencesManager.loadPreferencesSync()
+        guard let savedLat = prefs.savedLatitude,
+              let savedLng = prefs.savedLongitude else { return nil }
+
+        let saved = CLLocation(latitude: savedLat, longitude: savedLng)
+        let distance = fresh.distance(from: saved)
+        guard distance > threshold else { return nil }
+
+        let context = await inferenceService.inferContext(from: fresh)
+
+        await PreferencesManager.shared.saveLocation(
+            name: context.regionName,
+            latitude: context.coordinates.latitude,
+            longitude: context.coordinates.longitude,
+            countryCode: context.countryCode
+        )
+
+        return context
     }
 
     func startUpdatingHeading() {

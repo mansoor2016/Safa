@@ -34,6 +34,7 @@ struct SettingsView: View {
     @State private var savedLocationName: String?
     @State private var locationContext: LocationContext?
     @State private var isUpdatingLocation = false
+    @State private var autoUpdateLocation = true
     @State private var showLocationRecommendations = false
     @State private var showInviteFriendsSheet = false
     @State private var showRamadanBanner = true
@@ -155,6 +156,18 @@ struct SettingsView: View {
                         }
                     }
                 }
+            }
+
+            Toggle(isOn: $autoUpdateLocation) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Auto-update prayer times")
+                    Text("Update automatically when you travel to a new city")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .onChange(of: autoUpdateLocation) { _, newValue in
+                Task { await prefsManager.update(\.autoUpdateLocationForPrayers, to: newValue) }
             }
         } header: {
             Text("Location")
@@ -657,6 +670,9 @@ struct SettingsView: View {
 
         // Load Quran reader settings
         autoScrollEnabled = prefs.autoScrollEnabled
+
+        // Load auto-update location setting
+        autoUpdateLocation = prefs.autoUpdateLocationForPrayers
 
         // Load location context if we have saved coordinates
         if let coords = prefs.savedCoordinates {

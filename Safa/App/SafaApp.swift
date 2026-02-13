@@ -12,6 +12,7 @@ struct SafaApp: App {
     @State private var router = AppRouter()
     @State private var themeManager = ThemeManager()
     @State private var hasCompletedOnboarding = false
+    @Environment(\.scenePhase) private var scenePhase
 
     // Spotlight service
     private let spotlightService = SpotlightIndexService.shared
@@ -92,7 +93,71 @@ struct SafaApp: App {
                 // Handle Spotlight search result tap
                 router.handleSpotlightResult(userActivity)
             }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task { await checkLocationChange() }
+                }
+            }
         }
+    }
+
+    // MARK: - Location Change Detection
+
+    private func checkLocationChange() async {
+        let prefs = PreferencesManager.loadPreferencesSync()
+        guard prefs.hasCompletedOnboarding else { return }
+
+        // Determine if we're near a prayer time (within 30 min) for adaptive throttle
+        let nearPrayer = isNearPrayerTime(prefs: prefs)
+
+        guard let context = await dependencies.locationService
+            .checkForSignificantLocationChange(nearPrayerTime: nearPrayer) else { return }
+
+        // Location was already saved internally by the service.
+        // Only update UI / recalculate if the user has auto-update enabled.
+        guard prefs.autoUpdateLocationForPrayers else { return }
+
+        // Recalculate prayer times for the new location
+        guard let prayers = try? await dependencies.prayerRepository.getPrayers(
+            for: Date(),
+            location: context.coordinates,
+            method: prefs.calculationMethod,
+            madhab: prefs.madhab
+        ) else { return }
+
+        // Update cached prayers for instant home screen rendering
+        dependencies.cachedTodayPrayers = prayers
+
+        // Update widgets
+        WidgetDataService.shared.writePrayerTimes(prayers)
+
+        // Update Live Activity with next obligatory prayer
+        if let next = prayers.first(where: { $0.time > Date() && $0.type.isObligatory }) {
+            let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
+            await PrayerLiveActivityManager.shared.updateActivity(
+                prayerName: next.type.displayName,
+                prayerTime: next.time,
+                hijriDate: hijri,
+                locationName: context.regionName
+            )
+        }
+
+        // Re-schedule notifications for the new location
+        await NotificationScheduler.shared.scheduleIfNeeded()
+
+        await MainActor.run {
+            ToastService.shared.show(Toast(
+                message: "Prayer times updated for \(context.regionName)",
+                type: .success
+            ))
+        }
+    }
+
+    private func isNearPrayerTime(prefs: UserPreferences) -> Bool {
+        guard let prayers = dependencies.cachedTodayPrayers else { return false }
+        let now = Date()
+        return prayers.contains { $0.type.isObligatory && $0.time > now
+            && $0.time.timeIntervalSince(now) < 1800 }
     }
 
 }

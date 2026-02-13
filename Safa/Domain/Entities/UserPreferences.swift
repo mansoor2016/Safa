@@ -37,6 +37,7 @@ struct UserPreferences: Codable, Hashable {
     var savedLongitude: Double?
     var savedCountryCode: String?
     var useLocationBasedDefaults: Bool
+    var autoUpdateLocationForPrayers: Bool
 
     // MARK: - Accessibility Settings
     var reduceMotionEnabled: Bool
@@ -66,6 +67,7 @@ struct UserPreferences: Codable, Hashable {
         savedLongitude: Double? = nil,
         savedCountryCode: String? = nil,
         useLocationBasedDefaults: Bool = AppDefaults.useLocationBasedDefaults,
+        autoUpdateLocationForPrayers: Bool = true,
         adhanEnabled: Bool = false,
         selectedAdhan: String = AdhanSound.misharyAlafasy.rawValue,
         selectedFajrAdhan: String = AdhanSound.misharyAlafasyFajr.rawValue,
@@ -91,6 +93,7 @@ struct UserPreferences: Codable, Hashable {
         self.savedLongitude = savedLongitude
         self.savedCountryCode = savedCountryCode
         self.useLocationBasedDefaults = useLocationBasedDefaults
+        self.autoUpdateLocationForPrayers = autoUpdateLocationForPrayers
         self.adhanEnabled = adhanEnabled
         self.selectedAdhan = selectedAdhan
         self.selectedFajrAdhan = selectedFajrAdhan
