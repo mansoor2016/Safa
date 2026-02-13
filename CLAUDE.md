@@ -649,7 +649,7 @@ main               ← only merged into, never committed to directly
 4. When ready, merge to main and release:
    ```bash
    git checkout main && git merge feature/qibla-redesign
-   bin/release patch   # bumps version, tags, pushes — triggers one cloud build
+   bin/release patch   # bumps version, pushes — triggers one cloud build
    ```
 5. Delete the branch: `git branch -d feature/qibla-redesign`
 
@@ -671,14 +671,14 @@ This keeps main clean, minimizes cloud builds, and ensures every main commit is 
 
 ```bash
 bin/release --build     # Increment build number only (for non-release pushes)
-bin/release patch       # Auto-bump patch: 1.3.1 → 1.3.2 (creates tag)
-bin/release minor       # Auto-bump minor: 1.3.1 → 1.4.0 (creates tag)
-bin/release 2.0         # Explicit version (creates tag)
+bin/release patch       # Auto-bump patch: 1.3.1 → 1.3.2
+bin/release minor       # Auto-bump minor: 1.3.1 → 1.4.0
+bin/release 2.0         # Explicit version
 ```
 
 **Workflow:**
 - For regular merges to main: merge your branch, then run `bin/release --build` to bump the build number and push
-- For feature releases: merge your branch, then run `bin/release patch` (or `minor`/explicit version) to bump, tag, and push
+- For feature releases: merge your branch, then run `bin/release patch` (or `minor`/explicit version) to bump and push
 - **Never `git push main` directly** — always go through `bin/release` so the build number is incremented
 - The script handles commit + push atomically; working tree must be clean before running
 
