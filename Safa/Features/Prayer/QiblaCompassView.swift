@@ -9,6 +9,7 @@ import Combine
 struct QiblaCompassView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     @State private var qiblaDirection: Double = 0
     @State private var deviceHeading: Double = 0
@@ -18,12 +19,57 @@ struct QiblaCompassView: View {
     @State private var compassAccuracy: CompassAccuracy = .good
     @State private var headingTimedOut = false
     @State private var lastHeadingUpdate = Date()
+    @State private var hasReceivedHeading = false
+    @State private var locationStatus: CLAuthorizationStatus = .notDetermined
+    @State private var locationSource: LocationSource = .fallback(name: AppDefaults.defaultLocationName)
     @ScaledMetric(relativeTo: .largeTitle) private var compassSize: CGFloat = 280
 
     private enum CompassAccuracy {
         case good       // headingAccuracy <= 25
         case low        // headingAccuracy > 25
         case unreliable // headingAccuracy < 0
+    }
+
+    private enum LocationSource: Equatable {
+        case live
+        case saved(name: String?)
+        case fallback(name: String)
+
+        var icon: String {
+            switch self {
+            case .live:
+                return "location.fill"
+            case .saved:
+                return "mappin.and.ellipse"
+            case .fallback:
+                return "exclamationmark.triangle.fill"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .live:
+                return String(localized: "Using current location")
+            case .saved(let name):
+                if let name, !name.isEmpty {
+                    return String(localized: "Using saved location: \(name)")
+                }
+                return String(localized: "Using saved location")
+            case .fallback(let name):
+                return String(localized: "Using default location: \(name)")
+            }
+        }
+
+        var color: Color {
+            switch self {
+            case .live:
+                return .green
+            case .saved:
+                return .orange
+            case .fallback:
+                return .red
+            }
+        }
     }
 
     // Haptic feedback state
@@ -73,18 +119,35 @@ struct QiblaCompassView: View {
             }
         }
         .task {
+            locationStatus = dependencies.locationService.authorizationStatus
             await loadQiblaDirection()
             startHeadingUpdates()
         }
         .onDisappear {
             stopHeadingUpdates()
         }
-        .onChange(of: deviceHeading) { _, _ in
-            lastHeadingUpdate = Date()
-            headingTimedOut = false
+        .onReceive(dependencies.locationService.headingPublisher) { heading in
+            guard let heading else { return }
+            applyHeadingUpdate(heading)
+        }
+        .onReceive(dependencies.locationService.authorizationStatusPublisher) { status in
+            let previous = locationStatus
+            locationStatus = status
+
+            guard previous != status else { return }
+
+            if status == .authorizedAlways || status == .authorizedWhenInUse {
+                Task { await loadQiblaDirection() }
+                startHeadingUpdates()
+            }
         }
         .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
-            guard !isSimulatedHeading && !isLoading && CLLocationManager.headingAvailable() else { return }
+            // Only check for stale heading when we've previously received data
+            // and the sensor should be active
+            guard hasReceivedHeading,
+                  !isSimulatedHeading,
+                  !isLoading,
+                  !isPermissionDenied else { return }
             if Date().timeIntervalSince(lastHeadingUpdate) > 5 {
                 headingTimedOut = true
             }
@@ -137,6 +200,16 @@ struct QiblaCompassView: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel("Qibla direction is \(Int(qiblaDirection)) degrees from North")
 
+            HStack(spacing: SafaSpacing.xs) {
+                Image(systemName: locationSource.icon)
+                    .font(.caption)
+                Text(locationSource.message)
+                    .font(SafaTypography.labelSmall)
+                    .lineLimit(1)
+            }
+            .foregroundColor(locationSource.color)
+            .accessibilityLabel(locationSource.message)
+
             // Alignment indicator
             alignmentIndicator
 
@@ -154,10 +227,22 @@ struct QiblaCompassView: View {
                     text: "Debug mode: magnetometer reading not available",
                     color: .orange
                 )
+            } else if isPermissionDenied {
+                VStack(spacing: SafaSpacing.xs) {
+                    compassNotice(
+                        icon: "location.slash.fill",
+                        text: "Compass needs location permission to determine heading.",
+                        color: .red
+                    )
+                    Button("Open Settings") {
+                        openAppSettings()
+                    }
+                    .font(SafaTypography.labelSmall)
+                }
             } else if headingTimedOut {
                 compassNotice(
                     icon: "exclamationmark.triangle.fill",
-                    text: "Compass unavailable. Try moving to an open area.",
+                    text: "No compass updates detected. Move your phone in a figure-8.",
                     color: .red
                 )
             } else if compassAccuracy == .unreliable {
@@ -228,36 +313,66 @@ struct QiblaCompassView: View {
         isLoading = true
         error = nil
 
-        // Try cached/saved coordinates first, then live GPS
-        if let coords = dependencies.locationService.coordinates {
-            let calculator = PrayerTimeCalculator()
-            qiblaDirection = calculator.calculateQiblaDirection(from: coords)
-            isLoading = false
-        } else {
-            do {
-                let location = try await dependencies.locationService.getCurrentLocation()
+        let calculator = PrayerTimeCalculator()
+        let prefs = PreferencesManager.loadPreferencesSync()
+
+        if canUseLiveLocation {
+            if let currentLocation = dependencies.locationService.currentLocation {
                 let coords = Coordinates(
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude
+                    latitude: currentLocation.coordinate.latitude,
+                    longitude: currentLocation.coordinate.longitude
                 )
-                let calculator = PrayerTimeCalculator()
                 qiblaDirection = calculator.calculateQiblaDirection(from: coords)
+                locationSource = .live
                 isLoading = false
+                return
+            }
+
+            do {
+                let liveLocation = try await dependencies.locationService.getCurrentLocation()
+                let coords = Coordinates(
+                    latitude: liveLocation.coordinate.latitude,
+                    longitude: liveLocation.coordinate.longitude
+                )
+                qiblaDirection = calculator.calculateQiblaDirection(from: coords)
+                locationSource = .live
+                isLoading = false
+                return
             } catch {
-                self.error = error
-                isLoading = false
+                // Fall through to saved/default location. We'll still show a source banner.
             }
         }
+
+        if let saved = prefs.savedCoordinates {
+            qiblaDirection = calculator.calculateQiblaDirection(from: saved)
+            locationSource = .saved(name: prefs.savedLocationName)
+            isLoading = false
+            return
+        }
+
+        qiblaDirection = calculator.calculateQiblaDirection(from: AppDefaults.defaultCoordinates)
+        locationSource = .fallback(name: AppDefaults.defaultLocationName)
+        isLoading = false
     }
 
     private func startHeadingUpdates() {
-        if CLLocationManager.headingAvailable() {
-            dependencies.locationService.startUpdatingHeading()
-        } else {
+        guard CLLocationManager.headingAvailable() else {
             // Simulator: no magnetometer, assume North (0°)
             isSimulatedHeading = true
             deviceHeading = 0
+            return
         }
+
+        isSimulatedHeading = false
+        lastHeadingUpdate = Date()
+        hasReceivedHeading = false
+
+        if locationStatus == .notDetermined {
+            dependencies.locationService.requestPermission()
+        }
+
+        guard !isPermissionDenied else { return }
+        dependencies.locationService.startUpdatingHeading()
     }
 
     private func stopHeadingUpdates() {
@@ -304,6 +419,52 @@ struct QiblaCompassView: View {
 
         previousAlignmentZone = currentZone
     }
+
+    private func applyHeadingUpdate(_ heading: CLHeading) {
+        let headingValue = heading.trueHeading >= 0 ? heading.trueHeading : heading.magneticHeading
+        let normalizedHeading = normalizeDegrees(headingValue)
+
+        if hasReceivedHeading {
+            deviceHeading = smoothHeading(from: deviceHeading, to: normalizedHeading, factor: 0.25)
+        } else {
+            deviceHeading = normalizedHeading
+            hasReceivedHeading = true
+        }
+
+        compassAccuracy = compassAccuracy(for: heading.headingAccuracy)
+        lastHeadingUpdate = Date()
+        headingTimedOut = false
+    }
+
+    private func normalizeDegrees(_ value: Double) -> Double {
+        let normalized = value.truncatingRemainder(dividingBy: 360)
+        return normalized >= 0 ? normalized : normalized + 360
+    }
+
+    /// Smooth heading transitions while correctly handling 0/360 wrap-around.
+    private func smoothHeading(from current: Double, to target: Double, factor: Double) -> Double {
+        let shortestDelta = ((target - current + 540).truncatingRemainder(dividingBy: 360)) - 180
+        return normalizeDegrees(current + shortestDelta * factor)
+    }
+
+    private func compassAccuracy(for headingAccuracy: CLLocationDirectionAccuracy) -> CompassAccuracy {
+        if headingAccuracy < 0 { return .unreliable }
+        if headingAccuracy > 25 { return .low }
+        return .good
+    }
+
+    private var isPermissionDenied: Bool {
+        locationStatus == .denied || locationStatus == .restricted
+    }
+
+    private var canUseLiveLocation: Bool {
+        locationStatus == .authorizedAlways || locationStatus == .authorizedWhenInUse
+    }
+
+    private func openAppSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(settingsURL)
+    }
 }
 
 // MARK: - Compass View
@@ -312,8 +473,6 @@ private struct CompassView: View {
     let qiblaDirection: Double
     let deviceHeading: Double
     let size: CGFloat
-
-    @State private var currentHeading: Double = 0
 
     var body: some View {
         ZStack {
@@ -333,7 +492,7 @@ private struct CompassView: View {
                     .offset(y: -(size * 0.43))
                     .rotationEffect(.degrees(angle))
             }
-            .rotationEffect(.degrees(-currentHeading))
+            .rotationEffect(.degrees(-deviceHeading))
 
             // Tick marks
             ForEach(0..<36, id: \.self) { index in
@@ -343,18 +502,13 @@ private struct CompassView: View {
                     .offset(y: -(size * 0.46))
                     .rotationEffect(.degrees(Double(index) * 10))
             }
-            .rotationEffect(.degrees(-currentHeading))
+            .rotationEffect(.degrees(-deviceHeading))
 
             // Qibla direction arrow
             QiblaArrow()
-                .rotationEffect(.degrees(qiblaDirection - currentHeading))
+                .rotationEffect(.degrees(qiblaDirection - deviceHeading))
         }
-        .animation(.easeInOut(duration: 0.3), value: currentHeading)
-        .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
-            // In a real implementation, this would come from the LocationService heading updates
-            // For now, we'll simulate it
-            currentHeading = deviceHeading
-        }
+        .animation(.easeInOut(duration: 0.2), value: deviceHeading)
     }
 }
 
