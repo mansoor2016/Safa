@@ -145,20 +145,8 @@ struct RamadanView: View {
 
                 Divider()
 
-                // Live countdown
-                if let iftar = iftarTime, iftar > Date() {
-                    HStack {
-                        Image(systemName: "timer")
-                            .foregroundStyle(Color.accentColor)
-                        Text(iftar, style: .timer)
-                            .font(SafaTypography.headlineLarge)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                        Text("until Iftar")
-                            .font(SafaTypography.labelMedium)
-                            .foregroundStyle(.secondary)
-                    }
-                } else if let suhoor = suhoorTime, suhoor > Date() {
+                // Live countdown (check Suhoor first — both are in the future before Suhoor ends)
+                if let suhoor = suhoorTime, suhoor > Date() {
                     HStack {
                         Image(systemName: "timer")
                             .foregroundStyle(.orange)
@@ -167,6 +155,18 @@ struct RamadanView: View {
                             .monospacedDigit()
                             .contentTransition(.numericText())
                         Text("until Suhoor ends")
+                            .font(SafaTypography.labelMedium)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let iftar = iftarTime, iftar > Date() {
+                    HStack {
+                        Image(systemName: "timer")
+                            .foregroundStyle(Color.accentColor)
+                        Text(iftar, style: .timer)
+                            .font(SafaTypography.headlineLarge)
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                        Text("until Iftar")
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
