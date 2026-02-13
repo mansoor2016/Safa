@@ -36,7 +36,7 @@ struct DhikrView: View {
         .sheet(isPresented: $showTasbeehCounter) {
             TasbeehCounterView(dhikr: selectedDhikr)
                 .environment(dependencies)
-                .compactSheet()
+                .largeSheet()
         }
     }
 

@@ -1234,9 +1234,6 @@
     "In the name of Allah, the Most Gracious, the Most Merciful" : {
 
     },
-    "Increment counter" : {
-
-    },
     "Increment Tasbeeh" : {
 
     },
@@ -1692,9 +1689,6 @@
     "Qibla Compass" : {
 
     },
-    "Qibla Direction" : {
-
-    },
     "Qibla direction is %lld degrees from North" : {
 
     },
@@ -2146,6 +2140,9 @@
     "Taraweeh Tonight" : {
 
     },
+    "Target" : {
+
+    },
     "Target Count" : {
 
     },
@@ -2165,6 +2162,9 @@
 
     },
     "Test Haptics" : {
+
+    },
+    "Test Prayer Notification (5s)" : {
 
     },
     "The 10th of Muharram. Fasting this day expiates sins of the previous year." : {
@@ -2270,9 +2270,6 @@
 
     },
     "Type" : {
-
-    },
-    "Unable to determine direction" : {
 
     },
     "Unable to determine your location." : {
