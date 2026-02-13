@@ -33,7 +33,6 @@ struct RamadanBanner: View {
 
             // Countdown (centered) then day progress (left-aligned to match Quran line)
             countdownView
-                .frame(maxWidth: .infinity)
             dayProgress
 
             // Quran khatm progress
@@ -206,7 +205,7 @@ struct RamadanBanner: View {
                     .foregroundColor(.white.opacity(0.7))
             }
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Quick Actions
