@@ -60,8 +60,10 @@ struct OnboardingView: View {
             locationStatus = dependencies.locationService.authorizationStatus
         }
         .task {
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            notificationAuthStatus = settings.authorizationStatus
+            await checkNotificationAuth()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            Task { await checkNotificationAuth() }
         }
     }
 
@@ -553,6 +555,11 @@ struct OnboardingView: View {
     }
 
     // MARK: - Methods
+
+    private func checkNotificationAuth() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationAuthStatus = settings.authorizationStatus
+    }
 
     private func requestLocationPermission() {
         if locationStatus == .notDetermined {

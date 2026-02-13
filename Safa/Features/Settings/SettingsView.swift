@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI, PreferencesManager
 
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -13,6 +14,7 @@ struct SettingsView: View {
     @State private var selectedCalculationMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
+    @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
     @State private var adhanEnabled = false
     @State private var selectedAdhan: AdhanSound = .misharyAlafasy
     @State private var smartAdhanEnabled = false
@@ -98,6 +100,10 @@ struct SettingsView: View {
         }
         .task {
             await loadSettings()
+            await checkNotificationAuth()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            Task { await checkNotificationAuth() }
         }
     }
 
@@ -269,6 +275,23 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+            if notificationsEnabled && notificationAuthStatus == .denied {
+                HStack(spacing: SafaSpacing.xs) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text("Notifications are disabled in Settings")
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(.orange)
+                    Spacer()
+                    Button("Open Settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .font(SafaTypography.labelSmall)
+                }
+            }
 
             if notificationsEnabled {
                 Toggle("Use Adhan Sound", isOn: $adhanEnabled)
@@ -655,6 +678,11 @@ struct SettingsView: View {
     #endif
 
     // MARK: - Load/Save Methods
+
+    private func checkNotificationAuth() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationAuthStatus = settings.authorizationStatus
+    }
 
     private func loadSettings() async {
         let prefs = await prefsManager.getPreferences()
