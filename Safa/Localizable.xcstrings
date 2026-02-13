@@ -95,7 +95,16 @@
         }
       }
     },
-    "%@: 0 min": {},
+    "%@: %lld min": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$lld min"
+          }
+        }
+      }
+    },
     "%@. %@": {
       "localizations": {
         "en": {
@@ -247,7 +256,6 @@
     "×%lld": {},
     "~%lld min": {},
     "0": {},
-    "0 min": {},
     "0.5x": {},
     "1. Open Settings on your iPhone": {},
     "1.5x": {},
@@ -666,6 +674,7 @@
     "Log that you've completed a prayer": {},
     "Logged %@ prayer. +10 Hasanat earned!": {},
     "Made with love for the Ummah": {},
+    "Madhab": {},
     "Madhab (Asr Time)": {},
     "Madhab (Asr)": {},
     "Manage Data": {},
@@ -815,6 +824,7 @@
     "Reduce Motion": {},
     "Reference": {},
     "Reflect on the Year": {},
+    "Refresh Location": {},
     "Remember to %@": {},
     "Reminders": {},
     "Remove Log": {},
@@ -1074,7 +1084,7 @@
     "صفا": {},
     "صفا · Safa": {},
     "عيد مبارك": {},
-    "Refresh Location": {}
+    "Notifications are disabled in Settings": {}
   },
   "version": "1.0"
 }

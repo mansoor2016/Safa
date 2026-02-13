@@ -4,6 +4,7 @@
 
 import SwiftUI
 import CoreLocation
+import UserNotifications
 
 struct OnboardingView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -14,6 +15,7 @@ struct OnboardingView: View {
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled // Default ON
+    @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
     // Location inference
@@ -56,6 +58,10 @@ struct OnboardingView: View {
         }
         .onAppear {
             locationStatus = dependencies.locationService.authorizationStatus
+        }
+        .task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            notificationAuthStatus = settings.authorizationStatus
         }
     }
 
@@ -267,6 +273,27 @@ struct OnboardingView: View {
                     .padding()
                     .background(Color(UIColor.secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+
+                    if notificationsEnabled && notificationAuthStatus == .denied {
+                        HStack(spacing: SafaSpacing.xs) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                            Text("Notifications are disabled in Settings")
+                                .font(SafaTypography.bodySmall)
+                                .foregroundColor(.orange)
+                            Spacer()
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .font(SafaTypography.labelSmall)
+                        }
+                        .padding()
+                        .background(Color.orange.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                    }
 
                     // Mosque mode info (future feature)
                     HStack {
