@@ -296,6 +296,75 @@ final class PreferencesManagerTests: XCTestCase {
         XCTAssertFalse(prefs.hapticFeedbackEnabled)
     }
 
+    // MARK: - Cross-Surface Sync Tests
+    // These verify settings that appear on multiple screens (Prayer page, Quran page, Settings)
+    // all roundtrip through the same PreferencesManager path.
+
+    func test_autoScrollEnabled_roundtrip() async {
+        await sut.update(\.autoScrollEnabled, to: true)
+        let prefs = await sut.getPreferences()
+        XCTAssertTrue(prefs.autoScrollEnabled)
+
+        await sut.update(\.autoScrollEnabled, to: false)
+        let prefs2 = await sut.getPreferences()
+        XCTAssertFalse(prefs2.autoScrollEnabled)
+    }
+
+    func test_prayerAdjustments_roundtrip() async {
+        await sut.update { prefs in
+            prefs.setAdjustment(5, for: .fajr)
+            prefs.setAdjustment(-3, for: .asr)
+        }
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.adjustment(for: .fajr), 5)
+        XCTAssertEqual(prefs.adjustment(for: .asr), -3)
+        XCTAssertEqual(prefs.adjustment(for: .maghrib), 0) // untouched
+    }
+
+    func test_prayerAdjustments_clearRoundtrip() async {
+        await sut.update { prefs in
+            prefs.setAdjustment(10, for: .isha)
+        }
+        var prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.adjustment(for: .isha), 10)
+
+        await sut.update { prefs in
+            prefs.setAdjustment(0, for: .isha)
+        }
+        prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.adjustment(for: .isha), 0)
+        XCTAssertTrue(prefs.prayerAdjustments.isEmpty)
+    }
+
+    func test_calculationMethod_multipleSaves_lastWins() async {
+        // Simulates changing method in Prayer settings then Settings page
+        await sut.saveCalculationMethod(.egypt)
+        await sut.saveCalculationMethod(.isna)
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.calculationMethod, .isna)
+    }
+
+    func test_madhab_multipleSaves_lastWins() async {
+        await sut.saveMadhab(.shafi)
+        await sut.saveMadhab(.hanafi)
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.madhab, .hanafi)
+    }
+
+    func test_quranAndPrayerSettings_independent() async {
+        // Saving Quran settings should not affect prayer settings
+        await sut.saveCalculationMethod(.makkah)
+        await sut.saveQuranSettings(showArabic: false, showTransliteration: true)
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.calculationMethod, .makkah) // unchanged
+        XCTAssertFalse(prefs.showArabicText)
+        XCTAssertTrue(prefs.showTransliteration)
+    }
+
     // MARK: - Get Preferences Tests
 
     func test_getPreferences_returnsCurrentState() async {
