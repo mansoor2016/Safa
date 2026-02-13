@@ -650,6 +650,23 @@ struct SettingsView: View {
                         }
                     }
 
+                Button("Test Prayer Notification (5s)") {
+                    Task {
+                        let content = UNMutableNotificationContent()
+                        content.title = "Dhuhr Time"
+                        content.body = "It's time for Dhuhr prayer"
+                        content.sound = .default
+                        content.interruptionLevel = .timeSensitive
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+                        let request = UNNotificationRequest(
+                            identifier: "debug_test_notification",
+                            content: content,
+                            trigger: trigger
+                        )
+                        try? await UNUserNotificationCenter.current().add(request)
+                    }
+                }
+
                 Button("Reset Onboarding") {
                     Task {
                         var prefs = await dependencies.userRepository.getPreferences()
