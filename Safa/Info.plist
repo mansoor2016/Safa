@@ -31,9 +31,14 @@
 	<string>Safa uses your microphone during pronunciation practice so it can compare recitation and provide feedback.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Safa uses speech recognition during pronunciation practice to transcribe your recitation and help improve accuracy.</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.safa.notificationRefresh</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
 </dict>

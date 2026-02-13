@@ -4,6 +4,7 @@
 
 import Foundation
 import UserNotifications
+import BackgroundTasks
 
 // MARK: - Notification Scheduler
 
@@ -12,6 +13,14 @@ final class NotificationScheduler {
 
     // MARK: - Shared Instance
     static let shared = NotificationScheduler()
+
+    // MARK: - Constants
+    static let backgroundTaskIdentifier = "com.safa.notificationRefresh"
+
+    /// Number of days to schedule ahead. 14 × 5 = 70 may exceed iOS's 64-notification limit,
+    /// but iOS keeps the soonest-firing and silently drops the rest. Background refresh re-rolls
+    /// the window forward, so the farthest-out days get covered on the next refresh cycle.
+    private static let scheduleDaysAhead = 14
 
     // MARK: - Properties
 
@@ -34,7 +43,7 @@ final class NotificationScheduler {
 
     // MARK: - Daily Re-Scheduling (App Launch)
 
-    /// Call from SafaApp.task{} to ensure notifications are scheduled for today.
+    /// Call from SafaApp.task{} to ensure notifications are scheduled.
     /// Skips if already scheduled today.
     func scheduleIfNeeded() async {
         let prefs = await PreferencesManager.shared.getPreferences()
@@ -55,7 +64,7 @@ final class NotificationScheduler {
         case .skipNotAuthorized, .skipAlreadyScheduled:
             return
         case .schedule:
-            await scheduleTodaysPrayerNotifications()
+            await scheduleUpcomingPrayerNotifications()
         }
     }
 
@@ -77,11 +86,13 @@ final class NotificationScheduler {
         case .skipNotAuthorized, .skipAlreadyScheduled:
             return
         case .schedule:
-            await scheduleTodaysPrayerNotifications()
+            await scheduleUpcomingPrayerNotifications()
         }
     }
 
-    private func scheduleTodaysPrayerNotifications() async {
+    /// Schedule prayer notifications for the next N days (see `scheduleDaysAhead`).
+    /// Replaces all existing prayer notifications with fresh ones.
+    private func scheduleUpcomingPrayerNotifications() async {
         let prefs = await PreferencesManager.shared.getPreferences()
 
         // Defense in depth — callers should check this, but guard here too
@@ -95,56 +106,72 @@ final class NotificationScheduler {
 
         guard let coords = Dependencies.shared.locationService.coordinates else { return }
 
-        do {
-            let prayers = try await Dependencies.shared.prayerRepository.getPrayers(
-                for: Date(),
-                location: coords,
-                method: prefs.calculationMethod,
-                madhab: prefs.madhab
-            )
+        let now = Date()
+        let dates = NotificationSchedulerHelpers.scheduleDates(from: now, daysAhead: Self.scheduleDaysAhead)
 
-            await cancelPrayerNotifications()
+        // Cancel all existing prayer notifications before scheduling fresh ones
+        await cancelPrayerNotifications()
 
-            let now = Date()
-            for prayer in prayers where prayer.type.isObligatory && enabledPrayers.contains(prayer.type) && prayer.time > now {
-                let content = UNMutableNotificationContent()
-                content.title = String(localized: "\(prayer.type.displayName) Time")
-                content.body = String(localized: "It's time for \(prayer.type.displayName) prayer")
-                content.sound = .default
-                content.interruptionLevel = .timeSensitive
-                content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
-                content.userInfo = ["prayerType": prayer.type.rawValue]
+        for date in dates {
+            do {
+                let prayers = try await Dependencies.shared.prayerRepository.getPrayers(
+                    for: date,
+                    location: coords,
+                    method: prefs.calculationMethod,
+                    madhab: prefs.madhab
+                )
 
-                // Adhan sound selection:
-                // 1. Global adhan enabled → use selected adhan for all prayers
-                // 2. Iftar adhan enabled + Ramadan + Maghrib → use adhan just for iftar
-                let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
-                    && prayer.type == .maghrib
-                    && HijriDateConverter.shared.isRamadan()
+                let toSchedule = NotificationSchedulerHelpers.prayersToSchedule(
+                    from: prayers,
+                    enabledPrayers: enabledPrayers,
+                    after: now
+                )
 
-                if prefs.adhanEnabled || isRamadanIftarAdhan {
-                    let fileName = prayer.type == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
-                    content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+                for prayer in toSchedule {
+                    let content = UNMutableNotificationContent()
+                    content.title = String(localized: "\(prayer.type.displayName) Time")
+                    content.body = String(localized: "It's time for \(prayer.type.displayName) prayer")
+                    content.sound = .default
+                    content.interruptionLevel = .timeSensitive
+                    content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
+                    content.userInfo = ["prayerType": prayer.type.rawValue]
+
+                    // Adhan sound selection:
+                    // 1. Global adhan enabled → use selected adhan for all prayers
+                    // 2. Iftar adhan enabled + Ramadan + Maghrib → use adhan just for iftar
+                    let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
+                        && prayer.type == .maghrib
+                        && HijriDateConverter.shared.isRamadan()
+
+                    if prefs.adhanEnabled || isRamadanIftarAdhan {
+                        let fileName = prayer.type == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan
+                        content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+                    }
+
+                    let components = Calendar.current.dateComponents(
+                        [.year, .month, .day, .hour, .minute],
+                        from: prayer.time
+                    )
+                    let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+                    let identifier = NotificationSchedulerHelpers.notificationIdentifier(
+                        for: prayer.type,
+                        on: date
+                    )
+                    let request = UNNotificationRequest(
+                        identifier: identifier,
+                        content: content,
+                        trigger: trigger
+                    )
+
+                    try await center.add(request)
                 }
-
-                let components = Calendar.current.dateComponents(
-                    [.year, .month, .day, .hour, .minute],
-                    from: prayer.time
-                )
-                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-                let request = UNNotificationRequest(
-                    identifier: "prayer_at_\(prayer.type.rawValue)",
-                    content: content,
-                    trigger: trigger
-                )
-
-                try await center.add(request)
+            } catch {
+                // Silently fail for this day — continue scheduling remaining days
+                continue
             }
-
-            UserDefaults.standard.set(Date(), forKey: lastScheduledDateKey)
-        } catch {
-            // Silently fail — notifications are best-effort
         }
+
+        UserDefaults.standard.set(Date(), forKey: lastScheduledDateKey)
     }
 
     // MARK: - Authorization
@@ -219,32 +246,17 @@ final class NotificationScheduler {
         }
     }
 
-    /// Cancel all prayer notifications (current + legacy identifier formats)
+    /// Cancel all prayer notifications by scanning pending requests for prayer prefixes.
+    /// Handles current date-suffixed format (prayer_at_fajr_2026-02-14), legacy formats
+    /// (prayer_at_fajr, prayer_before_fajr, prayer_fajr, prayer_fajr_1707234000.123).
     func cancelPrayerNotifications() async {
-        // Current format: prayer_at_fajr, prayer_before_fajr
-        var identifiers = PrayerType.allCases.flatMap { type in
-            ["prayer_at_\(type.rawValue)", "prayer_before_\(type.rawValue)"]
-        }
-
-        // Legacy format from old PrayerViewModel: prayer_fajr
-        identifiers += PrayerType.allCases.map { "prayer_\($0.rawValue)" }
-
-        center.removePendingNotificationRequests(withIdentifiers: identifiers)
-
-        // Legacy timestamp-based format: prayer_fajr_1707234000.123
-        // These have unpredictable identifiers, so find and cancel by scanning pending
         let pending = await center.pendingNotificationRequests()
-        let timestampIDs = pending
-            .map { $0.identifier }
-            .filter { id in
-                // Match prayer_<type>_<digits> but NOT prayer_at_* or prayer_before_*
-                id.starts(with: "prayer_") &&
-                !id.starts(with: "prayer_at_") &&
-                !id.starts(with: "prayer_before_") &&
-                !identifiers.contains(id) // not already handled above
-            }
-        if !timestampIDs.isEmpty {
-            center.removePendingNotificationRequests(withIdentifiers: timestampIDs)
+        let prayerIDs = NotificationSchedulerHelpers.prayerNotificationIdentifiers(
+            from: pending.map { $0.identifier }
+        )
+
+        if !prayerIDs.isEmpty {
+            center.removePendingNotificationRequests(withIdentifiers: prayerIDs)
         }
     }
 
@@ -416,6 +428,49 @@ final class NotificationScheduler {
     /// Remove delivered notifications
     func removeDeliveredNotifications() {
         center.removeAllDeliveredNotifications()
+    }
+
+    // MARK: - Background Refresh
+
+    /// Register the BGAppRefreshTask handler. Must be called in `didFinishLaunchingWithOptions`
+    /// before the app finishes launching.
+    func registerBackgroundTask() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.backgroundTaskIdentifier,
+            using: nil
+        ) { task in
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleBackgroundRefresh(refreshTask)
+        }
+    }
+
+    /// Schedule the next background refresh for tomorrow at 2 AM (low-activity window).
+    func scheduleBackgroundRefresh() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.backgroundTaskIdentifier)
+        request.earliestBeginDate = NotificationSchedulerHelpers.nextBackgroundRefreshDate(after: Date())
+
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            // Best-effort — background refresh is a safety net, not critical
+        }
+    }
+
+    /// Handle the background refresh task: reschedule notifications and queue the next refresh.
+    private func handleBackgroundRefresh(_ task: BGAppRefreshTask) {
+        let workTask = Task {
+            await scheduleUpcomingPrayerNotifications()
+            scheduleBackgroundRefresh()
+            task.setTaskCompleted(success: true)
+        }
+
+        task.expirationHandler = {
+            workTask.cancel()
+            task.setTaskCompleted(success: false)
+        }
     }
 }
 

@@ -19,6 +19,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         // Set notification delegate so foreground notifications display with banner + sound
         UNUserNotificationCenter.current().delegate = NotificationResponseHandler.shared
+
+        // Register background refresh task for prayer notification rescheduling
+        NotificationScheduler.shared.registerBackgroundTask()
+
         return true
     }
 
@@ -108,6 +112,7 @@ struct SafaApp: App {
                 // Re-schedule prayer notifications daily on app launch
                 if prefs.hasCompletedOnboarding {
                     await NotificationScheduler.shared.scheduleIfNeeded()
+                    NotificationScheduler.shared.scheduleBackgroundRefresh()
                 }
 
                 // Record daily activity (awards .dailyOpen hasanat + daily streak)

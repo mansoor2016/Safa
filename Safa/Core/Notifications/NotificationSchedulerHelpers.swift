@@ -6,6 +6,8 @@ import Foundation
 
 enum NotificationSchedulerHelpers {
 
+    // MARK: - Schedule Decision
+
     enum ScheduleAction: Equatable {
         case cancelAll              // master toggle OFF — cancel pending notifications
         case skipNotAuthorized      // system notification permission not granted
@@ -35,4 +37,85 @@ enum NotificationSchedulerHelpers {
 
         return .schedule
     }
+
+    // MARK: - Notification Identifier
+
+    /// Generates a date-suffixed notification identifier for a prayer.
+    /// Format: `prayer_at_{prayerType}_{yyyy-MM-dd}`
+    static func notificationIdentifier(for prayerType: PrayerType, on date: Date) -> String {
+        let dateString = dateFormatter.string(from: date)
+        return "prayer_at_\(prayerType.rawValue)_\(dateString)"
+    }
+
+    // MARK: - Prayer Filtering
+
+    /// Filters prayers to only those that should receive notifications.
+    /// Returns obligatory prayers that are enabled by the user and scheduled after `now`.
+    static func prayersToSchedule(
+        from prayers: [PrayerTime],
+        enabledPrayers: Set<PrayerType>,
+        after now: Date
+    ) -> [PrayerTime] {
+        prayers.filter { prayer in
+            prayer.type.isObligatory
+            && enabledPrayers.contains(prayer.type)
+            && prayer.time > now
+        }
+    }
+
+    // MARK: - Cancel Logic
+
+    /// Returns true if the identifier belongs to a prayer notification (any format).
+    /// Used by `cancelPrayerNotifications` to find all prayer-related pending requests.
+    static func isPrayerNotificationIdentifier(_ identifier: String) -> Bool {
+        identifier.starts(with: "prayer_")
+    }
+
+    /// Filters a list of notification identifiers to only prayer-related ones.
+    static func prayerNotificationIdentifiers(from identifiers: [String]) -> [String] {
+        identifiers.filter { isPrayerNotificationIdentifier($0) }
+    }
+
+    // MARK: - Date Range
+
+    /// Generates an array of dates starting from `startDate` for `daysAhead` days.
+    static func scheduleDates(from startDate: Date, daysAhead: Int) -> [Date] {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: startDate)
+        return (0..<daysAhead).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: start)
+        }
+    }
+
+    // MARK: - Background Refresh
+
+    /// Computes the next 2 AM local time after `now` for background refresh scheduling.
+    static func nextBackgroundRefreshDate(after now: Date) -> Date {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: now)
+        components.hour = 2
+        components.minute = 0
+        components.second = 0
+
+        guard let twoAMToday = calendar.date(from: components) else {
+            // Fallback: 6 hours from now
+            return now.addingTimeInterval(6 * 3600)
+        }
+
+        if twoAMToday > now {
+            return twoAMToday
+        }
+
+        // 2 AM today has passed — schedule for tomorrow
+        return calendar.date(byAdding: .day, value: 1, to: twoAMToday)
+            ?? now.addingTimeInterval(24 * 3600)
+    }
+
+    // MARK: - Private
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 }
