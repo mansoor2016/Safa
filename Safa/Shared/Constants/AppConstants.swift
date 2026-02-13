@@ -155,6 +155,9 @@ enum AppConstants {
         // Eid
         static let eidBannerDismissedPrefix = "eid_banner_dismissed_"
 
+        // Qada (missed fast) Reminder
+        static let qadaReminderShownHijriYear = "com.safa.ramadan.qadaReminderShownHijriYear"
+
         // App Review
         static let reviewFirstLaunchDate = "com.safa.review.firstLaunchDate"
         static let reviewPromptCount = "com.safa.review.promptCount"

@@ -44,6 +44,7 @@ struct SafaApp: App {
     @State private var router = AppRouter()
     @State private var themeManager = ThemeManager()
     @State private var launchState: LaunchState = .loading
+    @State private var qadaReminderPayload: RamadanQadaReminderService.ReminderPayload?
     @Environment(\.scenePhase) private var scenePhase
 
     // Spotlight service
@@ -131,6 +132,13 @@ struct SafaApp: App {
 
                 // Pre-warm compressed databases in background (non-blocking)
                 await SQLiteService.shared.preWarmDatabases()
+
+                // Check for one-off Qada (missed fast) reminder
+                if let payload = RamadanQadaReminderService.shouldShowReminder(
+                    hasCompletedOnboarding: prefs.hasCompletedOnboarding
+                ) {
+                    qadaReminderPayload = payload
+                }
             }
             .onContinueUserActivity(CSSearchableItemActionType) { userActivity in
                 // Handle Spotlight search result tap
@@ -143,6 +151,19 @@ struct SafaApp: App {
                         handleShortcut(shortcutType)
                     }
                     Task { await checkLocationChange() }
+                }
+            }
+            .alert(
+                "Gentle reminder",
+                isPresented: Binding(
+                    get: { qadaReminderPayload != nil },
+                    set: { if !$0 { dismissQadaReminder() } }
+                )
+            ) {
+                Button("Got it") { dismissQadaReminder() }
+            } message: {
+                if let payload = qadaReminderPayload {
+                    Text("You logged \(payload.trackedDays) of 30 fasting days this Ramadan. If you have missed fasts, you can make them up when able.")
                 }
             }
         }
@@ -220,6 +241,13 @@ struct SafaApp: App {
         let now = Date()
         return prayers.contains { $0.type.isObligatory && $0.time > now
             && $0.time.timeIntervalSince(now) < 1800 }
+    }
+
+    private func dismissQadaReminder() {
+        if let payload = qadaReminderPayload {
+            RamadanQadaReminderService.markShown(hijriYear: payload.hijriYear)
+        }
+        qadaReminderPayload = nil
     }
 
 }
