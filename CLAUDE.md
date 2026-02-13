@@ -633,9 +633,41 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 - Write clear commit messages summarizing what changed and why
 - This ensures progress is saved, changes are reviewable, and rollback is easy if needed
 
-### Version Bumps Before Pushing
+### Branching Strategy
 
-**CRITICAL: Every push to main appears in App Store Connect.** Each push must have a unique build number. Use `bin/release` to manage versioning:
+**Every push to main triggers an Xcode Cloud build in App Store Connect.** To avoid excessive cloud builds, use feature branches for daily work and only merge to main when ready to ship:
+
+```
+main               ← only merged into, never committed to directly
+ └─ feature/xyz    ← daily work happens here
+```
+
+**Daily workflow:**
+1. Create a feature branch: `git checkout -b feature/qibla-redesign`
+2. Commit freely to the branch (no cloud builds triggered)
+3. Run full checks (`/build`, `/test`, lint) on the branch
+4. When ready, merge to main and release:
+   ```bash
+   git checkout main && git merge feature/qibla-redesign
+   bin/release patch   # bumps version, tags, pushes — triggers one cloud build
+   ```
+5. Delete the branch: `git branch -d feature/qibla-redesign`
+
+**When to merge to main:**
+- A feature or logical group of changes is complete and tested
+- End of a work session with meaningful progress
+- A bug fix that should ship immediately
+
+**When NOT to merge to main:**
+- Work-in-progress commits (keep on feature branch)
+- Intermediate refactors that aren't self-contained
+- Multiple unrelated small changes — batch them into one merge
+
+This keeps main clean, minimizes cloud builds, and ensures every main commit is a shippable state.
+
+### Version Bumps Before Pushing Main
+
+**CRITICAL: Every push to main must have a unique build number.** Use `bin/release` to manage versioning:
 
 ```bash
 bin/release --build     # Increment build number only (for non-release pushes)
@@ -645,9 +677,9 @@ bin/release 2.0         # Explicit version (creates tag)
 ```
 
 **Workflow:**
-- For regular commits (bug fixes, polish): commit your changes, then run `bin/release --build` to bump the build number and push
-- For feature releases: commit your changes, then run `bin/release patch` (or `minor`/explicit version) to bump, tag, and push
-- **Never `git push` directly** — always go through `bin/release` so the build number is incremented
+- For regular merges to main: merge your branch, then run `bin/release --build` to bump the build number and push
+- For feature releases: merge your branch, then run `bin/release patch` (or `minor`/explicit version) to bump, tag, and push
+- **Never `git push main` directly** — always go through `bin/release` so the build number is incremented
 - The script handles commit + push atomically; working tree must be clean before running
 
 ### Common Build Issues
