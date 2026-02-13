@@ -40,7 +40,7 @@ private struct PrayerContentView: View {
 
     var body: some View {
         ScrollableScreen {
-            if let error = viewModel.error {
+            if viewModel.error != nil {
                 ErrorView.prayerTimesError(retry: { await viewModel.loadPrayerTimes() })
             } else {
             VStack(spacing: SafaSpacing.lg) {

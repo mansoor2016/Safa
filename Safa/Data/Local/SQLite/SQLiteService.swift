@@ -48,12 +48,9 @@ final class SQLiteService {
     /// Decompress any gzipped databases in the background so they're ready when needed.
     /// Call from SafaApp.task{} — safe to call multiple times (no-ops if already decompressed).
     func preWarmDatabases() async {
-        await withTaskGroup(of: Void.self) { group in
-            for name in ["quran", "hadith"] {
-                group.addTask { [weak self] in
-                    _ = self?.databasePath(for: name)
-                }
-            }
+        // Run sequentially to avoid crossing actor isolation in task-group closures under Swift 6.
+        for name in ["quran", "hadith"] {
+            _ = databasePath(for: name)
         }
     }
 

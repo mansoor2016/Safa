@@ -35,7 +35,7 @@ final class CoreDataStack {
             self.isDegradedMode = true
         }
 
-        container.loadPersistentStores { description, error in
+        container.loadPersistentStores { _, error in
             if let error = error as NSError? {
                 // Fall back to in-memory store instead of crashing
                 let fallbackDescription = NSPersistentStoreDescription()

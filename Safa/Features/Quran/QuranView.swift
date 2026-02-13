@@ -65,7 +65,7 @@ private struct QuranContentView: View {
             .padding()
 
             // Content
-            if let error = viewModel.error {
+            if viewModel.error != nil {
                 ErrorView.loadFailed(retry: { await viewModel.loadSurahs() })
             } else {
                 TabView(selection: $selectedTab) {

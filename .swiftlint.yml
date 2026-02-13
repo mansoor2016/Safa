@@ -1,0 +1,67 @@
+# SwiftLint Configuration for Safa
+# Goal: zero warnings on current codebase so new violations are immediately visible.
+# Catches real bugs (unused bindings, unused params). Cosmetic rules relaxed.
+
+included:
+  - Safa
+  - SafaTests
+
+excluded:
+  - Safa/Resources
+  - SafaWidgetExtension
+  - SafaShared
+
+# Thresholds set above current codebase maximum to catch regressions only
+line_length:
+  warning: 400
+  error: 500
+  ignores_comments: true
+  ignores_urls: true
+
+file_length:
+  warning: 1100
+  error: 1500
+
+type_body_length:
+  warning: 700
+  error: 900
+
+function_body_length:
+  warning: 150
+  error: 200
+
+identifier_name:
+  min_length: 1
+  max_length: 70
+
+disabled_rules:
+  # Cosmetic — too noisy, not worth fixing project-wide
+  - trailing_comma
+  - multiple_closures_with_trailing_closure
+  - todo
+  - implicit_optional_initialization
+  - large_tuple
+  - nesting
+  - cyclomatic_complexity
+  - for_where
+  - vertical_whitespace
+  - redundant_string_enum_value
+  - orphaned_doc_comment
+  - inclusive_language
+  - trailing_newline
+  - type_name
+  - unneeded_synthesized_initializer
+  - redundant_discardable_let
+  - empty_enum_arguments
+  - function_parameter_count
+  # Intentional patterns
+  - force_unwrapping            # Tests use ! extensively
+  - force_cast                  # Few intentional uses
+  - force_try                   # Tests use try! intentionally
+  - closure_body_length         # SwiftUI view bodies are long closures
+  - discouraged_optional_boolean
+
+# Opt-in rules that catch real bugs
+opt_in_rules:
+  - unused_optional_binding     # if let x = ... where x is unused
+  - contains_over_first_not_nil # .contains(where:) over .first != nil

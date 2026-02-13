@@ -263,7 +263,7 @@ extension MarkdownRenderer {
             }
 
             // Numbered list
-            if let _ = trimmed.firstMatch(of: /^\d+\.\s+/) {
+            if trimmed.firstMatch(of: /^\d+\.\s+/) != nil {
                 var items: [String] = []
                 while currentIndex < lines.count {
                     let currentLine = lines[currentIndex].trimmingCharacters(in: .whitespaces)
@@ -313,7 +313,7 @@ extension MarkdownRenderer {
             }
 
             // Reference pattern (e.g., "Quran 2:255" or "Sahih Bukhari 1234")
-            if let _ = trimmed.firstMatch(of: /^(Quran|Sahih|Sunan|Musnad|Hadith)\s+[\d:]+/) {
+            if trimmed.firstMatch(of: /^(Quran|Sahih|Sunan|Musnad|Hadith)\s+[\d:]+/) != nil {
                 blocks.append(MarkdownBlock(type: .reference, content: trimmed))
                 currentIndex += 1
                 continue

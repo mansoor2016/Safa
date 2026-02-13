@@ -228,7 +228,6 @@ final class HijriDateConverter {
     func daysUntilRamadan(from date: Date = Date()) -> Int? {
         let currentComponents = hijriDate(from: date)
         guard let currentMonth = currentComponents.month,
-              let currentDay = currentComponents.day,
               let currentYear = currentComponents.year else {
             return nil
         }

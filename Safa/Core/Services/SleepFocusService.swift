@@ -286,7 +286,7 @@ final class SleepFocusService {
         }
 
         let calendar = Calendar.current
-        var components = calendar.dateComponents([.hour, .minute], from: wakeTime)
+        let components = calendar.dateComponents([.hour, .minute], from: wakeTime)
 
         // If wake time hour is less than bedtime hour, it's next day
         let bedtimeHour = calendar.component(.hour, from: bedtime)

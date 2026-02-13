@@ -62,9 +62,6 @@ final class IslamicEventService {
         let now = Date()
         let calendar = Calendar.current
 
-        // Get current Hijri date
-        let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
-
         // Filter upcoming events (next 60 days)
         let sixtyDaysFromNow = calendar.date(byAdding: .day, value: 60, to: now) ?? now
 
@@ -243,10 +240,9 @@ struct IslamicEvent: Identifiable, Equatable {
 
     func nextOccurrence(from date: Date) -> Date? {
         let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
-        let gregorianCalendar = Calendar(identifier: .gregorian)
 
         // Get current Hijri year
-        var currentHijriYear = hijriCalendar.component(.year, from: date)
+        let currentHijriYear = hijriCalendar.component(.year, from: date)
 
         // Create date components for the event
         var components = DateComponents()

@@ -100,7 +100,7 @@ final class ChatViewModel {
         messages.append(userMessage)
 
         // Add placeholder assistant message
-        var assistantMessage = ChatMessage(
+        let assistantMessage = ChatMessage(
             conversationId: activeConversation?.id ?? UUID(),
             role: .assistant,
             content: ""

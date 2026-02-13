@@ -152,7 +152,7 @@ final class StorageCleanupService {
             return
         }
 
-        for case let fileURL as URL in enumerator {
+        while let fileURL = enumerator.nextObject() as? URL {
             guard let resourceValues = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .creationDateKey]),
                   let fileSize = resourceValues.fileSize,
                   let creationDate = resourceValues.creationDate else {

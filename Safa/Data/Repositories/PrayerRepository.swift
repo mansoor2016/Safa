@@ -38,8 +38,6 @@ final class PrayerRepository: PrayerRepositoryProtocol {
     // MARK: - Prayer Logging
 
     func logPrayer(_ prayer: PrayerType, for date: Date, at time: Date, isOnTime: Bool) async throws {
-        let context = coreData.viewContext
-
         // Check if already logged
         let existingLog = try await fetchPrayerLog(prayer: prayer, date: date)
         if existingLog != nil {

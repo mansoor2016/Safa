@@ -86,7 +86,7 @@ struct HomeView: View {
     var body: some View {
         ScrollableScreen(stickyContent: nextPrayerChip) {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
-                if let loadError {
+                if loadError != nil {
                     ErrorView.loadFailed(retry: { await loadHomeData() })
                 } else {
                     HomeSkeletonView()

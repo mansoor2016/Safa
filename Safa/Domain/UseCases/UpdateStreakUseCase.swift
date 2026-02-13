@@ -92,7 +92,6 @@ final class UpdateStreakUseCase: UpdateStreakUseCaseProtocol {
 
         let startOfDay = calendar.startOfDay(for: date)
         let previousCount = streak.currentCount
-        let previousLongest = streak.longestCount
 
         // Check if already logged today
         if let todayActivities = activityLog[startOfDay], todayActivities.contains(streakType) {

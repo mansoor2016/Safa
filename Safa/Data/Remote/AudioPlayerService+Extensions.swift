@@ -18,7 +18,7 @@ extension AudioPlayerService {
             try session.setCategory(
                 .playback,
                 mode: .spokenAudio,
-                options: [.allowAirPlay, .allowBluetooth]
+                options: [.allowAirPlay, .allowBluetoothHFP]
             )
 
             // Activate the session
@@ -215,7 +215,7 @@ final class AudioDownloadManager {
 
         // Create download task
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: .main)
-        let task = session.downloadTask(with: url) { [weak self] tempURL, response, error in
+        let task = session.downloadTask(with: url) { [weak self] tempURL, _, error in
             guard let self = self else { return }
 
             self.downloadTasks.removeValue(forKey: identifier)

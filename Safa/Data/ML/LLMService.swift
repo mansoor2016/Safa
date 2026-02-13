@@ -110,8 +110,8 @@ final class LLMService {
             ragContext = await ragService.retrieveContext(for: prompt)
         }
 
-        // Build enhanced prompt with RAG context
-        let enhancedPrompt = buildEnhancedPrompt(
+        // Build enhanced prompt with RAG context (used when Foundation Models inference is wired in)
+        _ = buildEnhancedPrompt(
             userPrompt: prompt,
             systemPrompt: systemPrompt,
             ragContext: ragContext

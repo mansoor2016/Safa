@@ -594,7 +594,7 @@ Use this local-first model until CI exists:
 2. **Full checks** (required before commit):
    - `/build`
    - `/test`
-   - Run formatter/linter validation once configured
+   - `swiftlint lint Safa/ SafaTests/` (must report 0 violations)
 
 3. **Quick matrix** (when touching layout, frames, sizing, or UI components):
    - `/build --matrix` — builds on iOS 17 SE (375pt), iOS 18 Pro Max (430pt), iOS 26 Pro (402pt)
@@ -619,7 +619,7 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
 - Build and unit tests must pass before committing
-- Formatter/linter checks must pass once those configs are added
+- SwiftLint must pass with 0 violations: `swiftlint lint Safa/ SafaTests/`
 - If a test fails, fix the issue and re-run tests
 - Never commit with known failing tests
 - Run tests in series (one simulator at a time) to avoid resource issues

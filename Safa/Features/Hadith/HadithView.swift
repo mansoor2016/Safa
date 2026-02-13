@@ -60,7 +60,7 @@ struct HadithContentView: View {
                 FilterPillsView(options: hadithFilterOptions, selected: $selectedFilter)
             }
 
-            if let error = viewModel.error, !viewModel.isSearching {
+            if viewModel.error != nil, !viewModel.isSearching {
                 ErrorView.loadFailed(retry: { await viewModel.loadCollections() })
             } else if viewModel.isLoading {
                 LoadingView()
