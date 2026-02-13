@@ -705,35 +705,41 @@ struct HomeView: View {
 
     // MARK: - Contextual Reminders
 
+    @ViewBuilder
     private var contextualReminders: some View {
-        VStack(spacing: SafaSpacing.sm) {
-            let hour = Calendar.current.component(.hour, from: Date())
+        let hour = Calendar.current.component(.hour, from: Date())
+        let showTahajjud = hour >= 4 && hour < 6
+        let showMorning = hour >= 6 && hour < 9
+        let showEvening = hour >= 17 && hour < 20
 
-            if hour >= 4 && hour < 6 {
-                ReminderCard(
-                    icon: "moon.stars",
-                    title: "Tahajjud Time",
-                    message: "The last third of the night is a blessed time for prayer."
-                )
-            }
-
-            if hour >= 6 && hour < 9 {
-                ReminderCard(
-                    icon: "sunrise",
-                    title: "Morning Dhikr",
-                    message: "Start your day with morning remembrance."
-                ) {
-                    router.navigate(to: .dhikr)
+        if showTahajjud || showMorning || showEvening {
+            VStack(spacing: SafaSpacing.sm) {
+                if showTahajjud {
+                    ReminderCard(
+                        icon: "moon.stars",
+                        title: "Tahajjud Time",
+                        message: "The last third of the night is a blessed time for prayer."
+                    )
                 }
-            }
 
-            if hour >= 17 && hour < 20 {
-                ReminderCard(
-                    icon: "sunset",
-                    title: "Evening Dhikr",
-                    message: "Complete your evening remembrance."
-                ) {
-                    router.navigate(to: .dhikr)
+                if showMorning {
+                    ReminderCard(
+                        icon: "sunrise",
+                        title: "Morning Dhikr",
+                        message: "Start your day with morning remembrance."
+                    ) {
+                        router.navigate(to: .dhikr)
+                    }
+                }
+
+                if showEvening {
+                    ReminderCard(
+                        icon: "sunset",
+                        title: "Evening Dhikr",
+                        message: "Complete your evening remembrance."
+                    ) {
+                        router.navigate(to: .dhikr)
+                    }
                 }
             }
         }
