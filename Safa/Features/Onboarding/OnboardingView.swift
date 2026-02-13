@@ -399,10 +399,6 @@ struct OnboardingView: View {
                         .foregroundColor(.accentColor)
                     }
 
-                    Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
-                        .font(SafaTypography.arabicMedium)
-                        .foregroundColor(SafaColors.Fallback.text)
-                        .environment(\.layoutDirection, .rightToLeft)
                 }
                 .padding()
                 .frame(minHeight: geo.size.height)
