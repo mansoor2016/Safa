@@ -100,7 +100,11 @@ private struct PrayerContentView: View {
             await viewModel.loadPrayerTimes()
         }
         .onAppear {
-            Task { await viewModel.reloadLoggedPrayers() }
+            viewModel.reloadSettings()
+            Task {
+                await viewModel.reloadLoggedPrayers()
+                await viewModel.loadPrayerTimes()
+            }
             viewModel.updateNextPrayerIndicator()
         }
     }
@@ -328,35 +332,51 @@ private struct QuickActionButton: View {
     }
 }
 
-// MARK: - Prayer Settings View (Placeholder)
+// MARK: - Prayer Settings View
 
 private struct PrayerSettingsView: View {
     let viewModel: PrayerViewModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List {
             Section("Calculation Method") {
-                ForEach(CalculationMethod.allCases) { method in
-                    Button {
-                        Task {
-                            await viewModel.setCalculationMethod(method)
-                        }
-                    } label: {
-                        HStack {
-                            Text(method.displayName)
-                            Spacer()
-                            if viewModel.calculationMethod == method {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.accentColor)
-                            }
-                        }
+                Picker("Method", selection: Binding(
+                    get: { viewModel.calculationMethod },
+                    set: { newValue in Task { await viewModel.setCalculationMethod(newValue) } }
+                )) {
+                    ForEach(CalculationMethod.allCases, id: \.self) { method in
+                        Text(method.displayName).tag(method)
                     }
-                    .foregroundColor(SafaColors.Fallback.text)
+                }
+            }
+
+            Section("Madhab (Asr Time)") {
+                Picker("Madhab", selection: Binding(
+                    get: { viewModel.madhab },
+                    set: { newValue in Task { await viewModel.setMadhab(newValue) } }
+                )) {
+                    ForEach(Madhab.allCases, id: \.self) { madhab in
+                        Text(madhab.displayName).tag(madhab)
+                    }
+                }
+            }
+
+            Section {
+                NavigationLink {
+                    PrayerAdjustmentsView()
+                } label: {
+                    Text("Prayer Time Adjustments")
                 }
             }
         }
         .navigationTitle("Prayer Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") { dismiss() }
+            }
+        }
     }
 }
 

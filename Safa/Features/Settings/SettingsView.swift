@@ -176,6 +176,13 @@ struct SettingsView: View {
         }
     }
 
+    private var adjustmentsSummary: String {
+        let prefs = PreferencesManager.loadPreferencesSync()
+        let count = prefs.prayerAdjustments.values.filter { $0 != 0 }.count
+        if count == 0 { return "0 min" }
+        return "\(count) adjusted"
+    }
+
     private var hasNonRecommendedSettings: Bool {
         guard let context = locationContext else { return false }
         return selectedCalculationMethod != context.recommendedMethod ||
@@ -227,7 +234,7 @@ struct SettingsView: View {
                 HStack {
                     Text("Prayer Time Adjustments")
                     Spacer()
-                    Text("0 min")
+                    Text(adjustmentsSummary)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
             }

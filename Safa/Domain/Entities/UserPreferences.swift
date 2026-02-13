@@ -47,6 +47,9 @@ struct UserPreferences: Codable, Hashable {
     // MARK: - Quran Reader Settings
     var autoScrollEnabled: Bool
 
+    // MARK: - Prayer Time Adjustments (minutes offset per prayer)
+    var prayerAdjustments: [String: Int]
+
     // MARK: - App State
     var hasCompletedOnboarding: Bool
 
@@ -77,7 +80,8 @@ struct UserPreferences: Codable, Hashable {
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
         highContrastEnabled: Bool = false,
-        autoScrollEnabled: Bool = false
+        autoScrollEnabled: Bool = false,
+        prayerAdjustments: [String: Int] = [:]
     ) {
         self.calculationMethod = calculationMethod
         self.madhab = madhab
@@ -104,6 +108,23 @@ struct UserPreferences: Codable, Hashable {
         self.largerArabicTextEnabled = largerArabicTextEnabled
         self.highContrastEnabled = highContrastEnabled
         self.autoScrollEnabled = autoScrollEnabled
+        self.prayerAdjustments = prayerAdjustments
+    }
+
+    // MARK: - Prayer Adjustment Helpers
+
+    /// Get the minute offset for a specific prayer type (0 if none set)
+    func adjustment(for prayer: PrayerType) -> Int {
+        prayerAdjustments[prayer.rawValue] ?? 0
+    }
+
+    /// Set the minute offset for a specific prayer type
+    mutating func setAdjustment(_ minutes: Int, for prayer: PrayerType) {
+        if minutes == 0 {
+            prayerAdjustments.removeValue(forKey: prayer.rawValue)
+        } else {
+            prayerAdjustments[prayer.rawValue] = minutes
+        }
     }
 
     // MARK: - Location Helpers

@@ -583,16 +583,43 @@ struct LocationRecommendationsSheet: View {
 // MARK: - Prayer Adjustments View
 
 struct PrayerAdjustmentsView: View {
+    @State private var adjustments: [PrayerType: Int] = [:]
+
     var body: some View {
         List {
             ForEach(PrayerType.allCases) { prayer in
                 if prayer.isObligatory {
-                    Stepper("\(prayer.displayName): 0 min", value: .constant(0), in: -30...30)
+                    Stepper(
+                        "\(prayer.displayName): \(adjustments[prayer] ?? 0) min",
+                        value: Binding(
+                            get: { adjustments[prayer] ?? 0 },
+                            set: { newValue in
+                                adjustments[prayer] = newValue
+                                saveAdjustment(newValue, for: prayer)
+                            }
+                        ),
+                        in: -30...30
+                    )
                 }
             }
         }
         .navigationTitle("Adjustments")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            let prefs = await PreferencesManager.shared.getPreferences()
+            for prayer in PrayerType.allCases where prayer.isObligatory {
+                adjustments[prayer] = prefs.adjustment(for: prayer)
+            }
+        }
+    }
+
+    private func saveAdjustment(_ minutes: Int, for prayer: PrayerType) {
+        Task {
+            await PreferencesManager.shared.update { prefs in
+                prefs.setAdjustment(minutes, for: prayer)
+            }
+            await NotificationScheduler.shared.forceReschedule()
+        }
     }
 }
 

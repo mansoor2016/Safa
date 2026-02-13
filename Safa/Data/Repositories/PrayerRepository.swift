@@ -18,7 +18,21 @@ final class PrayerRepository: PrayerRepositoryProtocol {
     // MARK: - Prayer Times
 
     func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
-        calculator.calculatePrayerTimes(for: date, location: location, method: method, madhab: madhab)
+        let prefs = PreferencesManager.loadPreferencesSync()
+        var prayers = calculator.calculatePrayerTimes(for: date, location: location, method: method, madhab: madhab)
+        let adjustments = prefs.prayerAdjustments
+        if !adjustments.isEmpty {
+            prayers = prayers.map { prayer in
+                guard let offset = adjustments[prayer.type.rawValue], offset != 0 else { return prayer }
+                return PrayerTime(
+                    id: prayer.id,
+                    type: prayer.type,
+                    time: prayer.time.addingTimeInterval(TimeInterval(offset * 60)),
+                    isNext: prayer.isNext
+                )
+            }
+        }
+        return prayers
     }
 
     // MARK: - Prayer Logging

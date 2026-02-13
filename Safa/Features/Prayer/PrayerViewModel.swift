@@ -13,6 +13,7 @@ final class PrayerViewModel {
     var notificationEnabledPrayers: Set<PrayerType> = []
     var currentDate = Date()
     var calculationMethod: CalculationMethod = .isna
+    var madhab: Madhab = AppDefaults.madhab
     var isLoading = false
     var error: Error?
     var notificationSchedulingFailed = false
@@ -38,9 +39,10 @@ final class PrayerViewModel {
         self.userState = userState
         self.widgetDataService = widgetDataService
 
-        // Load saved calculation method from canonical preferences
+        // Load saved settings from canonical preferences
         let prefs = PreferencesManager.loadPreferencesSync()
         self.calculationMethod = prefs.calculationMethod
+        self.madhab = prefs.madhab
 
         // Default notification state (will be overwritten by async load in loadPrayerTimes)
         notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
@@ -271,9 +273,21 @@ final class PrayerViewModel {
         calculationMethod = method
         await PreferencesManager.shared.saveCalculationMethod(method)
         await loadPrayerTimes()
-
-        // Re-schedule notifications with new prayer times
         await NotificationScheduler.shared.forceReschedule()
+    }
+
+    func setMadhab(_ madhab: Madhab) async {
+        self.madhab = madhab
+        await PreferencesManager.shared.saveMadhab(madhab)
+        await loadPrayerTimes()
+        await NotificationScheduler.shared.forceReschedule()
+    }
+
+    /// Reload settings from prefs (for sync after Settings page changes)
+    func reloadSettings() {
+        let prefs = PreferencesManager.loadPreferencesSync()
+        calculationMethod = prefs.calculationMethod
+        madhab = prefs.madhab
     }
 
     func requestNotificationPermission() async {

@@ -37,11 +37,13 @@ struct AdhanPlayButton: View {
             VStack(spacing: SafaSpacing.xs) {
                 Image(systemName: isPlaying ? "stop.fill" : "speaker.wave.2.fill")
                     .font(.title2)
+                    .foregroundColor(isPlaying ? .red : .accentColor)
                 Text(isPlaying ? "Stop Adhan" : "Adhan")
                     .font(SafaTypography.labelSmall)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, SafaSpacing.sm)
+            .padding(.vertical, SafaSpacing.md)
             .background(Color(UIColor.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
         }
