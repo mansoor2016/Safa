@@ -145,12 +145,13 @@ struct RamadanView: View {
 
                 Divider()
 
-                // Live countdown (check Suhoor first — both are in the future before Suhoor ends)
-                if let suhoor = suhoorTime, suhoor > Date() {
+                // Live countdown (uses shared helper for Suhoor-first priority)
+                switch RamadanCountdownHelpers.resolveTarget(now: Date(), suhoorTime: suhoorTime, iftarTime: iftarTime) {
+                case .suhoor(let time):
                     HStack {
                         Image(systemName: "timer")
                             .foregroundStyle(.orange)
-                        Text(suhoor, style: .timer)
+                        Text(time, style: .timer)
                             .font(SafaTypography.headlineLarge)
                             .monospacedDigit()
                             .contentTransition(.numericText())
@@ -158,11 +159,11 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
-                } else if let iftar = iftarTime, iftar > Date() {
+                case .iftar(let time):
                     HStack {
                         Image(systemName: "timer")
                             .foregroundStyle(Color.accentColor)
-                        Text(iftar, style: .timer)
+                        Text(time, style: .timer)
                             .font(SafaTypography.headlineLarge)
                             .monospacedDigit()
                             .contentTransition(.numericText())
@@ -170,7 +171,7 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
-                } else {
+                case .complete:
                     Label("Fasting complete for today", systemImage: "checkmark.circle.fill")
                         .font(SafaTypography.titleSmall)
                         .foregroundStyle(.green)

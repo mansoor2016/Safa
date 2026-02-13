@@ -247,17 +247,20 @@ struct RamadanBanner: View {
 
     private func updateCountdown() {
         let now = Date()
+        let target = RamadanCountdownHelpers.resolveTarget(
+            now: now, suhoorTime: suhoorTime, iftarTime: iftarTime
+        )
 
-        // Determine which time to count down to
-        if let suhoor = suhoorTime, suhoor > now {
+        switch target {
+        case .suhoor(let time):
             isUntilSuhoor = true
-            let (hours, minutes, seconds) = suhoor.countdown()
+            let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        } else if let iftar = iftarTime, iftar > now {
+        case .iftar(let time):
             isUntilSuhoor = false
-            let (hours, minutes, seconds) = iftar.countdown()
+            let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
+        case .complete:
             countdown = "--:--:--"
         }
     }
