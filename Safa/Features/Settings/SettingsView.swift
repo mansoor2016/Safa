@@ -20,7 +20,6 @@ struct SettingsView: View {
     @State private var smartAdhanEnabled = false
     @State private var iftarAdhanEnabled = false
     @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
-    @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
     @State private var selectedTranslation = AppDefaults.translationLanguage
     @State private var autoScrollEnabled = false
@@ -351,11 +350,6 @@ struct SettingsView: View {
 
     private var quranSettingsSection: some View {
         Section {
-            Toggle("Show Arabic Text", isOn: $showArabicText)
-                .onChange(of: showArabicText) { _, newValue in
-                    Task { await prefsManager.saveQuranSettings(showArabic: newValue) }
-                }
-
             Toggle("Show Transliteration", isOn: $showTransliteration)
                 .onChange(of: showTransliteration) { _, newValue in
                     Task { await prefsManager.saveQuranSettings(showTransliteration: newValue) }

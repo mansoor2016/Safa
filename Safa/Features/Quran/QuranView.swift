@@ -452,7 +452,6 @@ private struct MatchedTransitionSourceModifier: ViewModifier {
 
 private struct QuranSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showArabicText = AppDefaults.showArabicText
     @State private var showTransliteration = AppDefaults.showTransliteration
     @State private var autoScrollEnabled = false
 
@@ -460,11 +459,6 @@ private struct QuranSettingsSheet: View {
 
     var body: some View {
         List {
-            Toggle("Show Arabic Text", isOn: $showArabicText)
-                .onChange(of: showArabicText) { _, newValue in
-                    Task { await prefsManager.saveQuranSettings(showArabic: newValue) }
-                }
-
             Toggle("Show Transliteration", isOn: $showTransliteration)
                 .onChange(of: showTransliteration) { _, newValue in
                     Task { await prefsManager.saveQuranSettings(showTransliteration: newValue) }
@@ -497,7 +491,6 @@ private struct QuranSettingsSheet: View {
         }
         .task {
             let prefs = await prefsManager.getPreferences()
-            showArabicText = prefs.showArabicText
             showTransliteration = prefs.showTransliteration
             autoScrollEnabled = prefs.autoScrollEnabled
         }
