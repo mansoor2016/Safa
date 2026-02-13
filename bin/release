@@ -1,27 +1,76 @@
 #!/bin/bash
 set -euo pipefail
 
-# Usage: bin/release 1.4
-#   - Updates MARKETING_VERSION in project.pbxproj
-#   - Commits the version bump
-#   - Creates an annotated git tag v{VERSION}
-#   - Pushes commit + tag to origin
+# Usage:
+#   bin/release patch        — auto-bump patch (1.3.1 → 1.3.2), increment build, commit, tag, push
+#   bin/release minor        — auto-bump minor (1.3.1 → 1.4.0), increment build, commit, tag, push
+#   bin/release 1.4          — explicit version, increment build, commit, tag, push
+#   bin/release --build      — increment build number only (no version/tag change), commit, push
+#
+# Every push to main shows up in App Store Connect, so every push needs
+# a unique MARKETING_VERSION + CURRENT_PROJECT_VERSION combination.
 
 PBXPROJ="Safa.xcodeproj/project.pbxproj"
 
-# --- Validate input ---
+# --- Read current values ---
+
+CURRENT_VERSION=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
+CURRENT_BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
+
+# --- No args: show usage ---
 
 if [[ $# -ne 1 ]]; then
-    current=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
-    echo "Usage: bin/release <version>"
-    echo "Current version: $current"
+    echo "Usage: bin/release <patch|minor|version|--build>"
+    echo ""
+    echo "  bin/release patch     Auto-bump patch (1.3.1 → 1.3.2)"
+    echo "  bin/release minor     Auto-bump minor (1.3.1 → 1.4.0)"
+    echo "  bin/release 1.4       Explicit version"
+    echo "  bin/release --build   Increment build number only"
+    echo ""
+    echo "Current: $CURRENT_VERSION ($CURRENT_BUILD)"
     exit 1
 fi
 
-VERSION="$1"
+ARG="$1"
+
+# --- Build-only mode ---
+
+if [[ "$ARG" == "--build" ]]; then
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "Error: working tree is dirty — commit or stash changes first"
+        exit 1
+    fi
+
+    NEW_BUILD=$((CURRENT_BUILD + 1))
+    echo "Bumping build $CURRENT_BUILD → $NEW_BUILD"
+
+    sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
+
+    git add "$PBXPROJ"
+    git commit -m "Bump build to $NEW_BUILD"
+    git push
+
+    echo "Pushed $CURRENT_VERSION ($NEW_BUILD)"
+    exit 0
+fi
+
+# --- Resolve version ---
+
+if [[ "$ARG" == "patch" ]]; then
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+    PATCH=${PATCH:-0}
+    VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+elif [[ "$ARG" == "minor" ]]; then
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+    VERSION="$MAJOR.$((MINOR + 1)).0"
+else
+    VERSION="$ARG"
+fi
+
 TAG="v$VERSION"
 
-# Sanity checks
+# --- Validate ---
+
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     echo "Error: version must be semver (e.g. 1.3, 1.3.1)"
     exit 1
@@ -37,27 +86,23 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 
-# --- Read current version ---
-
-CURRENT=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
-
-if [[ "$CURRENT" == "$VERSION" ]]; then
+if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
     echo "Error: version is already $VERSION"
     exit 1
 fi
 
-echo "Bumping $CURRENT → $VERSION"
+# --- Apply ---
 
-# --- Update pbxproj ---
+NEW_BUILD=$((CURRENT_BUILD + 1))
+echo "Bumping $CURRENT_VERSION ($CURRENT_BUILD) → $VERSION ($NEW_BUILD)"
 
-sed -i '' "s/MARKETING_VERSION = $CURRENT;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
-
-# --- Commit, tag, push ---
+sed -i '' "s/MARKETING_VERSION = $CURRENT_VERSION;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
+sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
 
 git add "$PBXPROJ"
-git commit -m "Bump version to $VERSION"
+git commit -m "Bump version to $VERSION ($NEW_BUILD)"
 git tag -a "$TAG" -m "$TAG"
 git push
 git push origin "$TAG"
 
-echo "Released $TAG"
+echo "Released $TAG ($NEW_BUILD)"

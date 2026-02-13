@@ -633,6 +633,23 @@ xcodebuild -scheme Safa -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 - Write clear commit messages summarizing what changed and why
 - This ensures progress is saved, changes are reviewable, and rollback is easy if needed
 
+### Version Bumps Before Pushing
+
+**CRITICAL: Every push to main appears in App Store Connect.** Each push must have a unique build number. Use `bin/release` to manage versioning:
+
+```bash
+bin/release --build     # Increment build number only (for non-release pushes)
+bin/release patch       # Auto-bump patch: 1.3.1 → 1.3.2 (creates tag)
+bin/release minor       # Auto-bump minor: 1.3.1 → 1.4.0 (creates tag)
+bin/release 2.0         # Explicit version (creates tag)
+```
+
+**Workflow:**
+- For regular commits (bug fixes, polish): commit your changes, then run `bin/release --build` to bump the build number and push
+- For feature releases: commit your changes, then run `bin/release patch` (or `minor`/explicit version) to bump, tag, and push
+- **Never `git push` directly** — always go through `bin/release` so the build number is incremented
+- The script handles commit + push atomically; working tree must be clean before running
+
 ### Common Build Issues
 
 | Error | Solution |
