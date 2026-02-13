@@ -57,6 +57,7 @@ struct OnboardingView: View {
                 bottomBar
                     .padding(.horizontal)
                     .padding(.bottom, SafaSpacing.sm)
+                    .animation(.easeInOut(duration: 0.3), value: currentPage)
             }
         }
         .onAppear {
