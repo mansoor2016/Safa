@@ -1132,6 +1132,9 @@
     "Friday Duas" : {
 
     },
+    "Gentle reminder" : {
+
+    },
     "Get Daily Verse" : {
 
     },
@@ -1160,6 +1163,9 @@
 
     },
     "Get today's verse of the day" : {
+
+    },
+    "Got it" : {
 
     },
     "hadith" : {
@@ -1701,10 +1707,7 @@
     "Question" : {
 
     },
-    "Questions? Email us at legal@safaapp.com" : {
-
-    },
-    "Questions? Email us at privacy@safaapp.com" : {
+    "Questions? Email us at helpmesafa@gmail.com" : {
 
     },
     "Quick Access" : {
@@ -2388,6 +2391,9 @@
 
     },
     "You can deduct immediate debts and expenses that are due within the year from your total assets." : {
+
+    },
+    "You logged %lld of 30 fasting days this Ramadan. If you have missed fasts, you can make them up when able." : {
 
     },
     "You've completed %lld %@!" : {

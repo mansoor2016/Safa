@@ -168,7 +168,7 @@ struct ReviewPromptView: View {
         let body = text
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        if let url = URL(string: "mailto:feedback@safaapp.com?subject=\(subject)&body=\(body)") {
+        if let url = URL(string: "mailto:helpmesafa@gmail.com?subject=\(subject)&body=\(body)") {
             openURL(url)
         }
     }

@@ -134,8 +134,7 @@ If we make changes to this privacy policy, we will:
 
 If you have questions about this privacy policy or Safa's privacy practices:
 
-- GitHub: https://github.com/mansoor2016/Safa
-- Email: mansoor.aman11@gmail.com
+- Email: helpmesafa@gmail.com
 
 ---
 

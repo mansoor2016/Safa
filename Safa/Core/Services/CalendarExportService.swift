@@ -233,7 +233,7 @@ final class CalendarExportService {
 
         for event in events {
             ics += "BEGIN:VEVENT\n"
-            ics += "UID:\(event.id.uuidString)@safaapp.com\n"
+            ics += "UID:\(event.id.uuidString)@safa.app\n"
             ics += "DTSTAMP:\(dateTimeFormatter.string(from: Date()))\n"
 
             if event.isAllDay {

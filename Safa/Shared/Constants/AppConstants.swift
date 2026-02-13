@@ -12,11 +12,11 @@ enum AppConstants {
 
     // MARK: - URLs
     enum URLs {
-        static let website = URL(string: "https://safaapp.com")!
-        static let privacyPolicy = URL(string: "https://safaapp.com/privacy")!
-        static let termsOfService = URL(string: "https://safaapp.com/terms")!
-        static let support = URL(string: "https://safaapp.com/support")!
-        static let feedback = URL(string: "mailto:feedback@safaapp.com")!
+        static let website = URL(string: "https://mansoor2016.github.io/safa-legal")!
+        static let privacyPolicy = URL(string: "https://mansoor2016.github.io/safa-legal/privacy")!
+        static let termsOfService = URL(string: "https://mansoor2016.github.io/safa-legal/terms")!
+        static let support = URL(string: "mailto:helpmesafa@gmail.com")!
+        static let feedback = URL(string: "mailto:helpmesafa@gmail.com")!
 
         // App Store URLs - Update with real App ID after submission
         static let appStoreId = "id123456789" // TODO: Replace with real App Store ID

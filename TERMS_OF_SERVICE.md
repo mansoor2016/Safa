@@ -154,8 +154,7 @@ If any provision of these Terms is found unenforceable, the remaining provisions
 
 For questions about these Terms:
 
-- GitHub: https://github.com/mansoor2016/Safa
-- Email: mansoor.aman11@gmail.com
+- Email: helpmesafa@gmail.com
 
 ---
 

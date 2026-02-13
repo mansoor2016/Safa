@@ -46,7 +46,7 @@ struct PrivacyPolicyView: View {
                 }
 
                 section(title: "Contact") {
-                    Text("Questions? Email us at privacy@safaapp.com")
+                    Text("Questions? Email us at helpmesafa@gmail.com")
                         .font(.body)
                 }
 
@@ -138,7 +138,7 @@ struct TermsOfServiceView: View {
                 }
 
                 section(title: "Contact") {
-                    Text("Questions? Email us at legal@safaapp.com")
+                    Text("Questions? Email us at helpmesafa@gmail.com")
                         .font(.body)
                 }
 
