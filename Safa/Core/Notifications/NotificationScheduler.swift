@@ -152,7 +152,7 @@ final class NotificationScheduler {
     func requestAuthorization() async -> Bool {
         do {
             let granted = try await center.requestAuthorization(
-                options: [.alert, .sound, .badge, .criticalAlert, .provisional]
+                options: [.alert, .sound, .badge]
             )
             await MainActor.run {
                 isAuthorized = granted
