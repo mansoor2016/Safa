@@ -229,8 +229,8 @@ private struct AyahReaderContent: View {
     // MARK: - Auto Scroll Settings
 
     private func loadAutoScrollSetting() {
-        let isEnabled = UserDefaults.standard.bool(forKey: "autoScrollEnabled")
-        autoScrollEnabled = isEnabled
+        let prefs = PreferencesManager.loadPreferencesSync()
+        autoScrollEnabled = prefs.autoScrollEnabled
     }
 
     private func resetAutoHideTimer() {

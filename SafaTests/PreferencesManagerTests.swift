@@ -300,14 +300,16 @@ final class PreferencesManagerTests: XCTestCase {
     // These verify settings that appear on multiple screens (Prayer page, Quran page, Settings)
     // all roundtrip through the same PreferencesManager path.
 
-    func test_autoScrollEnabled_roundtrip() async {
+    func test_autoScrollEnabled_savedViaPrefsMgr_readableViaGetPreferences() async {
+        // Settings/Quran page saves via update(keyPath), AyahReaderView reads via getPreferences
         await sut.update(\.autoScrollEnabled, to: true)
+
         let prefs = await sut.getPreferences()
-        XCTAssertTrue(prefs.autoScrollEnabled)
+        XCTAssertTrue(prefs.autoScrollEnabled, "Auto-scroll enabled via Settings should be readable")
 
         await sut.update(\.autoScrollEnabled, to: false)
         let prefs2 = await sut.getPreferences()
-        XCTAssertFalse(prefs2.autoScrollEnabled)
+        XCTAssertFalse(prefs2.autoScrollEnabled, "Auto-scroll disabled should persist")
     }
 
     func test_prayerAdjustments_roundtrip() async {
