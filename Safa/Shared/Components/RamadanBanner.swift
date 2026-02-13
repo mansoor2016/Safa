@@ -31,10 +31,10 @@ struct RamadanBanner: View {
             Divider()
                 .background(Color.white.opacity(0.2))
 
-            // Day progress and countdown
-            HStack(spacing: SafaSpacing.lg) {
-                dayProgress
+            // Countdown then day progress (stacked vertically)
+            VStack(spacing: SafaSpacing.sm) {
                 countdownView
+                dayProgress
             }
 
             // Quran khatm progress
@@ -192,7 +192,7 @@ struct RamadanBanner: View {
     // MARK: - Countdown
 
     private var countdownView: some View {
-        VStack(alignment: .trailing, spacing: SafaSpacing.xxs) {
+        VStack(spacing: SafaSpacing.xxs) {
             Text(isUntilSuhoor ? "Suhoor ends in" : "Iftar in")
                 .font(SafaTypography.labelSmall)
                 .foregroundColor(.white.opacity(0.7))
