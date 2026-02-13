@@ -4,6 +4,7 @@
 
 import SwiftUI
 import UIKit
+import UserNotifications
 import CoreSpotlight
 import AppIntents
 
@@ -11,6 +12,15 @@ import AppIntents
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     static var pendingShortcutType: String?
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        // Set notification delegate so foreground notifications display with banner + sound
+        UNUserNotificationCenter.current().delegate = NotificationResponseHandler.shared
+        return true
+    }
 
     func application(
         _ application: UIApplication,
