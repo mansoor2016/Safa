@@ -54,11 +54,11 @@ struct ReviewPromptView: View {
         VStack(spacing: SafaSpacing.xs) {
             Text("Rate Safa")
                 .font(SafaTypography.titleLarge)
-                .foregroundStyle(SafaColors.text)
+                .foregroundStyle(SafaColors.Fallback.text)
 
             Text("How are you enjoying Safa?")
                 .font(SafaTypography.bodyMedium)
-                .foregroundStyle(SafaColors.secondaryText)
+                .foregroundStyle(SafaColors.Fallback.secondaryText)
         }
     }
 
@@ -67,7 +67,7 @@ struct ReviewPromptView: View {
             ForEach(1...5, id: \.self) { star in
                 Image(systemName: star <= rating ? "star.fill" : "star")
                     .font(.title2)
-                    .foregroundStyle(star <= rating ? .accentColor : SafaColors.tertiaryText)
+                    .foregroundStyle(star <= rating ? .accentColor : SafaColors.Fallback.tertiaryText)
                     .onTapGesture { rating = star }
             }
         }
@@ -84,13 +84,13 @@ struct ReviewPromptView: View {
                 .padding(SafaSpacing.xs)
                 .background(
                     RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md)
-                        .fill(SafaColors.tertiaryBackground)
+                        .fill(SafaColors.Fallback.tertiaryBackground)
                 )
 
             if feedbackText.isEmpty && !isTextEditorFocused {
                 Text("Tell us more...")
                     .font(SafaTypography.bodyMedium)
-                    .foregroundStyle(SafaColors.tertiaryText)
+                    .foregroundStyle(SafaColors.Fallback.tertiaryText)
                     .padding(.horizontal, SafaSpacing.sm)
                     .padding(.vertical, SafaSpacing.sm)
                     .allowsHitTesting(false)
@@ -106,10 +106,10 @@ struct ReviewPromptView: View {
             } label: {
                 HStack(spacing: SafaSpacing.xs) {
                     Image(systemName: dontAskAgain ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(dontAskAgain ? .accentColor : SafaColors.tertiaryText)
+                        .foregroundStyle(dontAskAgain ? .accentColor : SafaColors.Fallback.tertiaryText)
                     Text("Don't ask again")
                         .font(SafaTypography.bodySmall)
-                        .foregroundStyle(SafaColors.secondaryText)
+                        .foregroundStyle(SafaColors.Fallback.secondaryText)
                 }
             }
             .buttonStyle(.plain)

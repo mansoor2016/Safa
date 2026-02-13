@@ -286,7 +286,8 @@ struct MainTabView: View {
             }
         }
         .task {
-            try? await Task.sleep(for: .seconds(5))
+            // Wait at least 15 minutes before showing review prompt (matches AppReviewService.baseInterval)
+            try? await Task.sleep(for: .seconds(AppReviewService.baseInterval))
             if AppReviewService.shouldShowPrompt() {
                 withAnimation { showReviewPrompt = true }
                 AppReviewService.recordPromptShown()
