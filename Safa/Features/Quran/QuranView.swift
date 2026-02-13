@@ -51,6 +51,7 @@ private struct QuranContentView: View {
     @State private var selectedTab = 0
     @State private var editingBookmark: QuranBookmark?
     @State private var editNoteText = ""
+    @State private var showingSettings = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,6 +79,21 @@ private struct QuranContentView: View {
         .navigationTitle("Quran")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $viewModel.searchQuery, prompt: "Search surahs...")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+            }
+        }
+        .sheet(isPresented: $showingSettings) {
+            NavigationStack {
+                QuranSettingsSheet()
+            }
+            .fullSheet()
+        }
         .task {
             await viewModel.loadSurahs()
         }
@@ -428,6 +444,62 @@ private struct MatchedTransitionSourceModifier: ViewModifier {
                 .matchedTransitionSource(id: id, in: namespace)
         } else {
             content
+        }
+    }
+}
+
+// MARK: - Quran Settings Sheet
+
+private struct QuranSettingsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var showArabicText = AppDefaults.showArabicText
+    @State private var showTransliteration = AppDefaults.showTransliteration
+    @State private var autoScrollEnabled = false
+
+    private let prefsManager = PreferencesManager.shared
+
+    var body: some View {
+        List {
+            Toggle("Show Arabic Text", isOn: $showArabicText)
+                .onChange(of: showArabicText) { _, newValue in
+                    Task { await prefsManager.saveQuranSettings(showArabic: newValue) }
+                }
+
+            Toggle("Show Transliteration", isOn: $showTransliteration)
+                .onChange(of: showTransliteration) { _, newValue in
+                    Task { await prefsManager.saveQuranSettings(showTransliteration: newValue) }
+                }
+
+            HStack {
+                Text("Translation")
+                Spacer()
+                Text("English - Sahih International")
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+            }
+
+            NavigationLink {
+                FontSettingsView()
+            } label: {
+                Text("Font Settings")
+            }
+
+            Toggle("Auto-Scroll Reader", isOn: $autoScrollEnabled)
+                .onChange(of: autoScrollEnabled) { _, newValue in
+                    Task { await prefsManager.update(\.autoScrollEnabled, to: newValue) }
+                }
+        }
+        .navigationTitle("Quran Settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") { dismiss() }
+            }
+        }
+        .task {
+            let prefs = await prefsManager.getPreferences()
+            showArabicText = prefs.showArabicText
+            showTransliteration = prefs.showTransliteration
+            autoScrollEnabled = prefs.autoScrollEnabled
         }
     }
 }
