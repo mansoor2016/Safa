@@ -452,18 +452,12 @@ private struct MatchedTransitionSourceModifier: ViewModifier {
 
 private struct QuranSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showTransliteration = AppDefaults.showTransliteration
     @State private var autoScrollEnabled = false
 
     private let prefsManager = PreferencesManager.shared
 
     var body: some View {
         List {
-            Toggle("Show Transliteration", isOn: $showTransliteration)
-                .onChange(of: showTransliteration) { _, newValue in
-                    Task { await prefsManager.saveQuranSettings(showTransliteration: newValue) }
-                }
-
             HStack {
                 Text("Translation")
                 Spacer()
@@ -491,7 +485,6 @@ private struct QuranSettingsSheet: View {
         }
         .task {
             let prefs = await prefsManager.getPreferences()
-            showTransliteration = prefs.showTransliteration
             autoScrollEnabled = prefs.autoScrollEnabled
         }
     }
