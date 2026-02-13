@@ -20,6 +20,22 @@ final class LocationService: NSObject, ObservableObject, LocationServiceProtocol
     private var locationContinuation: CheckedContinuation<CLLocation, Error>?
     private var lastChangeCheckDate: Date?
 
+    // MARK: - Publishers
+
+    /// Heading updates for compass-based UI (e.g., Qibla compass).
+    var headingPublisher: AnyPublisher<CLHeading?, Never> {
+        $heading
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
+    /// Authorization status updates for permission-dependent flows.
+    var authorizationStatusPublisher: AnyPublisher<CLAuthorizationStatus, Never> {
+        $authorizationStatus
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
     // MARK: - Init
     override init() {
         super.init()
