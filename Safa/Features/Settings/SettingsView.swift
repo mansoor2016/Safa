@@ -653,8 +653,8 @@ struct SettingsView: View {
                 Button("Test Prayer Notification (5s)") {
                     Task {
                         let content = UNMutableNotificationContent()
-                        content.title = "Dhuhr Time"
-                        content.body = "It's time for Dhuhr prayer"
+                        content.title = "Test Notification"
+                        content.body = "This is a test prayer notification"
                         content.sound = .default
                         content.interruptionLevel = .timeSensitive
                         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
