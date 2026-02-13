@@ -127,4 +127,38 @@ final class QiblaCompassHelpersTests: XCTestCase {
     func test_compassAccuracy_unreliable() {
         XCTAssertEqual(QiblaCompassHelpers.compassAccuracy(for: -1), .unreliable)
     }
+
+    // MARK: - compassSize(forContainerWidth:)
+
+    func test_compassSize_iPhoneSE_375pt() {
+        // Card interior on SE ≈ 375 - 32 (padding) - 32 (card insets) = 311pt
+        let size = QiblaCompassHelpers.compassSize(forContainerWidth: 311)
+        XCTAssertGreaterThanOrEqual(size, 200)
+        XCTAssertLessThanOrEqual(size, 320)
+        XCTAssertEqual(size, 247, accuracy: 1)
+    }
+
+    func test_compassSize_iPhoneProMax_430pt() {
+        // Card interior on Pro Max ≈ 430 - 32 - 32 = 366pt
+        let size = QiblaCompassHelpers.compassSize(forContainerWidth: 366)
+        XCTAssertEqual(size, 302, accuracy: 1)
+    }
+
+    func test_compassSize_narrowContainer_200pt() {
+        let size = QiblaCompassHelpers.compassSize(forContainerWidth: 200)
+        XCTAssertEqual(size, 200, "Should clamp to minimum of 200")
+    }
+
+    func test_compassSize_wideContainer_500pt() {
+        let size = QiblaCompassHelpers.compassSize(forContainerWidth: 500)
+        XCTAssertEqual(size, 320, "Should clamp to maximum of 320")
+    }
+
+    func test_compassSize_neverExceedsContainerWidth() {
+        // For containers wide enough to fit breathing room, size + breathing ≤ width
+        for width in stride(from: 264.0, through: 500.0, by: 20.0) {
+            let size = QiblaCompassHelpers.compassSize(forContainerWidth: width)
+            XCTAssertLessThanOrEqual(size + 64, width, "Compass size + breathing room should not exceed container width")
+        }
+    }
 }

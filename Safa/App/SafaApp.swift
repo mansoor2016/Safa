@@ -360,7 +360,7 @@ struct MainTabView: View {
         case .prayer:
             PrayerView()
         case .qibla:
-            QiblaCompassView()
+            QiblaCompassView(showsDoneButton: false)
         case .prayerLog:
             PrayerLogView()
         case .learn:

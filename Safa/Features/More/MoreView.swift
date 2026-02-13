@@ -23,7 +23,7 @@ struct MoreView: View {
                 }
 
                 NavigationLink {
-                    QiblaCompassView()
+                    QiblaCompassView(showsDoneButton: false)
                 } label: {
                     Label("Qibla Compass", systemImage: "location.north.fill")
                 }

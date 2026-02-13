@@ -85,7 +85,7 @@ private struct PrayerContentView: View {
             NavigationStack {
                 QiblaCompassView()
             }
-            .fullSheet()
+            .largeSheet()
         }
         .sheet(isPresented: $showingSettings) {
             NavigationStack {

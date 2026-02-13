@@ -64,4 +64,13 @@ enum QiblaCompassHelpers {
         let value = heading.trueHeading >= 0 ? heading.trueHeading : heading.magneticHeading
         return normalizeDegrees(value)
     }
+
+    // MARK: - Responsive Sizing
+
+    /// Compute compass size from the available container width.
+    /// Subtracts horizontal breathing room and clamps to [200, 320].
+    static func compassSize(forContainerWidth width: CGFloat) -> CGFloat {
+        let breathing: CGFloat = 64 // SafaSpacing.xl * 2
+        return min(max(width - breathing, 200), 320)
+    }
 }

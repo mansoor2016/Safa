@@ -75,7 +75,7 @@ struct RamadanView: View {
         }
         .sheet(isPresented: $showingQibla) {
             NavigationStack { QiblaCompassView() }
-                .fullSheet()
+                .largeSheet()
         }
         .sheet(isPresented: $showZakat) {
             NavigationStack { ZakatCalculatorView() }

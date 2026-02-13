@@ -22,4 +22,13 @@ extension View {
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
     }
+
+    /// Large sheet for immersive single-purpose tools (e.g. Qibla compass).
+    /// Full-screen only with drag indicator.
+    func largeSheet() -> some View {
+        self
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
+    }
 }
