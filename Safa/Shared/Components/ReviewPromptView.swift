@@ -138,9 +138,8 @@ struct ReviewPromptView: View {
         let currentRating = rating
         let text = feedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if dontAskAgain {
-            AppReviewService.optOut()
-        }
+        // Submitting = permanent opt-out. User completed the review flow.
+        AppReviewService.optOut()
 
         ToastService.shared.show(Toast(
             message: "Thank you for your feedback!",
