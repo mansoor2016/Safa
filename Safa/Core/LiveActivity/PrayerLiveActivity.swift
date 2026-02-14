@@ -51,7 +51,14 @@ final class PrayerLiveActivityManager {
         // System-level permission
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
-        // Detect stale/ended activity
+        // Reattach to existing system activity after cold launch (prevents duplicates)
+        if currentActivity == nil {
+            currentActivity = Activity<PrayerActivityAttributes>.activities.first {
+                $0.activityState == .active || $0.activityState == .stale
+            }
+        }
+
+        // Detect stale/ended tracked activity
         if let activity = currentActivity {
             let state = activity.activityState
             if state == .ended || state == .dismissed {
@@ -72,8 +79,8 @@ final class PrayerLiveActivityManager {
         // Find next obligatory prayer
         let now = Date()
         guard let next = prayers.first(where: { $0.time > now && $0.type.isObligatory }) else {
-            // All prayers passed — end any lingering activity
-            await endActivity()
+            // All prayers passed — end all activities (including orphans from previous sessions)
+            await endAllActivities()
             return
         }
 
@@ -136,7 +143,14 @@ final class PrayerLiveActivityManager {
         hijriDate: String,
         locationName: String
     ) async {
-        // Detect stale activity
+        // Reattach to existing system activity if handle was lost (cold launch)
+        if currentActivity == nil {
+            currentActivity = Activity<PrayerActivityAttributes>.activities.first {
+                $0.activityState == .active || $0.activityState == .stale
+            }
+        }
+
+        // Detect stale/ended tracked activity
         if let activity = currentActivity {
             let actState = activity.activityState
             if actState == .ended || actState == .dismissed {
