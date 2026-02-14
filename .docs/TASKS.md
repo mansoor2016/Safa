@@ -16,7 +16,6 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 |--------|------|
 | M | Prayer time accuracy — users report ~5 min early vs mosque timetables (London). Investigate calculation offsets, compare methods, validate against reference sources |
 | S | Calculation method visibility — show active method on Prayer screen so users can verify. Include a preview comparing today's times across methods so users can see the impact before switching |
-| M | Live Activity reliability — restart on foreground, recover from stale/expired state, handle 8h system limit, add settings toggle (on/off). Currently inconsistent: disappears unpredictably due to app termination killing boundary updates and staleDate expiry |
 | S | Adhan silent mode awareness — inline helper text below adhan sound picker + one-time tip on first enable |
 | S | Push 1.4.1+ build to 17 beta testers |
 | L | App Store screenshots, description, preview video |
@@ -74,4 +73,10 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ---
 
-*Last Updated: February 14, 2026 — P0/P1/P2 with effort estimates, beta feedback merged*
+## Completed
+
+Live Activity reliability (v1.4.3 — auto-recover on launch/foreground, stale detection, reattach after restart, settings toggle, onboarding gate, boundary task cleanup, duplicate/orphan prevention), widget stale prayer times fix (v1.4.1).
+
+---
+
+*Last Updated: February 14, 2026 — Live Activity reliability done, moved to Completed*
