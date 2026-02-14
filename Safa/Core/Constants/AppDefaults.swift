@@ -32,6 +32,11 @@ enum AppDefaults {
     /// Enable notifications by default
     static let notificationsEnabled: Bool = true
 
+    // MARK: - Live Activity
+
+    /// Enable Live Activity (lock screen countdown) by default
+    static let liveActivityEnabled: Bool = true
+
     // MARK: - UI Preferences
 
     /// Enable haptic feedback by default

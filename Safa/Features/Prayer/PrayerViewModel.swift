@@ -336,11 +336,12 @@ final class PrayerViewModel {
     }
 
     private func updateLiveActivity() {
+        let prefs = PreferencesManager.loadPreferencesSync()
+        guard prefs.liveActivityEnabled else { return }
         guard let next = nextPrayer else {
             Task { await PrayerLiveActivityManager.shared.endActivity() }
             return
         }
-        let prefs = PreferencesManager.loadPreferencesSync()
         let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
 

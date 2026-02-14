@@ -19,6 +19,7 @@ struct SettingsView: View {
     @State private var selectedAdhan: AdhanSound = .misharyAlafasy
     @State private var smartAdhanEnabled = false
     @State private var iftarAdhanEnabled = false
+    @State private var liveActivityEnabled = AppDefaults.liveActivityEnabled
     @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
     @State private var selectedTranslation = AppDefaults.translationLanguage
     @State private var autoScrollEnabled = false
@@ -332,15 +333,30 @@ struct SettingsView: View {
                         await prefsManager.update(\.iftarAdhanEnabled, to: newValue)
                     }
                 }
+
+            Toggle("Live Activity", isOn: $liveActivityEnabled)
+                .onChange(of: liveActivityEnabled) { _, newValue in
+                    Task {
+                        await prefsManager.saveLiveActivityEnabled(newValue)
+                        if newValue {
+                            await PrayerLiveActivityManager.shared.ensureActivityIfNeeded()
+                        } else {
+                            await PrayerLiveActivityManager.shared.endAllActivities()
+                        }
+                    }
+                }
         } header: {
             Text("Notifications")
         } footer: {
-            if iftarAdhanEnabled && !adhanEnabled {
-                Text("During Ramadan, the adhan will play for Maghrib (Iftar) only.")
-            } else if adhanEnabled && smartAdhanEnabled {
-                Text("Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.")
-            } else if adhanEnabled {
-                Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
+            VStack(alignment: .leading, spacing: 4) {
+                if iftarAdhanEnabled && !adhanEnabled {
+                    Text("During Ramadan, the adhan will play for Maghrib (Iftar) only.")
+                } else if adhanEnabled && smartAdhanEnabled {
+                    Text("Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.")
+                } else if adhanEnabled {
+                    Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
+                }
+                Text("Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island.")
             }
         }
     }
@@ -708,6 +724,9 @@ struct SettingsView: View {
         // Load banner states (synced with HomeView dismiss keys)
         showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
         showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
+
+        // Load Live Activity setting
+        liveActivityEnabled = prefs.liveActivityEnabled
 
         // Load adhan settings
         adhanEnabled = prefs.adhanEnabled

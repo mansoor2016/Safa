@@ -122,8 +122,8 @@ struct SafaApp: App {
                     await dependencies.userState.recordActivity(type: .daily)
                 }
 
-                // Clean up stale Live Activities from previous session
-                await PrayerLiveActivityManager.shared.endAllActivities()
+                // Restore or start Live Activity (handles stale cleanup internally)
+                await PrayerLiveActivityManager.shared.ensureActivityIfNeeded()
 
                 // Prune old hasanat tracker entries (prevents UserDefaults bloat)
                 HasanatTracker.pruneOldEntries()
@@ -152,6 +152,8 @@ struct SafaApp: App {
                         handleShortcut(shortcutType)
                     }
                     Task { await checkLocationChange() }
+                    // Recover Live Activity on every foreground resume
+                    Task { await PrayerLiveActivityManager.shared.ensureActivityIfNeeded() }
                 }
             }
             .alert(

@@ -70,6 +70,11 @@ final class PreferencesManager {
         await update(\.selectedTranslation, to: language)
     }
 
+    /// Save Live Activity enabled setting
+    func saveLiveActivityEnabled(_ enabled: Bool) async {
+        await update(\.liveActivityEnabled, to: enabled)
+    }
+
     /// Save location settings
     func saveLocation(name: String, latitude: Double, longitude: Double, countryCode: String?) async {
         await update { prefs in

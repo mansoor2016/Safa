@@ -20,6 +20,9 @@ struct UserPreferences: Codable, Hashable {
     var notificationsEnabled: Bool
     var notificationEnabledPrayers: [String]  // Prayer rawValues, e.g. ["fajr", "dhuhr", ...]
 
+    // MARK: - Live Activity Settings
+    var liveActivityEnabled: Bool
+
     // MARK: - Adhan Settings
     var adhanEnabled: Bool
     var selectedAdhan: String
@@ -77,6 +80,7 @@ struct UserPreferences: Codable, Hashable {
         smartAdhanEnabled: Bool = false,
         iftarAdhanEnabled: Bool = false,
         notificationEnabledPrayers: [String] = PrayerType.obligatoryPrayers.map { $0.rawValue },
+        liveActivityEnabled: Bool = AppDefaults.liveActivityEnabled,
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
         highContrastEnabled: Bool = false,
@@ -104,11 +108,60 @@ struct UserPreferences: Codable, Hashable {
         self.smartAdhanEnabled = smartAdhanEnabled
         self.iftarAdhanEnabled = iftarAdhanEnabled
         self.notificationEnabledPrayers = notificationEnabledPrayers
+        self.liveActivityEnabled = liveActivityEnabled
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled
         self.highContrastEnabled = highContrastEnabled
         self.autoScrollEnabled = autoScrollEnabled
         self.prayerAdjustments = prayerAdjustments
+    }
+
+    // MARK: - Codable (backward-compatible decoder for new fields)
+
+    enum CodingKeys: String, CodingKey {
+        case calculationMethod, madhab
+        case selectedTranslation, showArabicText, showTransliteration
+        case notificationsEnabled, notificationEnabledPrayers
+        case liveActivityEnabled
+        case adhanEnabled, selectedAdhan, selectedFajrAdhan, smartAdhanEnabled, iftarAdhanEnabled
+        case accentColorName, hapticFeedbackEnabled
+        case savedLocationName, savedLatitude, savedLongitude, savedCountryCode
+        case useLocationBasedDefaults, autoUpdateLocationForPrayers
+        case reduceMotionEnabled, largerArabicTextEnabled, highContrastEnabled
+        case autoScrollEnabled
+        case prayerAdjustments
+        case hasCompletedOnboarding
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        calculationMethod = try container.decode(CalculationMethod.self, forKey: .calculationMethod)
+        madhab = try container.decode(Madhab.self, forKey: .madhab)
+        selectedTranslation = try container.decode(String.self, forKey: .selectedTranslation)
+        showArabicText = try container.decode(Bool.self, forKey: .showArabicText)
+        showTransliteration = try container.decode(Bool.self, forKey: .showTransliteration)
+        notificationsEnabled = try container.decode(Bool.self, forKey: .notificationsEnabled)
+        notificationEnabledPrayers = try container.decode([String].self, forKey: .notificationEnabledPrayers)
+        liveActivityEnabled = try container.decodeIfPresent(Bool.self, forKey: .liveActivityEnabled) ?? AppDefaults.liveActivityEnabled
+        adhanEnabled = try container.decode(Bool.self, forKey: .adhanEnabled)
+        selectedAdhan = try container.decode(String.self, forKey: .selectedAdhan)
+        selectedFajrAdhan = try container.decode(String.self, forKey: .selectedFajrAdhan)
+        smartAdhanEnabled = try container.decode(Bool.self, forKey: .smartAdhanEnabled)
+        iftarAdhanEnabled = try container.decode(Bool.self, forKey: .iftarAdhanEnabled)
+        accentColorName = try container.decode(String.self, forKey: .accentColorName)
+        hapticFeedbackEnabled = try container.decode(Bool.self, forKey: .hapticFeedbackEnabled)
+        savedLocationName = try container.decodeIfPresent(String.self, forKey: .savedLocationName)
+        savedLatitude = try container.decodeIfPresent(Double.self, forKey: .savedLatitude)
+        savedLongitude = try container.decodeIfPresent(Double.self, forKey: .savedLongitude)
+        savedCountryCode = try container.decodeIfPresent(String.self, forKey: .savedCountryCode)
+        useLocationBasedDefaults = try container.decode(Bool.self, forKey: .useLocationBasedDefaults)
+        autoUpdateLocationForPrayers = try container.decode(Bool.self, forKey: .autoUpdateLocationForPrayers)
+        reduceMotionEnabled = try container.decode(Bool.self, forKey: .reduceMotionEnabled)
+        largerArabicTextEnabled = try container.decode(Bool.self, forKey: .largerArabicTextEnabled)
+        highContrastEnabled = try container.decode(Bool.self, forKey: .highContrastEnabled)
+        autoScrollEnabled = try container.decode(Bool.self, forKey: .autoScrollEnabled)
+        prayerAdjustments = try container.decode([String: Int].self, forKey: .prayerAdjustments)
+        hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
     }
 
     // MARK: - Prayer Adjustment Helpers

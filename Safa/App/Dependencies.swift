@@ -72,5 +72,11 @@ final class Dependencies {
 
         // Configure preferences manager (must happen after userRepository init)
         PreferencesManager.shared.configure(userRepository: userRepository)
+
+        // Configure Live Activity manager (needs prayer repo + location for ensureActivityIfNeeded)
+        PrayerLiveActivityManager.shared.configure(
+            prayerRepository: prayerRepository,
+            locationService: locationService
+        )
     }
 }
