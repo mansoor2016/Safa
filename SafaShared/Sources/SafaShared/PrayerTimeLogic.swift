@@ -43,6 +43,79 @@ public struct NextPrayerCalculator {
     public func isNextPrayer(_ name: String, from prayers: [PrayerInfo], at now: Date = Date()) -> Bool {
         nextPrayer(from: prayers, at: now)?.name == name
     }
+
+    // MARK: - Timeline Boundaries
+
+    /// Generate timeline boundary entries for widget/Live Activity use.
+    ///
+    /// Returns one entry per prayer transition: first at `startingAt` showing the current next prayer,
+    /// then one at each future prayer time switching to the subsequent prayer.
+    /// The final entry (after the last prayer) has `nextPrayer == nil`.
+    ///
+    /// Example for 5 prayers all in the future:
+    /// ```
+    /// [now → Fajr, fajrTime → Dhuhr, dhuhrTime → Asr, asrTime → Maghrib,
+    ///  maghribTime → Isha, ishaTime → nil]
+    /// ```
+    public func timelineBoundaries(from prayers: [PrayerInfo], startingAt now: Date) -> [PrayerBoundary] {
+        // Find prayers that haven't passed yet
+        let futurePrayers = prayers.filter { $0.time > now }
+
+        // If no future prayers, single entry with nil
+        guard !futurePrayers.isEmpty else {
+            return [PrayerBoundary(date: now, nextPrayer: nil)]
+        }
+
+        var boundaries: [PrayerBoundary] = []
+
+        // First entry: now, showing the next upcoming prayer
+        boundaries.append(PrayerBoundary(date: now, nextPrayer: futurePrayers[0]))
+
+        // Subsequent entries: at each prayer time, the next prayer switches
+        for i in 0..<futurePrayers.count {
+            let nextAfterThis = (i + 1 < futurePrayers.count) ? futurePrayers[i + 1] : nil
+            boundaries.append(PrayerBoundary(date: futurePrayers[i].time, nextPrayer: nextAfterThis))
+        }
+
+        return boundaries
+    }
+
+    /// The date to request a widget timeline refresh — 30 minutes after the last prayer,
+    /// or 30 minutes from now if all prayers have passed.
+    public func timelineRefreshDate(from prayers: [PrayerInfo], startingAt now: Date) -> Date {
+        let lastPrayerTime = prayers.last(where: { $0.time > now })?.time ?? now
+        let fallback = prayers.last?.time ?? now
+        let anchor = max(lastPrayerTime, fallback)
+        return anchor.addingTimeInterval(1800)
+    }
+
+    /// The next date at which the displayed prayer should change.
+    /// Returns the time of the next future prayer (the boundary where the name switches).
+    /// Returns nil if no more prayer transitions remain.
+    public func nextBoundaryDate(from prayers: [PrayerInfo], after now: Date) -> Date? {
+        // The "next boundary" is the time of the first future prayer.
+        // When that time arrives, the displayed prayer should switch to the one after it.
+        guard let next = prayers.first(where: { $0.time > now }) else { return nil }
+
+        // If that's the last prayer, the boundary is its time (switches to nil after)
+        // If there's one after, the boundary is still this prayer's time
+        // (because at this moment, "next" changes from this prayer to the following one)
+        return next.time
+    }
+}
+
+// MARK: - Prayer Boundary
+
+public struct PrayerBoundary: Equatable, Sendable {
+    /// The date this entry becomes active (for widget timeline) or the time to update (for Live Activity).
+    public let date: Date
+    /// The prayer to display as "next". Nil means all prayers for the day have passed.
+    public let nextPrayer: PrayerInfo?
+
+    public init(date: Date, nextPrayer: PrayerInfo?) {
+        self.date = date
+        self.nextPrayer = nextPrayer
+    }
 }
 
 // MARK: - Default Prayer Times (London Seasonal Approximation)

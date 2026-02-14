@@ -15,19 +15,11 @@ struct PrayerTimeEntry: TimelineEntry {
     let hijriDate: String
     let configuration: ConfigurationAppIntent
 
-    private let calculator = NextPrayerCalculator()
-
-    var hasNextPrayer: Bool {
-        calculator.nextPrayer(from: prayers) != nil
-    }
-
-    var nextPrayerName: String {
-        calculator.nextPrayerName(from: prayers)
-    }
-
-    var nextPrayerTime: Date {
-        calculator.nextPrayerTime(from: prayers)
-    }
+    /// Stored next prayer info — set at entry creation, not computed from Date().
+    /// This ensures WidgetKit pre-rendered entries show the correct prayer for their time window.
+    let nextPrayerName: String
+    let nextPrayerTime: Date
+    let hasNextPrayer: Bool
 }
 
 // MARK: - Widget Provider
@@ -77,21 +69,33 @@ struct Provider: AppIntentTimelineProvider {
         return hijri
     }
 
-    private func makeEntry(configuration: ConfigurationAppIntent) -> PrayerTimeEntry {
-        PrayerTimeEntry(
-            date: Date(),
-            prayers: loadPrayers(),
+    private let calculator = NextPrayerCalculator()
+
+    private func makeEntry(configuration: ConfigurationAppIntent, at date: Date = Date(), nextPrayer: PrayerInfo? = nil, prayers: [PrayerInfo]? = nil) -> PrayerTimeEntry {
+        let prayerList = prayers ?? loadPrayers()
+        let next = nextPrayer ?? calculator.nextPrayer(from: prayerList, at: date)
+        return PrayerTimeEntry(
+            date: date,
+            prayers: prayerList,
             hijriDate: loadHijriDate(),
-            configuration: configuration
+            configuration: configuration,
+            nextPrayerName: next?.name ?? "Isha",
+            nextPrayerTime: next?.time ?? date,
+            hasNextPrayer: next != nil
         )
     }
 
     func placeholder(in context: Context) -> PrayerTimeEntry {
-        PrayerTimeEntry(
+        let prayers = defaultPrayers.forToday()
+        let next = calculator.nextPrayer(from: prayers)
+        return PrayerTimeEntry(
             date: Date(),
-            prayers: defaultPrayers.forToday(),
+            prayers: prayers,
             hijriDate: hijriHelper.hijriDateString(),
-            configuration: ConfigurationAppIntent()
+            configuration: ConfigurationAppIntent(),
+            nextPrayerName: next?.name ?? "Isha",
+            nextPrayerTime: next?.time ?? Date(),
+            hasNextPrayer: next != nil
         )
     }
 
@@ -100,12 +104,21 @@ struct Provider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<PrayerTimeEntry> {
-        let entry = makeEntry(configuration: configuration)
+        let now = Date()
+        let prayers = loadPrayers()
+        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Refresh at the next prayer time, or in 30 minutes if all prayers passed
-        let calculator = NextPrayerCalculator()
-        let refreshDate = calculator.nextPrayer(from: entry.prayers)?.time ?? Date().addingTimeInterval(1800)
-        return Timeline(entries: [entry], policy: .after(refreshDate))
+        let entries = boundaries.map { boundary in
+            makeEntry(
+                configuration: configuration,
+                at: boundary.date,
+                nextPrayer: boundary.nextPrayer,
+                prayers: prayers
+            )
+        }
+
+        let refreshDate = calculator.timelineRefreshDate(from: prayers, startingAt: now)
+        return Timeline(entries: entries, policy: .after(refreshDate))
     }
 }
 
@@ -346,7 +359,7 @@ struct LargeWidgetView: View {
                     LargePrayerRow(
                         name: prayer.name,
                         time: prayer.time.formatted(date: .omitted, time: .shortened),
-                        isPast: prayer.time < Date(),
+                        isPast: prayer.time <= entry.date,
                         isNext: prayer.name == entry.nextPrayerName
                     )
                 }

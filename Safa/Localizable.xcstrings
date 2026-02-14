@@ -438,6 +438,9 @@
     "Activity" : {
 
     },
+    "Adaptive Tab Bar" : {
+
+    },
     "Add a note..." : {
 
     },
@@ -560,6 +563,9 @@
 
     },
     "Back" : {
+
+    },
+    "Basic Inline Header" : {
 
     },
     "Below Nisab threshold" : {
@@ -780,6 +786,9 @@
     "Day Streak" : {
 
     },
+    "Debug options only visible in development builds." : {
+
+    },
     "Deductible Liabilities" : {
 
     },
@@ -820,6 +829,9 @@
 
     },
     "Detecting..." : {
+
+    },
+    "Developer Settings" : {
 
     },
     "Dhikr" : {
@@ -1106,6 +1118,15 @@
 
     },
     "Font Settings" : {
+
+    },
+    "Force Eid al-Adha" : {
+
+    },
+    "Force Eid al-Fitr" : {
+
+    },
+    "Force Ramadan Mode" : {
 
     },
     "Friday Duas" : {
@@ -1813,6 +1834,9 @@
     "Reset counter" : {
 
     },
+    "Reset Onboarding" : {
+
+    },
     "Reset Progress" : {
 
     },
@@ -2141,6 +2165,9 @@
 
     },
     "Test Haptics" : {
+
+    },
+    "Test Prayer Notification (5s)" : {
 
     },
     "The 10th of Muharram. Fasting this day expiates sins of the previous year." : {

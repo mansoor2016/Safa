@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreLocation
+import SafaShared
 
 @Observable
 final class PrayerViewModel {
@@ -343,10 +344,21 @@ final class PrayerViewModel {
         let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
 
+        // Convert PrayerTime → PrayerInfo for boundary scheduling
+        let prayerInfos = todayPrayers
+            .filter { $0.type.isObligatory }
+            .map { PrayerInfo(name: $0.type.displayName, time: $0.time) }
+
         Task {
             await PrayerLiveActivityManager.shared.updateActivity(
                 prayerName: next.type.displayName,
                 prayerTime: next.time,
+                hijriDate: hijri,
+                locationName: location
+            )
+            // Schedule updates at each prayer boundary so the name switches on time
+            PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(
+                prayers: prayerInfos,
                 hijriDate: hijri,
                 locationName: location
             )

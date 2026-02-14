@@ -41,6 +41,7 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 ### Phase 3: Audio (Core Islamic Experience)
 **Why third:** Hearing the adhan is deeply important culturally. Silent prayer notifications feel incomplete. Audio pipeline is fully implemented — needs device verification.
 
+- [ ] Adhan silent mode awareness — inline helper text below adhan sound picker in settings ("Adhan plays as a notification sound. Make sure Silent Mode is off and ringer volume is up to hear it.") + one-time dismissible tip/toast on first adhan enable
 - [ ] Dua audio pronunciations (needs audio files) — defer if files unavailable, wire player now
 - [ ] Audio playback verification — test adhan plays, backgrounding works *(manual device test)*
 
@@ -79,6 +80,8 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 ### Audio Expansion
 **Why deferred:** Full recitation audio requires large downloads, caching infrastructure, and offline queue. Ship basic adhan in v1, expand audio post-launch.
 
+- [ ] Background audio adhan playback — silent notification triggers AVAudioSession `.playback` (bypasses silent switch) instead of relying on notification sound; graceful fallback when app is terminated by iOS
+- [ ] Critical alert entitlement — apply to Apple for `.criticalAlert` permission so adhan notification sounds override silent mode natively
 - [ ] Audio download/caching for recitations
 - [ ] Resumable audio downloads, offline queue migration to Core Data
 
@@ -87,6 +90,16 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 
 - [ ] WCAG AA color contrast verification
 - [ ] High-contrast mode refinement
+
+### Native Observability
+**Why deferred:** App works fine without it. These are operational improvements that become valuable once real users are on the app — helps diagnose crashes, understand usage, and toggle features remotely.
+
+- [ ] `os.Logger` across features — replace any remaining `print()`, structured leveled logging with per-feature categories (`prayer`, `quran`, `coredata`, etc.)
+- [ ] MetricKit subscriber — crash diagnostics (`MXCrashDiagnostic`), hang reports (`MXHangDiagnostic`), launch time metrics, delivered by Apple within 24h with no backend needed
+- [ ] `os_signpost` on hot paths — instrument prayer time calculation, Quran page load, Core Data fetches for Instruments profiling and MetricKit aggregation
+- [ ] Remote feature flags via CloudKit — extend existing `FeatureFlags` to read from a CloudKit public database record, polled at launch, toggle features without app updates
+- [ ] Lightweight on-device event logging — screen views, key actions (prayer logged, Quran page read, undo tapped) to Core Data, aggregate for usage insights
+- [ ] `URLSessionTaskMetrics` network monitoring — capture DNS/TLS/request durations for any API calls, useful when network-dependent features are added
 
 ---
 
@@ -107,4 +120,4 @@ Tasks ordered by: launch-blocking status, end-user value, what they unblock.
 
 ---
 
-*Last Updated: February 13, 2026 (Qibla/Tasbeeh redesign, Qada reminder, onboarding footer, notification fixes, release script, 2292 tests on 7-device full matrix)*
+*Last Updated: February 13, 2026 (added Native Observability section to post-v1 fast follows)*

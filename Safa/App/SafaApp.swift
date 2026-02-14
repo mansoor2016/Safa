@@ -7,6 +7,7 @@ import UIKit
 import UserNotifications
 import CoreSpotlight
 import AppIntents
+import SafaShared
 
 // MARK: - AppDelegate
 
@@ -214,9 +215,9 @@ struct SafaApp: App {
         // Update widgets
         WidgetDataService.shared.writePrayerTimes(prayers)
 
-        // Update Live Activity with next obligatory prayer
+        // Update Live Activity with next obligatory prayer + schedule boundary updates
+        let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         if let next = prayers.first(where: { $0.time > Date() && $0.type.isObligatory }) {
-            let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
             await PrayerLiveActivityManager.shared.updateActivity(
                 prayerName: next.type.displayName,
                 prayerTime: next.time,
@@ -224,6 +225,14 @@ struct SafaApp: App {
                 locationName: context.regionName
             )
         }
+        let prayerInfos = prayers
+            .filter { $0.type.isObligatory }
+            .map { PrayerInfo(name: $0.type.displayName, time: $0.time) }
+        PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(
+            prayers: prayerInfos,
+            hijriDate: hijri,
+            locationName: context.regionName
+        )
 
         // Re-schedule notifications for the new location
         await NotificationScheduler.shared.scheduleIfNeeded()
