@@ -50,6 +50,9 @@ struct UserPreferences: Codable, Hashable {
     // MARK: - Quran Reader Settings
     var autoScrollEnabled: Bool
 
+    // MARK: - Prayer Display Settings
+    var showSunnahTimes: Bool
+
     // MARK: - Prayer Time Adjustments (minutes offset per prayer)
     var prayerAdjustments: [String: Int]
 
@@ -85,6 +88,7 @@ struct UserPreferences: Codable, Hashable {
         largerArabicTextEnabled: Bool = false,
         highContrastEnabled: Bool = false,
         autoScrollEnabled: Bool = false,
+        showSunnahTimes: Bool = false,
         prayerAdjustments: [String: Int] = [:]
     ) {
         self.calculationMethod = calculationMethod
@@ -113,6 +117,7 @@ struct UserPreferences: Codable, Hashable {
         self.largerArabicTextEnabled = largerArabicTextEnabled
         self.highContrastEnabled = highContrastEnabled
         self.autoScrollEnabled = autoScrollEnabled
+        self.showSunnahTimes = showSunnahTimes
         self.prayerAdjustments = prayerAdjustments
     }
 
@@ -128,7 +133,7 @@ struct UserPreferences: Codable, Hashable {
         case savedLocationName, savedLatitude, savedLongitude, savedCountryCode
         case useLocationBasedDefaults, autoUpdateLocationForPrayers
         case reduceMotionEnabled, largerArabicTextEnabled, highContrastEnabled
-        case autoScrollEnabled
+        case autoScrollEnabled, showSunnahTimes
         case prayerAdjustments
         case hasCompletedOnboarding
     }
@@ -160,6 +165,7 @@ struct UserPreferences: Codable, Hashable {
         largerArabicTextEnabled = try container.decode(Bool.self, forKey: .largerArabicTextEnabled)
         highContrastEnabled = try container.decode(Bool.self, forKey: .highContrastEnabled)
         autoScrollEnabled = try container.decode(Bool.self, forKey: .autoScrollEnabled)
+        showSunnahTimes = try container.decodeIfPresent(Bool.self, forKey: .showSunnahTimes) ?? false
         prayerAdjustments = try container.decode([String: Int].self, forKey: .prayerAdjustments)
         hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
     }

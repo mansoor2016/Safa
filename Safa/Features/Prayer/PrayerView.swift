@@ -62,7 +62,7 @@ private struct PrayerContentView: View {
                 )
 
                 // Sunnah Times
-                if !viewModel.sunnahTimes.isEmpty {
+                if viewModel.showSunnahTimes && !viewModel.sunnahTimes.isEmpty {
                     SunnahTimesCard(sunnahTimes: viewModel.sunnahTimes)
                 }
 

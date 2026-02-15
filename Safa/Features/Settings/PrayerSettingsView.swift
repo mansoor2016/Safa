@@ -11,6 +11,7 @@ struct PrayerSettingsView: View {
     @State private var selectedTranslation: String
     @State private var locationContext: LocationContext?
     @State private var showLocationRecommendations = false
+    @State private var showSunnahTimes: Bool
 
     // Debounce state
     @State private var pendingCommitTask: Task<Void, Never>?
@@ -27,6 +28,7 @@ struct PrayerSettingsView: View {
         _selectedTranslation = State(initialValue: prefs.selectedTranslation)
         _lastAppliedMethod = State(initialValue: prefs.calculationMethod)
         _lastAppliedMadhab = State(initialValue: prefs.madhab)
+        _showSunnahTimes = State(initialValue: prefs.showSunnahTimes)
     }
 
     // MARK: - Computed
@@ -126,6 +128,11 @@ struct PrayerSettingsView: View {
                             .foregroundColor(SafaColors.Fallback.secondaryText)
                     }
                 }
+
+                Toggle("Show Night Prayer Times", isOn: $showSunnahTimes)
+                    .onChange(of: showSunnahTimes) { _, newValue in
+                        Task { await prefsManager.update(\.showSunnahTimes, to: newValue) }
+                    }
             } header: {
                 Text("Prayer Times")
             } footer: {

@@ -86,7 +86,7 @@ struct DuaCategoriesView: View {
                         duas: viewModel.duas(forCategory: "prayer"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "After Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                        QuickAccessButton(title: "Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
                     }
                     .buttonStyle(.plain)
 
@@ -95,7 +95,7 @@ struct DuaCategoriesView: View {
                         duas: viewModel.duas(forCategory: "food"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Food & Drink", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
+                        QuickAccessButton(title: "Eating", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
                     }
                     .buttonStyle(.plain)
 
@@ -156,17 +156,21 @@ struct QuickAccessButton: View {
                     .foregroundColor(color)
             }
 
-            Text(title)
-                .font(.caption)
-                .fontWeight(.medium)
+            VStack(spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
 
-            Text(arabicTitle)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .environment(\.layoutDirection, .rightToLeft)
-                .accessibilityArabic()
+                Text(arabicTitle)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
+            }
+            .frame(height: 36, alignment: .top)
         }
-        .frame(width: 80)
+        .frame(width: 80, alignment: .top)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title) duas")
     }
