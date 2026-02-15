@@ -18,6 +18,7 @@ struct SettingsView: View {
     // Inline section state
     @State private var showDeleteConfirmation = false
     @State private var showInviteFriendsSheet = false
+    @State private var showDeveloperSettings = false
 
     var body: some View {
         List {
@@ -73,9 +74,9 @@ struct SettingsView: View {
             dataPrivacySection
             aboutSection
 
-            #if DEBUG
-            debugSection
-            #endif
+            if showDeveloperSettings {
+                debugSection
+            }
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
@@ -207,6 +208,17 @@ struct SettingsView: View {
                 Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                     .foregroundColor(SafaColors.Fallback.secondaryText)
             }
+            .contentShape(Rectangle())
+            .onTapGesture(count: 3) {
+                showDeveloperSettings.toggle()
+                HapticFeedbackService.shared.play(.success)
+                ToastService.shared.show(Toast(
+                    message: showDeveloperSettings
+                        ? String(localized: "Developer settings enabled")
+                        : String(localized: "Developer settings hidden"),
+                    type: .info
+                ))
+            }
 
             NavigationLink {
                 AboutSafaView()
@@ -242,9 +254,8 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Debug Section
+    // MARK: - Developer Section
 
-    #if DEBUG
     @State private var forceRamadan = false
     @State private var forceEidAlFitr = false
     @State private var forceEidAlAdha = false
@@ -361,10 +372,9 @@ struct SettingsView: View {
                 .foregroundColor(.red)
             }
         } footer: {
-            Text("Debug options only visible in development builds.")
+            Text("Triple-tap the version number to hide.")
         }
     }
-    #endif
 
     // MARK: - Actions
 

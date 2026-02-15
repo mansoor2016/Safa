@@ -780,9 +780,6 @@
     "Day Streak" : {
 
     },
-    "Debug options only visible in development builds." : {
-
-    },
     "Deductible Liabilities" : {
 
     },
@@ -826,6 +823,12 @@
 
     },
     "Developer Settings" : {
+
+    },
+    "Developer settings enabled" : {
+
+    },
+    "Developer settings hidden" : {
 
     },
     "Dhikr" : {
@@ -2276,6 +2279,9 @@
 
     },
     "Transliteration" : {
+
+    },
+    "Triple-tap the version number to hide." : {
 
     },
     "Type" : {
