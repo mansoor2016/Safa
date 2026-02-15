@@ -70,6 +70,9 @@ struct NotificationSettingsView: View {
                     Toggle("Use Adhan Sound", isOn: $adhanEnabled)
                         .onChange(of: adhanEnabled) { _, newValue in
                             Task { await prefsManager.update(\.adhanEnabled, to: newValue) }
+                            if newValue && notificationAuthStatus == .authorized {
+                                showSilentModeTipIfNeeded()
+                            }
                         }
 
                     if adhanEnabled {
@@ -98,6 +101,9 @@ struct NotificationSettingsView: View {
                 Toggle("Iftar Adhan (Ramadan Only)", isOn: $iftarAdhanEnabled)
                     .onChange(of: iftarAdhanEnabled) { _, newValue in
                         Task { await prefsManager.update(\.iftarAdhanEnabled, to: newValue) }
+                        if newValue && notificationsEnabled && notificationAuthStatus == .authorized {
+                            showSilentModeTipIfNeeded()
+                        }
                     }
 
                 Toggle("Live Activity", isOn: $liveActivityEnabled)
@@ -122,6 +128,9 @@ struct NotificationSettingsView: View {
                     } else if adhanEnabled {
                         Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
                     }
+                    if notificationsEnabled && notificationAuthStatus != .denied && (adhanEnabled || iftarAdhanEnabled) {
+                        Label("Adhan won't play when your iPhone is on silent mode.", systemImage: "speaker.slash")
+                    }
                     Text("Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island.")
                 }
             }
@@ -141,5 +150,14 @@ struct NotificationSettingsView: View {
     private func checkNotificationAuth() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         notificationAuthStatus = settings.authorizationStatus
+    }
+
+    private func showSilentModeTipIfNeeded() {
+        guard SilentModeTipService.shouldShowTip() else { return }
+        SilentModeTipService.markTipShown()
+        ToastService.shared.show(Toast(
+            message: String(localized: "Make sure silent mode is off so the adhan plays aloud."),
+            type: .info
+        ))
     }
 }

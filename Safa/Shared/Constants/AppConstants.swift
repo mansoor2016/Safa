@@ -51,6 +51,7 @@ enum AppConstants {
         static let prayerLogsMigrated = "com.safa.prayerLogsMigratedToAppGroup"
 
         // Notifications
+        static let adhanSilentModeTipShown = "com.safa.notifications.adhanSilentModeTipShown"
         static let notificationOffset = "notificationOffset"
         static let notificationMosqueMode = "com.safa.notifications.mosqueMode"
         static let notificationVibrationOnly = "com.safa.notifications.vibrationOnly"
