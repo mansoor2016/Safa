@@ -14,8 +14,7 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| S | Adhan silent mode awareness — inline helper text below adhan sound picker + one-time tip on first enable |
-| L | App Store screenshots, description, preview video |
+| L | App Store screenshots, description, preview video (partial — listing copy + screenshot/video guide done in `APP_STORE_LISTING.md`, screenshots + video still needed) |
 | S | App Store Connect submission |
 
 ## P1 — Near-Term
@@ -72,8 +71,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ## Completed
 
-Live Activity reliability (v1.4.3 — auto-recover on launch/foreground, stale detection, reattach after restart, settings toggle, onboarding gate, boundary task cleanup, duplicate/orphan prevention), widget stale prayer times fix (v1.4.1). Prayer time accuracy (v1.5.0 — replaced custom calculator with adhan-swift, 389 accuracy tests, 5 regional methods, auto high-latitude rule, sunnah times), calculation method visibility (prayer time preview card, method description footer, location-based recommendations sheet), Settings refactor (extracted 6 standalone views, thin NavigationLink menu), notification action buttons (lock screen Mark as Prayed + Open Qibla, deferred log pattern, 33 regression tests), developer settings (triple-tap access in all builds), Package.resolved for Xcode Cloud, draft icon cleanup, beta build pushed (v1.5.0 build 14 to TestFlight). Live Activity staleness fix (v1.5.1 — 90s staleDate buffer, stale UI fallback on lock screen + Dynamic Island, 4 staleness tests), release notes in version bump commits (bin/release auto-generates changelog from git history).
+Live Activity reliability (v1.4.3 — auto-recover on launch/foreground, stale detection, reattach after restart, settings toggle, onboarding gate, boundary task cleanup, duplicate/orphan prevention), widget stale prayer times fix (v1.4.1). Prayer time accuracy (v1.5.0 — replaced custom calculator with adhan-swift, 389 accuracy tests, 5 regional methods, auto high-latitude rule, sunnah times), calculation method visibility (prayer time preview card, method description footer, location-based recommendations sheet), Settings refactor (extracted 6 standalone views, thin NavigationLink menu), notification action buttons (lock screen Mark as Prayed + Open Qibla, deferred log pattern, 33 regression tests), developer settings (triple-tap access in all builds), Package.resolved for Xcode Cloud, draft icon cleanup, beta build pushed (v1.5.0 build 14 to TestFlight). Live Activity staleness fix (v1.5.1 — 90s staleDate buffer, stale UI fallback on lock screen + Dynamic Island, 4 staleness tests), release notes in version bump commits (bin/release auto-generates changelog from git history). Adhan silent mode awareness (footer hint + one-time toast on first enable, gated on auth status, 4 tests).
 
 ---
 
-*Last Updated: February 15, 2026 — Live Activity staleness fix (v1.5.1), release notes in bump commits*
+*Last Updated: February 15, 2026 — Adhan silent mode awareness shipped, App Store listing copy drafted*
