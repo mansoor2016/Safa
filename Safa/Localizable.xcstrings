@@ -1,2499 +1,1108 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-
-    },
-    "— Narrated by %@" : {
-
-    },
-    "..." : {
-
-    },
-    "·" : {
-
-    },
-    "\"%@\"" : {
-
-    },
-    "\"I intend to fast tomorrow for the month of Ramadan\"" : {
-
-    },
-    "(%lld days from now)" : {
-
-    },
-    "#%lld" : {
-
-    },
-    "%@" : {
-
-    },
-    "%@ %lld AH" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$lld AH"
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "— Narrated by %@": {},
+    "...": {},
+    "·": {},
+    "\"%@\"": {},
+    "\"I intend to fast tomorrow for the month of Ramadan\"": {},
+    "(%lld days from now)": {},
+    "#%lld": {},
+    "%@": {},
+    "%@ %lld AH": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$lld AH"
           }
         }
       }
     },
-    "%@ at %@%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ at %2$@%3$@"
+    "%@ at %@%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ at %2$@%3$@"
           }
         }
       }
     },
-    "%@ Dhikr" : {
-
-    },
-    "%@ duas" : {
-
-    },
-    "%@ is coming!" : {
-
-    },
-    "%@ is in %lld day(s). %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ is in %2$lld day(s). %3$@"
+    "%@ Dhikr": {},
+    "%@ duas": {},
+    "%@ is coming!": {},
+    "%@ is in %lld day(s). %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ is in %2$lld day(s). %3$@"
           }
         }
       }
     },
-    "%@ number %lld. %@. %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ number %2$lld. %3$@. %4$@"
+    "%@ number %lld. %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ number %2$lld. %3$@. %4$@"
           }
         }
       }
     },
-    "%@ prayer is already logged for today." : {
-
-    },
-    "%@ Time" : {
-
-    },
-    "%@, %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
+    "%@ prayer is already logged for today.": {},
+    "%@ Time": {},
+    "%@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@"
           }
         }
       }
     },
-    "%@, %lld duas" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$lld duas"
+    "%@, %lld duas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$lld duas"
           }
         }
       }
     },
-    "%@, %lld hadith" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$lld hadith"
+    "%@, %lld hadith": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$lld hadith"
           }
         }
       }
     },
-    "%@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@: %2$@"
+    "%@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$@"
           }
         }
       }
     },
-    "%@: %lld min" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@: %2$lld min"
+    "%@: %lld min": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$lld min"
           }
         }
       }
     },
-    "%@. %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@. %2$@"
+    "%@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@. %2$@"
           }
         }
       }
     },
-    "%lld" : {
-
-    },
-    "%lld / %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld / %2$lld"
+    "%lld": {},
+    "%lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld"
           }
         }
       }
     },
-    "%lld %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld %2$@"
+    "%lld %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld %2$@"
           }
         }
       }
     },
-    "%lld ayahs" : {
-
-    },
-    "%lld Ayahs" : {
-
-    },
-    "%lld day%@ until %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld day%2$@ until %3$@"
+    "%lld ayahs": {},
+    "%lld Ayahs": {},
+    "%lld day%@ until %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld day%2$@ until %3$@"
           }
         }
       }
     },
-    "%lld days" : {
-
-    },
-    "%lld days until Ramadan begins" : {
-
-    },
-    "%lld hadith" : {
-
-    },
-    "%lld Hasanat" : {
-
-    },
-    "%lld hours" : {
-
-    },
-    "%lld khatm" : {
-
-    },
-    "%lld lessons" : {
-
-    },
-    "%lld lessons completed" : {
-
-    },
-    "%lld messages" : {
-
-    },
-    "%lld min" : {
-
-    },
-    "%lld min • %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld min • %2$@"
+    "%lld days": {},
+    "%lld days until Ramadan begins": {},
+    "%lld hadith": {},
+    "%lld Hasanat": {},
+    "%lld hours": {},
+    "%lld khatm": {},
+    "%lld lessons": {},
+    "%lld lessons completed": {},
+    "%lld messages": {},
+    "%lld min": {},
+    "%lld min • %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld min • %2$@"
           }
         }
       }
     },
-    "%lld of %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld of %2$lld"
+    "%lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld"
           }
         }
       }
     },
-    "%lld of 5 prayers completed" : {
-
-    },
-    "%lld percent complete" : {
-
-    },
-    "%lld results" : {
-
-    },
-    "%lld results found" : {
-
-    },
-    "%lld to Level %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld to Level %2$lld"
+    "%lld of 5 prayers completed": {},
+    "%lld percent complete": {},
+    "%lld results": {},
+    "%lld results found": {},
+    "%lld to Level %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld to Level %2$lld"
           }
         }
       }
     },
-    "%lld Unlocked" : {
-
-    },
-    "%lld." : {
-
-    },
-    "%lld/%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld/%2$lld"
+    "%lld Unlocked": {},
+    "%lld.": {},
+    "%lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld"
           }
         }
       }
     },
-    "%lld/%lld completed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld/%2$lld completed"
+    "%lld/%lld completed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld completed"
           }
         }
       }
     },
-    "%lld/%lld Correct" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld/%2$lld Correct"
+    "%lld/%lld Correct": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld Correct"
           }
         }
       }
     },
-    "%lld/5" : {
-
-    },
-    "%lld/7" : {
-
-    },
-    "%lld/30" : {
-
-    },
-    "%lld%%" : {
-
-    },
-    "%lld%% Complete" : {
-
-    },
-    "%lld° from North" : {
-
-    },
-    "%lldh %lldm" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lldh %2$lldm"
+    "%lld/5": {},
+    "%lld/7": {},
+    "%lld/30": {},
+    "%lld%%": {},
+    "%lld%% Complete": {},
+    "%lld° from North": {},
+    "%lldh %lldm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lldh %2$lldm"
           }
         }
       }
     },
-    "%lldx" : {
-
-    },
-    "•" : {
-
-    },
-    "• Double-tap and hold on the tasbeeh button for rapid counting" : {
-
-    },
-    "• Enable \"Speak Screen\" to have the Quran read aloud" : {
-
-    },
-    "• Prayer log history" : {
-
-    },
-    "• Preferences and settings" : {
-
-    },
-    "• Quran bookmarks and reading progress" : {
-
-    },
-    "• Streaks and achievements" : {
-
-    },
-    "• Three-finger swipe to navigate between pages" : {
-
-    },
-    "• Use rotor to navigate between headings and buttons" : {
-
-    },
-    "• User statistics" : {
-
-    },
-    "+%lld Hasanat" : {
-
-    },
-    "+15 Hasanat" : {
-
-    },
-    "×%lld" : {
-
-    },
-    "~%lld min" : {
-
-    },
-    "0" : {
-
-    },
-    "0.5x" : {
-
-    },
-    "1. Open Settings on your iPhone" : {
-
-    },
-    "1.5x" : {
-
-    },
-    "1x" : {
-
-    },
-    "2. Tap Focus" : {
-
-    },
-    "3. Create a new Focus or edit an existing one" : {
-
-    },
-    "4. Under 'Allowed Notifications', add Safa" : {
-
-    },
-    "5. Choose which Safa notification types to allow" : {
-
-    },
-    "6. Optional: Schedule the Focus for prayer times" : {
-
-    },
-    "9 minutes" : {
-
-    },
-    "14 days" : {
-
-    },
-    "99 Names of Allah" : {
-
-    },
-    "About" : {
-
-    },
-    "About Safa" : {
-
-    },
-    "About Zakat" : {
-
-    },
-    "Above Nisab threshold" : {
-
-    },
-    "Accessibility" : {
-
-    },
-    "Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update." : {
-
-    },
-    "Accessibility Tips" : {
-
-    },
-    "Achievement" : {
-
-    },
-    "Achievement Unlocked!" : {
-
-    },
-    "Achievements" : {
-
-    },
-    "Acknowledgements" : {
-
-    },
-    "Activity" : {
-
-    },
-    "Adaptive Tab Bar" : {
-
-    },
-    "Add a note..." : {
-
-    },
-    "Add any notes..." : {
-
-    },
-    "Add one to the tasbeeh counter" : {
-
-    },
-    "Add to Apple Calendar" : {
-
-    },
-    "Add to Calendar" : {
-
-    },
-    "Adhan" : {
-
-    },
-    "Adhan won't play when your iPhone is on silent mode." : {
-
-    },
-    "Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan." : {
-
-    },
-    "Adjustments" : {
-
-    },
-    "AI Companion" : {
-
-    },
-    "Alarm Options" : {
-
-    },
-    "Alarm Time" : {
-
-    },
-    "All prayer notifications disabled" : {
-
-    },
-    "Allah has ninety-nine Names, one-hundred less one; and he who memorizes them all by heart will enter Paradise." : {
-
-    },
-    "Appearance" : {
-
-    },
-    "Apple Health" : {
-
-    },
-    "Apple Health access was denied. Please enable access in Settings." : {
-
-    },
-    "Apple Health is not available on this device." : {
-
-    },
-    "Apple Health not available on this device" : {
-
-    },
-    "Apply All Recommendations" : {
-
-    },
-    "Arabic" : {
-
-    },
-    "Arabic Text Size" : {
-
-    },
-    "Arabic, Tajweed, and Islamic studies lessons are coming soon." : {
-
-    },
-    "Ashura" : {
-
-    },
-    "Ask a question..." : {
-
-    },
-    "Ask Safa" : {
-
-    },
-    "Ask Safa an Islamic question" : {
-
-    },
-    "Assalamu Alaikum!" : {
-
-    },
-    "Audio file not found." : {
-
-    },
-    "Audio session error: %@" : {
-
-    },
-    "Auto-Scroll Reader" : {
-
-    },
-    "Auto-Update Content" : {
-
-    },
-    "Available" : {
-
-    },
-    "Available after Asr prayer" : {
-
-    },
-    "Ayah %lld" : {
-
-    },
-    "Ayah %lld of %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Ayah %1$lld of %2$lld"
+    "%lldx": {},
+    "•": {},
+    "• Double-tap and hold on the tasbeeh button for rapid counting": {},
+    "• Enable \"Speak Screen\" to have the Quran read aloud": {},
+    "• Prayer log history": {},
+    "• Preferences and settings": {},
+    "• Quran bookmarks and reading progress": {},
+    "• Streaks and achievements": {},
+    "• Three-finger swipe to navigate between pages": {},
+    "• Use rotor to navigate between headings and buttons": {},
+    "• User statistics": {},
+    "+%lld Hasanat": {},
+    "+15 Hasanat": {},
+    "×%lld": {},
+    "~%lld min": {},
+    "0": {},
+    "0.5x": {},
+    "1. Open Settings on your iPhone": {},
+    "1.5x": {},
+    "1x": {},
+    "2. Tap Focus": {},
+    "3. Create a new Focus or edit an existing one": {},
+    "4. Under 'Allowed Notifications', add Safa": {},
+    "5. Choose which Safa notification types to allow": {},
+    "6. Optional: Schedule the Focus for prayer times": {},
+    "9 minutes": {},
+    "14 days": {},
+    "99 Names of Allah": {},
+    "About": {},
+    "About Safa": {},
+    "About Zakat": {},
+    "Above Nisab threshold": {},
+    "Accessibility": {},
+    "Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update.": {},
+    "Accessibility Tips": {},
+    "Achievement": {},
+    "Achievement Unlocked!": {},
+    "Achievements": {},
+    "Acknowledgements": {},
+    "Activity": {},
+    "Adaptive Tab Bar": {},
+    "Add a note...": {},
+    "Add any notes...": {},
+    "Add one to the tasbeeh counter": {},
+    "Add to Apple Calendar": {},
+    "Add to Calendar": {},
+    "Adhan": {},
+    "Adhan won't play when your iPhone is on silent mode.": {},
+    "Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.": {},
+    "Adjustments": {},
+    "AI Companion": {},
+    "Alarm Options": {},
+    "Alarm Time": {},
+    "All prayer notifications disabled": {},
+    "Allah has ninety-nine Names, one-hundred less one; and he who memorizes them all by heart will enter Paradise.": {},
+    "Appearance": {},
+    "Apple Health": {},
+    "Apple Health access was denied. Please enable access in Settings.": {},
+    "Apple Health is not available on this device.": {},
+    "Apple Health not available on this device": {},
+    "Apply All Recommendations": {},
+    "Arabic": {},
+    "Arabic Text Size": {},
+    "Arabic, Tajweed, and Islamic studies lessons are coming soon.": {},
+    "Ashura": {},
+    "Ask a question...": {},
+    "Ask Safa": {},
+    "Ask Safa an Islamic question": {},
+    "Assalamu Alaikum!": {},
+    "Audio file not found.": {},
+    "Audio session error: %@": {},
+    "Auto-Scroll Reader": {},
+    "Auto-Update Content": {},
+    "Available": {},
+    "Available after Asr prayer": {},
+    "Ayah %lld": {},
+    "Ayah %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Ayah %1$lld of %2$lld"
           }
         }
       }
     },
-    "Ayah %lld, bookmarked" : {
-
-    },
-    "Ayahs" : {
-
-    },
-    "Back" : {
-
-    },
-    "Basic Inline Header" : {
-
-    },
-    "Below Nisab threshold" : {
-
-    },
-    "Best" : {
-
-    },
-    "Best!" : {
-
-    },
-    "Beta testers and early users" : {
-
-    },
-    "Birth of Prophet Muhammad ﷺ" : {
-
-    },
-    "Bismillah! Time to break your fast." : {
-
-    },
-    "Bismillah. May Safa be a means of benefit for you in this life and the next." : {
-
-    },
-    "Bookmarks" : {
-
-    },
-    "By using Safa, you agree to these terms. If you disagree, please do not use the app." : {
-
-    },
-    "Calculate Your Zakat" : {
-
-    },
-    "Calendar" : {
-
-    },
-    "Calendar access was denied. Please enable access in Settings." : {
-
-    },
-    "Calming Recitation" : {
-
-    },
-    "Cancel" : {
-
-    },
-    "Categories" : {
-
-    },
-    "Category" : {
-
-    },
-    "Choose a Greeting" : {
-
-    },
-    "Clear" : {
-
-    },
-    "Clear All" : {
-
-    },
-    "Coming soon" : {
-
-    },
-    "Coming Soon" : {
-
-    },
-    "Common: 8 or 20 rak'ahs" : {
-
-    },
-    "Complete" : {
-
-    },
-    "Complete the Quran this Ramadan" : {
-
-    },
-    "Complete your nightly dhikr and set your Fajr alarm" : {
-
-    },
-    "Complete!" : {
-
-    },
-    "Completed" : {
-
-    },
-    "Continue" : {
-
-    },
-    "Continue Reading" : {
-
-    },
-    "Continue reading %@ from ayah %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Continue reading %1$@ from ayah %2$lld"
+    "Ayah %lld, bookmarked": {},
+    "Ayahs": {},
+    "Back": {},
+    "Basic Inline Header": {},
+    "Below Nisab threshold": {},
+    "Best": {},
+    "Best!": {},
+    "Beta testers and early users": {},
+    "Birth of Prophet Muhammad ﷺ": {},
+    "Bismillah! Time to break your fast.": {},
+    "Bismillah. May Safa be a means of benefit for you in this life and the next.": {},
+    "Bookmarks": {},
+    "By using Safa, you agree to these terms. If you disagree, please do not use the app.": {},
+    "Calculate Your Zakat": {},
+    "Calendar": {},
+    "Calendar access was denied. Please enable access in Settings.": {},
+    "Calming Recitation": {},
+    "Cancel": {},
+    "Categories": {},
+    "Category": {},
+    "Choose a Greeting": {},
+    "Clear": {},
+    "Clear All": {},
+    "Coming soon": {},
+    "Coming Soon": {},
+    "Common: 8 or 20 rak'ahs": {},
+    "Complete": {},
+    "Complete the Quran this Ramadan": {},
+    "Complete your nightly dhikr and set your Fajr alarm": {},
+    "Complete!": {},
+    "Completed": {},
+    "Continue": {},
+    "Continue Reading": {},
+    "Continue reading %@ from ayah %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Continue reading %1$@ from ayah %2$lld"
           }
         }
       }
     },
-    "Continue Reading Quran" : {
-
-    },
-    "Continue Reading Quran, Surah %lld, Ayah %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Continue Reading Quran, Surah %1$lld, Ayah %2$lld"
+    "Continue Reading Quran": {},
+    "Continue Reading Quran, Surah %lld, Ayah %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Continue Reading Quran, Surah %1$lld, Ayah %2$lld"
           }
         }
       }
     },
-    "Conversation not found." : {
-
-    },
-    "Coordinates" : {
-
-    },
-    "Copied" : {
-
-    },
-    "Copy" : {
-
-    },
-    "Core Location" : {
-
-    },
-    "Core ML" : {
-
-    },
-    "Could not find or create calendar." : {
-
-    },
-    "Could not log prayer. Please try again in the app." : {
-
-    },
-    "Could not play adhan." : {
-
-    },
-    "Current: %@" : {
-
-    },
-    "Customize" : {
-
-    },
-    "Customize Settings" : {
-
-    },
-    "Daily Hadith" : {
-
-    },
-    "Daily Hadith from %@. %@. Narrated by %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Daily Hadith from %1$@. %2$@. Narrated by %3$@"
+    "Conversation not found.": {},
+    "Coordinates": {},
+    "Copied": {},
+    "Copy": {},
+    "Core Location": {},
+    "Core ML": {},
+    "Could not find or create calendar.": {},
+    "Could not log prayer. Please try again in the app.": {},
+    "Could not play adhan.": {},
+    "Current: %@": {},
+    "Customize": {},
+    "Customize Settings": {},
+    "Daily Hadith": {},
+    "Daily Hadith from %@. %@. Narrated by %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Daily Hadith from %1$@. %2$@. Narrated by %3$@"
           }
         }
       }
     },
-    "Daily Practice" : {
-
-    },
-    "Daily Prayer Times" : {
-
-    },
-    "Daily Verse" : {
-
-    },
-    "Daily Verse, Surah %lld Ayah %lld. %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Daily Verse, Surah %1$lld Ayah %2$lld. %3$@"
+    "Daily Practice": {},
+    "Daily Prayer Times": {},
+    "Daily Verse": {},
+    "Daily Verse, Surah %lld Ayah %lld. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Daily Verse, Surah %1$lld Ayah %2$lld. %3$@"
           }
         }
       }
     },
-    "Data & Privacy" : {
-
-    },
-    "Data Categories" : {
-
-    },
-    "Data Sources" : {
-
-    },
-    "Database '%@' not found in bundle" : {
-
-    },
-    "Date" : {
-
-    },
-    "Day %lld of %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Day %1$lld of %2$lld"
+    "Data & Privacy": {},
+    "Data Categories": {},
+    "Data Sources": {},
+    "Database '%@' not found in bundle": {},
+    "Date": {},
+    "Day %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Day %1$lld of %2$lld"
           }
         }
       }
     },
-    "Day of Arafah" : {
-
-    },
-    "Day of Arafah Duas" : {
-
-    },
-    "day streak" : {
-
-    },
-    "Day Streak" : {
-
-    },
-    "Deductible Liabilities" : {
-
-    },
-    "Delete" : {
-
-    },
-    "Delete %@?" : {
-
-    },
-    "Delete All" : {
-
-    },
-    "Delete All Data" : {
-
-    },
-    "Delete All Data?" : {
-
-    },
-    "Delete All Downloads" : {
-
-    },
-    "Delete All Downloads?" : {
-
-    },
-    "Delete bookmark" : {
-
-    },
-    "Delete Download?" : {
-
-    },
-    "Delete Everything" : {
-
-    },
-    "Deleting a category only removes that data. Your app settings and preferences are not affected." : {
-
-    },
-    "Description" : {
-
-    },
-    "Detecting..." : {
-
-    },
-    "Developer Settings" : {
-
-    },
-    "Developer settings enabled" : {
-
-    },
-    "Developer settings hidden" : {
-
-    },
-    "Dhikr" : {
-
-    },
-    "Dhikr Type" : {
-
-    },
-    "Direction to Kaaba in Makkah" : {
-
-    },
-    "Dismiss" : {
-
-    },
-    "Don't ask again" : {
-
-    },
-    "Don't forget your Taraweeh prayers tonight. May your worship be accepted." : {
-
-    },
-    "Done" : {
-
-    },
-    "Double tap to %@" : {
-
-    },
-    "Double tap to bookmark" : {
-
-    },
-    "Double tap to complete" : {
-
-    },
-    "Double tap to count one %@" : {
-
-    },
-    "Double tap to edit bookmark note" : {
-
-    },
-    "Double tap to expand, then tap to open Quran" : {
-
-    },
-    "Double tap to go to this ayah" : {
-
-    },
-    "Double tap to log" : {
-
-    },
-    "Double tap to mark as %@" : {
-
-    },
-    "Double tap to mark as completed" : {
-
-    },
-    "Double tap to open %@" : {
-
-    },
-    "Double tap to play" : {
-
-    },
-    "Double tap to read this juz" : {
-
-    },
-    "Double tap to read this surah" : {
-
-    },
-    "Double tap to remove bookmark" : {
-
-    },
-    "Double tap to remove this bookmark" : {
-
-    },
-    "Double tap to reset the counter to zero" : {
-
-    },
-    "Double tap to resume reading" : {
-
-    },
-    "Double tap to start counting" : {
-
-    },
-    "Double tap to stop" : {
-
-    },
-    "Double tap to subtract one from the counter" : {
-
-    },
-    "Double tap to toggle notification" : {
-
-    },
-    "Double tap to undo" : {
-
-    },
-    "Double tap to unlog" : {
-
-    },
-    "Double tap to view prayer times" : {
-
-    },
-    "Download failed" : {
-
-    },
-    "Download on Wi-Fi Only" : {
-
-    },
-    "Downloads" : {
-
-    },
-    "Duas" : {
-
-    },
-    "Duas for this category are coming soon." : {
-
-    },
-    "During Ramadan, the adhan will play for Maghrib (Iftar) only." : {
-
-    },
-    "Each prayer time is announced with the prayer name, time, and completion status. The log button describes its function." : {
-
-    },
-    "Each surah is announced with its number, name, revelation type, and verse count. Arabic text uses proper right-to-left reading." : {
-
-    },
-    "Edit note" : {
-
-    },
-    "Edit Note" : {
-
-    },
-    "Eid al-Adha" : {
-
-    },
-    "Eid al-Fitr" : {
-
-    },
-    "Eid al-Fitr & Eid al-Adha" : {
-
-    },
-    "EID MUBARAK" : {
-
-    },
-    "Eid Mubarak!" : {
-
-    },
-    "Eid Mubarak! 🎉" : {
-
-    },
-    "Eid Mubarak! A time for sacrifice, charity, and reflection." : {
-
-    },
-    "Eid Mubarak! Taqabbal Allahu minna wa minkum." : {
-
-    },
-    "Eid Prayer: %@" : {
-
-    },
-    "Enable Fajr Alarm" : {
-
-    },
-    "Enable Location" : {
-
-    },
-    "Enable location for accurate prayer times" : {
-
-    },
-    "Enable Smart Cleanup to automatically remove audio files you haven't listened to in a while." : {
-
-    },
-    "Enabled" : {
-
-    },
-    "End of %@" : {
-
-    },
-    "End of %@%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "End of %1$@%2$@"
+    "Day of Arafah": {},
+    "Day of Arafah Duas": {},
+    "day streak": {},
+    "Day Streak": {},
+    "Deductible Liabilities": {},
+    "Delete": {},
+    "Delete %@?": {},
+    "Delete All": {},
+    "Delete All Data": {},
+    "Delete All Data?": {},
+    "Delete All Downloads": {},
+    "Delete All Downloads?": {},
+    "Delete bookmark": {},
+    "Delete Download?": {},
+    "Delete Everything": {},
+    "Deleting a category only removes that data. Your app settings and preferences are not affected.": {},
+    "Description": {},
+    "Detecting...": {},
+    "Developer Settings": {},
+    "Developer settings enabled": {},
+    "Developer settings hidden": {},
+    "Dhikr": {},
+    "Dhikr Type": {},
+    "Direction to Kaaba in Makkah": {},
+    "Dismiss": {},
+    "Don't ask again": {},
+    "Don't forget your Taraweeh prayers tonight. May your worship be accepted.": {},
+    "Done": {},
+    "Double tap to %@": {},
+    "Double tap to bookmark": {},
+    "Double tap to complete": {},
+    "Double tap to count one %@": {},
+    "Double tap to edit bookmark note": {},
+    "Double tap to expand, then tap to open Quran": {},
+    "Double tap to go to this ayah": {},
+    "Double tap to log": {},
+    "Double tap to mark as %@": {},
+    "Double tap to mark as completed": {},
+    "Double tap to open %@": {},
+    "Double tap to play": {},
+    "Double tap to read this juz": {},
+    "Double tap to read this surah": {},
+    "Double tap to remove bookmark": {},
+    "Double tap to remove this bookmark": {},
+    "Double tap to reset the counter to zero": {},
+    "Double tap to resume reading": {},
+    "Double tap to start counting": {},
+    "Double tap to stop": {},
+    "Double tap to subtract one from the counter": {},
+    "Double tap to toggle notification": {},
+    "Double tap to undo": {},
+    "Double tap to unlog": {},
+    "Double tap to view prayer times": {},
+    "Download failed": {},
+    "Download on Wi-Fi Only": {},
+    "Downloads": {},
+    "Duas": {},
+    "Duas for this category are coming soon.": {},
+    "During Ramadan, the adhan will play for Maghrib (Iftar) only.": {},
+    "Each prayer time is announced with the prayer name, time, and completion status. The log button describes its function.": {},
+    "Each surah is announced with its number, name, revelation type, and verse count. Arabic text uses proper right-to-left reading.": {},
+    "Edit note": {},
+    "Edit Note": {},
+    "Eid al-Adha": {},
+    "Eid al-Fitr": {},
+    "Eid al-Fitr & Eid al-Adha": {},
+    "EID MUBARAK": {},
+    "Eid Mubarak!": {},
+    "Eid Mubarak! 🎉": {},
+    "Eid Mubarak! A time for sacrifice, charity, and reflection.": {},
+    "Eid Mubarak! Taqabbal Allahu minna wa minkum.": {},
+    "Eid Prayer: %@": {},
+    "Enable Fajr Alarm": {},
+    "Enable Location": {},
+    "Enable location for accurate prayer times": {},
+    "Enable Smart Cleanup to automatically remove audio files you haven't listened to in a while.": {},
+    "Enabled": {},
+    "End of %@": {},
+    "End of %@%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "End of %1$@%2$@"
           }
         }
       }
     },
-    "English - Sahih International" : {
-
-    },
-    "Enjoying Safa?" : {
-
-    },
-    "Enter your assets and liabilities to calculate the Zakat due" : {
-
-    },
-    "Evening" : {
-
-    },
-    "Event Details" : {
-
-    },
-    "Events to Export" : {
-
-    },
-    "Exit" : {
-
-    },
-    "Explanation" : {
-
-    },
-    "Export" : {
-
-    },
-    "Export All Data (JSON)" : {
-
-    },
-    "Export as .ics File" : {
-
-    },
-    "Export Calendar" : {
-
-    },
-    "Export Data" : {
-
-    },
-    "Export failed: %@" : {
-
-    },
-    "Export Prayer Logs (CSV)" : {
-
-    },
-    "Export To" : {
-
-    },
-    "Failed to create speech recognition request." : {
-
-    },
-    "Failed to download audio." : {
-
-    },
-    "Failed to generate response: %@" : {
-
-    },
-    "Failed to load the AI model. Please try again." : {
-
-    },
-    "Failed to open database: %@" : {
-
-    },
-    "Failed to play audio." : {
-
-    },
-    "Failed to prepare statement: %@" : {
-
-    },
-    "Failed to save to Apple Health: %@" : {
-
-    },
-    "Failed to start recording." : {
-
-    },
-    "Fajr Alarm" : {
-
-    },
-    "Fajr Prayer Soon" : {
-
-    },
-    "Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\"." : {
-
-    },
-    "Fasted today" : {
-
-    },
-    "Fasting complete for today" : {
-
-    },
-    "Fasting hours will be logged to Apple Health in a future update." : {
-
-    },
-    "Fasting Sunnah" : {
-
-    },
-    "Favourites" : {
-
-    },
-    "Feedback" : {
-
-    },
-    "Font Settings" : {
-
-    },
-    "Force Eid al-Adha" : {
-
-    },
-    "Force Eid al-Fitr" : {
-
-    },
-    "Force Ramadan Mode" : {
-
-    },
-    "Friday Duas" : {
-
-    },
-    "Gentle reminder" : {
-
-    },
-    "Get Daily Verse" : {
-
-    },
-    "Get Next Prayer" : {
-
-    },
-    "Get notified at prayer times" : {
-
-    },
-    "Get Prayer Times" : {
-
-    },
-    "Get Qibla Direction" : {
-
-    },
-    "Get Started" : {
-
-    },
-    "Get the next prayer time" : {
-
-    },
-    "Get the Qibla direction from your location" : {
-
-    },
-    "Get today's prayer times for your location" : {
-
-    },
-    "Get today's verse of the day" : {
-
-    },
-    "Got it" : {
-
-    },
-    "hadith" : {
-
-    },
-    "Hadith" : {
-
-    },
-    "Hadith #%lld" : {
-
-    },
-    "Hadith from Sunnah.com" : {
-
-    },
-    "Haptic Feedback" : {
-
-    },
-    "Hasanat" : {
-
-    },
-    "Help & Support" : {
-
-    },
-    "Help others discover Safa" : {
-
-    },
-    "High Contrast" : {
-
-    },
-    "History" : {
-
-    },
-    "Holiday" : {
-
-    },
-    "How are you enjoying Safa?" : {
-
-    },
-    "I built Safa because I couldn't find an Islamic app I actually enjoyed using. Free, private, and made with care." : {
-
-    },
-    "I'm your Islamic knowledge companion. Ask me about:" : {
-
-    },
-    "Iftar" : {
-
-    },
-    "Iftar Adhan (Ramadan Only)" : {
-
-    },
-    "Iftar Duas" : {
-
-    },
-    "Iftar in" : {
-
-    },
-    "Iftar in %lld minutes" : {
-
-    },
-    "Iftar Reminder" : {
-
-    },
-    "Iftar Time!" : {
-
-    },
-    "Important day of the Hajj pilgrimage. Fasting is highly recommended." : {
-
-    },
-    "In the meantime, explore:" : {
-
-    },
-    "In the name of Allah, the Most Gracious, the Most Merciful" : {
-
-    },
-    "Increment Tasbeeh" : {
-
-    },
-    "Invite Friends" : {
-
-    },
-    "Islamic Calendar" : {
-
-    },
-    "Islamic Holidays" : {
-
-    },
-    "Islamic New Year" : {
-
-    },
-    "Isra" : {
-
-    },
-    "Isra and Mi'raj" : {
-
-    },
-    "It's time for %@ prayer" : {
-
-    },
-    "Jumu'ah" : {
-
-    },
-    "Just you and your faith." : {
-
-    },
-    "Juz" : {
-
-    },
-    "Juz %lld" : {
-
-    },
-    "Juz %lld · %lld%% complete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Juz %1$lld · %2$lld%% complete"
+    "English - Sahih International": {},
+    "Enjoying Safa?": {},
+    "Enter your assets and liabilities to calculate the Zakat due": {},
+    "Evening": {},
+    "Event Details": {},
+    "Events to Export": {},
+    "Exit": {},
+    "Explanation": {},
+    "Export": {},
+    "Export All Data (JSON)": {},
+    "Export as .ics File": {},
+    "Export Calendar": {},
+    "Export Data": {},
+    "Export failed: %@": {},
+    "Export Prayer Logs (CSV)": {},
+    "Export To": {},
+    "Failed to create speech recognition request.": {},
+    "Failed to download audio.": {},
+    "Failed to generate response: %@": {},
+    "Failed to load the AI model. Please try again.": {},
+    "Failed to open database: %@": {},
+    "Failed to play audio.": {},
+    "Failed to prepare statement: %@": {},
+    "Failed to save to Apple Health: %@": {},
+    "Failed to start recording.": {},
+    "Fajr Alarm": {},
+    "Fajr Prayer Soon": {},
+    "Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".": {},
+    "Fasted today": {},
+    "Fasting complete for today": {},
+    "Fasting hours will be logged to Apple Health in a future update.": {},
+    "Fasting Sunnah": {},
+    "Favourites": {},
+    "Feedback": {},
+    "Font Settings": {},
+    "Force Eid al-Adha": {},
+    "Force Eid al-Fitr": {},
+    "Force Ramadan Mode": {},
+    "Friday Duas": {},
+    "Gentle reminder": {},
+    "Get Daily Verse": {},
+    "Get Next Prayer": {},
+    "Get notified at prayer times": {},
+    "Get Prayer Times": {},
+    "Get Qibla Direction": {},
+    "Get Started": {},
+    "Get the next prayer time": {},
+    "Get the Qibla direction from your location": {},
+    "Get today's prayer times for your location": {},
+    "Get today's verse of the day": {},
+    "Got it": {},
+    "hadith": {},
+    "Hadith": {},
+    "Hadith #%lld": {},
+    "Hadith from Sunnah.com": {},
+    "Haptic Feedback": {},
+    "Hasanat": {},
+    "Help & Support": {},
+    "Help others discover Safa": {},
+    "High Contrast": {},
+    "History": {},
+    "Holiday": {},
+    "How are you enjoying Safa?": {},
+    "I built Safa because I couldn't find an Islamic app I actually enjoyed using. Free, private, and made with care.": {},
+    "I'm your Islamic knowledge companion. Ask me about:": {},
+    "Iftar": {},
+    "Iftar Adhan (Ramadan Only)": {},
+    "Iftar Duas": {},
+    "Iftar in": {},
+    "Iftar in %lld minutes": {},
+    "Iftar Reminder": {},
+    "Iftar Time!": {},
+    "Important day of the Hajj pilgrimage. Fasting is highly recommended.": {},
+    "In the meantime, explore:": {},
+    "In the name of Allah, the Most Gracious, the Most Merciful": {},
+    "Increment Tasbeeh": {},
+    "Invite Friends": {},
+    "Islamic Calendar": {},
+    "Islamic Holidays": {},
+    "Islamic New Year": {},
+    "Isra": {},
+    "Isra and Mi'raj": {},
+    "It's time for %@ prayer": {},
+    "Jumu'ah": {},
+    "Just you and your faith.": {},
+    "Juz": {},
+    "Juz %lld": {},
+    "Juz %lld · %lld%% complete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Juz %1$lld · %2$lld%% complete"
           }
         }
       }
     },
-    "Juz %lld, from Surah %lld ayah %lld to Surah %lld ayah %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Juz %1$lld, from Surah %2$lld ayah %3$lld to Surah %4$lld ayah %5$lld"
+    "Juz %lld, from Surah %lld ayah %lld to Surah %lld ayah %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Juz %1$lld, from Surah %2$lld ayah %3$lld to Surah %4$lld ayah %5$lld"
           }
         }
       }
     },
-    "Kaaba" : {
-
-    },
-    "Keep going to unlock this achievement!" : {
-
-    },
-    "Knowledge & Tools" : {
-
-    },
-    "Larger Arabic Text" : {
-
-    },
-    "Last 10 Nights" : {
-
-    },
-    "Last read: %lld:%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Last read: %1$lld:%2$lld"
+    "Kaaba": {},
+    "Keep going to unlock this achievement!": {},
+    "Knowledge & Tools": {},
+    "Larger Arabic Text": {},
+    "Last 10 Nights": {},
+    "Last read: %lld:%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Last read: %1$lld:%2$lld"
           }
         }
       }
     },
-    "Last updated: February 2026" : {
-
-    },
-    "Laylat al-Qadr" : {
-
-    },
-    "Laylat al-Qadr - Night %lld" : {
-
-    },
-    "Laylat al-Qadr Duas" : {
-
-    },
-    "Laylatul Qadr Duas" : {
-
-    },
-    "Learn" : {
-
-    },
-    "Learn About Ashura" : {
-
-    },
-    "Learn About Isra & Mi'raj" : {
-
-    },
-    "Lesson" : {
-
-    },
-    "Lesson Complete!" : {
-
-    },
-    "Lesson: %@/%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Lesson: %1$@/%2$@"
+    "Last updated: February 2026": {},
+    "Laylat al-Qadr": {},
+    "Laylat al-Qadr - Night %lld": {},
+    "Laylat al-Qadr Duas": {},
+    "Laylatul Qadr Duas": {},
+    "Learn": {},
+    "Learn About Ashura": {},
+    "Learn About Isra & Mi'raj": {},
+    "Lesson": {},
+    "Lesson Complete!": {},
+    "Lesson: %@/%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Lesson: %1$@/%2$@"
           }
         }
       }
     },
-    "Level %lld" : {
-
-    },
-    "Live Activity" : {
-
-    },
-    "Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island." : {
-
-    },
-    "Location" : {
-
-    },
-    "Location based auto-silence" : {
-
-    },
-    "Location permission was denied. Please enable in Settings." : {
-
-    },
-    "Location request timed out." : {
-
-    },
-    "Locked" : {
-
-    },
-    "Log" : {
-
-    },
-    "Log %@" : {
-
-    },
-    "Log ${prayer} prayer" : {
-
-    },
-    "Log fasting hours automatically" : {
-
-    },
-    "Log Prayer" : {
-
-    },
-    "Log that you've completed a prayer" : {
-
-    },
-    "Logged %@ prayer. +10 Hasanat earned!" : {
-
-    },
-    "Made with love for the Ummah" : {
-
-    },
-    "Make sure silent mode is off so the adhan plays aloud." : {
-
-    },
-    "Madhab (Asr Time)" : {
-
-    },
-    "Madhab (Asr)" : {
-
-    },
-    "Manage Data" : {
-
-    },
-    "Mark as Prayed" : {
-
-    },
-    "Mark complete" : {
-
-    },
-    "Mark Complete" : {
-
-    },
-    "Mark Incomplete" : {
-
-    },
-    "Mark today as fasted" : {
-
-    },
-    "Mawlid al-Nabi" : {
-
-    },
-    "May Allah accept your Zakat" : {
-
-    },
-    "May your journey with Safa be blessed" : {
-
-    },
-    "Meaning" : {
-
-    },
-    "Message is too long. Please shorten it." : {
-
-    },
-    "Method" : {
-
-    },
-    "Mi'raj" : {
-
-    },
-    "Microphone permission is required for pronunciation checking." : {
-
-    },
-    "Migration failed: %@" : {
-
-    },
-    "More" : {
-
-    },
-    "Morning" : {
-
-    },
-    "Mosque Mode" : {
-
-    },
-    "Name Detail" : {
-
-    },
-    "Narrator" : {
-
-    },
-    "Network" : {
-
-    },
-    "New Chat" : {
-
-    },
-    "Next" : {
-
-    },
-    "Next occurrence: %@" : {
-
-    },
-    "Next Prayer" : {
-
-    },
-    "Next Surah" : {
-
-    },
-    "Night of Power Guide" : {
-
-    },
-    "Night Prayer Times" : {
-
-    },
-    "Night Prayers" : {
-
-    },
-    "Nisab is the minimum amount of wealth a Muslim must possess before they become eligible to pay Zakat. It is calculated based on the value of either 85 grams of gold or 595 grams of silver." : {
-
-    },
-    "Nisab Threshold" : {
-
-    },
-    "No ads. No clutter. No tracking." : {
-
-    },
-    "No ayahs found for \"%@\".\nTry a different search term." : {
-
-    },
-    "No Duas Yet" : {
-
-    },
-    "No Events Found" : {
-
-    },
-    "No events matching \"%@\"" : {
-
-    },
-    "No Favourites Yet" : {
-
-    },
-    "No mapping model found for migration." : {
-
-    },
-    "No Results" : {
-
-    },
-    "No Zakat Due" : {
-
-    },
-    "Normal" : {
-
-    },
-    "Not completed" : {
-
-    },
-    "Not set" : {
-
-    },
-    "Note for %@" : {
-
-    },
-    "Note: For complex religious rulings, please consult a qualified scholar." : {
-
-    },
-    "Note: This calculator provides an estimate. For complex financial situations, please consult a qualified Islamic scholar." : {
-
-    },
-    "Notes (Optional)" : {
-
-    },
-    "Notification off for %@" : {
-
-    },
-    "Notification on for %@" : {
-
-    },
-    "Notifications" : {
-
-    },
-    "Notifications are disabled in Settings" : {
-
-    },
-    "Number %lld, %@, %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Number %1$lld, %2$@, %3$@"
+    "Level %lld": {},
+    "Live Activity": {},
+    "Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island.": {},
+    "Location": {},
+    "Location based auto-silence": {},
+    "Location permission was denied. Please enable in Settings.": {},
+    "Location request timed out.": {},
+    "Locked": {},
+    "Log": {},
+    "Log %@": {},
+    "Log ${prayer} prayer": {},
+    "Log fasting hours automatically": {},
+    "Log Prayer": {},
+    "Log that you've completed a prayer": {},
+    "Logged %@ prayer. +10 Hasanat earned!": {},
+    "Made with love for the Ummah": {},
+    "Make sure silent mode is off so the adhan plays aloud.": {},
+    "Madhab (Asr Time)": {},
+    "Madhab (Asr)": {},
+    "Manage Data": {},
+    "Mark as Prayed": {},
+    "Mark complete": {},
+    "Mark Complete": {},
+    "Mark Incomplete": {},
+    "Mark today as fasted": {},
+    "Mawlid al-Nabi": {},
+    "May Allah accept your Zakat": {},
+    "May your journey with Safa be blessed": {},
+    "Meaning": {},
+    "Message is too long. Please shorten it.": {},
+    "Method": {},
+    "Mi'raj": {},
+    "Microphone permission is required for pronunciation checking.": {},
+    "Migration failed: %@": {},
+    "More": {},
+    "Morning": {},
+    "Mosque Mode": {},
+    "Name Detail": {},
+    "Narrator": {},
+    "Network": {},
+    "New Chat": {},
+    "Next": {},
+    "Next occurrence: %@": {},
+    "Next Prayer": {},
+    "Next Surah": {},
+    "Night of Power Guide": {},
+    "Night Prayer Times": {},
+    "Night Prayers": {},
+    "Nisab is the minimum amount of wealth a Muslim must possess before they become eligible to pay Zakat. It is calculated based on the value of either 85 grams of gold or 595 grams of silver.": {},
+    "Nisab Threshold": {},
+    "No ads. No clutter. No tracking.": {},
+    "No ayahs found for \"%@\".\nTry a different search term.": {},
+    "No Duas Yet": {},
+    "No Events Found": {},
+    "No events matching \"%@\"": {},
+    "No Favourites Yet": {},
+    "No mapping model found for migration.": {},
+    "No Results": {},
+    "No Zakat Due": {},
+    "Normal": {},
+    "Not completed": {},
+    "Not set": {},
+    "Note for %@": {},
+    "Note: For complex religious rulings, please consult a qualified scholar.": {},
+    "Note: This calculator provides an estimate. For complex financial situations, please consult a qualified Islamic scholar.": {},
+    "Notes (Optional)": {},
+    "Notification off for %@": {},
+    "Notification on for %@": {},
+    "Notifications": {},
+    "Notifications are disabled in Settings": {},
+    "Number %lld, %@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Number %1$lld, %2$@, %3$@"
           }
         }
       }
     },
-    "Observance" : {
-
-    },
-    "of %lld" : {
-
-    },
-    "of %lld total" : {
-
-    },
-    "OK" : {
-
-    },
-    "Open iOS Accessibility Settings" : {
-
-    },
-    "Open Prayer" : {
-
-    },
-    "Open Qibla" : {
-
-    },
-    "Open Quran" : {
-
-    },
-    "Open Safa" : {
-
-    },
-    "Open Settings" : {
-
-    },
-    "Open Source" : {
-
-    },
-    "Open the Quran reader" : {
-
-    },
-    "Open the tasbeeh counter" : {
-
-    },
-    "Pause auto-scroll" : {
-
-    },
-    "Play adhan" : {
-
-    },
-    "Play auto-scroll" : {
-
-    },
-    "Playback Speed" : {
-
-    },
-    "Please read these terms carefully before using Safa." : {
-
-    },
-    "Point the top of your phone towards the arrow to face the Qibla" : {
-
-    },
-    "Popular Searches" : {
-
-    },
-    "Prayer" : {
-
-    },
-    "Prayer Breakdown" : {
-
-    },
-    "Prayer Calculation" : {
-
-    },
-    "Prayer Consistency" : {
-
-    },
-    "Prayer Location" : {
-
-    },
-    "Prayer Log" : {
-
-    },
-    "Prayer Notifications" : {
-
-    },
-    "Prayer Reminders" : {
-
-    },
-    "Prayer Settings" : {
-
-    },
-    "Prayer Streak" : {
-
-    },
-    "Prayer Time Adjustments" : {
-
-    },
-    "Prayer time calculations from PrayTimes.org" : {
-
-    },
-    "Prayer Times" : {
-
-    },
-    "Prayers for %@" : {
-
-    },
-    "Prepare for Restful Sleep" : {
-
-    },
-    "Prepare to break your fast. May Allah accept your worship." : {
-
-    },
-    "Preview with Recommended Settings" : {
-
-    },
-    "Privacy Policy" : {
-
-    },
-    "Progress" : {
-
-    },
-    "Purity · Clarity" : {
-
-    },
-    "Qibla" : {
-
-    },
-    "Qibla Compass" : {
-
-    },
-    "Qibla direction is %lld degrees from North" : {
-
-    },
-    "Quality" : {
-
-    },
-    "Query failed: %@" : {
-
-    },
-    "Question" : {
-
-    },
-    "Questions? Email us at helpmesafa@gmail.com" : {
-
-    },
-    "Quick Access" : {
-
-    },
-    "Quran" : {
-
-    },
-    "Quran Khatm Goal" : {
-
-    },
-    "Quran Reader" : {
-
-    },
-    "Quran Settings" : {
-
-    },
-    "Quran text from Tanzil.net" : {
-
-    },
-    "Rak'ahs Prayed" : {
-
-    },
-    "Ramadan (Start & Laylatul Qadr)" : {
-
-    },
-    "Ramadan Begins" : {
-
-    },
-    "Ramadan Duas" : {
-
-    },
-    "Ramadan Ends" : {
-
-    },
-    "Ramadan fasts logged" : {
-
-    },
-    "Ramadan is coming!" : {
-
-    },
-    "Ramadan mode is now active. May this blessed month bring you peace and blessings." : {
-
-    },
-    "Ramadan Mubarak" : {
-
-    },
-    "Ramadan Mubarak! 🌙" : {
-
-    },
-    "Ramadan Quran" : {
-
-    },
-    "Ramadan Settings" : {
-
-    },
-    "Rate on App Store" : {
-
-    },
-    "Rate Safa" : {
-
-    },
-    "Read 1 Juz per day to complete on time" : {
-
-    },
-    "Read Seerah" : {
-
-    },
-    "Ready to Begin" : {
-
-    },
-    "Recent Searches" : {
-
-    },
-    "Recognition failed: %@" : {
-
-    },
-    "Recommendations" : {
-
-    },
-    "Recommended for %@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Recommended for %1$@: %2$@"
+    "Observance": {},
+    "of %lld": {},
+    "of %lld total": {},
+    "OK": {},
+    "Open iOS Accessibility Settings": {},
+    "Open Prayer": {},
+    "Open Qibla": {},
+    "Open Quran": {},
+    "Open Safa": {},
+    "Open Settings": {},
+    "Open Source": {},
+    "Open the Quran reader": {},
+    "Open the tasbeeh counter": {},
+    "Pause auto-scroll": {},
+    "Play adhan": {},
+    "Play auto-scroll": {},
+    "Playback Speed": {},
+    "Please read these terms carefully before using Safa.": {},
+    "Point the top of your phone towards the arrow to face the Qibla": {},
+    "Popular Searches": {},
+    "Prayer": {},
+    "Prayer Breakdown": {},
+    "Prayer Calculation": {},
+    "Prayer Consistency": {},
+    "Prayer Location": {},
+    "Prayer Log": {},
+    "Prayer Notifications": {},
+    "Prayer Reminders": {},
+    "Prayer Settings": {},
+    "Prayer Streak": {},
+    "Prayer Time Adjustments": {},
+    "Prayer time calculations from PrayTimes.org": {},
+    "Prayer Times": {},
+    "Prayers for %@": {},
+    "Prepare for Restful Sleep": {},
+    "Prepare to break your fast. May Allah accept your worship.": {},
+    "Preview with Recommended Settings": {},
+    "Privacy Policy": {},
+    "Progress": {},
+    "Purity · Clarity": {},
+    "Qibla": {},
+    "Qibla Compass": {},
+    "Qibla direction is %lld degrees from North": {},
+    "Quality": {},
+    "Query failed: %@": {},
+    "Question": {},
+    "Questions? Email us at helpmesafa@gmail.com": {},
+    "Quick Access": {},
+    "Quran": {},
+    "Quran Khatm Goal": {},
+    "Quran Reader": {},
+    "Quran Settings": {},
+    "Quran text from Tanzil.net": {},
+    "Rak'ahs Prayed": {},
+    "Ramadan (Start & Laylatul Qadr)": {},
+    "Ramadan Begins": {},
+    "Ramadan Duas": {},
+    "Ramadan Ends": {},
+    "Ramadan fasts logged": {},
+    "Ramadan is coming!": {},
+    "Ramadan Mubarak": {},
+    "Ramadan Mubarak! 🌙": {},
+    "Ramadan Quran": {},
+    "Ramadan Settings": {},
+    "Rate on App Store": {},
+    "Rate Safa": {},
+    "Read 1 Juz per day to complete on time": {},
+    "Read Seerah": {},
+    "Ready to Begin": {},
+    "Recent Searches": {},
+    "Recognition failed: %@": {},
+    "Recommendations": {},
+    "Recommended for %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Recommended for %1$@: %2$@"
           }
         }
       }
     },
-    "Recommended Settings" : {
-
-    },
-    "Recommended: %@" : {
-
-    },
-    "Reduce Motion" : {
-
-    },
-    "Reference" : {
-
-    },
-    "Reflect on the Year" : {
-
-    },
-    "Refresh Location" : {
-
-    },
-    "Refresh prayer times when you move to a new city" : {
-
-    },
-    "Remember to %@" : {
-
-    },
-    "Reminders" : {
-
-    },
-    "Remove Log" : {
-
-    },
-    "Reset" : {
-
-    },
-    "Reset Calculator" : {
-
-    },
-    "Reset counter" : {
-
-    },
-    "Reset Onboarding" : {
-
-    },
-    "Reset Progress" : {
-
-    },
-    "Reset Tasbeeh" : {
-
-    },
-    "Reset the tasbeeh counter to zero" : {
-
-    },
-    "Retention Period" : {
-
-    },
-    "Rotate your device to align with the Qibla direction" : {
-
-    },
-    "Safa" : {
-
-    },
-    "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nAchievement Notifications: Passive\n- Low priority, silent\n- Shown in Notification Center only\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa" : {
-
-    },
-    "Safa is a comprehensive Islamic companion app designed with privacy, simplicity, and intelligence at its core." : {
-
-    },
-    "Safa is built with privacy at its core. We believe your spiritual journey is personal and should stay that way." : {
-
-    },
-    "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
-
-    },
-    "Save" : {
-
-    },
-    "Schedule" : {
-
-    },
-    "Search duas..." : {
-
-    },
-    "Search Quran" : {
-
-    },
-    "Search surahs..." : {
-
-    },
-    "Searching..." : {
-
-    },
-    "Section" : {
-
-    },
-    "Select Date" : {
-
-    },
-    "Select Reciter" : {
-
-    },
-    "Select which Islamic events to add to your calendar." : {
-
-    },
-    "Send Feedback" : {
-
-    },
-    "Send Salawat" : {
-
-    },
-    "Set Iftar Reminder" : {
-
-    },
-    "Set Islamic Goals" : {
-
-    },
-    "Set Suhoor Reminder" : {
-
-    },
-    "Settings" : {
-
-    },
-    "Share" : {
-
-    },
-    "Share Eid Greeting" : {
-
-    },
-    "Share Safa" : {
-
-    },
-    "Share Safa with Friends & Family" : {
-
-    },
-    "Share the app with friends and family" : {
-
-    },
-    "Shared!" : {
-
-    },
-    "Show Eid Banner" : {
-
-    },
-    "Show less" : {
-
-    },
-    "Show more" : {
-
-    },
-    "Show Night Prayer Times" : {
-
-    },
-    "Show Ramadan Banner" : {
-
-    },
-    "Show Translation" : {
-
-    },
-    "Shows time until next prayer" : {
-
-    },
-    "Skip" : {
-
-    },
-    "Sleep" : {
-
-    },
-    "Sleep Dhikr" : {
-
-    },
-    "Smart Adhan" : {
-
-    },
-    "Smart Cleanup" : {
-
-    },
-    "Smart settings applied" : {
-
-    },
-    "Snooze" : {
-
-    },
-    "Snooze 5 min" : {
-
-    },
-    "Sound" : {
-
-    },
-    "Source: %@" : {
-
-    },
-    "Special Thanks" : {
-
-    },
-    "Speech recognition is not authorized. Please enable it in Settings." : {
-
-    },
-    "Speech recognition is not available on this device." : {
-
-    },
-    "Speech recognition is not available." : {
-
-    },
-    "Speed %@" : {
-
-    },
-    "Spread the Word" : {
-
-    },
-    "Start Tasbeeh" : {
-
-    },
-    "Start Wind Down" : {
-
-    },
-    "Start your evening dhikr and prepare for a restful night." : {
-
-    },
-    "Stats" : {
-
-    },
-    "Stay connected to your prayers" : {
-
-    },
-    "Stop adhan" : {
-
-    },
-    "Stop Adhan" : {
-
-    },
-    "Storage" : {
-
-    },
-    "Storage Used" : {
-
-    },
-    "Streaks" : {
-
-    },
-    "Submit" : {
-
-    },
-    "Suhoor" : {
-
-    },
-    "Suhoor Dua" : {
-
-    },
-    "Suhoor ends in" : {
-
-    },
-    "Suhoor Reminder" : {
-
-    },
-    "Suhoor Time" : {
-
-    },
-    "Supplications & Remembrances" : {
-
-    },
-    "Supplications and Remembrances" : {
-
-    },
-    "Support" : {
-
-    },
-    "Surah" : {
-
-    },
-    "Surah %lld" : {
-
-    },
-    "Surah %lld, %@, %@, %lld verses%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Surah %1$lld, %2$@, %3$@, %4$lld verses%5$@"
+    "Recommended Settings": {},
+    "Recommended: %@": {},
+    "Reduce Motion": {},
+    "Reference": {},
+    "Reflect on the Year": {},
+    "Refresh Location": {},
+    "Refresh prayer times when you move to a new city": {},
+    "Remember to %@": {},
+    "Reminders": {},
+    "Remove Log": {},
+    "Reset": {},
+    "Reset Calculator": {},
+    "Reset counter": {},
+    "Reset Onboarding": {},
+    "Reset Progress": {},
+    "Reset Tasbeeh": {},
+    "Reset the tasbeeh counter to zero": {},
+    "Retention Period": {},
+    "Rotate your device to align with the Qibla direction": {},
+    "Safa": {},
+    "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nAchievement Notifications: Passive\n- Low priority, silent\n- Shown in Notification Center only\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa": {},
+    "Safa is a comprehensive Islamic companion app designed with privacy, simplicity, and intelligence at its core.": {},
+    "Safa is built with privacy at its core. We believe your spiritual journey is personal and should stay that way.": {},
+    "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages.": {},
+    "Save": {},
+    "Schedule": {},
+    "Search duas...": {},
+    "Search Quran": {},
+    "Search surahs...": {},
+    "Searching...": {},
+    "Section": {},
+    "Select Date": {},
+    "Select Reciter": {},
+    "Select which Islamic events to add to your calendar.": {},
+    "Send Feedback": {},
+    "Send Salawat": {},
+    "Set Iftar Reminder": {},
+    "Set Islamic Goals": {},
+    "Set Suhoor Reminder": {},
+    "Settings": {},
+    "Share": {},
+    "Share Eid Greeting": {},
+    "Share Safa": {},
+    "Share Safa with Friends & Family": {},
+    "Share the app with friends and family": {},
+    "Shared!": {},
+    "Show Eid Banner": {},
+    "Show less": {},
+    "Show more": {},
+    "Show Night Prayer Times": {},
+    "Show Ramadan Banner": {},
+    "Show Translation": {},
+    "Shows time until next prayer": {},
+    "Skip": {},
+    "Sleep": {},
+    "Sleep Dhikr": {},
+    "Smart Adhan": {},
+    "Smart Cleanup": {},
+    "Smart settings applied": {},
+    "Snooze": {},
+    "Snooze 5 min": {},
+    "Sound": {},
+    "Source: %@": {},
+    "Special Thanks": {},
+    "Speech recognition is not authorized. Please enable it in Settings.": {},
+    "Speech recognition is not available on this device.": {},
+    "Speech recognition is not available.": {},
+    "Speed %@": {},
+    "Spread the Word": {},
+    "Start Tasbeeh": {},
+    "Start Wind Down": {},
+    "Start your evening dhikr and prepare for a restful night.": {},
+    "Stats": {},
+    "Stay connected to your prayers": {},
+    "Stop adhan": {},
+    "Stop Adhan": {},
+    "Storage": {},
+    "Storage Used": {},
+    "Streaks": {},
+    "Submit": {},
+    "Suhoor": {},
+    "Suhoor Dua": {},
+    "Suhoor ends in": {},
+    "Suhoor Reminder": {},
+    "Suhoor Time": {},
+    "Supplications & Remembrances": {},
+    "Supplications and Remembrances": {},
+    "Support": {},
+    "Surah": {},
+    "Surah %lld": {},
+    "Surah %lld, %@, %@, %lld verses%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Surah %1$lld, %2$@, %3$@, %4$lld verses%5$@"
           }
         }
       }
     },
-    "Surah %lld, Ayah %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Surah %1$lld, Ayah %2$lld"
+    "Surah %lld, Ayah %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Surah %1$lld, Ayah %2$lld"
           }
         }
       }
     },
-    "Surah %lld:%lld - %lld:%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Surah %1$lld:%2$lld - %3$lld:%4$lld"
+    "Surah %lld:%lld - %lld:%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Surah %1$lld:%2$lld - %3$lld:%4$lld"
           }
         }
       }
     },
-    "Surah Al-Kahf" : {
-
-    },
-    "Surah Number" : {
-
-    },
-    "Surahs" : {
-
-    },
-    "SwiftUI" : {
-
-    },
-    "Sync to Apple Health" : {
-
-    },
-    "System Accessibility" : {
-
-    },
-    "System Status" : {
-
-    },
-    "Tap the heart on any dua to save it here." : {
-
-    },
-    "Tap to Count" : {
-
-    },
-    "Tap to log" : {
-
-    },
-    "Tap to Record" : {
-
-    },
-    "Tap to set up" : {
-
-    },
-    "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you." : {
-
-    },
-    "Taraweeh" : {
-
-    },
-    "Taraweeh Time" : {
-
-    },
-    "Taraweeh Tonight" : {
-
-    },
-    "Target" : {
-
-    },
-    "Target Count" : {
-
-    },
-    "Tasbeeh" : {
-
-    },
-    "Tasbeeh Counter" : {
-
-    },
-    "Tasbeeh counter reset" : {
-
-    },
-    "Tell us more..." : {
-
-    },
-    "Terms of Service" : {
-
-    },
-    "Test Haptics" : {
-
-    },
-    "Test Prayer Notification (5s)" : {
-
-    },
-    "The 10th of Muharram. Fasting this day expiates sins of the previous year." : {
-
-    },
-    "The AI model is not loaded. Please wait." : {
-
-    },
-    "The alarm will be set based on Fajr prayer time for your location. You can adjust the offset if needed." : {
-
-    },
-    "The beginning of a new Islamic year." : {
-
-    },
-    "The blessed month of fasting begins." : {
-
-    },
-    "The counter announces the current count, target, and percentage complete. The main button describes the dhikr being counted." : {
-
-    },
-    "The data model could not be found." : {
-
-    },
-    "The Most Beautiful Names" : {
-
-    },
-    "The Muslim developer community" : {
-
-    },
-    "The Night Journey and Ascension of Prophet Muhammad ﷺ" : {
-
-    },
-    "The Night of Power." : {
-
-    },
-    "The required health data type is not available." : {
-
-    },
-    "These recommendations are based on common practices in your region. You can always customize these settings to match your preference or local mosque." : {
-
-    },
-    "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي" : {
-
-    },
-    "This permanently removes all your data across every category. Your app settings are preserved." : {
-
-    },
-    "This Week" : {
-
-    },
-    "This will permanently delete all your progress, bookmarks, and chat history. This action cannot be undone." : {
-
-    },
-    "This will permanently delete all your progress, bookmarks, prayer history, chat history, and more. This action cannot be undone." : {
-
-    },
-    "This will permanently delete your %@. This action cannot be undone." : {
-
-    },
-    "This will remove %@ from your device. You can download it again later." : {
-
-    },
-    "This will remove all downloaded content (%@). You can download content again later." : {
-
-    },
-    "Time for pre-dawn meal. Fajr is in %lld minutes. May your fast be accepted." : {
-
-    },
-    "Time Range" : {
-
-    },
-    "Time to Wind Down" : {
-
-    },
-    "Time until next prayer" : {
-
-    },
-    "Tips" : {
-
-    },
-    "Title" : {
-
-    },
-    "Today" : {
-
-    },
-    "Today's Prayer Times" : {
-
-    },
-    "Tonight is the %@ - an odd night" : {
-
-    },
-    "Tonight's Progress" : {
-
-    },
-    "Total fasting hours" : {
-
-    },
-    "Translation" : {
-
-    },
-    "Translation Text Size" : {
-
-    },
-    "Transliteration" : {
-
-    },
-    "Triple-tap the version number to hide." : {
-
-    },
-    "Type" : {
-
-    },
-    "Unable to determine your location." : {
-
-    },
-    "Unable to load surah" : {
-
-    },
-    "Undo" : {
-
-    },
-    "Undo last count" : {
-
-    },
-    "Unknown prayer type." : {
-
-    },
-    "Unlocked!" : {
-
-    },
-    "until Iftar" : {
-
-    },
-    "until Suhoor ends" : {
-
-    },
-    "Upcoming: %@" : {
-
-    },
-    "Update Location" : {
-
-    },
-    "Update When Traveling" : {
-
-    },
-    "Use Adhan Sound" : {
-
-    },
-    "Using current location" : {
-
-    },
-    "Using default location: %@" : {
-
-    },
-    "Using saved location" : {
-
-    },
-    "Using saved location: %@" : {
-
-    },
-    "Version" : {
-
-    },
-    "Version %@ (%@)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Version %1$@ (%2$@)"
+    "Surah Al-Kahf": {},
+    "Surah Number": {},
+    "Surahs": {},
+    "SwiftUI": {},
+    "Sync to Apple Health": {},
+    "System Accessibility": {},
+    "System Status": {},
+    "Tap the heart on any dua to save it here.": {},
+    "Tap to Count": {},
+    "Tap to log": {},
+    "Tap to Record": {},
+    "Tap to set up": {},
+    "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you.": {},
+    "Taraweeh": {},
+    "Taraweeh Time": {},
+    "Taraweeh Tonight": {},
+    "Target": {},
+    "Target Count": {},
+    "Tasbeeh": {},
+    "Tasbeeh Counter": {},
+    "Tasbeeh counter reset": {},
+    "Tell us more...": {},
+    "Terms of Service": {},
+    "Test Haptics": {},
+    "Test Prayer Notification (5s)": {},
+    "The 10th of Muharram. Fasting this day expiates sins of the previous year.": {},
+    "The AI model is not loaded. Please wait.": {},
+    "The alarm will be set based on Fajr prayer time for your location. You can adjust the offset if needed.": {},
+    "The beginning of a new Islamic year.": {},
+    "The blessed month of fasting begins.": {},
+    "The counter announces the current count, target, and percentage complete. The main button describes the dhikr being counted.": {},
+    "The data model could not be found.": {},
+    "The Most Beautiful Names": {},
+    "The Muslim developer community": {},
+    "The Night Journey and Ascension of Prophet Muhammad ﷺ": {},
+    "The Night of Power.": {},
+    "The required health data type is not available.": {},
+    "These recommendations are based on common practices in your region. You can always customize these settings to match your preference or local mosque.": {},
+    "This could be the Night of Power. Increase your worship and make dua: اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي": {},
+    "This permanently removes all your data across every category. Your app settings are preserved.": {},
+    "This Week": {},
+    "This will permanently delete all your progress, bookmarks, and chat history. This action cannot be undone.": {},
+    "This will permanently delete all your progress, bookmarks, prayer history, chat history, and more. This action cannot be undone.": {},
+    "This will permanently delete your %@. This action cannot be undone.": {},
+    "This will remove %@ from your device. You can download it again later.": {},
+    "This will remove all downloaded content (%@). You can download content again later.": {},
+    "Time for pre-dawn meal. Fajr is in %lld minutes. May your fast be accepted.": {},
+    "Time Range": {},
+    "Time to Wind Down": {},
+    "Time until next prayer": {},
+    "Tips": {},
+    "Title": {},
+    "Today": {},
+    "Today's Prayer Times": {},
+    "Tonight is the %@ - an odd night": {},
+    "Tonight's Progress": {},
+    "Total fasting hours": {},
+    "Translation": {},
+    "Translation Text Size": {},
+    "Transliteration": {},
+    "Triple-tap the version number to hide.": {},
+    "Type": {},
+    "Unable to determine your location.": {},
+    "Unable to load surah": {},
+    "Undo": {},
+    "Undo last count": {},
+    "Unknown prayer type.": {},
+    "Unlocked!": {},
+    "until Iftar": {},
+    "until Suhoor ends": {},
+    "Upcoming: %@": {},
+    "Update Location": {},
+    "Update When Traveling": {},
+    "Use Adhan Sound": {},
+    "Using current location": {},
+    "Using default location: %@": {},
+    "Using saved location": {},
+    "Using saved location: %@": {},
+    "Version": {},
+    "Version %@ (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Version %1$@ (%2$@)"
           }
         }
       }
     },
-    "View" : {
-
-    },
-    "View All" : {
-
-    },
-    "View Eid Prayers" : {
-
-    },
-    "View Fasting Guide" : {
-
-    },
-    "View Recommended Settings" : {
-
-    },
-    "VoiceOver announces the direction to turn and tells you when you're facing the Qibla." : {
-
-    },
-    "VoiceOver Support" : {
-
-    },
-    "Wake up for Fajr prayer. May Allah accept your worship." : {
-
-    },
-    "We do not sell, trade, or share your personal information with anyone. Period." : {
-
-    },
-    "Well Done!" : {
-
-    },
-    "What happened?\nWhich page were you on?\nWhat did you expect instead?" : {
-
-    },
-    "What's included in JSON export:" : {
-
-    },
-    "White Days" : {
-
-    },
-    "White Days Fasting" : {
-
-    },
-    "Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi." : {
-
-    },
-    "WiFi connection required for downloads" : {
-
-    },
-    "Wind Down" : {
-
-    },
-    "You can customize calculation methods and more in the Settings" : {
-
-    },
-    "You can deduct immediate debts and expenses that are due within the year from your total assets." : {
-
-    },
-    "You logged %lld of 30 fasting days this Ramadan. If you have missed fasts, you can make them up when able." : {
-
-    },
-    "You've completed %lld %@!" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "You've completed %1$lld %2$@!"
+    "View": {},
+    "View All": {},
+    "View Eid Prayers": {},
+    "View Fasting Guide": {},
+    "View Recommended Settings": {},
+    "VoiceOver announces the direction to turn and tells you when you're facing the Qibla.": {},
+    "VoiceOver Support": {},
+    "Wake up for Fajr prayer. May Allah accept your worship.": {},
+    "We do not sell, trade, or share your personal information with anyone. Period.": {},
+    "Well Done!": {},
+    "What happened?\nWhich page were you on?\nWhat did you expect instead?": {},
+    "What's included in JSON export:": {},
+    "White Days": {},
+    "White Days Fasting": {},
+    "Wi-Fi only prevents large downloads from using cellular data. Auto-update keeps your content current when connected to Wi-Fi.": {},
+    "WiFi connection required for downloads": {},
+    "Wind Down": {},
+    "You can customize calculation methods and more in the Settings": {},
+    "You can deduct immediate debts and expenses that are due within the year from your total assets.": {},
+    "You logged %lld of 30 fasting days this Ramadan. If you have missed fasts, you can make them up when able.": {},
+    "You've completed %lld %@!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "You've completed %1$lld %2$@!"
           }
         }
       }
     },
-    "You've completed your nightly dhikr. May Allah grant you peaceful sleep and an easy awakening for Fajr." : {
-
-    },
-    "You've shared %lld time%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "You've shared %1$lld time%2$@"
+    "You've completed your nightly dhikr. May Allah grant you peaceful sleep and an easy awakening for Fajr.": {},
+    "You've shared %lld time%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "You've shared %1$lld time%2$@"
           }
         }
       }
     },
-    "Your answer..." : {
-
+    "Your answer...": {},
+    "Your data is exported as a file you can save or share. JSON includes all data; CSV is a spreadsheet of prayer logs.": {},
+    "Your data is stored locally on your device. Safa does not collect or share personal data.": {},
+    "Your Islamic Companion": {},
+    "Your location is used to calculate accurate prayer times.": {},
+    "Your Privacy Matters": {},
+    "Your Progress": {},
+    "Your wealth is below the Nisab threshold. Zakat is not obligatory, but voluntary charity (Sadaqah) is always encouraged.": {},
+    "Zakat Calculator": {},
+    "Zakat Due (2.5%)": {},
+    "Zakat is obligatory on every adult Muslim who possesses wealth above the Nisab threshold for a full lunar year (Hawl).": {},
+    "Zakat is one of the Five Pillars of Islam. It is a mandatory charitable contribution, typically 2.5% of a Muslim's total savings and wealth above a minimum amount known as Nisab.": {},
+    "أدعية وأذكار": {},
+    "أسماء الله الحسنى": {},
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ": {},
+    "صفا": {},
+    "صفا · Safa": {},
+    "عيد مبارك": {},
+    "Opens prayer settings": {},
+    "Times may vary — %@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Times may vary — %1$@ · %2$@"
+          }
+        }
+      }
     },
-    "Your data is exported as a file you can save or share. JSON includes all data; CSV is a spreadsheet of prayer logs." : {
-
-    },
-    "Your data is stored locally on your device. Safa does not collect or share personal data." : {
-
-    },
-    "Your Islamic Companion" : {
-
-    },
-    "Your location is used to calculate accurate prayer times." : {
-
-    },
-    "Your Privacy Matters" : {
-
-    },
-    "Your Progress" : {
-
-    },
-    "Your wealth is below the Nisab threshold. Zakat is not obligatory, but voluntary charity (Sadaqah) is always encouraged." : {
-
-    },
-    "Zakat Calculator" : {
-
-    },
-    "Zakat Due (2.5%)" : {
-
-    },
-    "Zakat is obligatory on every adult Muslim who possesses wealth above the Nisab threshold for a full lunar year (Hawl)." : {
-
-    },
-    "Zakat is one of the Five Pillars of Islam. It is a mandatory charitable contribution, typically 2.5% of a Muslim's total savings and wealth above a minimum amount known as Nisab." : {
-
-    },
-    "أدعية وأذكار" : {
-
-    },
-    "أسماء الله الحسنى" : {
-
-    },
-    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" : {
-
-    },
-    "صفا" : {
-
-    },
-    "صفا · Safa" : {
-
-    },
-    "عيد مبارك" : {
-
-    }
+    "Ramadan mode is now active. May this month bring you peace, mercy, and forgiveness.": {}
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

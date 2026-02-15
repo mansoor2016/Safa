@@ -279,6 +279,23 @@ enum CalculationMethod: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    var shortDisplayName: String {
+        switch self {
+        case .muslimWorldLeague: return "MWL"
+        case .isna: return "ISNA"
+        case .egypt: return "Egyptian"
+        case .makkah: return "Makkah"
+        case .karachi: return "Karachi"
+        case .tehran: return "Tehran"
+        case .jafari: return "Jafari"
+        case .dubai: return "Dubai"
+        case .kuwait: return "Kuwait"
+        case .qatar: return "Qatar"
+        case .singapore: return "Singapore"
+        case .turkey: return "Turkey"
+        }
+    }
+
     var methodDescription: String {
         switch self {
         case .muslimWorldLeague:

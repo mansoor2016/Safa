@@ -63,6 +63,22 @@ private struct PrayerContentView: View {
                     }
                 )
 
+                // Calculation disclaimer
+                Button {
+                    showingSettings = true
+                } label: {
+                    Label {
+                        Text("Times may vary — \(viewModel.calculationMethod.shortDisplayName) · \(viewModel.madhab.displayName)")
+                    } icon: {
+                        Image(systemName: "info.circle")
+                    }
+                    .font(SafaTypography.labelSmall)
+                    .foregroundStyle(SafaColors.Fallback.tertiaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(String(localized: "Opens prayer settings"))
+
                 // Sunnah Times
                 if viewModel.showSunnahTimes && !viewModel.sunnahTimes.isEmpty {
                     SunnahTimesCard(sunnahTimes: viewModel.sunnahTimes)

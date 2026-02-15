@@ -363,7 +363,7 @@ final class RamadanService {
     private func sendRamadanActivationNotification() {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Ramadan Mubarak! 🌙")
-        content.body = String(localized: "Ramadan mode is now active. May this blessed month bring you peace and blessings.")
+        content.body = String(localized: "Ramadan mode is now active. May this month bring you peace, mercy, and forgiveness.")
         content.sound = .default
 
         let request = UNNotificationRequest(
