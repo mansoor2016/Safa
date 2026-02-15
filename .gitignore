@@ -27,7 +27,6 @@ Pods/
 # Swift Package Manager
 .build/
 .swiftpm/
-Package.resolved
 
 # Carthage
 Carthage/Build
@@ -45,8 +44,8 @@ iOSInjectionProject/
 timeline.xctimeline
 playground.xcworkspace
 
-# Swift Package Manager
-*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+# Swift Package Manager (keep Package.resolved for Xcode Cloud)
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/configuration/
 
 # Xcode automatically generated files
 *.xcodeproj/xcuserdata/
