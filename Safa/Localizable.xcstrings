@@ -287,8 +287,8 @@
     "Add to Apple Calendar": {},
     "Add to Calendar": {},
     "Adhan": {},
-    "Adhan won't play when your iPhone is on silent mode.": {},
     "Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.": {},
+    "Adhan won't play when your iPhone is on silent mode.": {},
     "Adjustments": {},
     "AI Companion": {},
     "Alarm Options": {},
@@ -677,9 +677,9 @@
     "Log that you've completed a prayer": {},
     "Logged %@ prayer. +10 Hasanat earned!": {},
     "Made with love for the Ummah": {},
-    "Make sure silent mode is off so the adhan plays aloud.": {},
     "Madhab (Asr Time)": {},
     "Madhab (Asr)": {},
+    "Make sure silent mode is off so the adhan plays aloud.": {},
     "Manage Data": {},
     "Mark as Prayed": {},
     "Mark complete": {},
@@ -687,7 +687,9 @@
     "Mark Incomplete": {},
     "Mark today as fasted": {},
     "Mawlid al-Nabi": {},
+    "May Allah accept from us and from you.": {},
     "May Allah accept your Zakat": {},
+    "May this month bring you peace, mercy, and forgiveness.": {},
     "May your journey with Safa be blessed": {},
     "Meaning": {},
     "Message is too long. Please shorten it.": {},
@@ -754,12 +756,12 @@
     "Open Source": {},
     "Open the Quran reader": {},
     "Open the tasbeeh counter": {},
+    "Opens prayer settings": {},
     "Pause auto-scroll": {},
     "Play adhan": {},
     "Play auto-scroll": {},
     "Playback Speed": {},
     "Please read these terms carefully before using Safa.": {},
-    "Point the top of your phone towards the arrow to face the Qibla": {},
     "Popular Searches": {},
     "Prayer": {},
     "Prayer Breakdown": {},
@@ -992,6 +994,16 @@
     "Time Range": {},
     "Time to Wind Down": {},
     "Time until next prayer": {},
+    "Times may vary — %@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Times may vary — %1$@ · %2$@"
+          }
+        }
+      }
+    },
     "Tips": {},
     "Title": {},
     "Today": {},
@@ -1090,19 +1102,7 @@
     "صفا": {},
     "صفا · Safa": {},
     "عيد مبارك": {},
-    "Opens prayer settings": {},
-    "Times may vary — %@ · %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Times may vary — %1$@ · %2$@"
-          }
-        }
-      }
-    },
-    "May this month bring you peace, mercy, and forgiveness.": {},
-    "May Allah accept from us and from you.": {}
+    "Point your phone in the direction of the arrow": {}
   },
   "version": "1.0"
 }

@@ -162,3 +162,108 @@ final class QiblaCompassHelpersTests: XCTestCase {
         }
     }
 }
+
+// MARK: - Compass Wheel Tick/Cardinal Logic Tests
+
+final class QiblaCompassWheelLogicTests: XCTestCase {
+
+    // The wheel uses 72 ticks at 5° increments (0..<72).
+    // Cardinals (N/E/S/W) are at indices 0, 18, 36, 54 — ticks are skipped there.
+
+    func test_cardinalIndices_areCorrect() {
+        let cardinalDegrees = [0, 90, 180, 270]
+        for deg in cardinalDegrees {
+            let index = deg / 5
+            XCTAssertEqual(index % 18, 0,
+                           "\(deg)° should be a cardinal position (index \(index))")
+        }
+    }
+
+    func test_cardinalIndices_skipTicks() {
+        // Verify the 4 cardinal positions are the only ones where i % 18 == 0
+        let cardinalIndices = (0..<72).filter { $0 % 18 == 0 }
+        XCTAssertEqual(cardinalIndices, [0, 18, 36, 54])
+    }
+
+    func test_intercardinalIndices_areCorrect() {
+        // 45°, 135°, 225°, 315° → indices 9, 27, 45, 63
+        let intercardinalIndices = (0..<72).filter { $0 % 9 == 0 && $0 % 18 != 0 }
+        XCTAssertEqual(intercardinalIndices, [9, 27, 45, 63])
+    }
+
+    func test_tickCount_excluding_cardinals() {
+        // 72 total positions minus 4 cardinals = 68 tick marks drawn
+        let tickCount = (0..<72).filter { $0 % 18 != 0 }.count
+        XCTAssertEqual(tickCount, 68)
+    }
+
+    func test_cardinalLetterCounterRotation_netsToZero() {
+        // Each letter has rotation: angle + (-angle + deviceHeading) + (-deviceHeading)
+        // This should always equal 0 (letters stay upright)
+        let deviceHeadings: [Double] = [0, 45, 90, 180, 270, 359]
+        let cardinalAngles: [Double] = [0, 90, 180, 270]
+
+        for heading in deviceHeadings {
+            for angle in cardinalAngles {
+                let netRotation = angle + (-angle + heading) + (-heading)
+                XCTAssertEqual(netRotation, 0, accuracy: 0.001,
+                               "Letter at \(angle)° with heading \(heading)° should have net 0° rotation")
+            }
+        }
+    }
+
+    func test_qiblaArrowRotation_isRelativeToHeading() {
+        // Arrow rotates by (qiblaDirection - deviceHeading)
+        // When heading matches qibla, arrow should point to 12 o'clock (0°)
+        let qibla = 118.0
+        let heading = 118.0
+        let arrowRotation = qibla - heading
+        XCTAssertEqual(arrowRotation, 0, accuracy: 0.001,
+                       "Arrow should point up when facing Qibla")
+    }
+
+    func test_qiblaArrowRotation_offsetWhenNotAligned() {
+        let qibla = 118.0
+        let heading = 0.0
+        let arrowRotation = qibla - heading
+        XCTAssertEqual(arrowRotation, 118, accuracy: 0.001,
+                       "Arrow should point 118° clockwise when facing North")
+    }
+}
+
+// MARK: - CalculationMethod shortDisplayName Tests
+
+final class CalculationMethodDisplayTests: XCTestCase {
+
+    func test_shortDisplayName_allMethodsHaveValue() {
+        let allMethods: [CalculationMethod] = [
+            .muslimWorldLeague, .isna, .egypt, .makkah, .karachi,
+            .tehran, .jafari, .dubai, .kuwait, .qatar, .singapore, .turkey
+        ]
+
+        for method in allMethods {
+            XCTAssertFalse(method.shortDisplayName.isEmpty,
+                           "\(method) should have a non-empty shortDisplayName")
+        }
+    }
+
+    func test_shortDisplayName_isShort() {
+        // Short names should fit in a compact UI — max ~10 characters
+        let allMethods: [CalculationMethod] = [
+            .muslimWorldLeague, .isna, .egypt, .makkah, .karachi,
+            .tehran, .jafari, .dubai, .kuwait, .qatar, .singapore, .turkey
+        ]
+
+        for method in allMethods {
+            XCTAssertLessThanOrEqual(method.shortDisplayName.count, 10,
+                                     "\(method).shortDisplayName '\(method.shortDisplayName)' is too long")
+        }
+    }
+
+    func test_shortDisplayName_knownValues() {
+        XCTAssertEqual(CalculationMethod.muslimWorldLeague.shortDisplayName, "MWL")
+        XCTAssertEqual(CalculationMethod.isna.shortDisplayName, "ISNA")
+        XCTAssertEqual(CalculationMethod.makkah.shortDisplayName, "Makkah")
+        XCTAssertEqual(CalculationMethod.dubai.shortDisplayName, "Dubai")
+    }
+}

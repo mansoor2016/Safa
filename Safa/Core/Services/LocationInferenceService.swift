@@ -302,77 +302,85 @@ final class LocationInferenceService {
         let lat = coordinates.latitude
         let lng = coordinates.longitude
 
-        // Rough bounding boxes for major Muslim-majority countries.
-        // Order matters: smaller/more specific boxes must come before
-        // larger ones that overlap (e.g. UAE before Saudi Arabia).
+        // Tightened bounding boxes for major countries.
+        // Order: smallest/most specific first to avoid overlap swallowing.
+        // Coordinates based on actual country extents with ~0.2° margin.
 
-        // UAE (must precede SA — SA's box covers the full peninsula)
-        if lat > 22 && lat < 27 && lng > 51 && lng < 57 {
-            return "AE"
-        }
+        // --- Gulf States (smallest first, before Saudi Arabia) ---
 
-        // Kuwait (must precede SA)
-        if lat > 28.5 && lat < 30.5 && lng > 46.5 && lng < 49 {
-            return "KW"
-        }
-
-        // Qatar (must precede SA)
-        if lat > 24.4 && lat < 26.3 && lng > 50.7 && lng < 52 {
+        // Qatar: peninsula extending north from SA into the Gulf
+        if lat > 24.4 && lat < 26.2 && lng > 50.7 && lng < 51.7 {
             return "QA"
         }
 
-        // Singapore (must precede ID — ID's box covers SE Asia)
-        if lat > 1.1 && lat < 1.5 && lng > 103.5 && lng < 104.1 {
+        // Kuwait: small country at top of Gulf
+        if lat > 28.5 && lat < 30.1 && lng > 46.5 && lng < 48.5 {
+            return "KW"
+        }
+
+        // UAE: eastern Arabian peninsula coast
+        if lat > 22.6 && lat < 26.1 && lng > 51.5 && lng < 56.4 {
+            return "AE"
+        }
+
+        // --- Southeast Asia (smallest first, before Indonesia) ---
+
+        // Singapore: city-state at tip of Malay Peninsula
+        if lat > 1.15 && lat < 1.48 && lng > 103.6 && lng < 104.05 {
             return "SG"
         }
 
-        // Saudi Arabia
-        if lat > 16 && lat < 33 && lng > 34 && lng < 56 {
-            return "SA"
-        }
-
-        // Egypt
-        if lat > 22 && lat < 32 && lng > 24 && lng < 37 {
-            return "EG"
-        }
-
-        // Pakistan
-        if lat > 23 && lat < 37 && lng > 60 && lng < 78 {
-            return "PK"
-        }
-
-        // Turkey
-        if lat > 36 && lat < 42 && lng > 26 && lng < 45 {
-            return "TR"
-        }
-
-        // Malaysia (must precede ID)
-        if lat > 0 && lat < 8 && lng > 99 && lng < 120 {
+        // Malaysia: peninsula (1-7°N, 100-119°E) — excludes Singapore's range
+        if lat > 0.8 && lat < 7.4 && lng > 99.6 && lng < 119.3 {
             return "MY"
         }
 
-        // Indonesia
-        if lat > -11 && lat < 6 && lng > 95 && lng < 141 {
+        // Indonesia: archipelago south and east of Malaysia
+        if lat > -11 && lat < 5.9 && lng > 95 && lng < 141 {
             return "ID"
         }
 
-        // Iran
-        if lat > 25 && lat < 40 && lng > 44 && lng < 64 {
+        // --- Middle East ---
+
+        // Saudi Arabia: central Arabian peninsula (after Gulf states handled above)
+        if lat > 16.4 && lat < 32.2 && lng > 34.5 && lng < 55.7 {
+            return "SA"
+        }
+
+        // Egypt: northeast Africa + Sinai
+        if lat > 22 && lat < 31.7 && lng > 24.7 && lng < 36.9 {
+            return "EG"
+        }
+
+        // Iran: between Iraq/Turkey and Pakistan/Afghanistan
+        if lat > 25.1 && lat < 39.8 && lng > 44.0 && lng < 63.3 {
             return "IR"
         }
 
-        // USA
-        if lat > 24 && lat < 50 && lng > -125 && lng < -66 {
+        // Pakistan: between Iran and India
+        if lat > 23.6 && lat < 37.1 && lng > 60.9 && lng < 77.8 {
+            return "PK"
+        }
+
+        // Turkey: Anatolia + eastern Thrace
+        if lat > 35.8 && lat < 42.1 && lng > 25.7 && lng < 44.8 {
+            return "TR"
+        }
+
+        // --- Western countries ---
+
+        // USA: contiguous 48 states
+        if lat > 24.5 && lat < 49.4 && lng > -124.8 && lng < -66.9 {
             return "US"
         }
 
-        // UK
-        if lat > 49 && lat < 61 && lng > -11 && lng < 2 {
+        // UK: Great Britain + Northern Ireland
+        if lat > 49.9 && lat < 60.9 && lng > -10.5 && lng < 1.8 {
             return "GB"
         }
 
-        // Canada
-        if lat > 41 && lat < 84 && lng > -141 && lng < -52 {
+        // Canada: north of USA
+        if lat > 41.7 && lat < 83.1 && lng > -141 && lng < -52.6 {
             return "CA"
         }
 

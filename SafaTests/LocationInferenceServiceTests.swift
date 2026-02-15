@@ -315,6 +315,72 @@ final class LocationInferenceServiceTests: XCTestCase {
                        "Turkey should use Diyanet method, got \(context.recommendedMethod)")
     }
 
+    // MARK: - Fallback Bounding Box Tests (inferContextFast)
+
+    // These test the coordinate-only path (no geocoding) to verify
+    // that smaller country boxes are matched before larger overlapping ones.
+
+    func testFallback_dubaiCoordinates_getsDubaiMethod() {
+        let coords = Coordinates(latitude: 25.2048, longitude: 55.2708)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .dubai,
+                       "UAE fallback should use Dubai method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_kuwaitCoordinates_getsKuwaitMethod() {
+        let coords = Coordinates(latitude: 29.3759, longitude: 47.9774)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .kuwait,
+                       "Kuwait fallback should use Kuwait method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_dohaCoordinates_getsQatarMethod() {
+        let coords = Coordinates(latitude: 25.2854, longitude: 51.5310)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .qatar,
+                       "Qatar fallback should use Qatar method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_singaporeCoordinates_getsSingaporeMethod() {
+        let coords = Coordinates(latitude: 1.3521, longitude: 103.8198)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .singapore,
+                       "Singapore fallback should use Singapore method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_abuDhabi_getsDubaiMethod() {
+        // Abu Dhabi is also in UAE — verify the box covers it
+        let coords = Coordinates(latitude: 24.4539, longitude: 54.3773)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .dubai,
+                       "Abu Dhabi fallback should use Dubai method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_riyadh_getsMakkahMethod() {
+        // Saudi Arabia should still work after UAE/KW/QA boxes are checked first
+        let coords = Coordinates(latitude: 24.7136, longitude: 46.6753)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .makkah,
+                       "Saudi fallback should use Makkah method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_jakarta_usesCorrectMethod() {
+        // Indonesia should still work after Singapore/Malaysia boxes
+        let coords = Coordinates(latitude: -6.2088, longitude: 106.8456)
+        let context = sut.inferContextFast(from: coords)
+        // Indonesia uses MWL
+        XCTAssertEqual(context.recommendedMethod, .muslimWorldLeague,
+                       "Indonesia fallback should use MWL method, got \(context.recommendedMethod)")
+    }
+
+    func testFallback_kualaLumpur_getsSingaporeMethod() {
+        // Malaysia maps to Singapore/MUIS method and should match before Indonesia
+        let coords = Coordinates(latitude: 3.1390, longitude: 101.6869)
+        let context = sut.inferContextFast(from: coords)
+        XCTAssertEqual(context.recommendedMethod, .singapore,
+                       "Malaysia fallback should use Singapore/MUIS method, got \(context.recommendedMethod)")
+    }
+
     // MARK: - Coordinates Tests
 
     func testCoordinatesEquality() {

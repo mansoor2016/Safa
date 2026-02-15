@@ -33,6 +33,15 @@ struct QiblaCompassView: View {
     @State private var previousAlignmentZone: QiblaCompassHelpers.AlignmentZone = .far
     @State private var hapticFeedbackEnabled = true
 
+    /// Compass size derived from screen width minus card padding
+    private var compassDisplaySize: CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        let cardPadding: CGFloat = SafaSpacing.md * 2 // outer padding
+        let cardInset: CGFloat = SafaSpacing.md * 2   // ContentCard internal padding
+        let containerWidth = screenWidth - cardPadding - cardInset
+        return QiblaCompassHelpers.compassSize(forContainerWidth: containerWidth)
+    }
+
     private enum LocationSource: Equatable {
         case live
         case saved(name: String?)
@@ -131,6 +140,13 @@ struct QiblaCompassView: View {
 
     private var qiblaContent: some View {
         VStack(spacing: SafaSpacing.lg) {
+            // Instructions (below nav title)
+            Text("Point your phone in the direction of the arrow")
+                .font(SafaTypography.bodyMedium)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
             // Hero: compass card
             ContentCard {
                 VStack(spacing: SafaSpacing.md) {
@@ -149,16 +165,12 @@ struct QiblaCompassView: View {
                     .accessibilityLabel("Direction to Kaaba in Makkah")
 
                     // Responsive compass
-                    GeometryReader { proxy in
-                        let size = QiblaCompassHelpers.compassSize(forContainerWidth: proxy.size.width)
-                        QiblaCompassWheel(
-                            qiblaDirection: qiblaDirection,
-                            deviceHeading: deviceHeading,
-                            size: size
-                        )
-                        .frame(width: proxy.size.width, height: size)
-                    }
-                    .aspectRatio(1, contentMode: .fit)
+                    QiblaCompassWheel(
+                        qiblaDirection: qiblaDirection,
+                        deviceHeading: deviceHeading,
+                        size: compassDisplaySize
+                    )
+                    .frame(height: compassDisplaySize)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(compassAccessibilityLabel)
                     .accessibilityHint("Rotate your device to align with the Qibla direction")
@@ -220,12 +232,6 @@ struct QiblaCompassView: View {
                 onOpenSettings: isPermissionDenied ? { openAppSettings() } : nil
             )
 
-            // Instructions
-            Text("Point the top of your phone towards the arrow to face the Qibla")
-                .font(SafaTypography.bodySmall)
-                .foregroundColor(SafaColors.Fallback.tertiaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
         }
         .padding(SafaSpacing.md)
     }
