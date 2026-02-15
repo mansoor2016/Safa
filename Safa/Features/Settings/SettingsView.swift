@@ -1,5 +1,5 @@
 // MARK: - SettingsView.swift
-// PURPOSE: App settings and preferences
+// PURPOSE: Top-level settings menu with NavigationLinks to subpages
 // DEPENDENCIES: SwiftUI, PreferencesManager
 
 import SwiftUI
@@ -9,63 +9,70 @@ struct SettingsView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
     @Environment(ThemeManager.self) private var themeManager
-    @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedCalculationMethod: CalculationMethod = AppDefaults.calculationMethod
-    @State private var selectedMadhab: Madhab = AppDefaults.madhab
-    @State private var notificationsEnabled = AppDefaults.notificationsEnabled
-    @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
-    @State private var adhanEnabled = false
-    @State private var selectedAdhan: AdhanSound = .misharyAlafasy
-    @State private var smartAdhanEnabled = false
-    @State private var iftarAdhanEnabled = false
-    @State private var liveActivityEnabled = AppDefaults.liveActivityEnabled
-    @State private var hapticFeedbackEnabled = AppDefaults.hapticFeedbackEnabled
-    @State private var selectedTranslation = AppDefaults.translationLanguage
-    @State private var autoScrollEnabled = false
-    @State private var selectedAppearance: AppearanceOption = .system
+    // Summary state
+    @State private var locationName = ""
+    @State private var methodName = ""
+    @State private var appearanceName = ""
+
+    // Inline section state
     @State private var showDeleteConfirmation = false
-
-    // Accessibility state
-    @State private var reduceMotionEnabled = false
-    @State private var largerTextEnabled = false
-    @State private var highContrastEnabled = false
-
-    // Location state
-    @State private var savedLocationName: String?
-    @State private var locationContext: LocationContext?
-    @State private var isUpdatingLocation = false
-    @State private var autoUpdateLocation = true
-    @State private var showLocationRecommendations = false
     @State private var showInviteFriendsSheet = false
-    @State private var showRamadanBanner = true
-    @State private var showEidBanner = true
-
-    private let prefsManager = PreferencesManager.shared
-
-    private var ramadanBannerDismissKey: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
-    }
-
-    private var eidBannerDismissKey: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        return "\(AppConstants.StorageKeys.eidBannerDismissedPrefix)\(dateFormatter.string(from: Date()))"
-    }
 
     var body: some View {
         List {
             shareSection
-            locationSection
-            prayerSettingsSection
-            notificationSettingsSection
-            quranSettingsSection
-            appearanceSection
-            accessibilitySection
+
+            Section {
+                settingsRow(
+                    icon: "mappin.circle.fill",
+                    iconColor: .accentColor,
+                    title: "Location",
+                    summary: locationName
+                ) {
+                    LocationSettingsView()
+                }
+
+                settingsRow(
+                    icon: "clock.fill",
+                    iconColor: .orange,
+                    title: "Prayer Times",
+                    summary: methodName
+                ) {
+                    PrayerSettingsView()
+                }
+
+                settingsRow(
+                    icon: "bell.fill",
+                    iconColor: .red,
+                    title: "Notifications",
+                    summary: nil
+                ) {
+                    NotificationSettingsView()
+                }
+
+                settingsRow(
+                    icon: "book.fill",
+                    iconColor: .green,
+                    title: "Quran",
+                    summary: nil
+                ) {
+                    QuranSettingsView()
+                }
+
+                settingsRow(
+                    icon: "paintbrush.fill",
+                    iconColor: .purple,
+                    title: "Appearance",
+                    summary: appearanceName
+                ) {
+                    AppearanceSettingsView()
+                }
+            }
+
             dataPrivacySection
             aboutSection
+
             #if DEBUG
             debugSection
             #endif
@@ -80,417 +87,78 @@ struct SettingsView: View {
         } message: {
             Text("This will permanently delete all your progress, bookmarks, and chat history. This action cannot be undone.")
         }
-        .sheet(isPresented: $showLocationRecommendations) {
-            LocationRecommendationsSheet(
-                context: locationContext,
-                currentMethod: selectedCalculationMethod,
-                currentMadhab: selectedMadhab,
-                currentLanguage: selectedTranslation,
-                coordinates: previewCoordinates,
-                onApply: { method, madhab, language in
-                    Task {
-                        selectedCalculationMethod = method
-                        selectedMadhab = madhab
-                        selectedTranslation = language
-                        await prefsManager.saveLocationSettings(method: method, madhab: madhab, language: language)
-                    }
-                }
-            )
-            .fullSheet()
-        }
-        .task {
-            await loadSettings()
-            await checkNotificationAuth()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            Task { await checkNotificationAuth() }
-        }
+        .onAppear { loadSummary() }
     }
 
-    // MARK: - Location Section
+    // MARK: - Settings Row Helper
 
-    private var locationSection: some View {
-        Section {
-            HStack {
-                Image(systemName: "mappin.circle.fill")
-                    .foregroundColor(.accentColor)
-                    .font(.title2)
+    private func settingsRow<Destination: View>(
+        icon: String,
+        iconColor: Color,
+        title: String,
+        summary: String?,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            HStack(spacing: SafaSpacing.sm) {
+                Image(systemName: icon)
+                    .foregroundColor(iconColor)
+                    .frame(width: 24)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Prayer Location")
-                        .font(SafaTypography.bodyMedium)
-                        .foregroundColor(SafaColors.Fallback.text)
-
-                    Text(savedLocationName ?? "Not set")
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
+                Text(title)
 
                 Spacer()
 
-                if isUpdatingLocation {
-                    ProgressView()
+                if let summary {
+                    Text(summary)
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                        .lineLimit(1)
                 }
             }
+        }
+    }
 
+    // MARK: - Summary
+
+    private func loadSummary() {
+        let prefs = PreferencesManager.loadPreferencesSync()
+        locationName = prefs.savedLocationName ?? "Not set"
+        methodName = prefs.calculationMethod.displayName
+
+        if let scheme = themeManager.colorScheme {
+            appearanceName = scheme == .light ? "Light" : "Dark"
+        } else {
+            appearanceName = "System"
+        }
+    }
+
+    // MARK: - Share Section
+
+    private var shareSection: some View {
+        Section {
             Button {
-                Task { await updateLocation() }
+                showInviteFriendsSheet = true
             } label: {
                 HStack {
-                    Image(systemName: "location.fill")
-                    Text("Update Location")
-                }
-            }
-            .disabled(isUpdatingLocation)
-
-            Toggle(isOn: $autoUpdateLocation) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Update When Traveling")
-                    Text("Refresh prayer times when you move to a new city")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .onChange(of: autoUpdateLocation) { _, newValue in
-                Task { await prefsManager.update(\.autoUpdateLocationForPrayers, to: newValue) }
-            }
-        } header: {
-            Text("Location")
-        } footer: {
-            Text("Your location is used to calculate accurate prayer times.")
-        }
-    }
-
-    private var adjustmentsSummary: String {
-        let prefs = PreferencesManager.loadPreferencesSync()
-        let count = prefs.prayerAdjustments.values.filter { $0 != 0 }.count
-        if count == 0 { return "0 min" }
-        return "\(count) adjusted"
-    }
-
-    private var previewCoordinates: Coordinates? {
-        if let context = locationContext {
-            return context.coordinates
-        }
-        let prefs = PreferencesManager.loadPreferencesSync()
-        return prefs.savedCoordinates
-    }
-
-    private var hasNonRecommendedSettings: Bool {
-        guard let context = locationContext else { return false }
-        return selectedCalculationMethod != context.recommendedMethod ||
-               selectedMadhab != context.recommendedMadhab ||
-               selectedTranslation != context.recommendedLanguage
-    }
-
-    // MARK: - Prayer Settings Section
-
-    private var prayerSettingsSection: some View {
-        Section {
-            HStack {
-                Picker("Method", selection: $selectedCalculationMethod) {
-                    ForEach(CalculationMethod.allCases, id: \.self) { method in
-                        Text(method.displayName).tag(method)
-                    }
-                }
-
-                if let context = locationContext, selectedCalculationMethod == context.recommendedMethod {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                }
-            }
-            .onChange(of: selectedCalculationMethod) { _, newValue in
-                Task { await prefsManager.saveCalculationMethod(newValue) }
-            }
-
-            HStack {
-                Picker("Madhab (Asr)", selection: $selectedMadhab) {
-                    ForEach(Madhab.allCases, id: \.self) { madhab in
-                        Text(madhab.displayName).tag(madhab)
-                    }
-                }
-
-                if let context = locationContext, selectedMadhab == context.recommendedMadhab {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                }
-            }
-            .onChange(of: selectedMadhab) { _, newValue in
-                Task { await prefsManager.saveMadhab(newValue) }
-            }
-
-            if locationContext != nil {
-                Button {
-                    showLocationRecommendations = true
-                } label: {
-                    HStack {
-                        Image(systemName: "sparkles")
-                        Text("View Recommended Settings")
-                        Spacer()
-                        if hasNonRecommendedSettings {
-                            Text("Available")
-                                .font(SafaTypography.labelSmall)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.orange)
-                                .clipShape(Capsule())
-                        }
-                    }
-                }
-            }
-
-            if let coords = previewCoordinates {
-                PrayerTimePreviewCard(
-                    method: selectedCalculationMethod,
-                    madhab: selectedMadhab,
-                    location: coords,
-                    date: Date()
-                )
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-
-            NavigationLink {
-                PrayerAdjustmentsView()
-            } label: {
-                HStack {
-                    Text("Prayer Time Adjustments")
+                    Label("Share Safa", systemImage: "square.and.arrow.up")
+                        .foregroundColor(.accentColor)
                     Spacer()
-                    Text(adjustmentsSummary)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                        .foregroundColor(.pink)
                 }
             }
-        } header: {
-            Text("Prayer Times")
+            .sheet(isPresented: $showInviteFriendsSheet) {
+                InviteFriendsView()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
+            }
         } footer: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(selectedCalculationMethod.methodDescription)
-                if let context = locationContext, selectedCalculationMethod != context.recommendedMethod {
-                    Text("Recommended for \(context.regionName): \(context.recommendedMethod.displayName)")
-                }
-            }
-        }
-    }
-
-    // MARK: - Notification Settings Section
-
-    private var notificationSettingsSection: some View {
-        Section {
-            Toggle("Prayer Notifications", isOn: $notificationsEnabled)
-                .onChange(of: notificationsEnabled) { _, newValue in
-                    Task {
-                        let result = await NotificationToggleHandler.handle(
-                            enabled: newValue,
-                            preferenceSaver: prefsManager,
-                            scheduler: NotificationScheduler.shared
-                        )
-                        if result.showDisabledToast {
-                            ToastService.shared.show(Toast(
-                                message: String(localized: "All prayer notifications disabled"),
-                                type: .info
-                            ))
-                        }
-                    }
-                }
-
-            if notificationsEnabled && notificationAuthStatus == .denied {
-                HStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text("Notifications are disabled in Settings")
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.orange)
-                    Spacer()
-                    Button("Open Settings") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
-                    }
-                    .font(SafaTypography.labelSmall)
-                }
-            }
-
-            if notificationsEnabled {
-                Toggle("Use Adhan Sound", isOn: $adhanEnabled)
-                    .onChange(of: adhanEnabled) { _, newValue in
-                        Task {
-                            await prefsManager.update(\.adhanEnabled, to: newValue)
-                        }
-                    }
-
-                if adhanEnabled {
-                    Picker("Adhan", selection: $selectedAdhan) {
-                        ForEach(AdhanSound.regularOptions) { sound in
-                            VStack(alignment: .leading) {
-                                Text(sound.displayName)
-                                Text(sound.subtitle)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(sound)
-                        }
-                    }
-                    .onChange(of: selectedAdhan) { _, newValue in
-                        Task {
-                            await prefsManager.update(\.selectedAdhan, to: newValue.rawValue)
-                        }
-                    }
-
-                    Toggle("Smart Adhan", isOn: $smartAdhanEnabled)
-                        .onChange(of: smartAdhanEnabled) { _, newValue in
-                            Task {
-                                await prefsManager.update(\.smartAdhanEnabled, to: newValue)
-                            }
-                        }
-                }
-            }
-
-            Toggle("Iftar Adhan (Ramadan Only)", isOn: $iftarAdhanEnabled)
-                .onChange(of: iftarAdhanEnabled) { _, newValue in
-                    Task {
-                        await prefsManager.update(\.iftarAdhanEnabled, to: newValue)
-                    }
-                }
-
-            Toggle("Live Activity", isOn: $liveActivityEnabled)
-                .onChange(of: liveActivityEnabled) { _, newValue in
-                    Task {
-                        await prefsManager.saveLiveActivityEnabled(newValue)
-                        if newValue {
-                            await PrayerLiveActivityManager.shared.ensureActivityIfNeeded()
-                        } else {
-                            await PrayerLiveActivityManager.shared.endAllActivities()
-                        }
-                    }
-                }
-        } header: {
-            Text("Notifications")
-        } footer: {
-            VStack(alignment: .leading, spacing: 4) {
-                if iftarAdhanEnabled && !adhanEnabled {
-                    Text("During Ramadan, the adhan will play for Maghrib (Iftar) only.")
-                } else if adhanEnabled && smartAdhanEnabled {
-                    Text("Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.")
-                } else if adhanEnabled {
-                    Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
-                }
-                Text("Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island.")
-            }
-        }
-    }
-
-    // MARK: - Quran Settings Section
-
-    private var quranSettingsSection: some View {
-        Section {
-            HStack {
-                Text("Translation")
-                Spacer()
-                Text("English - Sahih International")
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            DisabledFeatureRow(
-                title: "More Translations",
-                icon: "globe",
-                feature: .moreTranslations
-            )
-
-            NavigationLink {
-                FontSettingsView()
-            } label: {
-                Text("Font Settings")
-            }
-
-            Toggle("Auto-Scroll Reader", isOn: $autoScrollEnabled)
-                .onChange(of: autoScrollEnabled) { _, newValue in
-                    Task { await prefsManager.update(\.autoScrollEnabled, to: newValue) }
-                }
-        } header: {
-            Text("Quran")
-        } footer: {
-        }
-    }
-
-    // MARK: - Appearance Section
-
-    private var appearanceSection: some View {
-        Section {
-            Picker("Appearance", selection: $selectedAppearance) {
-                ForEach(AppearanceOption.allCases) { option in
-                    Label(option.rawValue, systemImage: option.iconName)
-                        .tag(option)
-                }
-            }
-            .onChange(of: selectedAppearance) { _, newValue in
-                themeManager.setColorScheme(newValue.colorScheme)
-            }
-
-            Toggle("Haptic Feedback", isOn: $hapticFeedbackEnabled)
-                .onChange(of: hapticFeedbackEnabled) { _, newValue in
-                    HapticFeedbackService.shared.setEnabled(newValue)
-                    Task { await prefsManager.saveHapticFeedback(newValue) }
-                }
-
-            if hapticFeedbackEnabled {
-                Button {
-                    HapticFeedbackService.shared.play(.success)
-                } label: {
-                    HStack {
-                        Text("Test Haptics")
-                        Spacer()
-                        Image(systemName: "hand.tap")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            Toggle("Show Ramadan Banner", isOn: $showRamadanBanner)
-                .onChange(of: showRamadanBanner) { _, newValue in
-                    if newValue {
-                        UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
-                    } else {
-                        UserDefaults.standard.set(true, forKey: ramadanBannerDismissKey)
-                    }
-                }
-
-            Toggle("Show Eid Banner", isOn: $showEidBanner)
-                .onChange(of: showEidBanner) { _, newValue in
-                    if newValue {
-                        UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
-                    } else {
-                        UserDefaults.standard.set(true, forKey: eidBannerDismissKey)
-                    }
-                }
-        } header: {
-            Text("Appearance")
-        }
-    }
-
-    // MARK: - Accessibility Section
-
-    private var accessibilitySection: some View {
-        Section {
-            Toggle("Reduce Motion", isOn: $reduceMotionEnabled)
-                .onChange(of: reduceMotionEnabled) { _, newValue in
-                    Task { await prefsManager.saveAccessibility(reduceMotion: newValue) }
-                }
-
-            Toggle("Larger Arabic Text", isOn: $largerTextEnabled)
-                .onChange(of: largerTextEnabled) { _, newValue in
-                    Task { await prefsManager.saveAccessibility(largerText: newValue) }
-                }
-
-            Toggle("High Contrast", isOn: $highContrastEnabled)
-                .onChange(of: highContrastEnabled) { _, newValue in
-                    Task { await prefsManager.saveAccessibility(highContrast: newValue) }
-                }
-        } header: {
-            Text("Accessibility")
-        } footer: {
-            Text("Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update.")
+            Text("Help others discover Safa")
         }
     }
 
@@ -526,33 +194,6 @@ struct SettingsView: View {
             Text("Data & Privacy")
         } footer: {
             Text("Your data is stored locally on your device. Safa does not collect or share personal data.")
-        }
-    }
-
-    // MARK: - Share Section
-
-    private var shareSection: some View {
-        Section {
-            Button {
-                showInviteFriendsSheet = true
-            } label: {
-                HStack {
-                    Label("Share Safa", systemImage: "square.and.arrow.up")
-                        .foregroundColor(.accentColor)
-                    Spacer()
-                    Image(systemName: "heart.fill")
-                        .font(.caption)
-                        .foregroundColor(.pink)
-                }
-            }
-            .sheet(isPresented: $showInviteFriendsSheet) {
-                InviteFriendsView()
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-                    .presentationCornerRadius(SafaSpacing.CornerRadius.xl)
-            }
-        } footer: {
-            Text("Help others discover Safa")
         }
     }
 
@@ -611,6 +252,18 @@ struct SettingsView: View {
     @State private var useAdaptiveTabBar = false
     @State private var isDeveloperExpanded = false
 
+    private var ramadanBannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "ramadan_banner_dismissed_\(dateFormatter.string(from: Date()))"
+    }
+
+    private var eidBannerDismissKey: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return "\(AppConstants.StorageKeys.eidBannerDismissedPrefix)\(dateFormatter.string(from: Date()))"
+    }
+
     private var debugSection: some View {
         Section {
             DisclosureGroup("Developer Settings", isExpanded: $isDeveloperExpanded) {
@@ -621,7 +274,6 @@ struct SettingsView: View {
                     .onChange(of: forceRamadan) { _, newValue in
                         if newValue {
                             FeatureFlags.shared.setOverride(.ramadanMode, enabled: true)
-                            // Clear dismiss key so banner appears on Home
                             UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.ramadanMode)
@@ -635,10 +287,8 @@ struct SettingsView: View {
                     .onChange(of: forceEidAlFitr) { _, newValue in
                         if newValue {
                             FeatureFlags.shared.setOverride(.forceEidAlFitr, enabled: true)
-                            // Turn off conflicting Eid
                             forceEidAlAdha = false
                             FeatureFlags.shared.removeOverride(.forceEidAlAdha)
-                            // Clear dismiss key so banner appears on Home
                             UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.forceEidAlFitr)
@@ -652,10 +302,8 @@ struct SettingsView: View {
                     .onChange(of: forceEidAlAdha) { _, newValue in
                         if newValue {
                             FeatureFlags.shared.setOverride(.forceEidAlAdha, enabled: true)
-                            // Turn off conflicting Eid
                             forceEidAlFitr = false
                             FeatureFlags.shared.removeOverride(.forceEidAlFitr)
-                            // Clear dismiss key so banner appears on Home
                             UserDefaults.standard.removeObject(forKey: eidBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.forceEidAlAdha)
@@ -718,82 +366,7 @@ struct SettingsView: View {
     }
     #endif
 
-    // MARK: - Load/Save Methods
-
-    private func checkNotificationAuth() async {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        notificationAuthStatus = settings.authorizationStatus
-    }
-
-    private func loadSettings() async {
-        let prefs = await prefsManager.getPreferences()
-        selectedCalculationMethod = prefs.calculationMethod
-        selectedMadhab = prefs.madhab
-        selectedTranslation = prefs.selectedTranslation
-        notificationsEnabled = prefs.notificationsEnabled
-        hapticFeedbackEnabled = prefs.hapticFeedbackEnabled
-        HapticFeedbackService.shared.setEnabled(prefs.hapticFeedbackEnabled)
-        savedLocationName = prefs.savedLocationName
-
-        // Load appearance from ThemeManager
-        if let scheme = themeManager.colorScheme {
-            selectedAppearance = scheme == .light ? .light : .dark
-        } else {
-            selectedAppearance = .system
-        }
-        // Load banner states (synced with HomeView dismiss keys)
-        showRamadanBanner = !UserDefaults.standard.bool(forKey: ramadanBannerDismissKey)
-        showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
-
-        // Load Live Activity setting
-        liveActivityEnabled = prefs.liveActivityEnabled
-
-        // Load adhan settings
-        adhanEnabled = prefs.adhanEnabled
-        selectedAdhan = AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy
-        smartAdhanEnabled = prefs.smartAdhanEnabled
-        iftarAdhanEnabled = prefs.iftarAdhanEnabled
-
-        // Load accessibility settings
-        reduceMotionEnabled = prefs.reduceMotionEnabled
-        largerTextEnabled = prefs.largerArabicTextEnabled
-        highContrastEnabled = prefs.highContrastEnabled
-
-        // Load Quran reader settings
-        autoScrollEnabled = prefs.autoScrollEnabled
-
-        // Load auto-update location setting
-        autoUpdateLocation = prefs.autoUpdateLocationForPrayers
-
-        // Load location context if we have saved coordinates
-        if let coords = prefs.savedCoordinates {
-            locationContext = LocationInferenceService.shared.inferContextFast(from: coords)
-        }
-    }
-
-    private func updateLocation() async {
-        isUpdatingLocation = true
-        do {
-            let context = try await dependencies.locationService.getLocationContext()
-            await MainActor.run {
-                self.locationContext = context
-                self.savedLocationName = context.regionName
-                self.isUpdatingLocation = false
-            }
-
-            // Save location using PreferencesManager
-            await prefsManager.saveLocation(
-                name: context.regionName,
-                latitude: context.coordinates.latitude,
-                longitude: context.coordinates.longitude,
-                countryCode: context.countryCode
-            )
-        } catch {
-            await MainActor.run {
-                self.isUpdatingLocation = false
-            }
-        }
-    }
+    // MARK: - Actions
 
     private func deleteAllData() async {
         let appGroupDefaults = UserDefaults(suiteName: AppConstants.appGroupId)

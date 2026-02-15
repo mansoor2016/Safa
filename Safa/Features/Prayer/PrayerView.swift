@@ -92,9 +92,17 @@ private struct PrayerContentView: View {
             }
             .largeSheet()
         }
-        .sheet(isPresented: $showingSettings) {
+        .sheet(isPresented: $showingSettings, onDismiss: {
+            viewModel.reloadSettings()
+            Task { await viewModel.loadPrayerTimes() }
+        }) {
             NavigationStack {
-                PrayerSettingsView(viewModel: viewModel)
+                PrayerSettingsView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showingSettings = false }
+                        }
+                    }
             }
             .fullSheet()
         }
@@ -373,54 +381,6 @@ private struct SunnahTimesCard: View {
                             .monospacedDigit()
                     }
                 }
-            }
-        }
-    }
-}
-
-// MARK: - Prayer Settings View
-
-private struct PrayerSettingsView: View {
-    let viewModel: PrayerViewModel
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        List {
-            Section("Calculation Method") {
-                Picker("Method", selection: Binding(
-                    get: { viewModel.calculationMethod },
-                    set: { newValue in Task { await viewModel.setCalculationMethod(newValue) } }
-                )) {
-                    ForEach(CalculationMethod.allCases, id: \.self) { method in
-                        Text(method.displayName).tag(method)
-                    }
-                }
-            }
-
-            Section("Madhab (Asr Time)") {
-                Picker("Madhab", selection: Binding(
-                    get: { viewModel.madhab },
-                    set: { newValue in Task { await viewModel.setMadhab(newValue) } }
-                )) {
-                    ForEach(Madhab.allCases, id: \.self) { madhab in
-                        Text(madhab.displayName).tag(madhab)
-                    }
-                }
-            }
-
-            Section {
-                NavigationLink {
-                    PrayerAdjustmentsView()
-                } label: {
-                    Text("Prayer Time Adjustments")
-                }
-            }
-        }
-        .navigationTitle("Prayer Settings")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") { dismiss() }
             }
         }
     }

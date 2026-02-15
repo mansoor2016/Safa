@@ -984,11 +984,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B1A2C3D42F40000000000002 /* Adhan */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B1A2C3D42F40000000000001 /* XCRemoteSwiftPackageReference "adhan-swift" */;
-			productName = Adhan;
-		};
 		76F0B0B92F37DB1F007EB798 /* SafaShared */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SafaShared;
@@ -997,6 +992,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76F0B0B82F37DB1F007EB798 /* XCLocalSwiftPackageReference "SafaShared" */;
 			productName = SafaShared;
+		};
+		B1A2C3D42F40000000000002 /* Adhan */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1A2C3D42F40000000000001 /* XCRemoteSwiftPackageReference "adhan-swift" */;
+			productName = Adhan;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

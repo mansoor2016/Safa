@@ -90,7 +90,12 @@ private struct QuranContentView: View {
         }
         .sheet(isPresented: $showingSettings) {
             NavigationStack {
-                QuranSettingsSheet()
+                QuranSettingsView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showingSettings = false }
+                        }
+                    }
             }
             .fullSheet()
         }
@@ -444,48 +449,6 @@ private struct MatchedTransitionSourceModifier: ViewModifier {
                 .matchedTransitionSource(id: id, in: namespace)
         } else {
             content
-        }
-    }
-}
-
-// MARK: - Quran Settings Sheet
-
-private struct QuranSettingsSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var autoScrollEnabled = false
-
-    private let prefsManager = PreferencesManager.shared
-
-    var body: some View {
-        List {
-            HStack {
-                Text("Translation")
-                Spacer()
-                Text("English - Sahih International")
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-
-            NavigationLink {
-                FontSettingsView()
-            } label: {
-                Text("Font Settings")
-            }
-
-            Toggle("Auto-Scroll Reader", isOn: $autoScrollEnabled)
-                .onChange(of: autoScrollEnabled) { _, newValue in
-                    Task { await prefsManager.update(\.autoScrollEnabled, to: newValue) }
-                }
-        }
-        .navigationTitle("Quran Settings")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") { dismiss() }
-            }
-        }
-        .task {
-            let prefs = await prefsManager.getPreferences()
-            autoScrollEnabled = prefs.autoScrollEnabled
         }
     }
 }
