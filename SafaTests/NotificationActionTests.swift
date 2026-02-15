@@ -296,4 +296,82 @@ final class NotificationActionTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - NotificationAction Equatable (Regression: action replacement detection)
+
+    func test_notificationAction_logPrayerDifferentTypes_areNotEqual() {
+        // If two different logPrayer actions are equal, onChange(of:) won't fire
+        // when one replaces the other. This catches the Bool-projection regression.
+        let fajr = AppRouter.NotificationAction.logPrayer(prayerType: .fajr)
+        let dhuhr = AppRouter.NotificationAction.logPrayer(prayerType: .dhuhr)
+        XCTAssertNotEqual(fajr, dhuhr, "Different prayer types must be distinguishable")
+    }
+
+    func test_notificationAction_logPrayerSameType_areEqual() {
+        let fajr1 = AppRouter.NotificationAction.logPrayer(prayerType: .fajr)
+        let fajr2 = AppRouter.NotificationAction.logPrayer(prayerType: .fajr)
+        XCTAssertEqual(fajr1, fajr2)
+    }
+
+    func test_notificationAction_logPrayerAndOpenQibla_areNotEqual() {
+        // Replacing logPrayer with openQibla must be detectable by onChange
+        let log = AppRouter.NotificationAction.logPrayer(prayerType: .fajr)
+        let qibla = AppRouter.NotificationAction.openQibla
+        XCTAssertNotEqual(log, qibla)
+    }
+
+    func test_notificationAction_openQibla_equalsItself() {
+        let qibla1 = AppRouter.NotificationAction.openQibla
+        let qibla2 = AppRouter.NotificationAction.openQibla
+        XCTAssertEqual(qibla1, qibla2)
+    }
+
+    func test_notificationAction_allObligatoryPrayers_areDistinct() {
+        // Every obligatory prayer must produce a distinct action
+        let actions = PrayerType.obligatoryPrayers.map {
+            AppRouter.NotificationAction.logPrayer(prayerType: $0)
+        }
+        // Pairwise distinct
+        for i in 0..<actions.count {
+            for j in (i + 1)..<actions.count {
+                XCTAssertNotEqual(
+                    actions[i], actions[j],
+                    "Actions for different prayers must be distinguishable by onChange"
+                )
+            }
+        }
+    }
+
+    // MARK: - Idempotent Log Semantics (Regression: toggle → log-only)
+
+    func test_routerAction_logPrayer_producesLogNotToggle() {
+        // The notification action must always produce .logPrayer (not .togglePrayer).
+        // This ensures the lock screen "Mark as Prayed" is idempotent and never unlogs.
+        let result = NotificationActionHelpers.routerAction(
+            for: "LOG_PRAYER",
+            userInfo: ["prayerType": "fajr"]
+        )
+        if case .logPrayer(let type) = result.pendingAction {
+            XCTAssertEqual(type, .fajr)
+        } else {
+            XCTFail("LOG_PRAYER must produce .logPrayer, not any other action variant")
+        }
+        // Verify the enum case is specifically .logPrayer (not some hypothetical .togglePrayer)
+        // by checking it matches the expected pattern
+        guard case .logPrayer = result.pendingAction else {
+            XCTFail("Must be .logPrayer case")
+            return
+        }
+    }
+
+    func test_routerAction_logPrayer_sameInputProducesSameOutput() {
+        // Idempotency: calling routerAction twice with the same input must produce the same result.
+        // This guards against any future stateful behavior in the helper.
+        let userInfo: [AnyHashable: Any] = ["prayerType": "asr"]
+        let result1 = NotificationActionHelpers.routerAction(for: "LOG_PRAYER", userInfo: userInfo)
+        let result2 = NotificationActionHelpers.routerAction(for: "LOG_PRAYER", userInfo: userInfo)
+
+        XCTAssertEqual(result1.tab, result2.tab)
+        XCTAssertEqual(result1.pendingAction, result2.pendingAction)
+    }
 }
