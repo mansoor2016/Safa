@@ -19,18 +19,55 @@ Parse any arguments. Use defaults for anything not specified.
 
 ### Standard test (no --matrix):
 
+**Step 1: Clean previous result bundle and run tests:**
+```
+rm -rf /tmp/safa-test.xcresult
+```
+
 **All tests (no class specified):**
 ```
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests -parallel-testing-enabled NO test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests -parallel-testing-enabled NO -resultBundlePath /tmp/safa-test.xcresult test 2>&1 | tail -5
 ```
 
 **Specific test class:**
 ```
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} -parallel-testing-enabled NO test 2>&1 | grep -E "Test case|passed|failed|Executed" | tail -40
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests/{CLASS} -parallel-testing-enabled NO -resultBundlePath /tmp/safa-test.xcresult test 2>&1 | tail -5
+```
+
+Check the last lines for `** TEST SUCCEEDED **`, `** BUILD FAILED **`, or `** TEST FAILED **`.
+
+**Step 2: Get accurate test counts from the result bundle (always do this):**
+```
+xcrun xcresulttool get test-results summary --path /tmp/safa-test.xcresult
+```
+Parse the JSON for `passedTests` and `failedTests`.
+
+**Step 3: If TEST FAILED, get the names of failed tests:**
+```
+xcrun xcresulttool get test-results tests --path /tmp/safa-test.xcresult | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+def walk(node):
+    if node.get('status') == 'Failed' and 'subtests' not in node:
+        print(node.get('name', 'unknown'))
+    for sub in node.get('subtests', []):
+        walk(sub)
+for device in data.get('devices', []):
+    for result in device.get('tests', []):
+        walk(result)
+"
+```
+
+**Step 4: If BUILD FAILED (not test failure), get compiler errors:**
+```
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' -only-testing:SafaTests -parallel-testing-enabled NO test 2>&1 | grep -E "\.swift:[0-9]+:[0-9]+: error:" | head -15
 ```
 
 - If all pass: "All N tests passed."
 - If failures: List each failed test, then "X passed, Y failed."
+- If build fails: Report compiler errors.
+
+**IMPORTANT:** Never use `grep | tail` for test counts — with 2400+ tests the output gets truncated. Always use `xcresulttool` for accurate results.
 
 ### Quick matrix (--matrix flag):
 

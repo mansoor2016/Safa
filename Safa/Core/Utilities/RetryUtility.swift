@@ -15,7 +15,7 @@ func withRetry<T>(
     maxAttempts: Int = 3,
     initialDelay: TimeInterval = 1.0,
     multiplier: Double = 2.0,
-    _ operation: () async throws -> T
+    _ operation: @Sendable () async throws -> T
 ) async throws -> T {
     var delay = initialDelay
     for attempt in 1...maxAttempts {

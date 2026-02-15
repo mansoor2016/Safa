@@ -302,8 +302,29 @@ final class LocationInferenceService {
         let lat = coordinates.latitude
         let lng = coordinates.longitude
 
-        // Very rough bounding boxes for major Muslim-majority countries
-        // This is a fallback when geocoding fails
+        // Rough bounding boxes for major Muslim-majority countries.
+        // Order matters: smaller/more specific boxes must come before
+        // larger ones that overlap (e.g. UAE before Saudi Arabia).
+
+        // UAE (must precede SA — SA's box covers the full peninsula)
+        if lat > 22 && lat < 27 && lng > 51 && lng < 57 {
+            return "AE"
+        }
+
+        // Kuwait (must precede SA)
+        if lat > 28.5 && lat < 30.5 && lng > 46.5 && lng < 49 {
+            return "KW"
+        }
+
+        // Qatar (must precede SA)
+        if lat > 24.4 && lat < 26.3 && lng > 50.7 && lng < 52 {
+            return "QA"
+        }
+
+        // Singapore (must precede ID — ID's box covers SE Asia)
+        if lat > 1.1 && lat < 1.5 && lng > 103.5 && lng < 104.1 {
+            return "SG"
+        }
 
         // Saudi Arabia
         if lat > 16 && lat < 33 && lng > 34 && lng < 56 {
@@ -325,14 +346,14 @@ final class LocationInferenceService {
             return "TR"
         }
 
+        // Malaysia (must precede ID)
+        if lat > 0 && lat < 8 && lng > 99 && lng < 120 {
+            return "MY"
+        }
+
         // Indonesia
         if lat > -11 && lat < 6 && lng > 95 && lng < 141 {
             return "ID"
-        }
-
-        // Malaysia
-        if lat > 0 && lat < 8 && lng > 99 && lng < 120 {
-            return "MY"
         }
 
         // Iran

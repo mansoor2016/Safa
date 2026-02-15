@@ -86,9 +86,14 @@ This catches linker errors (`ld:`, `Undefined symbols`), code signing errors, an
 
 Run commands sequentially:
 
-**Step 1: Run tests and check for build failure first**
+**Step 0: Clean up previous result bundle**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | tail -5
+rm -rf /tmp/safa-test.xcresult
+```
+
+**Step 1: Run tests with result bundle**
+```bash
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} -parallel-testing-enabled NO -resultBundlePath /tmp/safa-test.xcresult test 2>&1 | tail -5
 ```
 Where `{ONLY_TESTING}` is:
 - All tests: `-only-testing:SafaTests`
@@ -101,19 +106,35 @@ Check the last lines for:
 
 **Step 2a: If BUILD FAILED during test, get Swift compiler errors**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "\.swift:[0-9]+:[0-9]+: error:" | head -15
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} -parallel-testing-enabled NO test 2>&1 | grep -E "\.swift:[0-9]+:[0-9]+: error:" | head -15
 ```
 
 **Step 2a-fallback: If Step 2a returned NO results (linker/signing/other errors)**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "^(ld:|Undefined symbols|error:|fatal error|Code Signing Error|clang:)" | head -10
+xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} -parallel-testing-enabled NO test 2>&1 | grep -E "^(ld:|Undefined symbols|error:|fatal error|Code Signing Error|clang:)" | head -10
 ```
 
-**Step 2b: If TEST FAILED (but build succeeded), get test results**
+**Step 2b: If TEST SUCCEEDED or TEST FAILED, get accurate counts from result bundle**
 ```bash
-xcodebuild -scheme {SCHEME} -destination 'platform={PLATFORM}' {ONLY_TESTING} test 2>&1 | grep -E "Test case .*(passed|failed)" | tail -50
+xcrun xcresulttool get test-results summary --path /tmp/safa-test.xcresult
 ```
-Then count passed/failed from those lines.
+Parse the JSON output for `passedTests` and `failedTests` fields.
+
+**Step 2c: If TEST FAILED, get the names of failed tests**
+```bash
+xcrun xcresulttool get test-results tests --path /tmp/safa-test.xcresult | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+def walk(node):
+    if node.get('status') == 'Failed' and 'subtests' not in node:
+        print(node.get('name', 'unknown'))
+    for sub in node.get('subtests', []):
+        walk(sub)
+for device in data.get('devices', []):
+    for result in device.get('tests', []):
+        walk(result)
+" 2>/dev/null
+```
 
 **Report format:**
 - If all pass: `All N tests passed.`
@@ -121,6 +142,7 @@ Then count passed/failed from those lines.
 - If test failures: List each failed test name, then `X passed, Y failed.`
 
 **IMPORTANT:** A test run can fail because the BUILD failed (not because tests failed). Always distinguish between build failures and test failures. If you see "Testing cancelled because the build failed", report it as a build failure and show the compiler errors.
+**IMPORTANT:** Never rely on `grep | tail` for test counts — with 2400+ tests the output gets truncated. Always use `xcresulttool` for accurate results.
 
 ## Available Simulators
 
