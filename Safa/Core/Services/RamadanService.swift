@@ -378,7 +378,7 @@ final class RamadanService {
     private func sendEidNotification() {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Eid Mubarak! 🎉")
-        content.body = String(localized: "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you.")
+        content.body = String(localized: "May Allah accept from us and from you.")
         content.sound = .default
 
         let request = UNNotificationRequest(

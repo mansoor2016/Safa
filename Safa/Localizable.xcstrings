@@ -955,7 +955,6 @@
     "Tap to log": {},
     "Tap to Record": {},
     "Tap to set up": {},
-    "Taqabbal Allahu minna wa minkum. May Allah accept from us and from you.": {},
     "Taraweeh": {},
     "Taraweeh Time": {},
     "Taraweeh Tonight": {},
@@ -1102,7 +1101,8 @@
         }
       }
     },
-    "May this month bring you peace, mercy, and forgiveness.": {}
+    "May this month bring you peace, mercy, and forgiveness.": {},
+    "May Allah accept from us and from you.": {}
   },
   "version": "1.0"
 }
