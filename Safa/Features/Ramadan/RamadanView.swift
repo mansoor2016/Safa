@@ -22,6 +22,7 @@ struct RamadanView: View {
     @State private var juzCompleted = 0
     @State private var healthSyncEnabled = false
     @State private var healthKitService = HealthKitService.shared
+    @State private var deferredLogPrayer: PrayerType?
 
     private let hijriConverter = HijriDateConverter.shared
     private let totalDays = 30
@@ -87,6 +88,16 @@ struct RamadanView: View {
         }
         .onAppear {
             loadJuzCount()
+            handlePendingNotificationAction()
+        }
+        .onChange(of: router.pendingNotificationAction != nil) { _, hasPending in
+            if hasPending { handlePendingNotificationAction() }
+        }
+        .onChange(of: todayPrayers.isEmpty) { wasEmpty, isEmpty in
+            if wasEmpty && !isEmpty, let prayerType = deferredLogPrayer {
+                deferredLogPrayer = nil
+                Task { await togglePrayer(prayerType) }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
             loadJuzCount() // Refresh when daily goals are toggled
@@ -424,6 +435,23 @@ struct RamadanView: View {
     }
 
     // Adhan play/stop logic extracted to AdhanPlayButton shared component
+
+    // MARK: - Notification Action Handling
+
+    private func handlePendingNotificationAction() {
+        guard let action = router.pendingNotificationAction else { return }
+        router.pendingNotificationAction = nil
+        switch action {
+        case .openQibla:
+            showingQibla = true
+        case .logPrayer(let prayerType):
+            if todayPrayers.isEmpty {
+                deferredLogPrayer = prayerType
+            } else {
+                Task { await togglePrayer(prayerType) }
+            }
+        }
+    }
 
     // MARK: - Load Data
 

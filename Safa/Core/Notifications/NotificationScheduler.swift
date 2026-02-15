@@ -502,63 +502,56 @@ final class NotificationResponseHandler: NSObject, UNUserNotificationCenterDeleg
     ) {
         let identifier = response.notification.request.identifier
         let actionIdentifier = response.actionIdentifier
+        let userInfo = response.notification.request.content.userInfo
 
         // Handle based on notification type
         if identifier.starts(with: "prayer_") {
-            handlePrayerNotificationTap(identifier: identifier, action: actionIdentifier)
-        } else if identifier.starts(with: "streak_") {
-            handleStreakNotificationTap(identifier: identifier)
-        } else if identifier.starts(with: "achievement_") {
-            handleAchievementNotificationTap(identifier: identifier)
+            handlePrayerNotificationTap(action: actionIdentifier, userInfo: userInfo)
         }
+        // streak_ and achievement_ notifications open the app but don't need special routing
 
         completionHandler()
     }
 
-    private func handlePrayerNotificationTap(identifier: String, action: String) {
-        switch action {
-        case "LOG_PRAYER":
-            // Log prayer action
-            NotificationCenter.default.post(
-                name: .logPrayerFromNotification,
-                object: identifier
-            )
-        case "OPEN_QIBLA":
-            // Open Qibla view
-            NotificationCenter.default.post(
-                name: .openQiblaFromNotification,
-                object: nil
-            )
-        default:
-            // Default tap - open app to prayer view
-            NotificationCenter.default.post(
-                name: .openPrayerFromNotification,
-                object: nil
-            )
+    func handlePrayerNotificationTap(action: String, userInfo: [AnyHashable: Any]) {
+        let result = NotificationActionHelpers.routerAction(for: action, userInfo: userInfo)
+        Task { @MainActor in
+            let router = AppRouter.shared
+            router.pendingNotificationAction = result.pendingAction
+            router.selectedTab = result.tab
         }
-    }
-
-    private func handleStreakNotificationTap(identifier: String) {
-        NotificationCenter.default.post(
-            name: .openProgressFromNotification,
-            object: nil
-        )
-    }
-
-    private func handleAchievementNotificationTap(identifier: String) {
-        NotificationCenter.default.post(
-            name: .openAchievementsFromNotification,
-            object: nil
-        )
     }
 }
 
-// MARK: - Notification Names
+// MARK: - Notification Action Helpers
 
-extension Notification.Name {
-    static let logPrayerFromNotification = Notification.Name("logPrayerFromNotification")
-    static let openQiblaFromNotification = Notification.Name("openQiblaFromNotification")
-    static let openPrayerFromNotification = Notification.Name("openPrayerFromNotification")
-    static let openProgressFromNotification = Notification.Name("openProgressFromNotification")
-    static let openAchievementsFromNotification = Notification.Name("openAchievementsFromNotification")
+enum NotificationActionHelpers {
+    /// Extracts a PrayerType from notification userInfo.
+    /// The scheduler stores the prayer type as userInfo["prayerType"] = prayer.type.rawValue.
+    static func prayerType(from userInfo: [AnyHashable: Any]) -> PrayerType? {
+        guard let rawValue = userInfo["prayerType"] as? String else { return nil }
+        return PrayerType(rawValue: rawValue)
+    }
+
+    /// Determines the router action for a prayer notification tap.
+    /// Returns (tab to select, optional pending action).
+    static func routerAction(
+        for action: String,
+        userInfo: [AnyHashable: Any]
+    ) -> (tab: String, pendingAction: AppRouter.NotificationAction?) {
+        switch action {
+        case "LOG_PRAYER":
+            let pendingAction: AppRouter.NotificationAction?
+            if let type = prayerType(from: userInfo) {
+                pendingAction = .logPrayer(prayerType: type)
+            } else {
+                pendingAction = nil
+            }
+            return ("prayer", pendingAction)
+        case "OPEN_QIBLA":
+            return ("prayer", .openQibla)
+        default:
+            return ("prayer", nil)
+        }
+    }
 }

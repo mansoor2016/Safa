@@ -42,7 +42,7 @@ struct SafaApp: App {
     // MARK: - State
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var dependencies = Dependencies()
-    @State private var router = AppRouter()
+    @State private var router = AppRouter.shared
     @State private var themeManager = ThemeManager()
     @State private var launchState: LaunchState = .loading
     @State private var qadaReminderPayload: RamadanQadaReminderService.ReminderPayload?

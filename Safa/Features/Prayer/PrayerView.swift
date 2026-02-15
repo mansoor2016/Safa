@@ -34,9 +34,11 @@ struct PrayerView: View {
 
 private struct PrayerContentView: View {
     @Environment(Dependencies.self) private var dependencies
+    @Environment(AppRouter.self) private var router
     @Bindable var viewModel: PrayerViewModel
     @State private var showingQibla = false
     @State private var showingSettings = false
+    @State private var deferredLogPrayer: PrayerType?
 
     var body: some View {
         ScrollableScreen {
@@ -119,6 +121,35 @@ private struct PrayerContentView: View {
                 await viewModel.loadPrayerTimes()
             }
             viewModel.updateNextPrayerIndicator()
+            handlePendingNotificationAction()
+        }
+        .onChange(of: router.pendingNotificationAction != nil) { _, hasPending in
+            if hasPending { handlePendingNotificationAction() }
+        }
+        .onChange(of: viewModel.todayPrayers.isEmpty) { wasEmpty, isEmpty in
+            // Prayers just loaded — flush any deferred log action
+            if wasEmpty && !isEmpty, let prayerType = deferredLogPrayer {
+                deferredLogPrayer = nil
+                Task { await viewModel.logPrayer(prayerType) }
+            }
+        }
+    }
+
+    // MARK: - Notification Action Handling
+
+    private func handlePendingNotificationAction() {
+        guard let action = router.pendingNotificationAction else { return }
+        router.pendingNotificationAction = nil
+        switch action {
+        case .openQibla:
+            showingQibla = true
+        case .logPrayer(let prayerType):
+            if viewModel.todayPrayers.isEmpty {
+                // Prayers not loaded yet — defer until they arrive
+                deferredLogPrayer = prayerType
+            } else {
+                Task { await viewModel.logPrayer(prayerType) }
+            }
         }
     }
 

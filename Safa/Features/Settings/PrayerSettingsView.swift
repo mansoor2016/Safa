@@ -157,6 +157,7 @@ struct PrayerSettingsView: View {
                 currentLanguage: selectedTranslation,
                 coordinates: previewCoordinates,
                 onApply: { method, madhab, language in
+                    let previousLanguage = selectedTranslation
                     selectedCalculationMethod = method
                     selectedMadhab = madhab
                     selectedTranslation = language
@@ -165,7 +166,7 @@ struct PrayerSettingsView: View {
                             method: method,
                             madhab: madhab,
                             language: language,
-                            current: (method: lastAppliedMethod, madhab: lastAppliedMadhab, language: selectedTranslation)
+                            current: (method: lastAppliedMethod, madhab: lastAppliedMadhab, language: previousLanguage)
                         )
                         lastAppliedMethod = method
                         lastAppliedMadhab = madhab

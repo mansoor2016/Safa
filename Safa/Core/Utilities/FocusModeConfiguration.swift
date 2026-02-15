@@ -130,7 +130,7 @@ final class FocusModeService {
             UNNotificationAction(
                 identifier: "LOG_PRAYER",
                 title: String(localized: "Mark as Prayed"),
-                options: []
+                options: [.foreground]
             ),
             UNNotificationAction(
                 identifier: "OPEN_QIBLA",

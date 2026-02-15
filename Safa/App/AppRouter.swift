@@ -13,7 +13,16 @@ final class AppRouter {
     var activeSheet: Sheet?
     var activeAlert: AlertType?
     var pendingQuranTarget: QuranNavigationTarget?
+    var pendingNotificationAction: NotificationAction?
 
+    // MARK: - Shared Instance (for notification handler access before SwiftUI mounts)
+    static let shared = AppRouter()
+
+    // MARK: - Notification Action
+    enum NotificationAction {
+        case openQibla
+        case logPrayer(prayerType: PrayerType)
+    }
 
     // MARK: - Destination Enum
     enum Destination: Hashable {
