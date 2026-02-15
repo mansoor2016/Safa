@@ -534,9 +534,6 @@
     "Auto-Update Content" : {
 
     },
-    "Auto-update prayer times" : {
-
-    },
     "Available" : {
 
     },
@@ -1689,6 +1686,9 @@
     "Prepare to break your fast. May Allah accept your worship." : {
 
     },
+    "Preview with Recommended Settings" : {
+
+    },
     "Privacy Policy" : {
 
     },
@@ -1823,6 +1823,9 @@
 
     },
     "Refresh Location" : {
+
+    },
+    "Refresh prayer times when you move to a new city" : {
 
     },
     "Remember to %@" : {
@@ -2311,10 +2314,10 @@
     "Upcoming: %@" : {
 
     },
-    "Update automatically when you travel to a new city" : {
+    "Update Location" : {
 
     },
-    "Update Location" : {
+    "Update When Traveling" : {
 
     },
     "Use Adhan Sound" : {
@@ -2440,7 +2443,7 @@
     "Your Islamic Companion" : {
 
     },
-    "Your location is used to calculate accurate prayer times and recommend regional settings." : {
+    "Your location is used to calculate accurate prayer times." : {
 
     },
     "Your Privacy Matters" : {

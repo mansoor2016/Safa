@@ -86,6 +86,7 @@ struct SettingsView: View {
                 currentMethod: selectedCalculationMethod,
                 currentMadhab: selectedMadhab,
                 currentLanguage: selectedTranslation,
+                coordinates: previewCoordinates,
                 onApply: { method, madhab, language in
                     Task {
                         selectedCalculationMethod = method
@@ -142,31 +143,10 @@ struct SettingsView: View {
             }
             .disabled(isUpdatingLocation)
 
-            if locationContext != nil {
-                Button {
-                    showLocationRecommendations = true
-                } label: {
-                    HStack {
-                        Image(systemName: "sparkles")
-                        Text("View Recommended Settings")
-                        Spacer()
-                        if hasNonRecommendedSettings {
-                            Text("Available")
-                                .font(SafaTypography.labelSmall)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.orange)
-                                .clipShape(Capsule())
-                        }
-                    }
-                }
-            }
-
             Toggle(isOn: $autoUpdateLocation) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Auto-update prayer times")
-                    Text("Update automatically when you travel to a new city")
+                    Text("Update When Traveling")
+                    Text("Refresh prayer times when you move to a new city")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -177,7 +157,7 @@ struct SettingsView: View {
         } header: {
             Text("Location")
         } footer: {
-            Text("Your location is used to calculate accurate prayer times and recommend regional settings.")
+            Text("Your location is used to calculate accurate prayer times.")
         }
     }
 
@@ -239,6 +219,27 @@ struct SettingsView: View {
             }
             .onChange(of: selectedMadhab) { _, newValue in
                 Task { await prefsManager.saveMadhab(newValue) }
+            }
+
+            if locationContext != nil {
+                Button {
+                    showLocationRecommendations = true
+                } label: {
+                    HStack {
+                        Image(systemName: "sparkles")
+                        Text("View Recommended Settings")
+                        Spacer()
+                        if hasNonRecommendedSettings {
+                            Text("Available")
+                                .font(SafaTypography.labelSmall)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(Color.orange)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
             }
 
             if let coords = previewCoordinates {

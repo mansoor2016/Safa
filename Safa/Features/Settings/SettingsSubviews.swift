@@ -471,6 +471,7 @@ struct LocationRecommendationsSheet: View {
     let currentMethod: CalculationMethod
     let currentMadhab: Madhab
     let currentLanguage: String
+    let coordinates: Coordinates?
     let onApply: (CalculationMethod, Madhab, String) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -496,6 +497,10 @@ struct LocationRecommendationsSheet: View {
                             isMatching: currentMethod == context.recommendedMethod
                         )
 
+                        Text(context.recommendedMethod.methodDescription)
+                            .font(.caption)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+
                         recommendationRow(
                             title: "Madhab",
                             current: currentMadhab.displayName,
@@ -509,6 +514,18 @@ struct LocationRecommendationsSheet: View {
                             recommended: context.recommendedLanguage,
                             isMatching: currentLanguage == context.recommendedLanguage
                         )
+                    }
+
+                    if let coords = coordinates {
+                        Section("Preview with Recommended Settings") {
+                            PrayerTimePreviewCard(
+                                method: context.recommendedMethod,
+                                madhab: context.recommendedMadhab,
+                                location: coords,
+                                date: Date()
+                            )
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        }
                     }
 
                     Section {
