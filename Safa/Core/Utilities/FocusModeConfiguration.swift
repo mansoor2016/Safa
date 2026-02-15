@@ -121,8 +121,8 @@ final class FocusModeService {
 
     // MARK: - Category Registration
 
-    /// Register all notification categories with the system
-    func registerNotificationCategories() async {
+    /// Build all notification categories (testable, no side effects).
+    static func buildNotificationCategories() -> Set<UNNotificationCategory> {
         var categories: Set<UNNotificationCategory> = []
 
         // Prayer Time Category - time sensitive
@@ -208,8 +208,12 @@ final class FocusModeService {
         )
         categories.insert(generalCategory)
 
-        // Register all categories
-        notificationCenter.setNotificationCategories(categories)
+        return categories
+    }
+
+    /// Register all notification categories with the system
+    func registerNotificationCategories() async {
+        notificationCenter.setNotificationCategories(Self.buildNotificationCategories())
     }
 
     // MARK: - Focus Status Checking

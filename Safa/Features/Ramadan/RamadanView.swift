@@ -90,13 +90,13 @@ struct RamadanView: View {
             loadJuzCount()
             handlePendingNotificationAction()
         }
-        .onChange(of: router.pendingNotificationAction != nil) { _, hasPending in
-            if hasPending { handlePendingNotificationAction() }
+        .onChange(of: router.pendingNotificationAction) { _, newValue in
+            if newValue != nil { handlePendingNotificationAction() }
         }
         .onChange(of: todayPrayers.isEmpty) { wasEmpty, isEmpty in
             if wasEmpty && !isEmpty, let prayerType = deferredLogPrayer {
                 deferredLogPrayer = nil
-                Task { await togglePrayer(prayerType) }
+                Task { await optimisticLogPrayer(prayerType) }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
@@ -363,6 +363,7 @@ struct RamadanView: View {
     }
 
     private func optimisticLogPrayer(_ prayerType: PrayerType) async {
+        guard !loggedPrayers.contains(prayerType) else { return }
         // Optimistic: update UI immediately
         loggedPrayers.insert(prayerType)
         WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
@@ -448,7 +449,7 @@ struct RamadanView: View {
             if todayPrayers.isEmpty {
                 deferredLogPrayer = prayerType
             } else {
-                Task { await togglePrayer(prayerType) }
+                Task { await optimisticLogPrayer(prayerType) }
             }
         }
     }

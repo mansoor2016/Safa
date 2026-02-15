@@ -123,8 +123,8 @@ private struct PrayerContentView: View {
             viewModel.updateNextPrayerIndicator()
             handlePendingNotificationAction()
         }
-        .onChange(of: router.pendingNotificationAction != nil) { _, hasPending in
-            if hasPending { handlePendingNotificationAction() }
+        .onChange(of: router.pendingNotificationAction) { _, newValue in
+            if newValue != nil { handlePendingNotificationAction() }
         }
         .onChange(of: viewModel.todayPrayers.isEmpty) { wasEmpty, isEmpty in
             // Prayers just loaded — flush any deferred log action

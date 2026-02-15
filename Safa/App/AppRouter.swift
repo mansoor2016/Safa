@@ -19,7 +19,7 @@ final class AppRouter {
     static let shared = AppRouter()
 
     // MARK: - Notification Action
-    enum NotificationAction {
+    enum NotificationAction: Equatable {
         case openQibla
         case logPrayer(prayerType: PrayerType)
     }
