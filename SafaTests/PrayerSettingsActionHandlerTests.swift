@@ -233,4 +233,54 @@ final class PrayerSettingsActionHandlerTests: XCTestCase {
         XCTAssertEqual(scheduler.forceRescheduleCallCount, 1)
         XCTAssertEqual(liveActivity.ensureCallCount, 1)
     }
+
+    // MARK: - Regression: current language must be captured BEFORE state update
+
+    func test_applyRecommendations_sameLanguageAsCurrent_isNoOp() async {
+        // Regression: if the View passes the NEW language as both `language` and `current.language`,
+        // the handler sees no diff and skips the save. This verifies the no-op guard works,
+        // which is the failure mode when language is NOT captured before the state update.
+        let saver = MockPrefsSaver()
+        let scheduler = MockScheduler()
+        let liveActivity = MockLiveActivity()
+
+        await PrayerSettingsActionHandler.applyRecommendations(
+            method: .muslimWorldLeague,
+            madhab: .hanafi,
+            language: "Arabic",
+            current: (method: .muslimWorldLeague, madhab: .hanafi, language: "Arabic"),
+            preferenceSaver: saver,
+            scheduler: scheduler,
+            liveActivity: liveActivity
+        )
+
+        // If current == new for ALL fields, nothing should be saved
+        XCTAssertTrue(saver.savedLocationSettings.isEmpty,
+            "When current.language == language, no save should occur — this is the broken case " +
+            "when View fails to capture previousLanguage before updating state")
+        XCTAssertEqual(scheduler.forceRescheduleCallCount, 0)
+    }
+
+    func test_applyRecommendations_languageDiffers_savesNewLanguage() async {
+        // Companion to the above: when current.language != language, save MUST occur.
+        // Together these two tests prove the handler correctly detects language-only changes.
+        let saver = MockPrefsSaver()
+        let scheduler = MockScheduler()
+        let liveActivity = MockLiveActivity()
+
+        await PrayerSettingsActionHandler.applyRecommendations(
+            method: .muslimWorldLeague,
+            madhab: .hanafi,
+            language: "Urdu",
+            current: (method: .muslimWorldLeague, madhab: .hanafi, language: "English"),
+            preferenceSaver: saver,
+            scheduler: scheduler,
+            liveActivity: liveActivity
+        )
+
+        XCTAssertEqual(saver.savedLocationSettings.count, 1)
+        XCTAssertEqual(saver.savedLocationSettings[0].language, "Urdu",
+            "New language must be persisted when it differs from current")
+        XCTAssertEqual(scheduler.forceRescheduleCallCount, 1)
+    }
 }

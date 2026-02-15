@@ -254,6 +254,37 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertFalse(sut.loggedPrayers.contains(.fajr))
     }
 
+    func test_logPrayer_whenTodayPrayersEmpty_doesNotCallRepository() async {
+        // Given — no prayers loaded, todayPrayers is empty
+        XCTAssertTrue(sut.todayPrayers.isEmpty)
+
+        // When
+        await sut.logPrayer(.fajr)
+
+        // Then — repo never called, no state change
+        XCTAssertEqual(mockPrayerRepository.logPrayerCallCount, 0)
+        XCTAssertFalse(sut.loggedPrayers.contains(.fajr))
+    }
+
+    func test_logPrayer_alreadyLogged_doesNotIncrementRepoCallCount() async {
+        // Given — load prayers and log fajr once
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        await sut.loadPrayerTimes()
+        await sut.logPrayer(.fajr)
+        let repoCallsAfterFirstLog = mockPrayerRepository.logPrayerCallCount
+
+        // When — try to log fajr again (e.g. repeated lock-screen tap)
+        await sut.logPrayer(.fajr)
+
+        // Then — still logged, but repo was NOT called again (no duplicate persist/stats)
+        XCTAssertTrue(sut.loggedPrayers.contains(.fajr))
+        XCTAssertEqual(
+            mockPrayerRepository.logPrayerCallCount, repoCallsAfterFirstLog,
+            "Duplicate logPrayer must not call repository again — prevents stat inflation"
+        )
+    }
+
     func test_togglePrayer_rapidDoubleTap_endsUnlogged() async {
         // Given
         mockPrayerRepository.prayersToReturn = createMockPrayers()
