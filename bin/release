@@ -17,6 +17,29 @@ PBXPROJ="Safa.xcodeproj/project.pbxproj"
 CURRENT_VERSION=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
 CURRENT_BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
 
+# --- Collect release notes since last bump ---
+
+release_notes() {
+    local last_bump
+    last_bump=$(git log --oneline --grep='^Bump ' --format='%H' -1 2>/dev/null || true)
+
+    local range
+    if [[ -n "$last_bump" ]]; then
+        range="${last_bump}..HEAD"
+    else
+        range="HEAD~10..HEAD"
+    fi
+
+    # Get non-bump commit subjects, prefix with "- "
+    local notes
+    notes=$(git log --oneline --format='%s' "$range" \
+        | grep -v '^Bump ' \
+        | sed 's/^/- /' \
+        | head -15)
+
+    echo "$notes"
+}
+
 # --- No args: show usage ---
 
 if [[ $# -ne 1 ]]; then
@@ -46,11 +69,24 @@ if [[ "$ARG" == "--build" ]]; then
 
     sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
 
+    NOTES=$(release_notes)
+    COMMIT_MSG="Bump build to $NEW_BUILD"
+    if [[ -n "$NOTES" ]]; then
+        COMMIT_MSG="$COMMIT_MSG
+
+$NOTES"
+    fi
+
     git add "$PBXPROJ"
-    git commit -m "Bump build to $NEW_BUILD"
+    git commit -m "$COMMIT_MSG"
     git push
 
     echo "Pushed $CURRENT_VERSION ($NEW_BUILD)"
+    if [[ -n "$NOTES" ]]; then
+        echo ""
+        echo "Release notes:"
+        echo "$NOTES"
+    fi
     exit 0
 fi
 
@@ -92,8 +128,21 @@ echo "Bumping $CURRENT_VERSION ($CURRENT_BUILD) → $VERSION ($NEW_BUILD)"
 sed -i '' "s/MARKETING_VERSION = $CURRENT_VERSION;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
 sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
 
+NOTES=$(release_notes)
+COMMIT_MSG="Bump version to $VERSION ($NEW_BUILD)"
+if [[ -n "$NOTES" ]]; then
+    COMMIT_MSG="$COMMIT_MSG
+
+$NOTES"
+fi
+
 git add "$PBXPROJ"
-git commit -m "Bump version to $VERSION ($NEW_BUILD)"
+git commit -m "$COMMIT_MSG"
 git push
 
 echo "Released $VERSION ($NEW_BUILD)"
+if [[ -n "$NOTES" ]]; then
+    echo ""
+    echo "Release notes:"
+    echo "$NOTES"
+fi
