@@ -23,9 +23,15 @@ struct PrayerLiveActivityView: View {
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text(context.state.nextPrayerTime, style: .relative)
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
+                if context.isStale {
+                    Text("Open app to refresh")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text(context.state.nextPrayerTime, style: .relative)
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                }
 
                 Text(context.state.locationName)
                     .font(.caption2)
@@ -34,9 +40,15 @@ struct PrayerLiveActivityView: View {
 
             Spacer()
 
-            Text(context.state.nextPrayerTime, style: .time)
-                .font(.title)
-                .fontWeight(.semibold)
+            if context.isStale {
+                Image(systemName: "arrow.clockwise")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+            } else {
+                Text(context.state.nextPrayerTime, style: .time)
+                    .font(.title)
+                    .fontWeight(.semibold)
+            }
         }
         .padding()
     }
@@ -60,9 +72,14 @@ struct PrayerCompactTrailingView: View {
     let context: ActivityViewContext<PrayerActivityAttributes>
 
     var body: some View {
-        Text(context.state.nextPrayerTime, style: .time)
-            .font(.caption)
-            .monospacedDigit()
+        if context.isStale {
+            Image(systemName: "arrow.clockwise")
+                .font(.caption)
+        } else {
+            Text(context.state.nextPrayerTime, style: .time)
+                .font(.caption)
+                .monospacedDigit()
+        }
     }
 }
 
@@ -97,11 +114,17 @@ struct PrayerLiveActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing) {
-                        Text(context.state.nextPrayerTime, style: .time)
-                            .font(.headline)
-                        Text(context.state.nextPrayerTime, style: .relative)
-                            .font(.caption2)
-                            .foregroundColor(.accentColor)
+                        if context.isStale {
+                            Text("Tap to refresh")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text(context.state.nextPrayerTime, style: .time)
+                                .font(.headline)
+                            Text(context.state.nextPrayerTime, style: .relative)
+                                .font(.caption2)
+                                .foregroundColor(.accentColor)
+                        }
                     }
                     .padding(.trailing)
                 }

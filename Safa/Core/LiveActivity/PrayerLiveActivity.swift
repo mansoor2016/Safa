@@ -122,7 +122,7 @@ final class PrayerLiveActivityManager {
             locationName: locationName
         )
 
-        let content = ActivityContent(state: state, staleDate: prayerTime)
+        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime))
 
         do {
             currentActivity = try Activity.request(
@@ -175,7 +175,7 @@ final class PrayerLiveActivityManager {
             locationName: locationName
         )
 
-        let content = ActivityContent(state: state, staleDate: prayerTime)
+        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime))
 
         await activity.update(content)
     }

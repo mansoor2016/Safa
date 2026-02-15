@@ -118,6 +118,20 @@ public struct PrayerBoundary: Equatable, Sendable {
     }
 }
 
+// MARK: - Live Activity Staleness
+
+public enum LiveActivityStaleness {
+    /// Buffer after prayer time before ActivityKit marks content stale (seconds).
+    public static let buffer: TimeInterval = 90
+
+    /// Calculate the staleDate for a Live Activity showing a prayer.
+    /// Adds a buffer after prayerTime so the boundary Task.sleep has time to fire
+    /// and update the content before the system marks the activity stale.
+    public static func staleDate(for prayerTime: Date) -> Date {
+        prayerTime.addingTimeInterval(buffer)
+    }
+}
+
 // MARK: - Default Prayer Times (London Seasonal Approximation)
 
 public struct DefaultPrayerTimes {

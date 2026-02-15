@@ -14,10 +14,7 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| M | Prayer time accuracy — users report ~5 min early vs mosque timetables (London). Investigate calculation offsets, compare methods, validate against reference sources |
-| S | Calculation method visibility — show active method on Prayer screen so users can verify. Include a preview comparing today's times across methods so users can see the impact before switching |
 | S | Adhan silent mode awareness — inline helper text below adhan sound picker + one-time tip on first enable |
-| S | Push 1.4.1+ build to 17 beta testers |
 | L | App Store screenshots, description, preview video |
 | S | App Store Connect submission |
 
@@ -75,8 +72,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ## Completed
 
-Live Activity reliability (v1.4.3 — auto-recover on launch/foreground, stale detection, reattach after restart, settings toggle, onboarding gate, boundary task cleanup, duplicate/orphan prevention), widget stale prayer times fix (v1.4.1).
+Live Activity reliability (v1.4.3 — auto-recover on launch/foreground, stale detection, reattach after restart, settings toggle, onboarding gate, boundary task cleanup, duplicate/orphan prevention), widget stale prayer times fix (v1.4.1). Prayer time accuracy (v1.5.0 — replaced custom calculator with adhan-swift, 389 accuracy tests, 5 regional methods, auto high-latitude rule, sunnah times), calculation method visibility (prayer time preview card, method description footer, location-based recommendations sheet), Settings refactor (extracted 6 standalone views, thin NavigationLink menu), notification action buttons (lock screen Mark as Prayed + Open Qibla, deferred log pattern, 33 regression tests), developer settings (triple-tap access in all builds), Package.resolved for Xcode Cloud, draft icon cleanup, beta build pushed (v1.5.0 build 14 to TestFlight).
 
 ---
 
-*Last Updated: February 14, 2026 — Live Activity reliability done, moved to Completed*
+*Last Updated: February 15, 2026 — Prayer accuracy, calculation visibility, beta push done; Settings refactor, notification actions, Xcode Cloud fix shipped in v1.5.0*

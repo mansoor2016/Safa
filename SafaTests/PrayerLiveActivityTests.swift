@@ -169,3 +169,57 @@ final class PrayerLiveActivityManagerTests: XCTestCase {
         // No crash = success
     }
 }
+
+// MARK: - Staleness Tests
+
+final class PrayerLiveActivityStalenessTests: XCTestCase {
+
+    func test_staleDateIsAfterPrayerTime() {
+        // Given — a prayer time in the near future
+        let prayerTime = Date().addingTimeInterval(3600)
+
+        // When
+        let staleDate = LiveActivityStaleness.staleDate(for: prayerTime)
+
+        // Then — staleDate must be strictly after the prayer time
+        XCTAssertGreaterThan(staleDate, prayerTime)
+    }
+
+    func test_staleDateBufferIs90Seconds() {
+        // Given — a specific prayer time
+        let prayerTime = Date(timeIntervalSince1970: 1_700_000_000)
+
+        // When
+        let staleDate = LiveActivityStaleness.staleDate(for: prayerTime)
+
+        // Then — the buffer between prayerTime and staleDate is exactly 90 seconds
+        let buffer = staleDate.timeIntervalSince(prayerTime)
+        XCTAssertEqual(buffer, 90, accuracy: 0.001)
+    }
+
+    func test_staleDateForDistantFuturePrayer() {
+        // Given — a prayer time far in the future
+        let distantPrayerTime = Date.distantFuture
+
+        // When
+        let staleDate = LiveActivityStaleness.staleDate(for: distantPrayerTime)
+
+        // Then — staleDate is still after the prayer time
+        XCTAssertGreaterThan(staleDate, distantPrayerTime)
+    }
+
+    func test_staleDateUsesBufferNotRawPrayerTime() {
+        // Given — a prayer time
+        let prayerTime = Date().addingTimeInterval(3600)
+
+        // When — computing the stale date
+        let staleDate = LiveActivityStaleness.staleDate(for: prayerTime)
+
+        // Then — staleDate is after prayerTime (not equal)
+        XCTAssertGreaterThan(staleDate, prayerTime)
+
+        // And — the buffer matches the declared constant
+        let expectedBuffer = LiveActivityStaleness.buffer
+        XCTAssertEqual(staleDate.timeIntervalSince(prayerTime), expectedBuffer, accuracy: 0.001)
+    }
+}
