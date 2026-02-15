@@ -597,6 +597,10 @@ final class TestablePrayerRepository: PrayerRepositoryProtocol {
             logs.contains { $0.prayerType == prayer }
         }
     }
+
+    nonisolated func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime] {
+        []
+    }
 }
 
 // MARK: - Testable Location Service

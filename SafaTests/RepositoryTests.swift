@@ -56,6 +56,10 @@ final class StatefulMockPrayerRepository: PrayerRepositoryProtocol {
             log.prayerType == prayer && calendar.isDate(log.date, inSameDayAs: date)
         }
     }
+
+    func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime] {
+        []
+    }
 }
 
 // MARK: - Mock Quran Repository

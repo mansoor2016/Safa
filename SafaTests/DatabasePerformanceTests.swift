@@ -115,7 +115,7 @@ final class DatabasePerformanceTests: XCTestCase {
         }
         let elapsed = CFAbsoluteTimeGetCurrent() - start
 
-        XCTAssertLessThan(elapsed, 0.1, "All 7 methods should calculate in < 100ms total, took \(elapsed * 1000)ms")
+        XCTAssertLessThan(elapsed, 0.1, "All 12 methods should calculate in < 100ms total, took \(elapsed * 1000)ms")
     }
 
     // MARK: - Repeated Query Performance (tests connection pooling)

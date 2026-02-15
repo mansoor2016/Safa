@@ -273,6 +273,48 @@ final class LocationInferenceServiceTests: XCTestCase {
                       "Geocoded context should have city or country populated")
     }
 
+    // MARK: - New Method Mapping Tests (via geocoding)
+
+    func testDubaiGetsDubaiMethod() async {
+        let dubai = CLLocation(latitude: 25.2048, longitude: 55.2708)
+        let context = await sut.inferContext(from: dubai)
+
+        XCTAssertEqual(context.recommendedMethod, .dubai,
+                       "UAE should use Dubai (GIAE) method, got \(context.recommendedMethod)")
+    }
+
+    func testKuwaitGetsKuwaitMethod() async {
+        let kuwait = CLLocation(latitude: 29.3759, longitude: 47.9774)
+        let context = await sut.inferContext(from: kuwait)
+
+        XCTAssertEqual(context.recommendedMethod, .kuwait,
+                       "Kuwait should use Kuwait method, got \(context.recommendedMethod)")
+    }
+
+    func testQatarGetsQatarMethod() async {
+        let doha = CLLocation(latitude: 25.2854, longitude: 51.5310)
+        let context = await sut.inferContext(from: doha)
+
+        XCTAssertEqual(context.recommendedMethod, .qatar,
+                       "Qatar should use Qatar method, got \(context.recommendedMethod)")
+    }
+
+    func testSingaporeGetsSingaporeMethod() async {
+        let singapore = CLLocation(latitude: 1.3521, longitude: 103.8198)
+        let context = await sut.inferContext(from: singapore)
+
+        XCTAssertEqual(context.recommendedMethod, .singapore,
+                       "Singapore should use MUIS method, got \(context.recommendedMethod)")
+    }
+
+    func testIstanbulGetsTurkeyMethod() async {
+        let istanbul = CLLocation(latitude: 41.0082, longitude: 28.9784)
+        let context = await sut.inferContext(from: istanbul)
+
+        XCTAssertEqual(context.recommendedMethod, .turkey,
+                       "Turkey should use Diyanet method, got \(context.recommendedMethod)")
+    }
+
     // MARK: - Coordinates Tests
 
     func testCoordinatesEquality() {

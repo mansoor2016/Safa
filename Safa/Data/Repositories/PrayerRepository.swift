@@ -35,6 +35,12 @@ final class PrayerRepository: PrayerRepositoryProtocol {
         return prayers
     }
 
+    // MARK: - Sunnah Times
+
+    func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime] {
+        calculator.calculateSunnahTimes(for: date, location: location, method: method, madhab: madhab)
+    }
+
     // MARK: - Prayer Logging
 
     func logPrayer(_ prayer: PrayerType, for date: Date, at time: Date, isOnTime: Bool) async throws {

@@ -61,6 +61,11 @@ private struct PrayerContentView: View {
                     }
                 )
 
+                // Sunnah Times
+                if !viewModel.sunnahTimes.isEmpty {
+                    SunnahTimesCard(sunnahTimes: viewModel.sunnahTimes)
+                }
+
                 // Daily Goals
                 DailyGoalsCard(isRamadan: false, loggedPrayers: viewModel.loggedPrayers, todayPrayers: viewModel.todayPrayers)
 
@@ -330,6 +335,46 @@ private struct QuickActionButton: View {
         }
         .accessibilityLabel(title)
         .accessibilityHint("Double tap to open \(title)")
+    }
+}
+
+// MARK: - Sunnah Times Card
+
+private struct SunnahTimesCard: View {
+    let sunnahTimes: [SunnahTime]
+
+    var body: some View {
+        ContentCard {
+            VStack(alignment: .leading, spacing: SafaSpacing.sm) {
+                HStack(spacing: SafaSpacing.xs) {
+                    Image(systemName: "moon.haze.fill")
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                        .font(.caption)
+                    Text("Night Prayer Times")
+                        .font(SafaTypography.labelMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                }
+
+                ForEach(sunnahTimes) { sunnah in
+                    HStack {
+                        Image(systemName: sunnah.type.iconName)
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            .frame(width: 20)
+
+                        Text(sunnah.type.displayName)
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+
+                        Spacer()
+
+                        Text(sunnah.time.formatted(date: .omitted, time: .shortened))
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                            .monospacedDigit()
+                    }
+                }
+            }
+        }
     }
 }
 

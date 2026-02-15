@@ -1112,6 +1112,12 @@ class CloudKitSyncService {
 | Umm Al-Qura, Makkah | Saudi Arabia |
 | University of Islamic Sciences, Karachi | Pakistan, India |
 | Institute of Geophysics, Tehran | Iran |
+| Dubai (GIAE) | United Arab Emirates |
+| Kuwait | Kuwait |
+| Qatar | Qatar |
+| MUIS, Singapore | Singapore, Malaysia, Brunei |
+| Diyanet, Turkey | Turkey, Central Asia |
+| Shia Ithna-Ashari (Jafari) | Shia communities |
 
 ### 4.3 Qibla Direction
 

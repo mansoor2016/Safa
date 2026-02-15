@@ -295,20 +295,16 @@ final class CalculationMethodTests: XCTestCase {
         XCTAssertFalse(CalculationMethod.karachi.displayName.isEmpty)
     }
 
-    func testMethodFajrAngles() {
-        // ISNA uses 15 degrees for Fajr
-        XCTAssertEqual(CalculationMethod.isna.fajrAngle, 15.0)
+    func testMethodDescriptions() {
+        // All methods should have non-empty descriptions
+        for method in CalculationMethod.allCases {
+            XCTAssertFalse(method.methodDescription.isEmpty,
+                           "\(method) should have a description")
+        }
 
-        // MWL uses 18 degrees for Fajr
-        XCTAssertEqual(CalculationMethod.muslimWorldLeague.fajrAngle, 18.0)
-    }
-
-    func testMethodIshaAngles() {
-        // ISNA uses 15 degrees for Isha
-        XCTAssertEqual(CalculationMethod.isna.ishaAngle, 15.0)
-
-        // MWL uses 17 degrees for Isha
-        XCTAssertEqual(CalculationMethod.muslimWorldLeague.ishaAngle, 17.0)
+        // Spot-check content
+        XCTAssertTrue(CalculationMethod.isna.methodDescription.contains("United States"))
+        XCTAssertTrue(CalculationMethod.muslimWorldLeague.methodDescription.contains("Europe"))
     }
 }
 

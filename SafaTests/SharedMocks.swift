@@ -168,6 +168,10 @@ final class MockPrayerRepository: PrayerRepositoryProtocol {
         let logs = await prayerLogsToReturn
         return logs.contains { $0.prayerType == type }
     }
+
+    nonisolated func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime] {
+        []
+    }
 }
 
 // MARK: - Mock Location Service

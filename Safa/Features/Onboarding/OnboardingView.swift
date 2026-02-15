@@ -340,6 +340,15 @@ struct OnboardingView: View {
                 settingSummaryItem(label: "Method", value: selectedMethod.shortName)
                 settingSummaryItem(label: "Madhab", value: selectedMadhab.displayName)
             }
+
+            if let context = locationContext {
+                PrayerTimePreviewCard(
+                    method: selectedMethod,
+                    madhab: selectedMadhab,
+                    location: context.coordinates,
+                    date: Date()
+                )
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -436,6 +445,16 @@ struct OnboardingView: View {
                         ForEach(Madhab.allCases, id: \.self) { madhab in
                             Text(madhab.displayName).tag(madhab)
                         }
+                    }
+
+                    if let context = locationContext {
+                        PrayerTimePreviewCard(
+                            method: selectedMethod,
+                            madhab: selectedMadhab,
+                            location: context.coordinates,
+                            date: Date()
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                 }
 
@@ -660,6 +679,11 @@ extension CalculationMethod {
         case .karachi: return "Karachi"
         case .tehran: return "Tehran"
         case .jafari: return "Jafari"
+        case .dubai: return "Dubai"
+        case .kuwait: return "Kuwait"
+        case .qatar: return "Qatar"
+        case .singapore: return "Singapore"
+        case .turkey: return "Turkey"
         }
     }
 }

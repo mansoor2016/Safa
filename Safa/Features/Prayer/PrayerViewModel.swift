@@ -10,6 +10,7 @@ import SafaShared
 final class PrayerViewModel {
     // MARK: - Published State
     var todayPrayers: [PrayerTime] = []
+    var sunnahTimes: [SunnahTime] = []
     var loggedPrayers: Set<PrayerType> = []
     var notificationEnabledPrayers: Set<PrayerType> = []
     var currentDate = Date()
@@ -84,6 +85,14 @@ final class PrayerViewModel {
                 madhab: prefs.madhab
             )
             todayPrayers = prayers
+
+            // Load sunnah times
+            sunnahTimes = prayerRepository.getSunnahTimes(
+                for: currentDate,
+                location: location,
+                method: calculationMethod,
+                madhab: prefs.madhab
+            )
 
             // Load logged prayers
             let logs = try await prayerRepository.getPrayerLogs(for: currentDate)

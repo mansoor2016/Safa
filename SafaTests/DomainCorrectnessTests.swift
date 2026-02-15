@@ -180,42 +180,17 @@ final class CalculationMethodAngleTests: XCTestCase {
     // Prayer time accuracy depends on these angles. A wrong angle
     // means Fajr or Isha could be off by tens of minutes.
 
-    func test_fajrAngles_matchStandards() {
-        XCTAssertEqual(CalculationMethod.muslimWorldLeague.fajrAngle, 18.0)
-        XCTAssertEqual(CalculationMethod.isna.fajrAngle, 15.0)
-        XCTAssertEqual(CalculationMethod.egypt.fajrAngle, 19.5)
-        XCTAssertEqual(CalculationMethod.makkah.fajrAngle, 18.5)
-        XCTAssertEqual(CalculationMethod.karachi.fajrAngle, 18.0)
-        XCTAssertEqual(CalculationMethod.tehran.fajrAngle, 17.7)
-        XCTAssertEqual(CalculationMethod.jafari.fajrAngle, 16.0)
-    }
-
-    func test_ishaAngles_matchStandards() {
-        XCTAssertEqual(CalculationMethod.muslimWorldLeague.ishaAngle, 17.0)
-        XCTAssertEqual(CalculationMethod.isna.ishaAngle, 15.0)
-        XCTAssertEqual(CalculationMethod.egypt.ishaAngle, 17.5)
-        XCTAssertEqual(CalculationMethod.makkah.ishaAngle, 0,
-                       "Makkah uses 90 min after Maghrib, not an angle")
-        XCTAssertEqual(CalculationMethod.karachi.ishaAngle, 18.0)
-        XCTAssertEqual(CalculationMethod.tehran.ishaAngle, 14.0)
-        XCTAssertEqual(CalculationMethod.jafari.ishaAngle, 14.0)
-    }
-
-    func test_allFajrAngles_arePositive() {
+    func test_allMethods_haveDescription() {
         for method in CalculationMethod.allCases {
-            XCTAssertGreaterThan(method.fajrAngle, 0,
-                                 "\(method) fajrAngle must be positive")
+            XCTAssertFalse(method.methodDescription.isEmpty,
+                           "\(method) must have a description")
         }
     }
 
-    func test_asrShadowRatio_jafariUsesHanafiStyle() {
-        XCTAssertEqual(CalculationMethod.jafari.asrShadowRatio, 2.0)
-    }
-
-    func test_asrShadowRatio_allOthersUseStandard() {
-        for method in CalculationMethod.allCases where method != .jafari {
-            XCTAssertEqual(method.asrShadowRatio, 1.0,
-                           "\(method) should use standard shadow ratio")
+    func test_allMethods_haveDisplayName() {
+        for method in CalculationMethod.allCases {
+            XCTAssertFalse(method.displayName.isEmpty,
+                           "\(method) must have a display name")
         }
     }
 }

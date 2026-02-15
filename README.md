@@ -17,7 +17,7 @@ Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed
 ## Features
 
 ### Core Features
-- **Prayer Times** — Accurate astronomical calculations with 7 methods (ISNA, MWL, Makkah, Karachi, Egypt, Tehran, Jafari)
+- **Prayer Times** — Accurate astronomical calculations with 12 methods (ISNA, MWL, Makkah, Karachi, Egypt, Tehran, Jafari, Dubai, Kuwait, Qatar, Singapore, Turkey)
 - **Qibla Compass** — Real-time compass with haptic feedback at alignment
 - **Quran Reader** — Full 6,236 ayahs with Arabic (Uthmani), Sahih International translation, and FTS search
 - **Hadith Collections** — 34,178 hadiths across all 6 Kutub al-Sittah (Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasa'i, Ibn Majah)

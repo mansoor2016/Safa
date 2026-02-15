@@ -118,16 +118,22 @@ final class LocationInferenceService {
 
         let egyptCountries: Set<String> = ["EG", "LY", "SD"]
 
-        let makkahCountries: Set<String> = ["SA", "QA", "BH", "KW", "AE", "OM", "YE"]
+        let makkahCountries: Set<String> = ["SA", "BH", "OM", "YE"]
+
+        let dubaiCountries: Set<String> = ["AE"]
+        let kuwaitCountries: Set<String> = ["KW"]
+        let qatarCountries: Set<String> = ["QA"]
 
         let karachiCountries: Set<String> = ["PK", "BD", "AF", "IN", "NP", "LK"]
 
         let tehranCountries: Set<String> = ["IR"]
 
-        // Southeast Asia - typically uses MWL or Shafi'i-based
-        let seAsiaCountries: Set<String> = ["MY", "ID", "SG", "BN", "TH", "PH"]
+        let singaporeCountries: Set<String> = ["SG", "MY", "BN"]
 
-        // Turkey uses Diyanet (similar to MWL with adjustments)
+        // Southeast Asia - typically uses MWL or Shafi'i-based
+        let seAsiaCountries: Set<String> = ["ID", "TH", "PH"]
+
+        // Turkey uses Diyanet
         let turkeyCountries: Set<String> = ["TR", "AZ", "TM", "UZ", "KZ", "KG", "TJ"]
 
         // North/West Africa
@@ -139,6 +145,12 @@ final class LocationInferenceService {
         switch code {
         case _ where isnaCountries.contains(code):
             return .isna
+        case _ where dubaiCountries.contains(code):
+            return .dubai
+        case _ where kuwaitCountries.contains(code):
+            return .kuwait
+        case _ where qatarCountries.contains(code):
+            return .qatar
         case _ where makkahCountries.contains(code):
             return .makkah
         case _ where egyptCountries.contains(code):
@@ -148,9 +160,11 @@ final class LocationInferenceService {
         case _ where tehranCountries.contains(code):
             return .tehran
         case _ where turkeyCountries.contains(code):
-            return .muslimWorldLeague // Turkey/Central Asia - MWL is closest
+            return .turkey
+        case _ where singaporeCountries.contains(code):
+            return .singapore
         case _ where seAsiaCountries.contains(code):
-            return .muslimWorldLeague // Southeast Asia typically uses MWL
+            return .muslimWorldLeague // Remaining SE Asia
         case _ where nwAfricaCountries.contains(code):
             return .muslimWorldLeague // North/West Africa - MWL
         case _ where levantCountries.contains(code):

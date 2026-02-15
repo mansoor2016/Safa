@@ -1364,6 +1364,12 @@
     "Level %lld" : {
 
     },
+    "Live Activity" : {
+
+    },
+    "Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island." : {
+
+    },
     "Location" : {
 
     },
@@ -1491,6 +1497,9 @@
 
     },
     "Night of Power Guide" : {
+
+    },
+    "Night Prayer Times" : {
 
     },
     "Night Prayers" : {
@@ -1894,9 +1903,6 @@
     "Select Reciter" : {
 
     },
-    "Select the calculation method used by your local mosque for accurate prayer times." : {
-
-    },
     "Select which Islamic events to add to your calendar." : {
 
     },
@@ -2252,6 +2258,9 @@
 
     },
     "Today" : {
+
+    },
+    "Today's Prayer Times" : {
 
     },
     "Tonight is the %@ - an odd night" : {

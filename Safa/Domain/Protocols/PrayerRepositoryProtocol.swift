@@ -42,4 +42,7 @@ protocol PrayerRepositoryProtocol {
     ///   - date: The date to check
     /// - Returns: True if the prayer has been logged
     func isPrayerLogged(_ prayer: PrayerType, for date: Date) async throws -> Bool
+
+    /// Fetches sunnah times (middle of night, last third) for a given date and location
+    func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime]
 }

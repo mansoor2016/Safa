@@ -214,11 +214,7 @@ final class ModelIntegrationTests: XCTestCase {
     func testCalculationMethods() {
         for method in CalculationMethod.allCases {
             XCTAssertFalse(method.displayName.isEmpty)
-            XCTAssertGreaterThan(method.fajrAngle, 0)
-            // Makkah uses fixed minutes instead of angle for Isha
-            if method != .makkah {
-                XCTAssertGreaterThan(method.ishaAngle, 0)
-            }
+            XCTAssertFalse(method.methodDescription.isEmpty)
         }
     }
 

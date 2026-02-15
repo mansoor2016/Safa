@@ -254,6 +254,11 @@ enum CalculationMethod: String, Codable, CaseIterable, Identifiable {
     case karachi = "karachi"
     case tehran = "tehran"
     case jafari = "jafari"
+    case dubai = "dubai"
+    case kuwait = "kuwait"
+    case qatar = "qatar"
+    case singapore = "singapore"
+    case turkey = "turkey"
 
     var id: String { rawValue }
 
@@ -266,37 +271,90 @@ enum CalculationMethod: String, Codable, CaseIterable, Identifiable {
         case .karachi: return "University of Islamic Sciences, Karachi"
         case .tehran: return "Institute of Geophysics, Tehran"
         case .jafari: return "Shia Ithna-Ashari (Jafari)"
+        case .dubai: return "Dubai (GIAE)"
+        case .kuwait: return "Kuwait"
+        case .qatar: return "Qatar"
+        case .singapore: return "MUIS, Singapore"
+        case .turkey: return "Diyanet, Turkey"
         }
     }
 
-    var fajrAngle: Double {
+    var methodDescription: String {
         switch self {
-        case .muslimWorldLeague: return 18.0
-        case .isna: return 15.0
-        case .egypt: return 19.5
-        case .makkah: return 18.5
-        case .karachi: return 18.0
-        case .tehran: return 17.7
-        case .jafari: return 16.0
+        case .muslimWorldLeague:
+            return "Used across Europe, Africa, and parts of Asia. Fajr 18°, Isha 17°."
+        case .isna:
+            return "Standard for the United States and Canada. Fajr 15°, Isha 15°."
+        case .egypt:
+            return "Used in Egypt, Libya, and Sudan. Fajr 19.5°, Isha 17.5°."
+        case .makkah:
+            return "Umm al-Qura method for Saudi Arabia and nearby Gulf states. Fajr 18.5°, Isha 90 min after Maghrib."
+        case .karachi:
+            return "Used in Pakistan, Bangladesh, Afghanistan, and India. Fajr 18°, Isha 18°."
+        case .tehran:
+            return "Used in Iran. Fajr 17.7°, Isha 14°, with Maghrib at 4.5°."
+        case .jafari:
+            return "Shia Ithna-Ashari method. Fajr 16°, Isha 14°."
+        case .dubai:
+            return "GIAE method for the United Arab Emirates. Fajr 18.2°, Isha 18.2°."
+        case .kuwait:
+            return "Standard for Kuwait. Fajr 18°, Isha 17.5°."
+        case .qatar:
+            return "Modified Umm al-Qura for Qatar. Fajr 18°, Isha 90 min after Maghrib."
+        case .singapore:
+            return "MUIS method for Singapore, Malaysia, and Brunei. Fajr 20°, Isha 18°."
+        case .turkey:
+            return "Diyanet method for Turkey and Central Asia. Fajr 18°, Isha 17°."
+        }
+    }
+}
+
+// MARK: - Sunnah Time Type
+
+enum SunnahTimeType: String, Codable, CaseIterable, Identifiable {
+    case middleOfTheNight
+    case lastThirdOfTheNight
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .middleOfTheNight: return "Middle of the Night"
+        case .lastThirdOfTheNight: return "Last Third of the Night"
         }
     }
 
-    var ishaAngle: Double {
+    var arabicName: String {
         switch self {
-        case .muslimWorldLeague: return 17.0
-        case .isna: return 15.0
-        case .egypt: return 17.5
-        case .makkah: return 0 // Uses 90 min after Maghrib
-        case .karachi: return 18.0
-        case .tehran: return 14.0
-        case .jafari: return 14.0
+        case .middleOfTheNight: return "نصف الليل"
+        case .lastThirdOfTheNight: return "الثلث الأخير"
         }
     }
 
-    var asrShadowRatio: Double {
+    var iconName: String {
         switch self {
-        case .jafari: return 2.0 // Hanafi: shadow equals twice the object
-        default: return 1.0 // Standard: shadow equals object length
+        case .middleOfTheNight: return "moon.fill"
+        case .lastThirdOfTheNight: return "moon.haze.fill"
         }
+    }
+}
+
+// MARK: - Sunnah Time
+
+struct SunnahTime: Identifiable, Hashable {
+    let id: UUID
+    let type: SunnahTimeType
+    let time: Date
+
+    init(id: UUID = UUID(), type: SunnahTimeType, time: Date) {
+        self.id = id
+        self.type = type
+        self.time = time
+    }
+
+    var timeString: String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: time)
     }
 }

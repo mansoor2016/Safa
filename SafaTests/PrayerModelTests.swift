@@ -182,10 +182,10 @@ final class PrayerModelTests: XCTestCase {
         XCTAssertFalse(CalculationMethod.egypt.displayName.isEmpty)
     }
 
-    func testCalculationMethodAngles() {
-        XCTAssertGreaterThan(CalculationMethod.muslimWorldLeague.fajrAngle, 0)
-        XCTAssertGreaterThan(CalculationMethod.muslimWorldLeague.ishaAngle, 0)
-        XCTAssertGreaterThan(CalculationMethod.isna.fajrAngle, 0)
+    func testCalculationMethodDescriptions() {
+        XCTAssertFalse(CalculationMethod.muslimWorldLeague.methodDescription.isEmpty)
+        XCTAssertFalse(CalculationMethod.isna.methodDescription.isEmpty)
+        XCTAssertTrue(CalculationMethod.dubai.methodDescription.contains("United Arab Emirates"))
     }
 
     // MARK: - Madhab Tests

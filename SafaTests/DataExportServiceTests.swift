@@ -174,4 +174,5 @@ private final class ExportTestMockPrayerRepository: PrayerRepositoryProtocol {
     nonisolated func getPrayerLogs(for date: Date) async throws -> [PrayerLog] { [] }
     nonisolated func deletePrayerLog(_ log: PrayerLog) async throws {}
     nonisolated func isPrayerLogged(_ prayer: PrayerType, for date: Date) async throws -> Bool { false }
+    nonisolated func getSunnahTimes(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) -> [SunnahTime] { [] }
 }

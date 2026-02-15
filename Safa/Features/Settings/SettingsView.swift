@@ -188,6 +188,14 @@ struct SettingsView: View {
         return "\(count) adjusted"
     }
 
+    private var previewCoordinates: Coordinates? {
+        if let context = locationContext {
+            return context.coordinates
+        }
+        let prefs = PreferencesManager.loadPreferencesSync()
+        return prefs.savedCoordinates
+    }
+
     private var hasNonRecommendedSettings: Bool {
         guard let context = locationContext else { return false }
         return selectedCalculationMethod != context.recommendedMethod ||
@@ -233,6 +241,16 @@ struct SettingsView: View {
                 Task { await prefsManager.saveMadhab(newValue) }
             }
 
+            if let coords = previewCoordinates {
+                PrayerTimePreviewCard(
+                    method: selectedCalculationMethod,
+                    madhab: selectedMadhab,
+                    location: coords,
+                    date: Date()
+                )
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+
             NavigationLink {
                 PrayerAdjustmentsView()
             } label: {
@@ -246,10 +264,11 @@ struct SettingsView: View {
         } header: {
             Text("Prayer Times")
         } footer: {
-            if let context = locationContext {
-                Text("Recommended for \(context.regionName): \(context.recommendedMethod.displayName)")
-            } else {
-                Text("Select the calculation method used by your local mosque for accurate prayer times.")
+            VStack(alignment: .leading, spacing: 4) {
+                Text(selectedCalculationMethod.methodDescription)
+                if let context = locationContext, selectedCalculationMethod != context.recommendedMethod {
+                    Text("Recommended for \(context.regionName): \(context.recommendedMethod.displayName)")
+                }
             }
         }
     }
