@@ -3,11 +3,9 @@
 // DEPENDENCIES: SwiftUI, StoreKit, AppReviewService, ToastService
 
 import SwiftUI
-import StoreKit
 
 struct ReviewPromptView: View {
     // MARK: - Environment
-    @Environment(\.requestReview) private var requestReview
     @Environment(\.openURL) private var openURL
 
     // MARK: - Binding
@@ -138,7 +136,6 @@ struct ReviewPromptView: View {
         let currentRating = rating
         let text = feedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Submitting = permanent opt-out. User completed the review flow.
         AppReviewService.optOut()
 
         ToastService.shared.show(Toast(
@@ -146,16 +143,7 @@ struct ReviewPromptView: View {
             type: .success
         ))
 
-        if currentRating >= 4 {
-            // High rating: show native App Store review dialog
-            requestReview()
-
-            // If they also wrote feedback, send email too
-            if !text.isEmpty {
-                openFeedbackEmail(rating: currentRating, text: text)
-            }
-        } else {
-            // Low rating: open email with pre-filled feedback
+        if !text.isEmpty {
             openFeedbackEmail(rating: currentRating, text: text)
         }
 

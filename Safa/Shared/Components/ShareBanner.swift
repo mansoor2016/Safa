@@ -60,11 +60,13 @@ struct ShareBanner: View {
         .padding(SafaSpacing.md)
         .background(Color(UIColor.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
-        .sheet(isPresented: $showingShareSheet, onDismiss: {
-            ShareBanner.markDismissed()
-            onDismiss()
-        }) {
-            AppShareSheet()
+        .sheet(isPresented: $showingShareSheet) {
+            AppShareSheet { completed in
+                if completed {
+                    ShareBanner.markDismissed()
+                    onDismiss()
+                }
+            }
         }
     }
 }
@@ -72,10 +74,15 @@ struct ShareBanner: View {
 // MARK: - Share Sheet
 
 private struct AppShareSheet: UIViewControllerRepresentable {
+    let onComplete: (Bool) -> Void
+
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let shareText = "Check out Safa - an Islamic companion app for prayer times, Quran, and more!"
         let items: [Any] = [shareText, AppConstants.URLs.downloadURL as Any]
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, completed, _, _ in
+            onComplete(completed)
+        }
         return controller
     }
 
