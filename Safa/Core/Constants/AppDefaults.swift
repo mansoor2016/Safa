@@ -32,6 +32,12 @@ enum AppDefaults {
     /// Enable notifications by default
     static let notificationsEnabled: Bool = true
 
+    /// Wudhu reminder off by default (opt-in)
+    static let wudhuReminderEnabled: Bool = false
+
+    /// Default minutes before prayer for wudhu reminder
+    static let wudhuReminderMinutesBefore: Int = 15
+
     // MARK: - Live Activity
 
     /// Enable Live Activity (lock screen countdown) by default

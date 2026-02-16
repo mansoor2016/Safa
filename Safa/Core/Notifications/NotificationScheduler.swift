@@ -17,11 +17,6 @@ final class NotificationScheduler {
     // MARK: - Constants
     static let backgroundTaskIdentifier = "com.safa.notificationRefresh"
 
-    /// Number of days to schedule ahead. 14 × 5 = 70 may exceed iOS's 64-notification limit,
-    /// but iOS keeps the soonest-firing and silently drops the rest. Background refresh re-rolls
-    /// the window forward, so the farthest-out days get covered on the next refresh cycle.
-    private static let scheduleDaysAhead = 14
-
     // MARK: - Properties
 
     private let center = UNUserNotificationCenter.current()
@@ -102,12 +97,19 @@ final class NotificationScheduler {
         }
 
         let enabledPrayers = Set(prefs.notificationEnabledPrayers.compactMap { PrayerType(rawValue: $0) })
-        guard !enabledPrayers.isEmpty else { return }
+        guard !enabledPrayers.isEmpty else {
+            await cancelPrayerNotifications()
+            return
+        }
 
         guard let coords = Dependencies.shared.locationService.coordinates else { return }
 
         let now = Date()
-        let dates = NotificationSchedulerHelpers.scheduleDates(from: now, daysAhead: Self.scheduleDaysAhead)
+        let daysAhead = NotificationSchedulerHelpers.effectiveDaysAhead(
+            enabledPrayerCount: enabledPrayers.count,
+            wudhuEnabled: prefs.wudhuReminderEnabled
+        )
+        let dates = NotificationSchedulerHelpers.scheduleDates(from: now, daysAhead: daysAhead)
 
         // Cancel all existing prayer notifications before scheduling fresh ones
         await cancelPrayerNotifications()
@@ -164,6 +166,47 @@ final class NotificationScheduler {
                     )
 
                     try await center.add(request)
+                }
+                // Wudhu reminders for this day
+                if prefs.wudhuReminderEnabled {
+                    let wudhuPrayers = NotificationSchedulerHelpers.wudhuPrayersToSchedule(
+                        from: prayers,
+                        enabledPrayers: enabledPrayers,
+                        minutesBefore: prefs.wudhuReminderMinutesBefore,
+                        after: now
+                    )
+
+                    for prayer in wudhuPrayers {
+                        let reminderTime = prayer.time.addingTimeInterval(
+                            -TimeInterval(prefs.wudhuReminderMinutesBefore * 60)
+                        )
+                        let wudhuContent = UNMutableNotificationContent()
+                        wudhuContent.title = String(localized: "Wudhu Reminder")
+                        wudhuContent.body = String(localized: "Prepare for \(prayer.type.displayName) in \(prefs.wudhuReminderMinutesBefore) minutes")
+                        wudhuContent.sound = .default
+                        wudhuContent.interruptionLevel = .active
+                        wudhuContent.categoryIdentifier = FocusModeService.NotificationCategory.generalReminder.rawValue
+
+                        let wudhuComponents = Calendar.current.dateComponents(
+                            [.year, .month, .day, .hour, .minute],
+                            from: reminderTime
+                        )
+                        let wudhuTrigger = UNCalendarNotificationTrigger(
+                            dateMatching: wudhuComponents,
+                            repeats: false
+                        )
+                        let wudhuIdentifier = NotificationSchedulerHelpers.wudhuNotificationIdentifier(
+                            for: prayer.type,
+                            on: date
+                        )
+                        let wudhuRequest = UNNotificationRequest(
+                            identifier: wudhuIdentifier,
+                            content: wudhuContent,
+                            trigger: wudhuTrigger
+                        )
+
+                        try await center.add(wudhuRequest)
+                    }
                 }
             } catch {
                 // Silently fail for this day — continue scheduling remaining days

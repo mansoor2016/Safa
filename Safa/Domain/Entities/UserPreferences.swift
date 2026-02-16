@@ -20,6 +20,10 @@ struct UserPreferences: Codable, Hashable {
     var notificationsEnabled: Bool
     var notificationEnabledPrayers: [String]  // Prayer rawValues, e.g. ["fajr", "dhuhr", ...]
 
+    // MARK: - Wudhu Reminder Settings
+    var wudhuReminderEnabled: Bool
+    var wudhuReminderMinutesBefore: Int
+
     // MARK: - Live Activity Settings
     var liveActivityEnabled: Bool
 
@@ -83,6 +87,8 @@ struct UserPreferences: Codable, Hashable {
         smartAdhanEnabled: Bool = false,
         iftarAdhanEnabled: Bool = false,
         notificationEnabledPrayers: [String] = PrayerType.obligatoryPrayers.map { $0.rawValue },
+        wudhuReminderEnabled: Bool = AppDefaults.wudhuReminderEnabled,
+        wudhuReminderMinutesBefore: Int = AppDefaults.wudhuReminderMinutesBefore,
         liveActivityEnabled: Bool = AppDefaults.liveActivityEnabled,
         reduceMotionEnabled: Bool = false,
         largerArabicTextEnabled: Bool = false,
@@ -112,6 +118,8 @@ struct UserPreferences: Codable, Hashable {
         self.smartAdhanEnabled = smartAdhanEnabled
         self.iftarAdhanEnabled = iftarAdhanEnabled
         self.notificationEnabledPrayers = notificationEnabledPrayers
+        self.wudhuReminderEnabled = wudhuReminderEnabled
+        self.wudhuReminderMinutesBefore = wudhuReminderMinutesBefore
         self.liveActivityEnabled = liveActivityEnabled
         self.reduceMotionEnabled = reduceMotionEnabled
         self.largerArabicTextEnabled = largerArabicTextEnabled
@@ -127,6 +135,7 @@ struct UserPreferences: Codable, Hashable {
         case calculationMethod, madhab
         case selectedTranslation, showArabicText, showTransliteration
         case notificationsEnabled, notificationEnabledPrayers
+        case wudhuReminderEnabled, wudhuReminderMinutesBefore
         case liveActivityEnabled
         case adhanEnabled, selectedAdhan, selectedFajrAdhan, smartAdhanEnabled, iftarAdhanEnabled
         case accentColorName, hapticFeedbackEnabled
@@ -147,6 +156,9 @@ struct UserPreferences: Codable, Hashable {
         showTransliteration = try container.decode(Bool.self, forKey: .showTransliteration)
         notificationsEnabled = try container.decode(Bool.self, forKey: .notificationsEnabled)
         notificationEnabledPrayers = try container.decode([String].self, forKey: .notificationEnabledPrayers)
+        wudhuReminderEnabled = try container.decodeIfPresent(Bool.self, forKey: .wudhuReminderEnabled) ?? AppDefaults.wudhuReminderEnabled
+        let rawMinutes = try container.decodeIfPresent(Int.self, forKey: .wudhuReminderMinutesBefore) ?? AppDefaults.wudhuReminderMinutesBefore
+        wudhuReminderMinutesBefore = [5, 10, 15, 20].contains(rawMinutes) ? rawMinutes : AppDefaults.wudhuReminderMinutesBefore
         liveActivityEnabled = try container.decodeIfPresent(Bool.self, forKey: .liveActivityEnabled) ?? AppDefaults.liveActivityEnabled
         adhanEnabled = try container.decode(Bool.self, forKey: .adhanEnabled)
         selectedAdhan = try container.decode(String.self, forKey: .selectedAdhan)

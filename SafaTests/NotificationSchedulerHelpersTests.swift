@@ -483,4 +483,108 @@ final class NotificationSchedulerHelpersTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - Wudhu Notification Identifier
+
+    func test_wudhuIdentifier_format() {
+        let date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 14))!
+        let identifier = NotificationSchedulerHelpers.wudhuNotificationIdentifier(for: .fajr, on: date)
+        XCTAssertEqual(identifier, "prayer_wudhu_fajr_2026-02-14")
+    }
+
+    func test_wudhuIdentifier_matchesPrayerPrefix() {
+        let date = Calendar.current.date(from: DateComponents(year: 2026, month: 2, day: 14))!
+        let identifier = NotificationSchedulerHelpers.wudhuNotificationIdentifier(for: .dhuhr, on: date)
+        XCTAssertTrue(
+            NotificationSchedulerHelpers.isPrayerNotificationIdentifier(identifier),
+            "Wudhu identifier '\(identifier)' must start with prayer_ for cancellation coverage"
+        )
+    }
+
+    // MARK: - Wudhu Prayer Filtering
+
+    func test_wudhuPrayersToSchedule_filtersDisabledPrayers() {
+        let now = Date()
+        let future = now.addingTimeInterval(3600) // 1 hour from now
+
+        let prayers = PrayerType.obligatoryPrayers.map { PrayerTime(type: $0, time: future) }
+        let enabled: Set<PrayerType> = [.fajr, .isha]
+
+        let result = NotificationSchedulerHelpers.wudhuPrayersToSchedule(
+            from: prayers, enabledPrayers: enabled, minutesBefore: 15, after: now
+        )
+
+        XCTAssertEqual(Set(result.map(\.type)), [.fajr, .isha])
+    }
+
+    func test_wudhuPrayersToSchedule_filtersPastReminders() {
+        let now = Date()
+        // Prayer is 5 minutes away, but wudhu offset is 15 min → reminder time is in the past
+        let fiveMinAway = now.addingTimeInterval(5 * 60)
+        let prayers = [PrayerTime(type: .fajr, time: fiveMinAway)]
+        let enabled: Set<PrayerType> = [.fajr]
+
+        let result = NotificationSchedulerHelpers.wudhuPrayersToSchedule(
+            from: prayers, enabledPrayers: enabled, minutesBefore: 15, after: now
+        )
+
+        XCTAssertTrue(result.isEmpty, "Reminder time already passed — should be excluded")
+    }
+
+    func test_wudhuPrayersToSchedule_includesUpcomingReminders() {
+        let now = Date()
+        // Prayer 30 minutes away, wudhu offset 15 min → reminder 15 min from now → future
+        let thirtyMinAway = now.addingTimeInterval(30 * 60)
+        let prayers = [PrayerTime(type: .asr, time: thirtyMinAway)]
+        let enabled: Set<PrayerType> = [.asr]
+
+        let result = NotificationSchedulerHelpers.wudhuPrayersToSchedule(
+            from: prayers, enabledPrayers: enabled, minutesBefore: 15, after: now
+        )
+
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first?.type, .asr)
+    }
+
+    func test_wudhuPrayersToSchedule_filtersNonObligatory() {
+        let now = Date()
+        let future = now.addingTimeInterval(3600)
+        let prayers = [
+            PrayerTime(type: .sunrise, time: future),
+            PrayerTime(type: .fajr, time: future)
+        ]
+        let enabled: Set<PrayerType> = [.sunrise, .fajr]
+
+        let result = NotificationSchedulerHelpers.wudhuPrayersToSchedule(
+            from: prayers, enabledPrayers: enabled, minutesBefore: 15, after: now
+        )
+
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.first?.type, .fajr)
+    }
+
+    // MARK: - Effective Days Ahead
+
+    func test_effectiveDaysAhead_allPrayersNoWudhu() {
+        // 5 prayers / day → 64 / 5 = 12
+        let days = NotificationSchedulerHelpers.effectiveDaysAhead(enabledPrayerCount: 5, wudhuEnabled: false)
+        XCTAssertEqual(days, 12)
+    }
+
+    func test_effectiveDaysAhead_allPrayersWithWudhu() {
+        // 5 prayers × 2 = 10 / day → 64 / 10 = 6
+        let days = NotificationSchedulerHelpers.effectiveDaysAhead(enabledPrayerCount: 5, wudhuEnabled: true)
+        XCTAssertEqual(days, 6)
+    }
+
+    func test_effectiveDaysAhead_twoPrayersWithWudhu() {
+        // 2 prayers × 2 = 4 / day → 64 / 4 = 16 → capped at 14
+        let days = NotificationSchedulerHelpers.effectiveDaysAhead(enabledPrayerCount: 2, wudhuEnabled: true)
+        XCTAssertEqual(days, 14)
+    }
+
+    func test_effectiveDaysAhead_zeroPrayers() {
+        let days = NotificationSchedulerHelpers.effectiveDaysAhead(enabledPrayerCount: 0, wudhuEnabled: false)
+        XCTAssertEqual(days, 14)
+    }
 }
