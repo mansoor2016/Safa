@@ -4,6 +4,7 @@
 
 import Foundation
 import BackgroundTasks
+import OSLog
 
 // MARK: - Retention Period
 
@@ -310,7 +311,7 @@ final class StorageCleanupService {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            print("StorageCleanupService: Failed to schedule background task: \(error)")
+            Log.storage.error("Failed to schedule background task: \(error)")
         }
     }
 

@@ -4,6 +4,7 @@
 
 import UIKit
 import CoreHaptics
+import OSLog
 
 // MARK: - Haptic Event Enum
 
@@ -85,7 +86,7 @@ final class HapticFeedbackService {
             hapticEngine?.isAutoShutdownEnabled = true
             try hapticEngine?.start()
         } catch {
-            print("Haptic engine initialization failed: \(error)")
+            Log.haptics.error("Haptic engine initialization failed: \(error)")
         }
     }
 

@@ -3,6 +3,7 @@
 // DEPENDENCIES: UserNotifications, Foundation
 
 import Foundation
+import OSLog
 import UserNotifications
 import BackgroundTasks
 
@@ -229,7 +230,7 @@ final class NotificationScheduler {
             }
             return granted
         } catch {
-            print("Notification authorization error: \(error)")
+            Log.notifications.error("Authorization error: \(error)")
             return false
         }
     }

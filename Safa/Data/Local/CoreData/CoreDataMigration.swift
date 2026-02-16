@@ -3,6 +3,7 @@
 // DEPENDENCIES: CoreData
 
 import CoreData
+import OSLog
 
 // MARK: - Migration Manager
 
@@ -294,7 +295,7 @@ extension CoreDataStack {
             try migrationManager.migrateStore(at: storeURL)
         } catch {
             // Log error but continue - Core Data may still recover
-            print("Migration error: \(error.localizedDescription)")
+            Log.coreData.error("Migration error: \(error.localizedDescription)")
         }
     }
 }

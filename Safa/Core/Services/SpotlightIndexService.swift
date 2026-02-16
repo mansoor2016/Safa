@@ -5,6 +5,7 @@
 import Foundation
 import CoreSpotlight
 import MobileCoreServices
+import OSLog
 import UniformTypeIdentifiers
 
 // MARK: - Indexable Content Types
@@ -202,7 +203,7 @@ final class SpotlightIndexService {
             try await searchableIndex.indexSearchableItems(items)
             return items.count
         } catch {
-            print("SpotlightIndexService: Failed to index surahs: \(error)")
+            Log.spotlight.error("Failed to index surahs: \(error)")
             return 0
         }
     }
@@ -285,7 +286,7 @@ final class SpotlightIndexService {
             try await searchableIndex.indexSearchableItems(items)
             return items.count
         } catch {
-            print("SpotlightIndexService: Failed to index ayahs: \(error)")
+            Log.spotlight.error("Failed to index ayahs: \(error)")
             return 0
         }
     }
@@ -345,7 +346,7 @@ final class SpotlightIndexService {
             try await searchableIndex.indexSearchableItems(items)
             return items.count
         } catch {
-            print("SpotlightIndexService: Failed to index duas: \(error)")
+            Log.spotlight.error("Failed to index duas: \(error)")
             return 0
         }
     }
@@ -415,7 +416,7 @@ final class SpotlightIndexService {
             try await searchableIndex.indexSearchableItems(items)
             return items.count
         } catch {
-            print("SpotlightIndexService: Failed to index hadiths: \(error)")
+            Log.spotlight.error("Failed to index hadiths: \(error)")
             return 0
         }
     }
@@ -458,7 +459,7 @@ final class SpotlightIndexService {
             try await searchableIndex.indexSearchableItems(items)
             return items.count
         } catch {
-            print("SpotlightIndexService: Failed to index names: \(error)")
+            Log.spotlight.error("Failed to index names: \(error)")
             return 0
         }
     }

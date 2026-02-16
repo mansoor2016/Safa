@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreData
+import OSLog
 
 final class HadithRepository: HadithRepositoryProtocol {
     // MARK: - Dependencies
@@ -37,7 +38,7 @@ final class HadithRepository: HadithRepositoryProtocol {
                 return collections
             }
         } catch {
-            print("HadithRepository: SQLite load failed, using fallback: \(error)")
+            Log.hadith.error("SQLite load failed, using fallback: \(error)")
         }
 
         // Fallback to static data
@@ -52,7 +53,7 @@ final class HadithRepository: HadithRepositoryProtocol {
                 return books
             }
         } catch {
-            print("HadithRepository: SQLite books load failed, using fallback: \(error)")
+            Log.hadith.error("SQLite books load failed, using fallback: \(error)")
         }
 
         // Fallback to static data for Bukhari
@@ -70,7 +71,7 @@ final class HadithRepository: HadithRepositoryProtocol {
                 return hadiths
             }
         } catch {
-            print("HadithRepository: SQLite hadiths load failed, using fallback: \(error)")
+            Log.hadith.error("SQLite hadiths load failed, using fallback: \(error)")
         }
 
         // Fallback to static data
@@ -102,7 +103,7 @@ final class HadithRepository: HadithRepositoryProtocol {
                 return results
             }
         } catch {
-            print("HadithRepository: SQLite search failed, using fallback: \(error)")
+            Log.hadith.error("SQLite search failed, using fallback: \(error)")
         }
 
         // Fallback to searching static data
@@ -124,7 +125,7 @@ final class HadithRepository: HadithRepositoryProtocol {
                 return hadith
             }
         } catch {
-            print("HadithRepository: SQLite daily hadith failed, using fallback: \(error)")
+            Log.hadith.error("SQLite daily hadith failed, using fallback: \(error)")
         }
 
         // Fallback to static data

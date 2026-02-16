@@ -41,9 +41,7 @@ struct PrimaryButton: View {
 
 #Preview {
     VStack(spacing: SafaSpacing.md) {
-        PrimaryButton(title: "Continue") {
-            print("Tapped")
-        }
+        PrimaryButton(title: "Continue") { }
 
         PrimaryButton(title: "Loading...", action: {}, isLoading: true)
 

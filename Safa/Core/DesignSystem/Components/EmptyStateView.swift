@@ -109,8 +109,6 @@ extension EmptyStateView {
             title: "No Bookmarks",
             message: "Bookmark your favorite ayahs to find them easily later.",
             actionTitle: "Browse Quran"
-        ) {
-            print("Action tapped")
-        }
+        ) { }
     }
 }

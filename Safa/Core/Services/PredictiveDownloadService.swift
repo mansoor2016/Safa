@@ -4,6 +4,7 @@
 
 import Foundation
 import BackgroundTasks
+import OSLog
 
 // MARK: - Download Prediction
 
@@ -176,7 +177,7 @@ final class PredictiveDownloadService {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            print("PredictiveDownloadService: Failed to schedule background task: \(error)")
+            Log.downloads.error("Failed to schedule background task: \(error)")
         }
     }
 
@@ -326,10 +327,10 @@ final class PredictiveDownloadService {
                 progress: { _ in }
             ) { result in
                 switch result {
-                case .success(let localURL):
-                    print("PredictiveDownloadService: Downloaded surah \(surahNumber) to \(localURL)")
+                case .success:
+                    Log.downloads.info("Downloaded surah \(surahNumber)")
                 case .failure(let error):
-                    print("PredictiveDownloadService: Failed to download surah \(surahNumber): \(error)")
+                    Log.downloads.error("Failed to download surah \(surahNumber): \(error)")
                 }
                 continuation.resume()
             }

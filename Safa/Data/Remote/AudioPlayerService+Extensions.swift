@@ -4,6 +4,7 @@
 
 import AVFoundation
 import MediaPlayer
+import OSLog
 
 // MARK: - Audio Session Configuration
 
@@ -24,9 +25,9 @@ extension AudioPlayerService {
             // Activate the session
             try session.setActive(true)
 
-            print("Audio session configured for background playback")
+            Log.audio.info("Audio session configured for background playback")
         } catch {
-            print("Failed to configure audio session: \(error)")
+            Log.audio.error("Failed to configure audio session: \(error)")
         }
     }
 
@@ -35,7 +36,7 @@ extension AudioPlayerService {
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
-            print("Failed to deactivate audio session: \(error)")
+            Log.audio.error("Failed to deactivate audio session: \(error)")
         }
     }
 }

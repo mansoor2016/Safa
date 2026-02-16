@@ -101,7 +101,7 @@ struct CardButtonStyle: ButtonStyle {
                 Text("Fajr: 5:30 AM")
             }
 
-            InteractiveCard(action: { print("Tapped") }) {
+            InteractiveCard(action: { }) {
                 HStack {
                     Text("Tap me")
                     Spacer()

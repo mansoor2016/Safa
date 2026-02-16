@@ -4,6 +4,7 @@
 
 import Foundation
 import HealthKit
+import OSLog
 
 // MARK: - Fasting Log Entry
 
@@ -114,7 +115,7 @@ final class HealthKitService {
 
             return isAuthorized
         } catch {
-            print("HealthKitService: Authorization error: \(error)")
+            Log.healthKit.error("Authorization error: \(error)")
             return false
         }
     }
@@ -204,7 +205,7 @@ final class HealthKitService {
             do {
                 try await logFast(start: log.startDate, end: log.endDate, type: log.type)
             } catch {
-                print("HealthKitService: Failed to sync log: \(error)")
+                Log.healthKit.error("Failed to sync log: \(error)")
             }
         }
     }

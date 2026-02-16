@@ -3,6 +3,7 @@
 // DEPENDENCIES: Foundation, UserNotifications
 
 import Foundation
+import OSLog
 import UserNotifications
 
 // MARK: - Focus Mode Configuration Guide
@@ -227,9 +228,9 @@ final class FocusModeService {
         let isAuthorized = settings.authorizationStatus == .authorized
 
         // Log for debugging
-        print("Notification Authorization: \(isAuthorized)")
-        print("Alert Setting: \(settings.alertSetting.rawValue)")
-        print("Sound Setting: \(settings.soundSetting.rawValue)")
+        Log.focusMode.debug("Notification Authorization: \(isAuthorized)")
+        Log.focusMode.debug("Alert Setting: \(settings.alertSetting.rawValue)")
+        Log.focusMode.debug("Sound Setting: \(settings.soundSetting.rawValue)")
     }
 
     // MARK: - Scheduling with Focus Support

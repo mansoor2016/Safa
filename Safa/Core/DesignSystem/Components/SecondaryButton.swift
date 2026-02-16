@@ -44,9 +44,7 @@ struct SecondaryButton: View {
 
 #Preview {
     VStack(spacing: SafaSpacing.md) {
-        SecondaryButton(title: "Skip") {
-            print("Tapped")
-        }
+        SecondaryButton(title: "Skip") { }
 
         SecondaryButton(title: "Loading...", action: {}, isLoading: true)
 

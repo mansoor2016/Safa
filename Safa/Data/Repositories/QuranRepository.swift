@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreData
+import OSLog
 
 final class QuranRepository: QuranRepositoryProtocol {
     // MARK: - Dependencies
@@ -39,7 +40,7 @@ final class QuranRepository: QuranRepositoryProtocol {
                 return surahs
             }
         } catch {
-            print("QuranRepository: SQLite load failed, using fallback: \(error)")
+            Log.quran.error("SQLite load failed, using fallback: \(error)")
         }
 
         // Fallback to static data
@@ -61,7 +62,7 @@ final class QuranRepository: QuranRepositoryProtocol {
                 return ayahs
             }
         } catch {
-            print("QuranRepository: SQLite ayah load failed, using fallback: \(error)")
+            Log.quran.error("SQLite ayah load failed, using fallback: \(error)")
         }
 
         // Fallback to static data
@@ -100,7 +101,7 @@ final class QuranRepository: QuranRepositoryProtocol {
                 return results
             }
         } catch {
-            print("QuranRepository: SQLite search failed, using fallback: \(error)")
+            Log.quran.error("SQLite search failed, using fallback: \(error)")
         }
 
         // Fallback to searching static data
@@ -265,7 +266,7 @@ final class QuranRepository: QuranRepositoryProtocol {
                 return juz
             }
         } catch {
-            print("QuranRepository: SQLite juz load failed, using fallback: \(error)")
+            Log.quran.error("SQLite juz load failed, using fallback: \(error)")
         }
 
         // Fallback to static data

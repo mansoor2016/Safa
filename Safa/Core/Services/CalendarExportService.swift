@@ -4,6 +4,7 @@
 
 import Foundation
 import EventKit
+import OSLog
 import UIKit
 
 // MARK: - Islamic Calendar Event
@@ -118,7 +119,7 @@ final class CalendarExportService {
             }
             return granted
         } catch {
-            print("CalendarExportService: Authorization error: \(error)")
+            Log.calendar.error("Authorization error: \(error)")
             return false
         }
     }
