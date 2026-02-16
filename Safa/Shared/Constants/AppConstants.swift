@@ -18,10 +18,15 @@ enum AppConstants {
         static let support = URL(string: "mailto:helpmesafa@gmail.com")!
         static let feedback = URL(string: "mailto:helpmesafa@gmail.com")!
 
-        // App Store URLs - Update with real App ID after submission
-        static let appStoreId = "id123456789" // TODO: Replace with real App Store ID
+        // App Store URLs — update appStoreId after App Store approval
+        static let appStoreId = "" // TODO: Replace with real App Store ID (e.g. "id6741076498")
         static let appStore = URL(string: "https://apps.apple.com/app/safa/\(appStoreId)")!
-        static let testFlight = URL(string: "https://testflight.apple.com/join/XXXXXX")! // TODO: Replace with TestFlight link
+        static let testFlight = URL(string: "https://testflight.apple.com/join/QhcJrVg6")!
+
+        /// The best available download link: App Store if published, otherwise TestFlight.
+        static var downloadURL: URL {
+            appStoreId.isEmpty ? testFlight : appStore
+        }
     }
 
     // MARK: - Deep Links

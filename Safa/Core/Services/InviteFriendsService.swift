@@ -63,13 +63,13 @@ final class InviteFriendsService {
         I've been using Safa for prayer times, Quran reading, and more. It's beautiful, ad-free, and private.
 
         Download it here:
-        \(AppConstants.URLs.appStore.absoluteString)
+        \(AppConstants.URLs.downloadURL.absoluteString)
         """
     }
 
     /// Get a shorter share message for social media
     var shortShareMessage: String {
-        "Check out Safa - a beautiful, ad-free Islamic companion app! 🌙 \(AppConstants.URLs.appStore.absoluteString)"
+        "Check out Safa - a beautiful, ad-free Islamic companion app! 🌙 \(AppConstants.URLs.downloadURL.absoluteString)"
     }
 
     /// Get share items for UIActivityViewController
@@ -105,9 +105,9 @@ final class InviteFriendsService {
         )
     }
 
-    /// Get App Store URL for the app
+    /// Get the best available download URL (App Store or TestFlight)
     var appStoreURL: URL {
-        AppConstants.URLs.appStore
+        AppConstants.URLs.downloadURL
     }
 
     /// Get TestFlight URL (for beta)

@@ -73,9 +73,8 @@ struct ShareBanner: View {
 
 private struct AppShareSheet: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        let appStoreURL = "https://apps.apple.com/app/safa"
         let shareText = "Check out Safa - an Islamic companion app for prayer times, Quran, and more!"
-        let items: [Any] = [shareText, URL(string: appStoreURL) as Any]
+        let items: [Any] = [shareText, AppConstants.URLs.downloadURL as Any]
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
         return controller
     }

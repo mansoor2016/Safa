@@ -118,7 +118,7 @@ final class ShareService {
             \(description)
 
             Join me on Safa - Your Islamic Companion
-            \(AppConstants.URLs.appStore.absoluteString)
+            \(AppConstants.URLs.downloadURL.absoluteString)
             """
 
         case .dailyProgress(let hasanat, let streak):
@@ -149,7 +149,7 @@ final class ShareService {
             Use invite code: \(code)
 
             Or download Safa - Your Islamic Companion:
-            [App Store Link]
+            \(AppConstants.URLs.downloadURL.absoluteString)
             """
 
         case .eidGreeting(let eidType, let message):
@@ -160,7 +160,7 @@ final class ShareService {
             \(eidType.acceptanceDua)
 
             Shared via Safa - Your Islamic Companion
-            \(AppConstants.URLs.appStore.absoluteString)
+            \(AppConstants.URLs.downloadURL.absoluteString)
             """
         }
     }

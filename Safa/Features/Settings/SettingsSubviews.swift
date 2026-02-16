@@ -278,7 +278,7 @@ struct AboutView: View {
                     Label("Share Safa", systemImage: "square.and.arrow.up")
                 }
 
-                Link(destination: AppConstants.URLs.appStore) {
+                Link(destination: AppConstants.URLs.downloadURL) {
                     HStack {
                         Label("Rate on App Store", systemImage: "star")
                         Spacer()
