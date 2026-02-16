@@ -19,4 +19,5 @@ enum Log {
     static let storage = Logger(subsystem: subsystem, category: "Storage")
     static let healthKit = Logger(subsystem: subsystem, category: "HealthKit")
     static let focusMode = Logger(subsystem: subsystem, category: "FocusMode")
+    static let metrics = Logger(subsystem: subsystem, category: "Metrics")
 }

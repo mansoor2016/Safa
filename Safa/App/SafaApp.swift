@@ -24,6 +24,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Register background refresh task for prayer notification rescheduling
         NotificationScheduler.shared.registerBackgroundTask()
 
+        // Subscribe to MetricKit performance and diagnostic payloads
+        MetricKitSubscriber.shared.register()
+
         return true
     }
 
