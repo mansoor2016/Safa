@@ -179,12 +179,6 @@ struct SettingsView: View {
                 Label("Manage Data", systemImage: "externaldrive")
             }
 
-            NavigationLink {
-                SystemStatusView()
-            } label: {
-                Label("System Status", systemImage: "heart.text.square")
-            }
-
             Button(role: .destructive) {
                 showDeleteConfirmation = true
             } label: {
