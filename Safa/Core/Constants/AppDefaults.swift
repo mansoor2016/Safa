@@ -18,8 +18,11 @@ enum AppDefaults {
 
     // MARK: - Language & Content
 
-    /// Default translation language
+    /// Default translation language (region-inferred, used by recommendation sheet)
     static let translationLanguage: String = "English"
+
+    /// Default Quran translation edition
+    static let quranTranslation: QuranTranslation = .sahihInternational
 
     /// Show Arabic text by default
     static let showArabicText: Bool = true

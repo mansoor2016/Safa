@@ -509,7 +509,7 @@ struct LocationRecommendationsSheet: View {
                         )
 
                         recommendationRow(
-                            title: "Translation",
+                            title: "Region Language",
                             current: currentLanguage,
                             recommended: context.recommendedLanguage,
                             isMatching: currentLanguage == context.recommendedLanguage

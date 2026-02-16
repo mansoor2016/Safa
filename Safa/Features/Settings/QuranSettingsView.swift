@@ -20,19 +20,6 @@ struct QuranSettingsView: View {
     var body: some View {
         List {
             Section {
-                HStack {
-                    Text("Translation")
-                    Spacer()
-                    Text("English - Sahih International")
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
-
-                DisabledFeatureRow(
-                    title: "More Translations",
-                    icon: "globe",
-                    feature: .moreTranslations
-                )
-
                 NavigationLink {
                     FontSettingsView()
                 } label: {

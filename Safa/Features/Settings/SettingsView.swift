@@ -13,6 +13,7 @@ struct SettingsView: View {
     // Summary state
     @State private var locationName = ""
     @State private var methodName = ""
+    @State private var translationName = ""
     @State private var appearanceName = ""
 
     // Inline section state
@@ -59,6 +60,15 @@ struct SettingsView: View {
                     summary: nil
                 ) {
                     QuranSettingsView()
+                }
+
+                settingsRow(
+                    icon: "globe",
+                    iconColor: .blue,
+                    title: "Language",
+                    summary: translationName
+                ) {
+                    LanguageSettingsView()
                 }
 
                 settingsRow(
@@ -128,6 +138,7 @@ struct SettingsView: View {
         let prefs = PreferencesManager.loadPreferencesSync()
         locationName = prefs.savedLocationName ?? "Not set"
         methodName = prefs.calculationMethod.displayName
+        translationName = prefs.quranTranslation.displayName
 
         if let scheme = themeManager.colorScheme {
             appearanceName = scheme == .light ? "Light" : "Dark"

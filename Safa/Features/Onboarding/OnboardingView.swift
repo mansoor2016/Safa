@@ -462,7 +462,7 @@ struct OnboardingView: View {
                     HStack {
                         Text("Translation")
                         Spacer()
-                        Text("English - Sahih International")
+                        Text(AppDefaults.quranTranslation.fullDisplayName)
                             .foregroundColor(.secondary)
                     }
                 }
