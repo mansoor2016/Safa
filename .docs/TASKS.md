@@ -14,15 +14,10 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| L | App Store screenshots, description, preview video (partial — listing copy + screenshot/video guide done in `APP_STORE_LISTING.md`, screenshots + video still needed) |
-| S | App Store Connect submission |
-
 ## P1 — Near-Term
 
 | Effort | Task |
 |--------|------|
-| S | Ramadan navigation consistency — standardize entry behavior to follow Prayer tab flow |
-| M | Wudhu reminder (default off) — configurable notification 15 min before prayer, global + per-prayer controls, tests |
 | S | Memory profiling (target < 200MB) *(manual — Instruments)* |
 | S | Battery impact test *(manual — Live Activity running)* |
 | M | Dua audio pronunciations (needs audio files) — defer if unavailable |
@@ -64,13 +59,15 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | S | Update appStoreURL with real App ID |
 | M | Rak'ah prayer table — static table or contextual display for current prayer |
 | M | In-app feedback flow — lightweight bug/feedback intake for better beta triage |
+| L | App Store screenshots, description, preview video (partial — listing copy + screenshot/video guide done in `APP_STORE_LISTING.md`, screenshots + video still needed) *(manual)* |
+| S | App Store Connect submission *(manual)* |
 
 ---
 
 ## Completed
 
-Live Activity reliability (v1.4.3), widget stale prayer fix (v1.4.1), prayer time accuracy with adhan-swift (v1.5.0), calculation method visibility, Settings refactor, notification action buttons, developer settings, Package.resolved, draft icon cleanup, TestFlight beta (v1.5.0 build 14), Live Activity staleness fix (v1.5.1), release notes in version bumps, adhan silent mode awareness, convention clarity disclaimer (v1.5.2), location fallback fix, Eid/Ramadan copy cleanup, test tooling accuracy. Qibla compass polish (Canvas tick marks, semibold upright cardinals, thicker ring/arrow, instruction text under title), tightened location geoboxes (Qatar/UAE/Kuwait/SG/MY/ID), fallback bounding box tests, compass wheel logic tests, CalculationMethod shortDisplayName tests.
+Live Activity reliability (v1.4.3), widget stale prayer fix (v1.4.1), prayer time accuracy with adhan-swift (v1.5.0), calculation method visibility, Settings refactor, notification action buttons, developer settings, Package.resolved, draft icon cleanup, TestFlight beta (v1.5.0 build 14), Live Activity staleness fix (v1.5.1), release notes in version bumps, adhan silent mode awareness, convention clarity disclaimer (v1.5.2), location fallback fix, Eid/Ramadan copy cleanup, test tooling accuracy. Qibla compass polish (Canvas tick marks, semibold upright cardinals, thicker ring/arrow, instruction text under title), tightened location geoboxes (Qatar/UAE/Kuwait/SG/MY/ID), fallback bounding box tests, compass wheel logic tests, CalculationMethod shortDisplayName tests. Ramadan navigation consistency (conditional tab switch vs push, injectable isRamadanActive for tests), copy polish ("No ads", Qibla instruction clarified). Wudhu reminder notifications (opt-in toggle + 5/10/15/20 min picker, generalReminder category, dynamic daysAhead for 64-notification limit, empty-enabledPrayers cancellation bugfix).
 
 ---
 
-*Last Updated: February 15, 2026 — Qibla compass polish, tightened geoboxes, new test coverage*
+*Last Updated: February 16, 2026 — Wudhu reminder feature completed, task audit*
