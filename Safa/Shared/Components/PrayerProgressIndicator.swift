@@ -13,11 +13,39 @@ struct PrayerProgressIndicator: View {
     var onLogPrayer: ((PrayerType) -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var compactDotSize: CGFloat = 16
-    @ScaledMetric(relativeTo: .body) private var expandedDotSize: CGFloat = 40
+    @ScaledMetric(relativeTo: .body) private var expandedDotSize: CGFloat = 32
 
     enum Style {
         case compact    // For home page - dots + numeric count
         case expanded   // For prayer page - larger with labels
+    }
+
+    // MARK: - Prayer State Helper
+
+    private struct PrayerState {
+        let type: PrayerType
+        let isLogged: Bool
+        let isNext: Bool
+        let isPastUnlogged: Bool
+        let canTap: Bool
+    }
+
+    private var prayerStates: [PrayerState] {
+        let prayerTypes: [PrayerType] = [.fajr, .dhuhr, .asr, .maghrib, .isha]
+        return prayerTypes.map { prayerType in
+            let isLogged = loggedPrayers.contains(prayerType)
+            let isNext = nextPrayer?.type == prayerType
+            let prayer = obligatoryPrayers.first { $0.type == prayerType }
+            let isPast = prayer.map { $0.time < Date() } ?? false
+            let canTap = onLogPrayer != nil && (isLogged || isPast || isNext)
+            return PrayerState(
+                type: prayerType,
+                isLogged: isLogged,
+                isNext: isNext,
+                isPastUnlogged: isPast && !isLogged,
+                canTap: canTap
+            )
+        }
     }
 
     private var obligatoryPrayers: [PrayerTime] {
@@ -25,26 +53,7 @@ struct PrayerProgressIndicator: View {
     }
 
     private var completedCount: Int {
-        // Count prayers that are logged
-        let logged = obligatoryPrayers.filter { loggedPrayers.contains($0.type) }.count
-        // If no prayers loaded yet, show 0
-        return logged
-    }
-
-    private var currentPrayerNumber: Int {
-        // Which prayer are we on? (1-5)
-        guard let next = nextPrayer else {
-            // All prayers passed for today
-            return 5
-        }
-        switch next.type {
-        case .fajr: return 1
-        case .dhuhr: return 2
-        case .asr: return 3
-        case .maghrib: return 4
-        case .isha: return 5
-        default: return 1
-        }
+        obligatoryPrayers.filter { loggedPrayers.contains($0.type) }.count
     }
 
     var body: some View {
@@ -97,7 +106,6 @@ struct PrayerProgressIndicator: View {
         let isNext = nextPrayer?.type == prayerType
         let prayer = obligatoryPrayers.first { $0.type == prayerType }
         let isPast = prayer.map { $0.time < Date() } ?? false
-        // Can toggle off logged prayers; can toggle on if prayer time has passed or is current
         let canTap = onLogPrayer != nil && (isLogged || isPast || isNext)
 
         return Button {
@@ -106,19 +114,16 @@ struct PrayerProgressIndicator: View {
             onLogPrayer?(prayerType)
         } label: {
             ZStack {
-                // Main circle
                 Circle()
                     .fill(compactDotColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
                     .frame(width: compactDotSize, height: compactDotSize)
 
-                // Checkmark for completed
                 if isLogged {
                     Image(systemName: "checkmark")
                         .font(.system(size: compactDotSize * 0.56, weight: .bold))
                         .foregroundColor(.white)
                 }
 
-                // Ring for next prayer
                 if isNext && !isLogged {
                     Circle()
                         .stroke(Color.accentColor, lineWidth: 2)
@@ -153,27 +158,24 @@ struct PrayerProgressIndicator: View {
     // MARK: - Expanded View (for prayer page)
 
     private var expandedView: some View {
-        VStack(spacing: 12) {
-            // Progress bar with dots
+        VStack(spacing: 10) {
             HStack(spacing: 0) {
-                ForEach(0..<5, id: \.self) { index in
-                    expandedDot(index: index)
-
-                    // Connecting line (except after last)
+                let states = prayerStates
+                ForEach(Array(states.enumerated()), id: \.offset) { index, state in
+                    expandedDot(state: state)
                     if index < 4 {
-                        expandedConnectingLine(fromIndex: index)
+                        expandedLine(from: states[index], to: states[index + 1])
                     }
                 }
             }
 
-            // Numeric status
-            HStack {
-                Text("\(completedCount) of 5 prayers completed")
-                    .font(SafaTypography.bodyMedium)
+            HStack(spacing: 4) {
+                Text("\(completedCount) of 5")
+                    .font(SafaTypography.labelSmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
-
                 if completedCount == 5 {
                     Image(systemName: "checkmark.seal.fill")
+                        .font(SafaTypography.labelSmall)
                         .foregroundColor(.green)
                 }
             }
@@ -182,101 +184,73 @@ struct PrayerProgressIndicator: View {
         .padding(.vertical, 8)
     }
 
-    private func expandedDot(index: Int) -> some View {
-        let prayerTypes: [PrayerType] = [.fajr, .dhuhr, .asr, .maghrib, .isha]
-        let prayerType = prayerTypes[index]
-        let isLogged = loggedPrayers.contains(prayerType)
-        let isNext = nextPrayer?.type == prayerType
-        let prayer = obligatoryPrayers.first { $0.type == prayerType }
-        let isPast = prayer.map { $0.time < Date() } ?? false
-        // Can toggle off logged prayers; can toggle on if prayer time has passed or is current
-        let canTap = onLogPrayer != nil && (isLogged || isPast || isNext)
-
-        return Button {
-            guard canTap else { return }
+    private func expandedDot(state: PrayerState) -> some View {
+        Button {
+            guard state.canTap else { return }
             HapticFeedbackService.shared.play(.commit)
-            onLogPrayer?(prayerType)
+            onLogPrayer?(state.type)
         } label: {
             VStack(spacing: 6) {
                 ZStack {
-                    // Background circle
-                    Circle()
-                        .fill(expandedDotColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
-                        .frame(width: expandedDotSize, height: expandedDotSize)
-
-                    // Border for next prayer
-                    if isNext && !isLogged {
+                    if state.isLogged {
                         Circle()
-                            .stroke(Color.accentColor, lineWidth: 3)
-                            .frame(width: expandedDotSize + 6, height: expandedDotSize + 6)
-                    }
-
-                    // Content
-                    if isLogged {
+                            .fill(.green)
+                            .frame(width: expandedDotSize, height: expandedDotSize)
                         Image(systemName: "checkmark")
                             .font(.system(size: expandedDotSize * 0.45, weight: .bold))
                             .foregroundColor(.white)
-                    } else {
-                        Text("\(index + 1)")
+                    } else if state.isNext {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.1))
+                            .frame(width: expandedDotSize, height: expandedDotSize)
+                        Circle()
+                            .stroke(Color.accentColor, lineWidth: 2.5)
+                            .frame(width: expandedDotSize, height: expandedDotSize)
+                    } else if state.isPastUnlogged {
+                        Circle()
+                            .fill(.orange)
+                            .frame(width: expandedDotSize, height: expandedDotSize)
+                        Image(systemName: "exclamationmark")
                             .font(.system(size: expandedDotSize * 0.4, weight: .semibold))
-                            .foregroundColor(expandedTextColor(isLogged: isLogged, isNext: isNext, isPast: isPast && !isLogged))
+                            .foregroundColor(.white)
+                    } else {
+                        Circle()
+                            .fill(Color(UIColor.systemGray4))
+                            .frame(width: expandedDotSize * 0.4, height: expandedDotSize * 0.4)
                     }
                 }
+                .frame(width: expandedDotSize, height: expandedDotSize)
 
-                // Prayer name (full)
-                Text(prayerType.displayName)
+                Text(state.type.displayName)
                     .font(SafaTypography.labelSmall)
-                    .fontWeight(isNext ? .semibold : .regular)
-                    .foregroundColor(isLogged ? .green : (isNext ? .accentColor : SafaColors.Fallback.secondaryText))
+                    .fontWeight(state.isNext ? .semibold : .regular)
+                    .foregroundColor(
+                        state.isLogged ? .green :
+                        state.isNext ? .accentColor :
+                        state.isPastUnlogged ? .orange :
+                        SafaColors.Fallback.secondaryText
+                    )
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
         }
         .buttonStyle(.plain)
-        .disabled(!canTap)
+        .disabled(!state.canTap)
         .accessibilityLabel(formatPrayerDotAccessibilityLabel(
-            prayerName: prayerType.displayName,
-            isLogged: isLogged,
-            isNext: isNext,
-            isPast: isPast && !isLogged
+            prayerName: state.type.displayName,
+            isLogged: state.isLogged,
+            isNext: state.isNext,
+            isPast: state.isPastUnlogged
         ))
-        .accessibilityHint(canTap ? (isLogged ? "Double tap to unlog" : "Double tap to log") : "")
+        .accessibilityHint(state.canTap ? (state.isLogged ? "Double tap to unlog" : "Double tap to log") : "")
     }
 
-    private func expandedConnectingLine(fromIndex: Int) -> some View {
-        let prayerTypes: [PrayerType] = [.fajr, .dhuhr, .asr, .maghrib, .isha]
-        let fromLogged = loggedPrayers.contains(prayerTypes[fromIndex])
-        let toLogged = loggedPrayers.contains(prayerTypes[fromIndex + 1])
-
-        return Rectangle()
-            .fill(fromLogged && toLogged ? Color.green : Color(UIColor.systemGray4))
-            .frame(height: 4)
+    private func expandedLine(from: PrayerState, to: PrayerState) -> some View {
+        Capsule()
+            .fill(from.isLogged && to.isLogged ? Color.green.opacity(0.6) : Color(UIColor.systemGray5))
+            .frame(height: 2)
             .frame(maxWidth: .infinity)
-            .padding(.bottom, 28) // Align with circle centers
-    }
-
-    private func expandedDotColor(isLogged: Bool, isNext: Bool, isPast: Bool) -> Color {
-        if isLogged {
-            return .green
-        } else if isNext {
-            return Color.accentColor.opacity(0.2)
-        } else if isPast {
-            return .orange
-        } else {
-            return Color(UIColor.systemGray5)
-        }
-    }
-
-    private func expandedTextColor(isLogged: Bool, isNext: Bool, isPast: Bool) -> Color {
-        if isLogged {
-            return .white
-        } else if isNext {
-            return .accentColor
-        } else if isPast {
-            return .white
-        } else {
-            return Color(UIColor.systemGray)
-        }
+            .padding(.bottom, 24) // Align with circle centers
     }
 }
 

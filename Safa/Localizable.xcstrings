@@ -232,7 +232,7 @@
         }
       }
     },
-    "%lld of 5 prayers completed" : {
+    "%lld of 5" : {
 
     },
     "%lld percent complete" : {
