@@ -167,10 +167,20 @@ final class AppRouterTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 
-    func testDeepLinkRamadan() {
+    func testDeepLinkRamadan_outsideRamadan_pushesOntoHome() {
+        sut.isRamadanActive = { false }
         let url = URL(string: "safa://ramadan")!
         XCTAssertTrue(sut.handleDeepLink(url))
+        XCTAssertEqual(sut.selectedTab, "home")
         XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func testDeepLinkRamadan_duringRamadan_switchesToPrayerTab() {
+        sut.isRamadanActive = { true }
+        let url = URL(string: "safa://ramadan")!
+        XCTAssertTrue(sut.handleDeepLink(url))
+        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertTrue(sut.path.isEmpty, "During Ramadan, should switch tab not push")
     }
 
     func testDeepLinkSettings() {

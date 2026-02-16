@@ -9,7 +9,7 @@ Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed
 | Problem with existing apps | Safa's approach |
 |---------------------------|-----------------|
 | Cluttered, outdated UI | Clean, calm design inspired by Apple's design language |
-| Aggressive advertisements | No ads, ever |
+| Aggressive advertisements | No ads |
 | Need 5+ apps for different features | All-in-one: Prayer, Quran, Hadith, Learning, AI |
 | No intelligence | Contextually aware — adapts to time, location, and Islamic calendar |
 | No habit formation | Gamification with Hasanat points, streaks, and achievements |

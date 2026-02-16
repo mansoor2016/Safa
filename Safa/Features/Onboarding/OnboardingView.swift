@@ -110,7 +110,7 @@ struct OnboardingView: View {
 
                 // Quick features list
                 VStack(alignment: .leading, spacing: SafaSpacing.sm) {
-                    featureItem(icon: "nosign", text: "No ads, ever")
+                    featureItem(icon: "nosign", text: "No ads")
                     featureItem(icon: "hand.tap", text: "Easy to navigate")
                     featureItem(icon: "sparkles", text: "Islamic AI assistant")
                 }

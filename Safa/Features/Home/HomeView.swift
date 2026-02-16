@@ -213,7 +213,11 @@ struct HomeView: View {
         if visibility != .hidden {
             ramadanBannerExpandedContent
                 .onTapGesture {
-                    router.navigate(to: .ramadan)
+                    if isRamadan {
+                        router.selectedTab = "prayer"
+                    } else {
+                        router.navigate(to: .ramadan)
+                    }
                 }
         }
     }

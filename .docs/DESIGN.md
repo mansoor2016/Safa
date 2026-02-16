@@ -25,7 +25,7 @@ Safa is an all-in-one Islamic companion app for iPhone that prioritizes clean, i
 
 1. **Beautiful, Calm Design**
    - Clean white aesthetic that feels peaceful, not cluttered
-   - No ads, ever - the experience is sacred
+   - No ads - the experience is sacred
    - Designed like a premium Apple app, not a 2012 Android port
 
 2. **One App for Everything**

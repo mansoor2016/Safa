@@ -15,6 +15,11 @@ final class AppRouter {
     var pendingQuranTarget: QuranNavigationTarget?
     var pendingNotificationAction: NotificationAction?
 
+    // MARK: - Injectable State
+    var isRamadanActive: () -> Bool = {
+        HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
+    }
+
     // MARK: - Shared Instance (for notification handler access before SwiftUI mounts)
     static let shared = AppRouter()
 
@@ -179,7 +184,12 @@ final class AppRouter {
             return true
 
         case "ramadan":
-            navigate(to: .ramadan)
+            if isRamadanActive() {
+                selectedTab = "prayer"
+            } else {
+                selectedTab = "home"
+                navigate(to: .ramadan)
+            }
             return true
 
         case "eid":

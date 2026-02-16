@@ -141,7 +141,7 @@ struct QiblaCompassView: View {
     private var qiblaContent: some View {
         VStack(spacing: SafaSpacing.lg) {
             // Instructions (below nav title)
-            Text("Point your phone in the direction of the arrow")
+            Text("Align the compass arrow in the direction of the Kaaba")
                 .font(SafaTypography.bodyMedium)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
                 .multilineTextAlignment(.center)
