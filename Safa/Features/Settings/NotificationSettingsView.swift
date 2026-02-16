@@ -125,18 +125,8 @@ struct NotificationSettingsView: View {
             } header: {
                 Text("Notifications")
             } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    if iftarAdhanEnabled && !adhanEnabled {
-                        Text("During Ramadan, the adhan will play for Maghrib (Iftar) only.")
-                    } else if adhanEnabled && smartAdhanEnabled {
-                        Text("Adhan plays at home only. Standard tone elsewhere. Fajr uses a distinct adhan.")
-                    } else if adhanEnabled {
-                        Text("Fajr prayer uses a distinct adhan that includes \"Prayer is better than sleep\".")
-                    }
-                    if notificationsEnabled && notificationAuthStatus != .denied && (adhanEnabled || iftarAdhanEnabled) {
-                        Label("Adhan won't play when your iPhone is on silent mode.", systemImage: "speaker.slash")
-                    }
-                    Text("Live Activity shows the next prayer countdown on your Lock Screen and Dynamic Island.")
+                if notificationsEnabled && notificationAuthStatus != .denied && (adhanEnabled || iftarAdhanEnabled) {
+                    Label("Adhan won't play when your iPhone is on silent mode.", systemImage: "speaker.slash")
                 }
             }
 
