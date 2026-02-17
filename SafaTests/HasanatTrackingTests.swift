@@ -458,4 +458,85 @@ final class HasanatIntegrationTests: XCTestCase {
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1, "Only one hasanat call")
         XCTAssertEqual(userState.userStats.totalPrayersLogged, 2, "Counter still increments (lifetime total)")
     }
+
+    // MARK: - Rollback on Failure
+
+    func test_awardOnce_rollsBackOnFailure() async {
+        // Given — make the repository throw so awardHasanat returns false
+        mockRepo.errorToThrow = NSError(domain: "test", code: 1)
+
+        // When
+        let awarded = await HasanatTracker.awardOnce(.morningDhikr, key: "morning_dhikr", via: userState)
+
+        // Then — award failed, key should NOT be marked
+        XCTAssertFalse(awarded)
+        let fullKey = HasanatTracker.dailyKey("morning_dhikr")
+        XCTAssertFalse(HasanatTracker.hasAwarded(fullKey), "Key should be rolled back on failure")
+    }
+
+    func test_awardOnceEver_rollsBackOnFailure() async {
+        // Given
+        mockRepo.errorToThrow = NSError(domain: "test", code: 1)
+
+        // When
+        let awarded = await HasanatTracker.awardOnceEver(.lessonComplete, key: "lesson_fail", via: userState)
+
+        // Then
+        XCTAssertFalse(awarded)
+        let fullKey = HasanatTracker.permanentKey("lesson_fail")
+        XCTAssertFalse(HasanatTracker.hasAwarded(fullKey), "Permanent key should be rolled back on failure")
+    }
+
+    // MARK: - Dhikr Dedup
+
+    func test_dhikrMorning_awardedOncePerDay() async {
+        let first = await HasanatTracker.awardOnce(.morningDhikr, key: "morning_dhikr", via: userState)
+        let second = await HasanatTracker.awardOnce(.morningDhikr, key: "morning_dhikr", via: userState)
+
+        XCTAssertTrue(first)
+        XCTAssertFalse(second)
+        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
+    }
+
+    func test_dhikrEvening_awardedOncePerDay() async {
+        let first = await HasanatTracker.awardOnce(.eveningDhikr, key: "evening_dhikr", via: userState)
+        let second = await HasanatTracker.awardOnce(.eveningDhikr, key: "evening_dhikr", via: userState)
+
+        XCTAssertTrue(first)
+        XCTAssertFalse(second)
+        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
+    }
+
+    // MARK: - Tasbeeh Dedup
+
+    func test_tasbeeh_awardedOncePerDay() async {
+        let first = await HasanatTracker.awardOnce(.tasbeehSession, key: "tasbeeh", via: userState)
+        let second = await HasanatTracker.awardOnce(.tasbeehSession, key: "tasbeeh", via: userState)
+
+        XCTAssertTrue(first)
+        XCTAssertFalse(second)
+        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
+    }
+
+    // MARK: - Lesson Dedup
+
+    func test_lessonComplete_awardedOnceEver() async {
+        let first = await HasanatTracker.awardOnceEver(.lessonComplete, key: "lesson_intro-1", via: userState)
+        let second = await HasanatTracker.awardOnceEver(.lessonComplete, key: "lesson_intro-1", via: userState)
+
+        XCTAssertTrue(first)
+        XCTAssertFalse(second)
+        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
+    }
+
+    // MARK: - Pronunciation Dedup
+
+    func test_pronunciation_awardedOncePerDay() async {
+        let first = await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_l1", via: userState)
+        let second = await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_l1", via: userState)
+
+        XCTAssertTrue(first)
+        XCTAssertFalse(second)
+        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
+    }
 }

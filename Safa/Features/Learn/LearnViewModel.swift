@@ -107,10 +107,10 @@ final class LearnViewModel {
             // Update overall progress
             overallProgress = try await learningRepository.getOverallProgress()
 
-            // Award Hasanat
-            await userState.awardHasanat(.lessonComplete)
-            if score >= 90 {
-                await userState.awardHasanat(.lessonPerfect)
+            // Award Hasanat (deduped — same keys as LessonContentView)
+            await HasanatTracker.awardOnceEver(.lessonComplete, key: "lesson_\(lesson.id)", via: userState)
+            if score >= 100 {
+                await HasanatTracker.awardOnceEver(.lessonPerfect, key: "lessonPerfect_\(lesson.id)", via: userState)
             }
 
             // Update learning streak
@@ -129,7 +129,7 @@ final class LearnViewModel {
             try await learningRepository.recordPronunciationAttempt(lessonId: lessonId, score: score)
 
             if score >= 70 {
-                await userState.awardHasanat(.pronunciationPass)
+                await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_\(lessonId)", via: userState)
             }
         } catch {
             self.error = error

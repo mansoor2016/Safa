@@ -33,7 +33,7 @@ final class InviteFriendsServiceTests: XCTestCase {
     }
 
     func testShareMessageContainsAppStoreURL() {
-        XCTAssertTrue(sut.shareMessage.contains(AppConstants.URLs.appStore.absoluteString))
+        XCTAssertTrue(sut.shareMessage.contains(AppConstants.URLs.downloadURL.absoluteString))
     }
 
     func testShareMessageContainsDescription() {
@@ -45,7 +45,7 @@ final class InviteFriendsServiceTests: XCTestCase {
     }
 
     func testShortShareMessageContainsAppStoreURL() {
-        XCTAssertTrue(sut.shortShareMessage.contains(AppConstants.URLs.appStore.absoluteString))
+        XCTAssertTrue(sut.shortShareMessage.contains(AppConstants.URLs.downloadURL.absoluteString))
     }
 
     func testShortShareMessageContainsEmoji() {

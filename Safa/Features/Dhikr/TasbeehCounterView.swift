@@ -192,7 +192,7 @@ struct TasbeehCounterView: View {
     private func saveAndDismiss() {
         if TasbeehHelpers.isComplete(count: count, target: targetCount) {
             Task {
-                await dependencies.userState.awardHasanat(.tasbeehSession)
+                await HasanatTracker.awardOnce(.tasbeehSession, key: "tasbeeh", via: dependencies.userState)
             }
         }
         dismiss()

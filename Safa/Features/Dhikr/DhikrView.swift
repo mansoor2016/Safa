@@ -266,9 +266,9 @@ private struct DhikrListView: View {
             // Award Hasanat if all completed
             if completedIds.count == dhikr.count {
                 if type == .morning {
-                    await dependencies.userState.awardHasanat(.morningDhikr)
+                    await HasanatTracker.awardOnce(.morningDhikr, key: "morning_dhikr", via: dependencies.userState)
                 } else if type == .evening {
-                    await dependencies.userState.awardHasanat(.eveningDhikr)
+                    await HasanatTracker.awardOnce(.eveningDhikr, key: "evening_dhikr", via: dependencies.userState)
                 }
                 await dependencies.userState.recordActivity(type: .dhikr)
             }

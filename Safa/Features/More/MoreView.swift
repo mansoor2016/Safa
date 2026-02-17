@@ -60,14 +60,8 @@ struct MoreView: View {
             // Progress
             Section("Progress") {
                 DisabledFeatureRow(
-                    title: "Your Journey",
+                    title: "Your Progress",
                     icon: "chart.line.uptrend.xyaxis",
-                    feature: .progressDashboard
-                )
-
-                DisabledFeatureRow(
-                    title: "Achievements",
-                    icon: "trophy",
                     feature: .progressDashboard
                 )
             }

@@ -59,7 +59,8 @@ final class UserStateManager {
 
     // MARK: - Hasanat
 
-    func awardHasanat(_ award: HasanatAward) async {
+    @discardableResult
+    func awardHasanat(_ award: HasanatAward) async -> Bool {
         do {
             // Check for Ramadan multiplier
             let points = HijriDateConverter.shared.isRamadan() ? award.points * 2 : award.points
@@ -71,8 +72,10 @@ final class UserStateManager {
 
             // Check for level-up achievements
             await checkLevelAchievements()
+            return true
         } catch {
             self.error = error
+            return false
         }
     }
 

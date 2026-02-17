@@ -10,6 +10,7 @@ import Foundation
 ///   - `awardOnceEver(_:key:via:)` — permanent (lesson completions, invite)
 struct HasanatTracker {
     private static let prefix = "com.safa.hasanat.awarded."
+    private static let lock = NSLock()
 
     // MARK: - Date-Scoped Awards
 
@@ -22,10 +23,17 @@ struct HasanatTracker {
         via userState: UserStateManager
     ) async -> Bool {
         let fullKey = dailyKey(key, on: date)
-        guard !hasAwarded(fullKey) else { return false }
-        markAwarded(fullKey)
-        await userState.awardHasanat(award)
-        return true
+        let shouldProceed = lock.withLock {
+            guard !hasAwarded(fullKey) else { return false }
+            markAwarded(fullKey) // tentative mark under lock
+            return true
+        }
+        guard shouldProceed else { return false }
+        let success = await userState.awardHasanat(award)
+        if !success {
+            lock.withLock { unmarkAwarded(fullKey) }
+        }
+        return success
     }
 
     // MARK: - Permanent Awards
@@ -38,10 +46,17 @@ struct HasanatTracker {
         via userState: UserStateManager
     ) async -> Bool {
         let fullKey = permanentKey(key)
-        guard !hasAwarded(fullKey) else { return false }
-        markAwarded(fullKey)
-        await userState.awardHasanat(award)
-        return true
+        let shouldProceed = lock.withLock {
+            guard !hasAwarded(fullKey) else { return false }
+            markAwarded(fullKey) // tentative mark under lock
+            return true
+        }
+        guard shouldProceed else { return false }
+        let success = await userState.awardHasanat(award)
+        if !success {
+            lock.withLock { unmarkAwarded(fullKey) }
+        }
+        return success
     }
 
     // MARK: - Query
@@ -52,6 +67,10 @@ struct HasanatTracker {
 
     static func markAwarded(_ fullKey: String) {
         UserDefaults.standard.set(true, forKey: fullKey)
+    }
+
+    static func unmarkAwarded(_ fullKey: String) {
+        UserDefaults.standard.removeObject(forKey: fullKey)
     }
 
     // MARK: - Key Helpers
