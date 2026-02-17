@@ -11,7 +11,6 @@ struct NotificationSettingsView: View {
     @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
     @State private var adhanEnabled: Bool
     @State private var selectedAdhan: AdhanSound
-    @State private var smartAdhanEnabled: Bool
     @State private var iftarAdhanEnabled: Bool
     @State private var liveActivityEnabled: Bool
     @State private var wudhuReminderEnabled: Bool
@@ -26,7 +25,6 @@ struct NotificationSettingsView: View {
         _notificationsEnabled = State(initialValue: prefs.notificationsEnabled)
         _adhanEnabled = State(initialValue: prefs.adhanEnabled)
         _selectedAdhan = State(initialValue: AdhanSound(rawValue: prefs.selectedAdhan) ?? .misharyAlafasy)
-        _smartAdhanEnabled = State(initialValue: prefs.smartAdhanEnabled)
         _iftarAdhanEnabled = State(initialValue: prefs.iftarAdhanEnabled)
         _liveActivityEnabled = State(initialValue: prefs.liveActivityEnabled)
         _wudhuReminderEnabled = State(initialValue: prefs.wudhuReminderEnabled)
@@ -96,10 +94,6 @@ struct NotificationSettingsView: View {
                             Task { await prefsManager.update(\.selectedAdhan, to: newValue.rawValue) }
                         }
 
-                        Toggle("Smart Adhan", isOn: $smartAdhanEnabled)
-                            .onChange(of: smartAdhanEnabled) { _, newValue in
-                                Task { await prefsManager.update(\.smartAdhanEnabled, to: newValue) }
-                            }
                     }
                 }
 

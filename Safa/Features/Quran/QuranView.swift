@@ -54,26 +54,30 @@ private struct QuranContentView: View {
     @State private var showingSettings = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Tab selector
-            Picker("View", selection: $selectedTab) {
-                Text("Surahs").tag(0)
-                Text("Juz").tag(1)
-                Text("Bookmarks").tag(2)
-            }
-            .pickerStyle(.segmented)
-            .padding()
-
-            // Content
+        Group {
             if viewModel.error != nil {
                 ErrorView.loadFailed(retry: { await viewModel.loadSurahs() })
             } else {
-                TabView(selection: $selectedTab) {
-                    surahListView.tag(0)
-                    juzListView.tag(1)
-                    bookmarksView.tag(2)
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        // Tab selector
+                        Picker("View", selection: $selectedTab) {
+                            Text("Surahs").tag(0)
+                            Text("Juz").tag(1)
+                            Text("Bookmarks").tag(2)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding()
+
+                        // Content
+                        switch selectedTab {
+                        case 0: surahContent
+                        case 1: juzContent
+                        case 2: bookmarksContent
+                        default: EmptyView()
+                        }
+                    }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
             }
         }
         .navigationTitle("Quran")
@@ -110,93 +114,87 @@ private struct QuranContentView: View {
         }
     }
 
-    // MARK: - Surah List
+    // MARK: - Surah Content
 
-    private var surahListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                // Resume reading card
-                if let progress = viewModel.readingProgress {
-                    ResumeReadingCard(
+    private var surahContent: some View {
+        Group {
+            // Resume reading card
+            if let progress = viewModel.readingProgress {
+                ResumeReadingCard(
+                    surahNumber: progress.lastSurah,
+                    ayahNumber: progress.lastAyah,
+                    surahName: viewModel.getSurahName(progress.lastSurah)
+                ) {
+                    path.append(QuranNavigationTarget(
                         surahNumber: progress.lastSurah,
-                        ayahNumber: progress.lastAyah,
-                        surahName: viewModel.getSurahName(progress.lastSurah)
-                    ) {
-                        path.append(QuranNavigationTarget(
-                            surahNumber: progress.lastSurah,
-                            startAyah: progress.lastAyah
-                        ))
-                    }
-                    .padding()
+                        startAyah: progress.lastAyah
+                    ))
                 }
+                .padding()
+            }
 
-                ForEach(viewModel.filteredSurahs) { surah in
-                    NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
-                        SurahRow(
-                            surah: surah,
-                            isComplete: viewModel.completedSurahs.contains(surah.number),
-                            onToggleComplete: {
-                                Task { await viewModel.toggleSurahCompletion(surah.number) }
-                            }
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .modifier(MatchedTransitionSourceModifier(id: surah.number, namespace: surahZoom))
-
-                    Divider()
-                        .padding(.leading, SafaSpacing.xl + SafaSpacing.md)
+            ForEach(viewModel.filteredSurahs) { surah in
+                NavigationLink(value: QuranNavigationTarget(surahNumber: surah.number)) {
+                    SurahRow(
+                        surah: surah,
+                        isComplete: viewModel.completedSurahs.contains(surah.number),
+                        onToggleComplete: {
+                            Task { await viewModel.toggleSurahCompletion(surah.number) }
+                        }
+                    )
                 }
+                .buttonStyle(.plain)
+                .modifier(MatchedTransitionSourceModifier(id: surah.number, namespace: surahZoom))
+
+                Divider()
+                    .padding(.leading, SafaSpacing.xl + SafaSpacing.md)
             }
         }
     }
 
-    // MARK: - Juz List
+    // MARK: - Juz Content
 
-    private var juzListView: some View {
-        ScrollView {
-            LazyVStack(spacing: SafaSpacing.sm) {
-                ForEach(viewModel.juzList) { juz in
-                    JuzRow(juz: juz) {
-                        if let target = viewModel.navigationTargetForJuz(juz.number) {
-                            path.append(target)
-                        }
+    private var juzContent: some View {
+        LazyVStack(spacing: SafaSpacing.sm) {
+            ForEach(viewModel.juzList) { juz in
+                JuzRow(juz: juz) {
+                    if let target = viewModel.navigationTargetForJuz(juz.number) {
+                        path.append(target)
                     }
                 }
             }
-            .padding()
         }
+        .padding()
         .task {
             await viewModel.loadJuz()
         }
     }
 
-    // MARK: - Bookmarks
+    // MARK: - Bookmarks Content
 
-    private var bookmarksView: some View {
+    private var bookmarksContent: some View {
         Group {
             if viewModel.bookmarks.isEmpty {
                 EmptyStateView.noBookmarks
             } else {
-                ScrollView {
-                    LazyVStack(spacing: SafaSpacing.sm) {
-                        ForEach(viewModel.bookmarks) { bookmark in
-                            BookmarkRow(bookmark: bookmark) {
-                                path.append(QuranNavigationTarget(
-                                    surahNumber: bookmark.surahNumber,
-                                    startAyah: bookmark.ayahNumber
-                                ))
-                            } onEditNote: {
-                                editNoteText = bookmark.note ?? ""
-                                editingBookmark = bookmark
-                            } onDelete: {
-                                Task {
-                                    await viewModel.removeBookmark(bookmark)
-                                }
+                LazyVStack(spacing: SafaSpacing.sm) {
+                    ForEach(viewModel.bookmarks) { bookmark in
+                        BookmarkRow(bookmark: bookmark) {
+                            path.append(QuranNavigationTarget(
+                                surahNumber: bookmark.surahNumber,
+                                startAyah: bookmark.ayahNumber
+                            ))
+                        } onEditNote: {
+                            editNoteText = bookmark.note ?? ""
+                            editingBookmark = bookmark
+                        } onDelete: {
+                            Task {
+                                await viewModel.removeBookmark(bookmark)
                             }
                         }
                     }
-                    .padding()
                 }
+                .padding()
             }
         }
         .task {

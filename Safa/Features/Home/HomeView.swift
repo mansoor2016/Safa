@@ -94,9 +94,7 @@ struct HomeView: View {
             } else {
             VStack(spacing: SafaSpacing.lg) {
                 // Date subheader (Option 4: visible below large title, scrolls away)
-                if !useBasicInlineHeader {
-                    dateSubheader
-                }
+                dateSubheader
 
                 // Next prayer card
                 if let prayer = nextPrayer {
@@ -146,29 +144,12 @@ struct HomeView: View {
             .padding()
             } // end else (skeleton)
         }
-        .adaptiveTabBar()
-        .navigationTitle(useBasicInlineHeader ? "" : "Safa")
-        .navigationBarTitleDisplayMode(useBasicInlineHeader ? .inline : .large)
+        .navigationTitle("Safa")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
-            if useBasicInlineHeader {
-                // Option 1: Compact inline header
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { router.navigate(to: .settings) } label: {
-                        Image(systemName: "gearshape").font(.body)
-                    }
-                }
-                ToolbarItem(placement: .principal) {
-                    VStack(spacing: 0) {
-                        Text("Safa").font(.headline)
-                        Text(compactDateLine).font(.caption2).foregroundStyle(.secondary)
-                    }
-                }
-            } else {
-                // Option 4: Large collapsing title with gear on right
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { router.navigate(to: .settings) } label: {
-                        Image(systemName: "gearshape")
-                    }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { router.navigate(to: .settings) } label: {
+                    Image(systemName: "gearshape")
                 }
             }
         }
@@ -404,13 +385,9 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Header Layout
+    // MARK: - Date Subheader
 
-    private var useBasicInlineHeader: Bool {
-        FeatureFlags.shared.isEnabled(.basicInlineHeader)
-    }
-
-    /// Option 4: Date line below large title (scrolls away with content)
+    /// Date line below large title (scrolls away with content)
     private var dateSubheader: some View {
         HStack {
             Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
@@ -428,16 +405,6 @@ struct HomeView: View {
                     .font(.subheadline.weight(.medium))
             }
         }
-    }
-
-    // MARK: - Compact Date Line (for toolbar)
-
-    private var compactDateLine: String {
-        let gregorian = Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
-        if hijriDate.isEmpty {
-            return gregorian
-        }
-        return "\(gregorian) · \(hijriDate)"
     }
 
     // MARK: - Quick Actions

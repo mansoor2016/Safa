@@ -264,8 +264,6 @@ struct SettingsView: View {
     @State private var forceRamadan = false
     @State private var forceEidAlFitr = false
     @State private var forceEidAlAdha = false
-    @State private var useBasicInlineHeader = false
-    @State private var useAdaptiveTabBar = false
     @State private var isDeveloperExpanded = false
 
     private var ramadanBannerDismissKey: String {
@@ -326,36 +324,19 @@ struct SettingsView: View {
                         }
                     }
 
-                Toggle("Basic Inline Header", isOn: $useBasicInlineHeader)
-                    .onAppear {
-                        useBasicInlineHeader = FeatureFlags.shared.isEnabled(.basicInlineHeader)
-                    }
-                    .onChange(of: useBasicInlineHeader) { _, newValue in
-                        if newValue {
-                            FeatureFlags.shared.setOverride(.basicInlineHeader, enabled: true)
-                        } else {
-                            FeatureFlags.shared.removeOverride(.basicInlineHeader)
-                        }
-                    }
-
-                Toggle("Adaptive Tab Bar", isOn: $useAdaptiveTabBar)
-                    .onAppear {
-                        useAdaptiveTabBar = FeatureFlags.shared.isEnabled(.adaptiveTabBar)
-                    }
-                    .onChange(of: useAdaptiveTabBar) { _, newValue in
-                        if newValue {
-                            FeatureFlags.shared.setOverride(.adaptiveTabBar, enabled: true)
-                        } else {
-                            FeatureFlags.shared.removeOverride(.adaptiveTabBar)
-                        }
-                    }
 
                 Button("Test Prayer Notification (5s)") {
                     Task {
+                        let prefs = PreferencesManager.loadPreferencesSync()
                         let content = UNMutableNotificationContent()
                         content.title = "Test Notification"
                         content.body = "This is a test prayer notification"
-                        content.sound = .default
+                        if prefs.adhanEnabled {
+                            let fileName = prefs.selectedAdhan
+                            content.sound = UNNotificationSound(named: UNNotificationSoundName("\(fileName)_notification.caf"))
+                        } else {
+                            content.sound = .default
+                        }
                         content.interruptionLevel = .timeSensitive
                         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
                         let request = UNNotificationRequest(
