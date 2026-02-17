@@ -254,9 +254,6 @@
         }
       }
     },
-    "%lld Unlocked" : {
-
-    },
     "%lld." : {
 
     },
@@ -302,9 +299,6 @@
     "%lld%%" : {
 
     },
-    "%lld%% Complete" : {
-
-    },
     "%lld° from North" : {
 
     },
@@ -339,7 +333,7 @@
     "• Quran bookmarks and reading progress" : {
 
     },
-    "• Streaks and achievements" : {
+    "• Streaks and progress" : {
 
     },
     "• Three-finger swipe to navigate between pages" : {
@@ -433,15 +427,6 @@
 
     },
     "Accessibility Tips" : {
-
-    },
-    "Achievement" : {
-
-    },
-    "Achievement Unlocked!" : {
-
-    },
-    "Achievements" : {
 
     },
     "Acknowledgements" : {
@@ -1299,9 +1284,6 @@
     "Kaaba" : {
 
     },
-    "Keep going to unlock this achievement!" : {
-
-    },
     "Knowledge & Tools" : {
 
     },
@@ -1380,9 +1362,6 @@
 
     },
     "Location request timed out." : {
-
-    },
-    "Locked" : {
 
     },
     "Log" : {
@@ -1588,9 +1567,6 @@
 
     },
     "of %lld" : {
-
-    },
-    "of %lld total" : {
 
     },
     "OK" : {
@@ -2324,9 +2300,6 @@
     "Unknown prayer type." : {
 
     },
-    "Unlocked!" : {
-
-    },
     "until Iftar" : {
 
     },
@@ -2371,9 +2344,6 @@
       }
     },
     "View" : {
-
-    },
-    "View All" : {
 
     },
     "View Eid Prayers" : {
