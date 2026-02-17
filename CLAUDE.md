@@ -667,19 +667,19 @@ This keeps main clean, minimizes cloud builds, and ensures every main commit is 
 
 ### Version Bumps Before Pushing Main
 
-**CRITICAL: Every push to main must have a unique build number.** Use `bin/release` to manage versioning:
+Build numbers are **automatic** — derived from git commit count at build time by the "Set Build Number from Git" build phase (local) and `ci_scripts/ci_post_clone.sh` (Xcode Cloud). Never set build numbers manually.
+
+Use `bin/release` to bump the **marketing version** before pushing main:
 
 ```bash
-bin/release --build     # Increment build number only (for non-release pushes)
 bin/release patch       # Auto-bump patch: 1.3.1 → 1.3.2
 bin/release minor       # Auto-bump minor: 1.3.1 → 1.4.0
 bin/release 2.0         # Explicit version
 ```
 
 **Workflow:**
-- For regular merges to main: merge your branch, then run `bin/release --build` to bump the build number and push
-- For feature releases: merge your branch, then run `bin/release patch` (or `minor`/explicit version) to bump and push
-- **Never `git push main` directly** — always go through `bin/release` so the build number is incremented
+- For regular merges to main: merge your branch, then run `bin/release patch` (or `minor`/explicit version) to bump and push
+- `git push main` directly is fine if no version bump is needed — build numbers are automatic
 - The script handles commit + push atomically; working tree must be clean before running
 
 ### Common Build Issues

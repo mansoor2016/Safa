@@ -2,20 +2,19 @@
 set -euo pipefail
 
 # Usage:
-#   bin/release patch        — auto-bump patch (1.3.1 → 1.3.2), increment build, commit, push
-#   bin/release minor        — auto-bump minor (1.3.1 → 1.4.0), increment build, commit, push
-#   bin/release 1.4          — explicit version, increment build, commit, push
-#   bin/release --build      — increment build number only (no version/tag change), commit, push
+#   bin/release patch        — auto-bump patch (1.3.1 → 1.3.2), commit, push
+#   bin/release minor        — auto-bump minor (1.3.1 → 1.4.0), commit, push
+#   bin/release 1.4          — explicit version, commit, push
 #
-# Every push to main shows up in App Store Connect, so every push needs
-# a unique MARKETING_VERSION + CURRENT_PROJECT_VERSION combination.
+# Build number is derived from git commit count at build time (set by
+# the "Set Build Number from Git" build phase and ci_post_clone.sh).
+# This script only manages MARKETING_VERSION.
 
 PBXPROJ="Safa.xcodeproj/project.pbxproj"
 
 # --- Read current values ---
 
 CURRENT_VERSION=$(grep -m1 'MARKETING_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
-CURRENT_BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' "$PBXPROJ" | sed 's/.*= //;s/;.*//')
 
 # --- Collect release notes since last bump ---
 
@@ -43,52 +42,21 @@ release_notes() {
 # --- No args: show usage ---
 
 if [[ $# -ne 1 ]]; then
-    echo "Usage: bin/release <patch|minor|version|--build>"
+    BUILD_NUMBER=$(git rev-list --count HEAD)
+    echo "Usage: bin/release <patch|minor|version>"
     echo ""
     echo "  bin/release patch     Auto-bump patch (1.3.1 → 1.3.2)"
     echo "  bin/release minor     Auto-bump minor (1.3.1 → 1.4.0)"
     echo "  bin/release 1.4       Explicit version"
-    echo "  bin/release --build   Increment build number only"
     echo ""
-    echo "Current: $CURRENT_VERSION ($CURRENT_BUILD)"
+    echo "Current: $CURRENT_VERSION (build $BUILD_NUMBER from git commit count)"
+    echo ""
+    echo "Build numbers are automatic — derived from git commit count at build time."
+    echo "Just push to main and both local and Xcode Cloud builds get the same number."
     exit 1
 fi
 
 ARG="$1"
-
-# --- Build-only mode ---
-
-if [[ "$ARG" == "--build" ]]; then
-    if [[ -n "$(git status --porcelain)" ]]; then
-        echo "Error: working tree is dirty — commit or stash changes first"
-        exit 1
-    fi
-
-    NEW_BUILD=$((CURRENT_BUILD + 1))
-    echo "Bumping build $CURRENT_BUILD → $NEW_BUILD"
-
-    sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
-
-    NOTES=$(release_notes)
-    COMMIT_MSG="Bump build to $NEW_BUILD"
-    if [[ -n "$NOTES" ]]; then
-        COMMIT_MSG="$COMMIT_MSG
-
-$NOTES"
-    fi
-
-    git add "$PBXPROJ"
-    git commit -m "$COMMIT_MSG"
-    git push
-
-    echo "Pushed $CURRENT_VERSION ($NEW_BUILD)"
-    if [[ -n "$NOTES" ]]; then
-        echo ""
-        echo "Release notes:"
-        echo "$NOTES"
-    fi
-    exit 0
-fi
 
 # --- Resolve version ---
 
@@ -99,6 +67,10 @@ if [[ "$ARG" == "patch" ]]; then
 elif [[ "$ARG" == "minor" ]]; then
     IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
     VERSION="$MAJOR.$((MINOR + 1)).0"
+elif [[ "$ARG" == "--build" ]]; then
+    echo "Build numbers are now automatic (git commit count)."
+    echo "Just push to main — no manual bump needed."
+    exit 0
 else
     VERSION="$ARG"
 fi
@@ -122,14 +94,16 @@ fi
 
 # --- Apply ---
 
-NEW_BUILD=$((CURRENT_BUILD + 1))
-echo "Bumping $CURRENT_VERSION ($CURRENT_BUILD) → $VERSION ($NEW_BUILD)"
+BUILD_NUMBER=$(git rev-list --count HEAD)
+# After this commit, build number will be BUILD_NUMBER + 1
+NEXT_BUILD=$((BUILD_NUMBER + 1))
+
+echo "Bumping $CURRENT_VERSION → $VERSION (next build will be $NEXT_BUILD)"
 
 sed -i '' "s/MARKETING_VERSION = $CURRENT_VERSION;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
-sed -i '' "s/CURRENT_PROJECT_VERSION = $CURRENT_BUILD;/CURRENT_PROJECT_VERSION = $NEW_BUILD;/g" "$PBXPROJ"
 
 NOTES=$(release_notes)
-COMMIT_MSG="Bump version to $VERSION ($NEW_BUILD)"
+COMMIT_MSG="Bump version to $VERSION"
 if [[ -n "$NOTES" ]]; then
     COMMIT_MSG="$COMMIT_MSG
 
@@ -140,7 +114,7 @@ git add "$PBXPROJ"
 git commit -m "$COMMIT_MSG"
 git push
 
-echo "Released $VERSION ($NEW_BUILD)"
+echo "Released $VERSION (build $NEXT_BUILD)"
 if [[ -n "$NOTES" ]]; then
     echo ""
     echo "Release notes:"
