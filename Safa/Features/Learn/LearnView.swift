@@ -42,7 +42,7 @@ struct LearnView: View {
                 .font(SafaTypography.headlineMedium)
                 .foregroundColor(SafaColors.Fallback.text)
 
-            Text("Arabic, Tajweed, and Islamic studies lessons are coming soon.")
+            Text(String(localized: "Arabic, Tajweed, and Islamic studies lessons are coming soon."))
                 .font(SafaTypography.bodyMedium)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
                 .multilineTextAlignment(.center)

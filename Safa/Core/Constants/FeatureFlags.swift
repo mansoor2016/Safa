@@ -21,7 +21,6 @@ enum Feature: String, CaseIterable {
     case forceEidAlFitr = "force_eid_al_fitr"
     case forceEidAlAdha = "force_eid_al_adha"
     case windDown = "wind_down"
-    case zakatCalculator = "zakat_calculator"
     case namesOfAllah = "names_of_allah"
 
     // Platform Features
@@ -33,7 +32,6 @@ enum Feature: String, CaseIterable {
     // Advanced Features (Enabled - Implementation complete)
     case spotlightSearch = "spotlight_search"
     case calendarExport = "calendar_export"
-    case prayerCalendarExport = "prayer_calendar_export"
     case healthKitSync = "healthkit_sync"
     case predictiveDownload = "predictive_download"
     case smartCleanup = "smart_cleanup"
@@ -42,8 +40,6 @@ enum Feature: String, CaseIterable {
     case progressDashboard = "progress_dashboard"
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
-    case standByMode = "standby_mode"
-    case moreTranslations = "more_translations"
 
     var displayName: String {
         switch self {
@@ -60,7 +56,6 @@ enum Feature: String, CaseIterable {
         case .forceEidAlFitr: return "Force Eid al-Fitr"
         case .forceEidAlAdha: return "Force Eid al-Adha"
         case .windDown: return "Wind Down"
-        case .zakatCalculator: return "Zakat Calculator"
         case .namesOfAllah: return "99 Names of Allah"
         case .widgets: return "Widgets"
         case .liveActivities: return "Live Activities"
@@ -69,11 +64,8 @@ enum Feature: String, CaseIterable {
         case .progressDashboard: return "Progress Dashboard"
         case .aiCompanion: return "AI Companion"
         case .interactiveWidgets: return "Interactive Widgets"
-        case .standByMode: return "StandBy Mode"
-        case .moreTranslations: return "More Translations"
         case .spotlightSearch: return "Spotlight Search"
         case .calendarExport: return "Calendar Export"
-        case .prayerCalendarExport: return "Prayer Time Calendar"
         case .healthKitSync: return "Apple Health Sync"
         case .predictiveDownload: return "Predictive Download"
         case .smartCleanup: return "Smart Cleanup"
@@ -93,9 +85,7 @@ enum Feature: String, CaseIterable {
         case .ramadanMode, .forceEidAlFitr, .forceEidAlAdha:
             return false
         // Requires Widget extension target setup in Xcode
-        case .interactiveWidgets,
-             .standByMode,
-             .moreTranslations:
+        case .interactiveWidgets:
             return false
         default:
             return true
@@ -169,29 +159,5 @@ final class FeatureFlags {
         if let data = try? JSONEncoder().encode(encoded) {
             UserDefaults.standard.set(data, forKey: storageKey)
         }
-    }
-}
-
-// MARK: - Convenience Extensions
-
-extension FeatureFlags {
-    var aiCompanionAvailable: Bool {
-        isEnabled(.aiCompanion)
-    }
-
-    var interactiveWidgetsAvailable: Bool {
-        isEnabled(.interactiveWidgets)
-    }
-
-    var spotlightSearchAvailable: Bool {
-        isEnabled(.spotlightSearch)
-    }
-
-    var calendarExportAvailable: Bool {
-        isEnabled(.calendarExport)
-    }
-
-    var healthKitSyncAvailable: Bool {
-        isEnabled(.healthKitSync)
     }
 }
