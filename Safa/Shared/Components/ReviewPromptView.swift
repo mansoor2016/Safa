@@ -136,7 +136,10 @@ struct ReviewPromptView: View {
         let currentRating = rating
         let text = feedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        AppReviewService.optOut()
+        if currentRating >= 4 {
+            // High rating — open App Store write-review page directly
+            openURL(AppConstants.URLs.writeReview)
+        }
 
         ToastService.shared.show(Toast(
             message: "Thank you for your feedback!",

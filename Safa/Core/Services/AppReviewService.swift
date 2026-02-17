@@ -51,6 +51,7 @@ struct AppReviewService {
         return true
     }
 
+
     /// Records the first launch date if not already set.
     static func recordFirstLaunchIfNeeded(defaults: UserDefaults = .standard) {
         if defaults.object(forKey: AppConstants.StorageKeys.reviewFirstLaunchDate) == nil {
@@ -85,4 +86,13 @@ struct AppReviewService {
         defaults.removeObject(forKey: AppConstants.StorageKeys.reviewOptedOut)
         defaults.removeObject(forKey: AppConstants.StorageKeys.reviewLastPromptDate)
     }
+
+    /// Posts a notification to immediately show the review prompt (developer testing only).
+    static func triggerDebugPrompt() {
+        NotificationCenter.default.post(name: .debugShowReviewPrompt, object: nil)
+    }
+}
+
+extension Notification.Name {
+    static let debugShowReviewPrompt = Notification.Name("com.safa.debug.showReviewPrompt")
 }

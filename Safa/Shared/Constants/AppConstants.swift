@@ -27,6 +27,9 @@ enum AppConstants {
         static var downloadURL: URL {
             appStoreId.isEmpty ? testFlight : appStore
         }
+
+        /// Direct link to the App Store "Write a Review" page.
+        static let writeReview = URL(string: "https://apps.apple.com/app/\(appStoreId)?action=write-review")!
     }
 
     // MARK: - Deep Links

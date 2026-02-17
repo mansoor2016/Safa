@@ -348,6 +348,10 @@ struct SettingsView: View {
                     }
                 }
 
+                Button("Test Review Prompt") {
+                    AppReviewService.triggerDebugPrompt()
+                }
+
                 Button("Reset Onboarding") {
                     Task {
                         var prefs = await dependencies.userRepository.getPreferences()

@@ -144,8 +144,6 @@ struct SafaWidgetEntryView: View {
             SmallWidgetView(entry: entry)
         case .systemMedium:
             MediumWidgetView(entry: entry)
-        case .systemLarge:
-            LargeWidgetView(entry: entry)
         case .accessoryCircular:
             AccessoryCircularView(entry: entry)
         case .accessoryRectangular:
@@ -293,110 +291,6 @@ struct PrayerRow: View {
 
 // MARK: - Large Widget
 
-struct LargeWidgetView: View {
-    let entry: PrayerTimeEntry
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                Image(systemName: "moon.stars.fill")
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
-
-                VStack(alignment: .leading) {
-                    Text("Safa")
-                        .font(.headline)
-
-                    if entry.configuration.showHijriDate {
-                        Text(entry.hijriDate)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                Text(Date(), style: .date)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Divider()
-
-            // Next prayer highlight
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Next Prayer")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Text(entry.nextPrayerName)
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing) {
-                    Text(entry.nextPrayerTime, style: .time)
-                        .font(.title2)
-                        .foregroundColor(.accentColor)
-
-                    Text(entry.nextPrayerTime, style: .relative)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(Color.accentColor.opacity(0.1))
-            .cornerRadius(12)
-
-            // All prayers
-            VStack(spacing: 8) {
-                ForEach(entry.prayers, id: \.name) { prayer in
-                    LargePrayerRow(
-                        name: prayer.name,
-                        time: prayer.time.formatted(date: .omitted, time: .shortened),
-                        isPast: prayer.time <= entry.date,
-                        isNext: prayer.name == entry.nextPrayerName
-                    )
-                }
-            }
-
-            Spacer()
-        }
-        .padding()
-    }
-}
-
-struct LargePrayerRow: View {
-    let name: String
-    let time: String
-    var isPast: Bool = false
-    var isNext: Bool = false
-
-    var body: some View {
-        HStack {
-            Circle()
-                .fill(isNext ? Color.accentColor : (isPast ? Color.green : Color.gray.opacity(0.3)))
-                .frame(width: 8, height: 8)
-
-            Text(name)
-                .font(.subheadline)
-                .foregroundColor(isPast ? .secondary : .primary)
-
-            Spacer()
-
-            Text(time)
-                .font(.subheadline)
-                .fontWeight(isNext ? .bold : .regular)
-                .foregroundColor(isNext ? .accentColor : (isPast ? .secondary : .primary))
-        }
-    }
-}
-
 // MARK: - Lock Screen Widgets
 
 struct AccessoryCircularView: View {
@@ -462,7 +356,6 @@ struct PrayerTimesWidget: Widget {
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
-            .systemLarge,
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline
