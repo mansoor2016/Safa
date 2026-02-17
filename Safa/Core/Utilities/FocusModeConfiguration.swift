@@ -353,10 +353,6 @@ extension FocusModeService {
         - Regular notification priority
         - Can be filtered by Focus
 
-        Achievement Notifications: Passive
-        - Low priority, silent
-        - Shown in Notification Center only
-
         To customize, go to:
         Settings > Focus > [Your Focus] > Apps > Safa
         """)

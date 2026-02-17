@@ -116,6 +116,9 @@ final class DataDeletionTests: XCTestCase {
         // Given
         testDefaults.set("stats", forKey: AppConstants.StorageKeys.userStats)
         testDefaults.set("streaks", forKey: AppConstants.StorageKeys.userStreaks)
+        testDefaults.set("legacy", forKey: AppConstants.StorageKeys.userAchievements)
+        testDefaults.set(true, forKey: "com.safa.hasanat.awarded.prayer_2026-02-17")
+        testDefaults.set(50, forKey: "com.safa.hasanat.daily.2026-02-17")
 
         // When
         DataDeletionService.deleteCategory(.streaksAndProgress, from: testDefaults)
@@ -123,6 +126,11 @@ final class DataDeletionTests: XCTestCase {
         // Then
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStats))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStreaks))
+        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userAchievements))
+        XCTAssertNil(testDefaults.object(forKey: "com.safa.hasanat.awarded.prayer_2026-02-17"),
+                     "Hasanat dedup keys must be cleared so re-awards work after deletion")
+        XCTAssertNil(testDefaults.object(forKey: "com.safa.hasanat.daily.2026-02-17"),
+                     "Daily hasanat keys must be cleared so weekly chart resets")
     }
 
     // MARK: - Ramadan Data Deletion
@@ -158,6 +166,8 @@ final class DataDeletionTests: XCTestCase {
         testDefaults.set(["m"], forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1")
         testDefaults.set("s", forKey: AppConstants.StorageKeys.userStats)
         testDefaults.set("st", forKey: AppConstants.StorageKeys.userStreaks)
+        testDefaults.set(true, forKey: "com.safa.hasanat.awarded.prayer_2026-01-01")
+        testDefaults.set(25, forKey: "com.safa.hasanat.daily.2026-01-01")
         testDefaults.set(["f"], forKey: AppConstants.StorageKeys.ramadanFastingDays)
         testDefaults.set(["t"], forKey: AppConstants.StorageKeys.ramadanTaraweehDays)
         testDefaults.set("g", forKey: "dailyGoals_2026-01-01")
@@ -176,6 +186,8 @@ final class DataDeletionTests: XCTestCase {
         XCTAssertNil(testDefaults.object(forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1"))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStats))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStreaks))
+        XCTAssertNil(testDefaults.object(forKey: "com.safa.hasanat.awarded.prayer_2026-01-01"))
+        XCTAssertNil(testDefaults.object(forKey: "com.safa.hasanat.daily.2026-01-01"))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanFastingDays))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanTaraweehDays))
         XCTAssertNil(testDefaults.object(forKey: "dailyGoals_2026-01-01"))

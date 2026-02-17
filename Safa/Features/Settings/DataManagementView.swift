@@ -71,6 +71,7 @@ enum DataCategory: String, CaseIterable, Identifiable {
             return [
                 AppConstants.StorageKeys.userStats,
                 AppConstants.StorageKeys.userStreaks,
+                AppConstants.StorageKeys.userAchievements,
             ]
         case .ramadanData:
             return [
@@ -85,6 +86,8 @@ enum DataCategory: String, CaseIterable, Identifiable {
         switch self {
         case .chatHistory:
             return [AppConstants.StorageKeys.chatMessagesPrefix]
+        case .streaksAndProgress:
+            return ["com.safa.hasanat.awarded.", "com.safa.hasanat.daily."]
         case .ramadanData:
             return ["dailyGoals_"]
         default:

@@ -40,9 +40,6 @@ enum Feature: String, CaseIterable {
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
 
-    // Enabled Features (formerly Coming Soon)
-    case progressDashboard = "progress_dashboard"
-
     var displayName: String {
         switch self {
         case .prayerTimes: return "Prayer Times"
@@ -63,7 +60,6 @@ enum Feature: String, CaseIterable {
         case .liveActivities: return "Live Activities"
         case .siriShortcuts: return "Siri Shortcuts"
         case .focusMode: return "Focus Mode"
-        case .progressDashboard: return "Progress Dashboard"
         case .aiCompanion: return "AI Companion"
         case .interactiveWidgets: return "Interactive Widgets"
         case .spotlightSearch: return "Spotlight Search"

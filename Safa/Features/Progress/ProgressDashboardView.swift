@@ -104,10 +104,10 @@ final class ProgressDashboardViewModel {
 
         let daysInMonth = calendar.range(of: .day, in: .month, for: now)?.count ?? 30
 
+        let endOfMonth = startOfNextMonth.addingTimeInterval(-1)
+
         do {
-            // Use startOfNextMonth as upper bound — logs exactly at midnight roll to day 1
-            // of next month, which falls outside 1...daysInMonth and is harmlessly ignored
-            let logs = try await prayerRepository.getPrayerLogs(from: startOfMonth, to: startOfNextMonth)
+            let logs = try await prayerRepository.getPrayerLogs(from: startOfMonth, to: endOfMonth)
             var dayCounts: [Int: Set<String>] = [:]
             for log in logs where log.prayerType.isObligatory {
                 let day = calendar.component(.day, from: log.date)
