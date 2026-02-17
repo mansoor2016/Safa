@@ -132,9 +132,6 @@ private final class ExportTestMockUserRepository: UserRepositoryProtocol {
     nonisolated func getStreak(type: StreakType) async throws -> Streak? { Streak(type: type) }
     nonisolated func updateStreak(_ streak: Streak) async throws {}
     nonisolated func recordStreakActivity(type: StreakType) async throws {}
-    nonisolated func getAchievements() async throws -> [Achievement] { [] }
-    nonisolated func unlockAchievement(_ achievementId: String) async throws {}
-    nonisolated func isAchievementUnlocked(_ achievementId: String) async throws -> Bool { false }
     nonisolated func getPreference<T: Codable>(key: String) async throws -> T? { nil }
     nonisolated func setPreference<T: Codable>(key: String, value: T) async throws {}
     nonisolated func getPreferences() async -> UserPreferences { UserPreferences() }

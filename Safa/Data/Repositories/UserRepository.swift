@@ -12,7 +12,6 @@ final class UserRepository: UserRepositoryProtocol {
     // MARK: - Storage Keys
     private let userStatsKey = AppConstants.StorageKeys.userStats
     private let streaksKey = AppConstants.StorageKeys.userStreaks
-    private let achievementsKey = AppConstants.StorageKeys.userAchievements
     private let preferencesKey = AppConstants.StorageKeys.userPreferences
 
     // MARK: - Init
@@ -119,38 +118,6 @@ final class UserRepository: UserRepositoryProtocol {
         }
     }
 
-    // MARK: - Achievements
-
-    func getAchievements() async throws -> [Achievement] {
-        let unlockedIds = getUnlockedAchievementIds()
-        return Achievement.allAchievements.map { achievement in
-            var updated = achievement
-            if unlockedIds.contains(achievement.id) {
-                updated.isUnlocked = true
-            }
-            return updated
-        }
-    }
-
-    func unlockAchievement(_ achievementId: String) async throws {
-        var ids = getUnlockedAchievementIds()
-        guard !ids.contains(achievementId) else { return }
-        ids.append(achievementId)
-        UserDefaults.standard.set(ids, forKey: achievementsKey)
-
-        // Update user stats
-        var stats = try await getUserStats()
-        if !stats.unlockedAchievements.contains(achievementId) {
-            stats.unlockedAchievements.append(achievementId)
-            try await updateUserStats(stats)
-        }
-    }
-
-    func isAchievementUnlocked(_ achievementId: String) async throws -> Bool {
-        let ids = getUnlockedAchievementIds()
-        return ids.contains(achievementId)
-    }
-
     // MARK: - Preferences
 
     func getPreference<T: Codable>(key: String) async throws -> T? {
@@ -205,9 +172,4 @@ final class UserRepository: UserRepositoryProtocol {
         try await updateUserStats(stats)
     }
 
-    // MARK: - Private Helpers
-
-    private func getUnlockedAchievementIds() -> [String] {
-        UserDefaults.standard.stringArray(forKey: achievementsKey) ?? []
-    }
 }

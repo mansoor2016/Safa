@@ -305,12 +305,11 @@ final class FocusModeIntegrationTests: XCTestCase {
             "prayerTime",
             "quranReminder",
             "streakReminder",
-            "achievementUnlocked",
             "generalReminder"
         ]
 
-        XCTAssertEqual(categories.count, 6,
-                       "Should have 6 notification categories for Focus filtering")
+        XCTAssertEqual(categories.count, 5,
+                       "Should have 5 notification categories for Focus filtering")
     }
 
     func test_prayerTime_isTimeSensitive() {
@@ -325,18 +324,12 @@ final class FocusModeIntegrationTests: XCTestCase {
         XCTAssertTrue(true, "Prayer reminder notifications are active")
     }
 
-    func test_achievement_isPassive() {
-        // Achievement unlock notifications should use .passive interruption level
-        // Collected silently during Focus, shown in Notification Center later
-        XCTAssertTrue(true, "Achievement notifications are passive")
-    }
-
     // MARK: - Focus Mode Filtering Rules
 
     func test_prayerFocus_allowsPrayerNotifications() {
         // During Prayer Focus:
         // - Allow: prayerTime (critical), prayerReminder
-        // - Block: quran, achievements, family
+        // - Block: quran, streaks, general
         let allowedDuring = ["prayerTime", "prayerReminder"]
         XCTAssertEqual(allowedDuring.count, 2)
     }
@@ -344,7 +337,7 @@ final class FocusModeIntegrationTests: XCTestCase {
     func test_quranFocus_allowsQuranNotifications() {
         // During Quran Focus:
         // - Allow: quranReminder
-        // - Block: prayer reminders, achievements
+        // - Block: prayer reminders, streaks
         XCTAssertTrue(true, "Quran Focus allows quranReminder only")
     }
 
@@ -415,7 +408,7 @@ final class PlatformVerificationChecklistTests: XCTestCase {
         // [ ] Add prayer reminder to allowed notifications
         // [ ] Activate Prayer Focus
         // [ ] Verify prayer notifications get through
-        // [ ] Verify Quran/achievement notifications are silenced
+        // [ ] Verify Quran/streak notifications are silenced
         // [ ] Create "Learning" Focus mode
         // [ ] Verify learning-related notifications allowed
         // [ ] App Intents to customize Focus rules (low priority for v1)

@@ -298,7 +298,7 @@ final class NotificationSchedulerHelpersTests: XCTestCase {
             NotificationSchedulerHelpers.isPrayerNotificationIdentifier("streak_reminder_prayer")
         )
         XCTAssertFalse(
-            NotificationSchedulerHelpers.isPrayerNotificationIdentifier("achievement_123")
+            NotificationSchedulerHelpers.isPrayerNotificationIdentifier("general_reminder_123")
         )
         XCTAssertFalse(
             NotificationSchedulerHelpers.isPrayerNotificationIdentifier("morning_dhikr_reminder")
@@ -313,7 +313,7 @@ final class NotificationSchedulerHelpersTests: XCTestCase {
             "prayer_at_fajr_2026-02-14",
             "prayer_at_dhuhr_2026-02-14",
             "streak_reminder_prayer",
-            "achievement_123",
+            "general_reminder_123",
             "prayer_before_asr",
             "morning_dhikr_reminder",
             "prayer_fajr_1707234000.123"

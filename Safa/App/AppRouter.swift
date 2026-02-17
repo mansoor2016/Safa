@@ -63,6 +63,9 @@ final class AppRouter {
         // Wind Down
         case windDown
 
+        // Progress
+        case progress
+
         // Settings
         case settings
     }

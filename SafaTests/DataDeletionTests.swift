@@ -110,21 +110,19 @@ final class DataDeletionTests: XCTestCase {
         XCTAssertNil(testDefaults.object(forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)conv1"))
     }
 
-    // MARK: - Streaks & Achievements Deletion
+    // MARK: - Streaks & Progress Deletion
 
     func test_deleteStreaks_resetsAll() {
         // Given
         testDefaults.set("stats", forKey: AppConstants.StorageKeys.userStats)
         testDefaults.set("streaks", forKey: AppConstants.StorageKeys.userStreaks)
-        testDefaults.set("achievements", forKey: AppConstants.StorageKeys.userAchievements)
 
         // When
-        DataDeletionService.deleteCategory(.streaksAndAchievements, from: testDefaults)
+        DataDeletionService.deleteCategory(.streaksAndProgress, from: testDefaults)
 
         // Then
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStats))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStreaks))
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userAchievements))
     }
 
     // MARK: - Ramadan Data Deletion
@@ -160,7 +158,6 @@ final class DataDeletionTests: XCTestCase {
         testDefaults.set(["m"], forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1")
         testDefaults.set("s", forKey: AppConstants.StorageKeys.userStats)
         testDefaults.set("st", forKey: AppConstants.StorageKeys.userStreaks)
-        testDefaults.set("a", forKey: AppConstants.StorageKeys.userAchievements)
         testDefaults.set(["f"], forKey: AppConstants.StorageKeys.ramadanFastingDays)
         testDefaults.set(["t"], forKey: AppConstants.StorageKeys.ramadanTaraweehDays)
         testDefaults.set("g", forKey: "dailyGoals_2026-01-01")
@@ -179,7 +176,6 @@ final class DataDeletionTests: XCTestCase {
         XCTAssertNil(testDefaults.object(forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1"))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStats))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStreaks))
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userAchievements))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanFastingDays))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanTaraweehDays))
         XCTAssertNil(testDefaults.object(forKey: "dailyGoals_2026-01-01"))
@@ -195,7 +191,7 @@ final class DataDeletionTests: XCTestCase {
         DataDeletionService.deleteCategory(.quranProgress, from: testDefaults)
         DataDeletionService.deleteCategory(.hadithBookmarks, from: testDefaults)
         DataDeletionService.deleteCategory(.chatHistory, from: testDefaults)
-        DataDeletionService.deleteCategory(.streaksAndAchievements, from: testDefaults)
+        DataDeletionService.deleteCategory(.streaksAndProgress, from: testDefaults)
         DataDeletionService.deleteCategory(.ramadanData, from: testDefaults)
     }
 
@@ -257,7 +253,7 @@ final class DataDeletionTests: XCTestCase {
             (.quranProgress, AppConstants.StorageKeys.quranBookmarks),
             (.hadithBookmarks, AppConstants.StorageKeys.hadithBookmarks),
             (.chatHistory, AppConstants.StorageKeys.chatConversations),
-            (.streaksAndAchievements, AppConstants.StorageKeys.userStats),
+            (.streaksAndProgress, AppConstants.StorageKeys.userStats),
             (.ramadanData, AppConstants.StorageKeys.ramadanFastingDays),
         ]
 

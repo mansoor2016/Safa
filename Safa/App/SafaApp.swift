@@ -423,6 +423,8 @@ struct MainTabView: View {
             RamadanView()
         case .windDown:
             WindDownView()
+        case .progress:
+            ProgressDashboardView()
         case .settings:
             SettingsView()
         }

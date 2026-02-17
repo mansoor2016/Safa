@@ -69,7 +69,6 @@ final class FocusModeService {
         case prayerTime = "PRAYER_TIME"
         case quranReminder = "QURAN_REMINDER"
         case streakReminder = "STREAK_REMINDER"
-        case achievementUnlocked = "ACHIEVEMENT_UNLOCKED"
         case generalReminder = "GENERAL_REMINDER"
 
         /// Whether this category should be allowed during Prayer Focus
@@ -104,8 +103,6 @@ final class FocusModeService {
                 return .timeSensitive
             case .prayerReminder:
                 return .active
-            case .achievementUnlocked:
-                return .passive
             default:
                 return .active
             }
@@ -190,15 +187,6 @@ final class FocusModeService {
             options: []
         )
         categories.insert(streakCategory)
-
-        // Achievement Category - passive notifications
-        let achievementCategory = UNNotificationCategory(
-            identifier: NotificationCategory.achievementUnlocked.rawValue,
-            actions: [],
-            intentIdentifiers: [],
-            options: []
-        )
-        categories.insert(achievementCategory)
 
         // General Reminder Category
         let generalCategory = UNNotificationCategory(

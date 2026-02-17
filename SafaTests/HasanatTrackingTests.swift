@@ -21,9 +21,10 @@ final class HasanatTrackingTests: XCTestCase {
 
     /// Remove all tracker keys from UserDefaults
     private func clearTrackerKeys() {
-        let prefix = "com.safa.hasanat.awarded."
+        let awardedPrefix = "com.safa.hasanat.awarded."
+        let dailyPrefix = "com.safa.hasanat.daily."
         let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
-        for key in allKeys where key.hasPrefix(prefix) {
+        for key in allKeys where key.hasPrefix(awardedPrefix) || key.hasPrefix(dailyPrefix) {
             UserDefaults.standard.removeObject(forKey: key)
         }
     }
@@ -252,12 +253,12 @@ final class HasanatTrackingTests: XCTestCase {
         let dateString = formatter.string(from: Date())
 
         let keyVerse = HasanatTracker.dailyKey("share_verse_\(dateString)")
-        let keyAchievement = HasanatTracker.dailyKey("share_achievement_\(dateString)")
+        let keyInvite = HasanatTracker.dailyKey("share_invite_\(dateString)")
 
         HasanatTracker.markAwarded(keyVerse)
 
         XCTAssertTrue(HasanatTracker.hasAwarded(keyVerse))
-        XCTAssertFalse(HasanatTracker.hasAwarded(keyAchievement), "Different share types should be independent")
+        XCTAssertFalse(HasanatTracker.hasAwarded(keyInvite), "Different share types should be independent")
     }
 
     // MARK: - Daily Open Dedup
@@ -300,6 +301,41 @@ final class HasanatTrackingTests: XCTestCase {
         stats.totalPrayersLogged += 1
         XCTAssertEqual(stats.totalPrayersLogged, 2)
     }
+
+    // MARK: - Daily Hasanat Recording
+
+    func test_recordDailyPoints_storesAndReads() {
+        HasanatTracker.recordDailyPoints(10)
+        XCTAssertEqual(HasanatTracker.dailyPoints(for: Date()), 10)
+    }
+
+    func test_recordDailyPoints_accumulates() {
+        HasanatTracker.recordDailyPoints(10)
+        HasanatTracker.recordDailyPoints(20)
+        XCTAssertEqual(HasanatTracker.dailyPoints(for: Date()), 30)
+    }
+
+    func test_weeklyPoints_returns7Days() {
+        let weekly = HasanatTracker.weeklyPoints()
+        XCTAssertEqual(weekly.count, 7)
+    }
+
+    func test_weeklyPoints_includesRecordedDay() {
+        HasanatTracker.recordDailyPoints(42)
+        let weekly = HasanatTracker.weeklyPoints()
+        let todayEntry = weekly.last // most recent is last (oldest first)
+        XCTAssertEqual(todayEntry?.points, 42)
+    }
+
+    func test_pruneDailyHistory_removesOldKeys() {
+        let oldDate = Calendar.current.date(byAdding: .day, value: -31, to: Date())!
+        HasanatTracker.recordDailyPoints(100, on: oldDate)
+        XCTAssertEqual(HasanatTracker.dailyPoints(for: oldDate), 100, "Key should exist before pruning")
+
+        HasanatTracker.pruneDailyHistory()
+
+        XCTAssertEqual(HasanatTracker.dailyPoints(for: oldDate), 0, "Old daily key should be pruned")
+    }
 }
 
 // MARK: - Integration Tests (UserStateManager + HasanatTracker)
@@ -325,9 +361,10 @@ final class HasanatIntegrationTests: XCTestCase {
     }
 
     private func clearTrackerKeys() {
-        let prefix = "com.safa.hasanat.awarded."
+        let awardedPrefix = "com.safa.hasanat.awarded."
+        let dailyPrefix = "com.safa.hasanat.daily."
         let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
-        for key in allKeys where key.hasPrefix(prefix) {
+        for key in allKeys where key.hasPrefix(awardedPrefix) || key.hasPrefix(dailyPrefix) {
             UserDefaults.standard.removeObject(forKey: key)
         }
     }

@@ -1,6 +1,6 @@
 // MARK: - ProgressDashboardView.swift
 // PURPOSE: Display user's overall progress and statistics
-// DEPENDENCIES: SwiftUI
+// DEPENDENCIES: SwiftUI, UserStateManager, PrayerRepositoryProtocol, QuranRepositoryProtocol, LearningRepositoryProtocol
 
 import SwiftUI
 
@@ -8,16 +8,17 @@ import SwiftUI
 
 @Observable
 final class ProgressDashboardViewModel {
+    // MARK: - Published State
     var userStats = UserStats()
     var streaks: [Streak] = []
     var weeklyData: [DailyProgress] = []
     var monthlyPrayerData: [DayPrayerCount] = []
+    private(set) var isLoading = false
 
     struct DailyProgress: Identifiable {
         let id = UUID()
         let date: Date
         let hasanat: Int
-        let activities: Int
     }
 
     struct DayPrayerCount: Identifiable {
@@ -26,51 +27,63 @@ final class ProgressDashboardViewModel {
         let count: Int // 0-5 prayers
     }
 
-    init() {
-        loadData()
+    // MARK: - Dependencies
+    private let userState: UserStateManager
+    private let prayerRepository: PrayerRepositoryProtocol
+    private let quranRepository: QuranRepositoryProtocol
+    private let learningRepository: LearningRepositoryProtocol
+
+    // MARK: - Init
+    init(
+        userState: UserStateManager,
+        prayerRepository: PrayerRepositoryProtocol,
+        quranRepository: QuranRepositoryProtocol,
+        learningRepository: LearningRepositoryProtocol
+    ) {
+        self.userState = userState
+        self.prayerRepository = prayerRepository
+        self.quranRepository = quranRepository
+        self.learningRepository = learningRepository
     }
 
-    func loadData() {
-        // Sample data for demonstration
-        userStats = UserStats(
-            totalHasanat: 1250,
-            currentLevel: 5,
-            unlockedAchievements: ["prayer_first", "quran_first_page", "dhikr_first"],
-            lessonsCompleted: 12,
-            totalPrayersLogged: 145,
-            totalAyahsRead: 420,
-            totalTasbeehCount: 3300,
-            streakFreezes: 2
-        )
+    // MARK: - Load
 
-        streaks = [
-            Streak(type: .daily, currentCount: 15, longestCount: 23, lastActivityDate: Date()),
-            Streak(type: .prayer, currentCount: 7, longestCount: 14, lastActivityDate: Date()),
-            Streak(type: .quran, currentCount: 3, longestCount: 10, lastActivityDate: Date()),
-            Streak(type: .dhikr, currentCount: 5, longestCount: 12, lastActivityDate: Date())
-        ]
+    func load() async {
+        isLoading = true
+        defer { isLoading = false }
 
-        // Generate sample weekly data
-        let calendar = Calendar.current
-        weeklyData = (0..<7).map { dayOffset in
-            let date = calendar.date(byAdding: .day, value: -6 + dayOffset, to: Date())!
-            return DailyProgress(
-                date: date,
-                hasanat: Int.random(in: 15...80),
-                activities: Int.random(in: 2...8)
-            )
+        // Always refresh to ensure fresh data (handles async init race)
+        await userState.loadUserData()
+
+        // Snapshot gamification stats
+        userStats = userState.userStats
+        streaks = userState.streaks
+        // Query source-of-truth for lessons completed
+        if let progress = try? await learningRepository.getOverallProgress() {
+            userStats.lessonsCompleted = progress.totalLessonsCompleted
         }
 
-        // Generate sample monthly prayer data
-        monthlyPrayerData = (1...30).map { day in
-            DayPrayerCount(day: day, count: Int.random(in: 0...5))
+        // Query source-of-truth for ayahs read
+        if let quranProgress = try? await quranRepository.getReadingProgress() {
+            userStats.totalAyahsRead = quranProgress.totalAyahsRead
         }
+
+        // Weekly hasanat from daily recording keys
+        weeklyData = HasanatTracker.weeklyPoints().map { entry in
+            DailyProgress(date: entry.date, hasanat: entry.points)
+        }
+
+        // Monthly prayer data
+        await loadMonthlyPrayerData()
     }
+
+    // MARK: - Computed Properties
 
     var levelProgress: Double {
         let currentLevelHasanat = UserStats.hasanatForLevel(userStats.currentLevel)
         let nextLevelHasanat = UserStats.hasanatForLevel(userStats.currentLevel + 1)
         let range = nextLevelHasanat - currentLevelHasanat
+        guard range > 0 else { return 1.0 }
         let progress = userStats.totalHasanat - currentLevelHasanat
         return min(1.0, Double(progress) / Double(range))
     }
@@ -79,53 +92,84 @@ final class ProgressDashboardViewModel {
         let nextLevelHasanat = UserStats.hasanatForLevel(userStats.currentLevel + 1)
         return max(0, nextLevelHasanat - userStats.totalHasanat)
     }
+
+    // MARK: - Private
+
+    private func loadMonthlyPrayerData() async {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)),
+              let startOfNextMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)
+        else { return }
+
+        let daysInMonth = calendar.range(of: .day, in: .month, for: now)?.count ?? 30
+
+        do {
+            // Use startOfNextMonth as upper bound — logs exactly at midnight roll to day 1
+            // of next month, which falls outside 1...daysInMonth and is harmlessly ignored
+            let logs = try await prayerRepository.getPrayerLogs(from: startOfMonth, to: startOfNextMonth)
+            var dayCounts: [Int: Set<String>] = [:]
+            for log in logs where log.prayerType.isObligatory {
+                let day = calendar.component(.day, from: log.date)
+                dayCounts[day, default: []].insert(log.prayerType.rawValue)
+            }
+            monthlyPrayerData = (1...daysInMonth).map { day in
+                DayPrayerCount(day: day, count: min(5, dayCounts[day]?.count ?? 0))
+            }
+        } catch {
+            monthlyPrayerData = (1...daysInMonth).map { DayPrayerCount(day: $0, count: 0) }
+        }
+    }
 }
 
 // MARK: - Progress Dashboard View
 
 struct ProgressDashboardView: View {
-    @State private var viewModel = ProgressDashboardViewModel()
-    @State private var selectedTimeRange: TimeRange = .week
+    @Environment(Dependencies.self) private var dependencies
+    @State private var viewModel: ProgressDashboardViewModel?
     @ScaledMetric(relativeTo: .title) private var levelRingSize: CGFloat = 80
 
-    enum TimeRange: String, CaseIterable {
-        case week = "Week"
-        case month = "Month"
-        case year = "Year"
-    }
-
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 20) {
-                // Level Card
-                levelCard
-
-                // Statistics Grid
-                statisticsGrid
-
-                // Streaks Section
-                streaksSection
-
-                // Activity Chart
-                activityChart
-
-                // Prayer Consistency
-                prayerConsistencySection
-
-                // Quick Stats
-                quickStatsSection
+        Group {
+            if let viewModel, !viewModel.isLoading {
+                scrollContent(viewModel)
+            } else {
+                ProgressView()
             }
-            .padding()
-            .padding(.bottom, 80)
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Progress")
         .navigationBarTitleDisplayMode(.large)
+        .task {
+            guard viewModel == nil else { return }
+            let vm = ProgressDashboardViewModel(
+                userState: dependencies.userState,
+                prayerRepository: dependencies.prayerRepository,
+                quranRepository: dependencies.quranRepository,
+                learningRepository: dependencies.learningRepository
+            )
+            viewModel = vm
+            await vm.load()
+        }
+    }
+
+    private func scrollContent(_ viewModel: ProgressDashboardViewModel) -> some View {
+        ScrollView {
+            LazyVStack(spacing: 20) {
+                levelCard(viewModel)
+                statisticsGrid(viewModel)
+                streaksSection(viewModel)
+                activityChart(viewModel)
+                prayerConsistencySection(viewModel)
+            }
+            .padding()
+            .padding(.bottom, 80)
+        }
     }
 
     // MARK: - Level Card
 
-    private var levelCard: some View {
+    private func levelCard(_ viewModel: ProgressDashboardViewModel) -> some View {
         VStack(spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -191,7 +235,7 @@ struct ProgressDashboardView: View {
 
     // MARK: - Statistics Grid
 
-    private var statisticsGrid: some View {
+    private func statisticsGrid(_ viewModel: ProgressDashboardViewModel) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             StatCard(
                 title: "Prayers",
@@ -225,7 +269,7 @@ struct ProgressDashboardView: View {
 
     // MARK: - Streaks Section
 
-    private var streaksSection: some View {
+    private func streaksSection(_ viewModel: ProgressDashboardViewModel) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Streaks")
@@ -258,30 +302,27 @@ struct ProgressDashboardView: View {
 
     // MARK: - Activity Chart
 
-    private var activityChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func activityChart(_ viewModel: ProgressDashboardViewModel) -> some View {
+        let maxHasanat = max(1, viewModel.weeklyData.map(\.hasanat).max() ?? 1)
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Activity")
                     .font(.headline)
 
                 Spacer()
 
-                Picker("Time Range", selection: $selectedTimeRange) {
-                    ForEach(TimeRange.allCases, id: \.self) { range in
-                        Text(range.rawValue).tag(range)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 180)
+                Text("This Week")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
-            // Simple bar chart
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(viewModel.weeklyData) { day in
                     VStack(spacing: 4) {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(Color.accentColor)
-                            .frame(width: 32, height: CGFloat(day.hasanat))
+                            .frame(width: 32, height: max(4, CGFloat(day.hasanat) / CGFloat(maxHasanat) * 100))
 
                         Text(formatWeekday(day.date))
                             .font(.caption2)
@@ -299,22 +340,31 @@ struct ProgressDashboardView: View {
 
     // MARK: - Prayer Consistency Section
 
-    private var prayerConsistencySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func prayerConsistencySection(_ viewModel: ProgressDashboardViewModel) -> some View {
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        let firstDayWeekday = calendar.component(.weekday, from: startOfMonth) // 1=Sun...7=Sat
+        let offset = firstDayWeekday - 1
+
+        return VStack(alignment: .leading, spacing: 12) {
             Text("Prayer Consistency")
                 .font(.headline)
 
-            // Calendar-style grid
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 4) {
-                // Day headers
-                ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
+                ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
                     Text(day)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .frame(width: 32, height: 20)
                 }
 
-                // Days
+                // Empty cells for weekday alignment
+                ForEach(0..<offset, id: \.self) { _ in
+                    Color.clear
+                        .frame(width: 32, height: 32)
+                }
+
                 ForEach(viewModel.monthlyPrayerData) { day in
                     PrayerDayCell(count: day.count)
                 }
@@ -323,7 +373,6 @@ struct ProgressDashboardView: View {
             .background(Color(.secondarySystemGroupedBackground))
             .cornerRadius(12)
 
-            // Legend
             HStack(spacing: 16) {
                 ForEach(0...5, id: \.self) { count in
                     HStack(spacing: 4) {
@@ -340,42 +389,6 @@ struct ProgressDashboardView: View {
         }
     }
 
-    // MARK: - Quick Stats Section
-
-    private var quickStatsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Achievements")
-                .font(.headline)
-
-            HStack {
-                Image(systemName: "trophy.fill")
-                    .font(.title)
-                    .foregroundColor(.yellow)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(viewModel.userStats.unlockedAchievements.count) Unlocked")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-
-                    Text("of \(Achievement.allAchievements.count) total")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                NavigationLink(destination: AchievementsView()) {
-                    Text("View All")
-                        .font(.caption)
-                        .foregroundColor(.accentColor)
-                }
-            }
-            .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .cornerRadius(12)
-        }
-    }
-
     // MARK: - Helpers
 
     private func formatNumber(_ number: Int) -> String {
@@ -387,8 +400,8 @@ struct ProgressDashboardView: View {
 
     private func formatWeekday(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        return String(formatter.string(from: date).prefix(1))
+        formatter.dateFormat = "EEE"
+        return String(formatter.string(from: date).prefix(3))
     }
 
     private func colorForPrayerCount(_ count: Int) -> Color {
@@ -406,7 +419,7 @@ struct ProgressDashboardView: View {
 
 // MARK: - Supporting Views
 
-struct StatCard: View {
+private struct StatCard: View {
     let title: String
     let value: String
     let icon: String
@@ -434,7 +447,7 @@ struct StatCard: View {
     }
 }
 
-struct StreakCard: View {
+private struct StreakCard: View {
     let streak: Streak
 
     var body: some View {
@@ -464,7 +477,7 @@ struct StreakCard: View {
     }
 }
 
-struct PrayerDayCell: View {
+private struct PrayerDayCell: View {
     let count: Int
 
     private var color: Color {
@@ -489,5 +502,6 @@ struct PrayerDayCell: View {
 #Preview {
     NavigationStack {
         ProgressDashboardView()
+            .environment(Dependencies())
     }
 }

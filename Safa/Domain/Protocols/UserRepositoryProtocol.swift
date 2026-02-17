@@ -7,7 +7,7 @@ protocol UserRepositoryProtocol {
     // MARK: - User Stats
 
     /// Gets the current user stats
-    /// - Returns: User stats including Hasanat, level, achievements
+    /// - Returns: User stats including Hasanat, level, streaks
     func getUserStats() async throws -> UserStats
 
     /// Updates user stats
@@ -38,21 +38,6 @@ protocol UserRepositoryProtocol {
     /// Records activity for streak tracking
     /// - Parameter type: The activity type
     func recordStreakActivity(type: StreakType) async throws
-
-    // MARK: - Achievements
-
-    /// Gets all achievements with unlock status
-    /// - Returns: Array of achievements
-    func getAchievements() async throws -> [Achievement]
-
-    /// Unlocks an achievement
-    /// - Parameter achievementId: The achievement identifier
-    func unlockAchievement(_ achievementId: String) async throws
-
-    /// Checks if an achievement is unlocked
-    /// - Parameter achievementId: The achievement identifier
-    /// - Returns: True if unlocked
-    func isAchievementUnlocked(_ achievementId: String) async throws -> Bool
 
     // MARK: - Preferences
 

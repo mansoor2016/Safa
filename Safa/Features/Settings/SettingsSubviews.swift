@@ -727,7 +727,7 @@ struct DataExportView: View {
                     Text("• Preferences and settings")
                     Text("• Prayer log history")
                     Text("• Quran bookmarks and reading progress")
-                    Text("• Streaks and achievements")
+                    Text("• Streaks and progress")
                     Text("• User statistics")
                 }
                 .font(SafaTypography.bodySmall)

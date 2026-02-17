@@ -11,7 +11,7 @@ enum DataCategory: String, CaseIterable, Identifiable {
     case quranProgress
     case hadithBookmarks
     case chatHistory
-    case streaksAndAchievements
+    case streaksAndProgress
     case ramadanData
 
     var id: String { rawValue }
@@ -22,7 +22,7 @@ enum DataCategory: String, CaseIterable, Identifiable {
         case .quranProgress: return "Quran Progress"
         case .hadithBookmarks: return "Hadith Bookmarks"
         case .chatHistory: return "Chat History"
-        case .streaksAndAchievements: return "Streaks & Achievements"
+        case .streaksAndProgress: return "Streaks & Progress"
         case .ramadanData: return "Ramadan Data"
         }
     }
@@ -33,7 +33,7 @@ enum DataCategory: String, CaseIterable, Identifiable {
         case .quranProgress: return "book"
         case .hadithBookmarks: return "bookmark"
         case .chatHistory: return "bubble.left.and.bubble.right"
-        case .streaksAndAchievements: return "flame"
+        case .streaksAndProgress: return "flame"
         case .ramadanData: return "moon.stars"
         }
     }
@@ -44,7 +44,7 @@ enum DataCategory: String, CaseIterable, Identifiable {
         case .quranProgress: return "Bookmarks, reading position, and progress"
         case .hadithBookmarks: return "All saved hadith bookmarks"
         case .chatHistory: return "All conversations and messages"
-        case .streaksAndAchievements: return "Streak counts, hasanat, and achievements"
+        case .streaksAndProgress: return "Streak counts, hasanat, and progress data"
         case .ramadanData: return "Fasting logs, taraweeh days, and daily goals"
         }
     }
@@ -67,11 +67,10 @@ enum DataCategory: String, CaseIterable, Identifiable {
                 AppConstants.StorageKeys.chatConversations,
                 AppConstants.StorageKeys.chatActiveConversation,
             ]
-        case .streaksAndAchievements:
+        case .streaksAndProgress:
             return [
                 AppConstants.StorageKeys.userStats,
                 AppConstants.StorageKeys.userStreaks,
-                AppConstants.StorageKeys.userAchievements,
             ]
         case .ramadanData:
             return [
@@ -233,8 +232,8 @@ struct DataManagementView: View {
             Task { try? await dependencies.chatRepository.clearHistory() }
         }
 
-        // Reload user state if streaks/achievements were cleared
-        if category == .streaksAndAchievements {
+        // Reload user state if streaks/progress were cleared
+        if category == .streaksAndProgress {
             Task { await dependencies.userState.loadUserData() }
         }
 

@@ -16,7 +16,6 @@ final class UserStatsTests: XCTestCase {
 
         XCTAssertEqual(stats.totalHasanat, 0)
         XCTAssertEqual(stats.currentLevel, 1)
-        XCTAssertTrue(stats.unlockedAchievements.isEmpty)
         XCTAssertEqual(stats.lessonsCompleted, 0)
         XCTAssertEqual(stats.totalPrayersLogged, 0)
         XCTAssertEqual(stats.totalAyahsRead, 0)
@@ -28,7 +27,6 @@ final class UserStatsTests: XCTestCase {
         let stats = UserStats(
             totalHasanat: 1000,
             currentLevel: 5,
-            unlockedAchievements: ["achievement1", "achievement2"],
             lessonsCompleted: 10,
             totalPrayersLogged: 50,
             totalAyahsRead: 200,
@@ -38,7 +36,6 @@ final class UserStatsTests: XCTestCase {
 
         XCTAssertEqual(stats.totalHasanat, 1000)
         XCTAssertEqual(stats.currentLevel, 5)
-        XCTAssertEqual(stats.unlockedAchievements.count, 2)
         XCTAssertEqual(stats.lessonsCompleted, 10)
     }
 
@@ -86,7 +83,6 @@ final class UserStatsTests: XCTestCase {
         let original = UserStats(
             totalHasanat: 500,
             currentLevel: 3,
-            unlockedAchievements: ["test"],
             lessonsCompleted: 5,
             totalPrayersLogged: 25,
             totalAyahsRead: 100,
@@ -102,7 +98,7 @@ final class UserStatsTests: XCTestCase {
 
         XCTAssertEqual(original.totalHasanat, decoded.totalHasanat)
         XCTAssertEqual(original.currentLevel, decoded.currentLevel)
-        XCTAssertEqual(original.unlockedAchievements, decoded.unlockedAchievements)
+        XCTAssertEqual(original.lessonsCompleted, decoded.lessonsCompleted)
     }
 
     // MARK: - User Preferences Tests

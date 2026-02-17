@@ -36,7 +36,6 @@ enum HasanatAction: Equatable {
     case invitedFriend
     case friendJoined
     case sharedVerse
-    case sharedAchievement
 
     // Streak Actions
     case streakMilestone(days: Int)
@@ -92,7 +91,6 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
         "inviteFriend": 10,
         "friendJoined": 25,
         "shareVerse": 5,
-        "shareAchievement": 5,
 
         // Streaks
         "streak7": 50,
@@ -172,9 +170,6 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
 
         case .sharedVerse:
             return basePoints["shareVerse"] ?? 5
-
-        case .sharedAchievement:
-            return basePoints["shareAchievement"] ?? 5
 
         case .streakMilestone(let days):
             return calculateStreakPoints(days: days)

@@ -691,16 +691,6 @@ final class PrayerTestMockUserRepository: UserRepositoryProtocol {
 
     nonisolated func recordStreakActivity(type: StreakType) async throws {}
 
-    nonisolated func getAchievements() async throws -> [Achievement] {
-        return []
-    }
-
-    nonisolated func unlockAchievement(_ achievementId: String) async throws {}
-
-    nonisolated func isAchievementUnlocked(_ achievementId: String) async throws -> Bool {
-        return false
-    }
-
     nonisolated func getPreference<T: Codable>(key: String) async throws -> T? {
         return nil
     }

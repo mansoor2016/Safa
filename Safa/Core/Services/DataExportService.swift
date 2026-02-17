@@ -15,7 +15,6 @@ struct DataExportService {
         let preferences: UserPreferences
         let userStats: UserStats
         let streaks: [Streak]
-        let achievements: [Achievement]
         let quranBookmarks: [QuranBookmark]
         let quranProgress: QuranProgress?
     }
@@ -30,7 +29,6 @@ struct DataExportService {
         let prefs = await userRepository.getPreferences()
         let stats = try await userRepository.getUserStats()
         let streaks = try await userRepository.getStreaks()
-        let achievements = try await userRepository.getAchievements()
         let bookmarks = try await quranRepository.getBookmarks()
         let progress = try await quranRepository.getReadingProgress()
 
@@ -41,7 +39,6 @@ struct DataExportService {
             preferences: prefs,
             userStats: stats,
             streaks: streaks,
-            achievements: achievements,
             quranBookmarks: bookmarks,
             quranProgress: progress
         )

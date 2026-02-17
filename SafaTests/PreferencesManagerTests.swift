@@ -44,16 +44,6 @@ final class MockUserRepositoryForPrefs: UserRepositoryProtocol {
 
     func recordStreakActivity(type: StreakType) async throws {}
 
-    func getAchievements() async throws -> [Achievement] {
-        return []
-    }
-
-    func unlockAchievement(_ achievementId: String) async throws {}
-
-    func isAchievementUnlocked(_ achievementId: String) async throws -> Bool {
-        return false
-    }
-
     func getPreference<T: Codable>(key: String) async throws -> T? {
         return nil
     }

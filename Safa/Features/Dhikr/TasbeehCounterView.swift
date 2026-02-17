@@ -11,8 +11,10 @@ struct TasbeehCounterView: View {
     let dhikr: CommonDhikr
 
     @State private var count = 0
+    @State private var savedCount = 0
     @State private var targetCount: Int
     @State private var isComplete = false
+    @State private var completedAtLeastOnce = false
     @State private var showSettings = false
 
     init(dhikr: CommonDhikr) {
@@ -131,7 +133,10 @@ struct TasbeehCounterView: View {
                 targetSettingsSheet
             }
             .alert("Complete!", isPresented: $isComplete) {
-                Button("Continue") { count = 0 }
+                Button("Continue") {
+                    savedCount += count
+                    count = 0
+                }
                 Button("Done") { saveAndDismiss() }
             } message: {
                 Text("You've completed \(targetCount) \(dhikr.rawValue)!")
@@ -185,14 +190,20 @@ struct TasbeehCounterView: View {
 
         if TasbeehHelpers.isComplete(count: count, target: targetCount) {
             HapticFeedbackService.shared.play(.tasbeehMilestone)
+            completedAtLeastOnce = true
             isComplete = true
         }
     }
 
     private func saveAndDismiss() {
-        if TasbeehHelpers.isComplete(count: count, target: targetCount) {
-            Task {
+        let totalCount = savedCount + count
+        let earned = completedAtLeastOnce
+        Task {
+            if earned {
                 await HasanatTracker.awardOnce(.tasbeehSession, key: "tasbeeh", via: dependencies.userState)
+            }
+            if totalCount > 0 {
+                await dependencies.userState.incrementTasbeehCount(by: totalCount)
             }
         }
         dismiss()

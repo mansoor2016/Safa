@@ -268,7 +268,7 @@ final class NotificationActionTests: XCTestCase {
         // These notification identifiers must NOT match the prayer_ prefix
         let nonPrayerIDs = [
             "streak_reminder_prayer",
-            "achievement_123",
+            "general_reminder_123",
             "morning_dhikr_reminder",
             "suhoor_reminder",
             "iftar_reminder"

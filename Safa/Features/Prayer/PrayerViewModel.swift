@@ -159,19 +159,13 @@ final class PrayerViewModel {
 
             // Side effects (after persist succeeds)
             await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: userState)
-            let wasFirstPrayer = userState.userStats.totalPrayersLogged == 0
             await userState.incrementPrayersLogged()
 
             if allPrayersCompleted {
                 await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: userState)
-                await userState.checkAndUnlockAchievement("prayer_perfect_day")
             }
 
             await userState.recordActivity(type: .prayer)
-
-            if wasFirstPrayer {
-                await userState.checkAndUnlockAchievement("prayer_first")
-            }
 
             // Update Live Activity (next prayer context may have changed)
             updateLiveActivity()

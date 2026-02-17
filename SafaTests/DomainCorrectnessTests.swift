@@ -359,32 +359,6 @@ final class AdhanSoundFilteringTests: XCTestCase {
     }
 }
 
-// MARK: - Achievement Color Mapping Tests
-
-final class AchievementCategoryTests: XCTestCase {
-
-    func test_allCategories_haveDistinctColors() {
-        var seenColors: [String] = []
-        for category in Achievement.AchievementCategory.allCases {
-            let achievement = Achievement(
-                id: "test", category: category, title: "Test",
-                description: "Test", iconName: "star", isUnlocked: false
-            )
-            let colorDescription = "\(achievement.color)"
-            // We just verify no crash and each category returns a color
-            XCTAssertFalse(colorDescription.isEmpty)
-        }
-    }
-
-    func test_allPredefinedAchievements_haveValidCategories() {
-        for achievement in Achievement.allAchievements {
-            // Each predefined achievement's category should be a known case
-            XCTAssertTrue(Achievement.AchievementCategory.allCases.contains(achievement.category),
-                          "Achievement \(achievement.id) has unknown category \(achievement.category)")
-        }
-    }
-}
-
 // MARK: - Tasbeeh Session Edge Cases
 
 final class TasbeehSessionEdgeCaseTests: XCTestCase {

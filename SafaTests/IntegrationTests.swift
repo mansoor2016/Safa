@@ -122,29 +122,6 @@ final class ModelIntegrationTests: XCTestCase {
         XCTAssertFalse(yesterdayStreak.isActiveToday)
     }
 
-    // MARK: - Achievement Tests
-
-    func testAchievementCategories() {
-        for category in Achievement.AchievementCategory.allCases {
-            XCTAssertFalse(category.displayName.isEmpty)
-        }
-    }
-
-    func testPredefinedAchievements() {
-        let achievements = Achievement.allAchievements
-
-        // Verify we have achievements
-        XCTAssertGreaterThan(achievements.count, 10)
-
-        // Verify each achievement has required fields
-        for achievement in achievements {
-            XCTAssertFalse(achievement.id.isEmpty)
-            XCTAssertFalse(achievement.title.isEmpty)
-            XCTAssertFalse(achievement.description.isEmpty)
-            XCTAssertFalse(achievement.iconName.isEmpty)
-        }
-    }
-
     // MARK: - Hasanat Award Tests
 
     func testHasanatAwardPoints() {

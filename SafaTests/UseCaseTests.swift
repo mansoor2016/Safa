@@ -1,5 +1,5 @@
 // MARK: - UseCaseTests.swift
-// PURPOSE: Unit tests for domain use cases (Hasanat, Streak, Achievement)
+// PURPOSE: Unit tests for domain use cases (Hasanat, Streak)
 
 import XCTest
 @testable import Safa
@@ -134,11 +134,6 @@ final class CalculateHasanatUseCaseTests: XCTestCase {
 
     func testSharedVersePoints() {
         let points = sut.calculatePoints(for: .sharedVerse)
-        XCTAssertEqual(points, 5)
-    }
-
-    func testSharedAchievementPoints() {
-        let points = sut.calculatePoints(for: .sharedAchievement)
         XCTAssertEqual(points, 5)
     }
 

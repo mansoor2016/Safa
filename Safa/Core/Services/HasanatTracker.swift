@@ -10,6 +10,7 @@ import Foundation
 ///   - `awardOnceEver(_:key:via:)` — permanent (lesson completions, invite)
 struct HasanatTracker {
     private static let prefix = "com.safa.hasanat.awarded."
+    private static let dailyPrefix = "com.safa.hasanat.daily."
     private static let lock = NSLock()
 
     // MARK: - Date-Scoped Awards
@@ -84,6 +85,45 @@ struct HasanatTracker {
         "\(prefix)\(key)"
     }
 
+    // MARK: - Daily Hasanat Recording
+
+    /// Records hasanat points for a specific day (accumulates).
+    static func recordDailyPoints(_ points: Int, on date: Date = Date()) {
+        lock.withLock {
+            let key = dailyPrefix + dateFormatter.string(from: date)
+            let current = UserDefaults.standard.integer(forKey: key)
+            UserDefaults.standard.set(current + points, forKey: key)
+        }
+    }
+
+    /// Returns recorded hasanat for a specific day.
+    static func dailyPoints(for date: Date) -> Int {
+        let key = dailyPrefix + dateFormatter.string(from: date)
+        return UserDefaults.standard.integer(forKey: key)
+    }
+
+    /// Returns the last 7 days of hasanat data (oldest first).
+    static func weeklyPoints(from date: Date = Date()) -> [(date: Date, points: Int)] {
+        let calendar = Calendar.current
+        return (0..<7).reversed().map { offset in
+            let day = calendar.date(byAdding: .day, value: -offset, to: date)!
+            return (date: calendar.startOfDay(for: day), points: dailyPoints(for: day))
+        }
+    }
+
+    /// Remove daily recording keys older than 30 days.
+    static func pruneDailyHistory() {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
+        for key in allKeys where key.hasPrefix(dailyPrefix) {
+            let dateStr = String(key.dropFirst(dailyPrefix.count))
+            guard dateStr.count == 10, let keyDate = dateFormatter.date(from: dateStr) else { continue }
+            if keyDate < cutoff {
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
+    }
+
     // MARK: - Pruning
 
     /// Remove tracker entries older than 7 days to prevent UserDefaults bloat.
@@ -103,6 +143,8 @@ struct HasanatTracker {
                 UserDefaults.standard.removeObject(forKey: key)
             }
         }
+
+        pruneDailyHistory()
     }
 
     // MARK: - Private

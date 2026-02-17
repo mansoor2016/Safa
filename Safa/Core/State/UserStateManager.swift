@@ -9,7 +9,6 @@ final class UserStateManager {
     // MARK: - Published State
     var userStats: UserStats
     var streaks: [Streak]
-    var achievements: [Achievement]
     var isLoading: Bool = false
     var error: Error?
 
@@ -21,7 +20,6 @@ final class UserStateManager {
         self.userRepository = userRepository
         self.userStats = UserStats()
         self.streaks = StreakType.allCases.map { Streak(type: $0) }
-        self.achievements = Achievement.allAchievements
 
         // Listen for invite hasanat notification (from InviteFriendsService)
         NotificationCenter.default.addObserver(
@@ -50,7 +48,6 @@ final class UserStateManager {
         do {
             userStats = try await userRepository.getUserStats()
             streaks = try await userRepository.getStreaks()
-            achievements = try await userRepository.getAchievements()
             syncStreakToWidget()
         } catch {
             self.error = error
@@ -70,8 +67,9 @@ final class UserStateManager {
             userStats.totalHasanat = newTotal
             userStats.currentLevel = UserStats.calculateLevel(from: newTotal)
 
-            // Check for level-up achievements
-            await checkLevelAchievements()
+            // Record daily hasanat for progress dashboard
+            HasanatTracker.recordDailyPoints(points)
+
             return true
         } catch {
             self.error = error
@@ -83,6 +81,17 @@ final class UserStateManager {
 
     func incrementPrayersLogged() async {
         userStats.totalPrayersLogged += 1
+        do {
+            try await userRepository.updateUserStats(userStats)
+        } catch {
+            self.error = error
+        }
+    }
+
+    // MARK: - Tasbeeh Counter
+
+    func incrementTasbeehCount(by count: Int) async {
+        userStats.totalTasbeehCount += count
         do {
             try await userRepository.updateUserStats(userStats)
         } catch {
@@ -102,60 +111,10 @@ final class UserStateManager {
                 await HasanatTracker.awardOnce(.dailyOpen, key: "dailyOpen", via: self)
             }
 
-            // Check for streak achievements
-            await checkStreakAchievements()
-
             // Sync streak to widget
             syncStreakToWidget()
         } catch {
             self.error = error
-        }
-    }
-
-    // MARK: - Achievements
-
-    func checkAndUnlockAchievement(_ achievementId: String) async {
-        do {
-            guard !(try await userRepository.isAchievementUnlocked(achievementId)) else {
-                return
-            }
-
-            try await userRepository.unlockAchievement(achievementId)
-            achievements = try await userRepository.getAchievements()
-
-            // Update user stats
-            if !userStats.unlockedAchievements.contains(achievementId) {
-                userStats.unlockedAchievements.append(achievementId)
-            }
-        } catch {
-            self.error = error
-        }
-    }
-
-    // MARK: - Private Achievement Checks
-
-    private func checkLevelAchievements() async {
-        // Could add level-based achievements here
-    }
-
-    private func checkStreakAchievements() async {
-        for streak in streaks {
-            switch streak.type {
-            case .prayer:
-                if streak.currentCount >= 7 {
-                    await checkAndUnlockAchievement("prayer_week_warrior")
-                }
-                if streak.currentCount >= 30 {
-                    await checkAndUnlockAchievement("prayer_month_strong")
-                }
-            case .dhikr:
-                if streak.currentCount >= 7 {
-                    await checkAndUnlockAchievement("dhikr_morning")
-                    await checkAndUnlockAchievement("dhikr_evening")
-                }
-            default:
-                break
-            }
         }
     }
 
@@ -195,14 +154,6 @@ final class UserStateManager {
 
     var prayerStreak: Streak? {
         streaks.first { $0.type == .prayer }
-    }
-
-    var unlockedAchievementCount: Int {
-        achievements.filter { $0.isUnlocked }.count
-    }
-
-    var totalAchievementCount: Int {
-        achievements.count
     }
 
     // MARK: - Widget Sync

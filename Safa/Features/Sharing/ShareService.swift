@@ -1,5 +1,5 @@
 // MARK: - ShareService.swift
-// PURPOSE: Service for sharing content (verses, achievements, etc.)
+// PURPOSE: Service for sharing content (verses, progress, etc.)
 // DEPENDENCIES: Foundation, UIKit, SwiftUI
 
 import Foundation
@@ -12,7 +12,6 @@ import UIKit
 enum ShareableContent {
     case quranVerse(surah: String, ayah: Int, arabicText: String, translation: String)
     case hadith(collection: String, narrator: String, text: String)
-    case achievement(title: String, description: String)
     case dailyProgress(hasanat: Int, streak: Int)
     case dua(title: String, arabic: String, translation: String)
     case inviteLink(code: String)
@@ -36,12 +35,6 @@ struct ShareCardStyle {
         backgroundColor: Color(red: 0.15, green: 0.10, blue: 0.25),
         textColor: .white,
         accentColor: Color(red: 0.7, green: 0.5, blue: 0.9)
-    )
-
-    static let achievement = ShareCardStyle(
-        backgroundColor: Color(red: 0.95, green: 0.85, blue: 0.30),
-        textColor: Color(red: 0.2, green: 0.15, blue: 0.0),
-        accentColor: Color(red: 0.6, green: 0.45, blue: 0.0)
     )
 
     static let progress = ShareCardStyle(
@@ -108,17 +101,6 @@ final class ShareService {
             (\(collection))
 
             Shared via Safa - Your Islamic Companion
-            """
-
-        case .achievement(let title, let description):
-            return """
-            🏆 Achievement Unlocked!
-
-            \(title)
-            \(description)
-
-            Join me on Safa - Your Islamic Companion
-            \(AppConstants.URLs.downloadURL.absoluteString)
             """
 
         case .dailyProgress(let hasanat, let streak):
@@ -258,8 +240,6 @@ final class ShareService {
             switch content {
             case .quranVerse:
                 await HasanatTracker.awardOnce(.share, key: "share_verse_\(dateString)", via: userState)
-            case .achievement:
-                await HasanatTracker.awardOnce(.share, key: "share_achievement_\(dateString)", via: userState)
             case .inviteLink:
                 await HasanatTracker.awardOnce(.share, key: "share_invite_\(dateString)", via: userState)
             case .eidGreeting:
@@ -371,37 +351,6 @@ struct QuranShareCard: View {
                 .italic()
                 .multilineTextAlignment(.center)
                 .foregroundStyle(ShareCardStyle.quran.textColor.opacity(0.9))
-        }
-    }
-}
-
-struct AchievementShareCard: View {
-    let title: String
-    let description: String
-    let iconName: String
-
-    var body: some View {
-        ShareCardLayout(
-            style: .achievement,
-            headerIcon: "trophy.fill",
-            headerTitle: "Achievement Unlocked!",
-            footerText: "Achieved with صفا",
-            width: 300,
-            height: 420
-        ) {
-            Image(systemName: iconName)
-                .font(.system(size: SafaSpacing.IconSize.xxl))
-                .foregroundStyle(ShareCardStyle.achievement.textColor)
-
-            Text(title)
-                .font(SafaTypography.titleMedium)
-                .bold()
-                .foregroundStyle(ShareCardStyle.achievement.textColor)
-
-            Text(description)
-                .font(SafaTypography.bodySmall)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(ShareCardStyle.achievement.textColor.opacity(0.8))
         }
     }
 }
@@ -544,14 +493,6 @@ struct ShareButton: View {
         ayahNumber: 1,
         arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
         translation: "In the name of Allah, the Most Gracious, the Most Merciful"
-    )
-}
-
-#Preview("Achievement Share Card") {
-    AchievementShareCard(
-        title: "First Prayer",
-        description: "Logged your first prayer in Safa",
-        iconName: "moon.stars.fill"
     )
 }
 

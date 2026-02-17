@@ -19,7 +19,7 @@ enum SafaMotion {
     /// Deliberate transitions: sheet present, scroll reveal, hero morph (400ms)
     static let durationSlow: TimeInterval = 0.4
 
-    /// Emphasis animations: onboarding, achievement unlock, celebration (600ms)
+    /// Emphasis animations: onboarding, celebration (600ms)
     static let durationEmphasis: TimeInterval = 0.6
 
     // MARK: - Curves (SwiftUI Animation)
@@ -44,7 +44,7 @@ enum SafaMotion {
     /// Standard spring for interactive elements
     static let springInteractive: Animation = .spring(duration: 0.3, bounce: 0.1)
 
-    /// Bouncy spring for celebrations and achievements
+    /// Bouncy spring for celebrations and milestones
     static let springBouncy: Animation = .spring(duration: 0.5, bounce: 0.3)
 
     // MARK: - Convenience

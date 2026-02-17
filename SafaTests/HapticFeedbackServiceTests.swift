@@ -126,10 +126,6 @@ final class HapticFeedbackServiceTests: XCTestCase {
         sut.streakMilestone()
     }
 
-    func test_achievementUnlocked_doesNotCrash() {
-        sut.achievementUnlocked()
-    }
-
     func test_tasbeehTap_doesNotCrash() {
         sut.tasbeehTap()
     }

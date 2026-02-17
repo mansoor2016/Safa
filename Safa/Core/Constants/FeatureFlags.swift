@@ -37,9 +37,11 @@ enum Feature: String, CaseIterable {
     case smartCleanup = "smart_cleanup"
 
     // Coming Soon Features (Disabled - partially implemented or requires additional work)
-    case progressDashboard = "progress_dashboard"
     case aiCompanion = "ai_companion"
     case interactiveWidgets = "interactive_widgets"
+
+    // Enabled Features (formerly Coming Soon)
+    case progressDashboard = "progress_dashboard"
 
     var displayName: String {
         switch self {
@@ -75,8 +77,7 @@ enum Feature: String, CaseIterable {
     var isEnabledByDefault: Bool {
         switch self {
         // Requires iOS 18.4+ for Apple Foundation Models
-        case .aiCompanion,
-             .progressDashboard:
+        case .aiCompanion:
             return false
         // Content not yet ready
         case .learning:

@@ -21,7 +21,7 @@ enum HapticEvent {
     case qiblaPerfect   // Custom — facing Qibla
     case tasbeehTap     // Soft — per-count
     case tasbeehMilestone // Rigid — 33/99 count
-    case celebration    // Custom — achievement, all 5 prayers
+    case celebration    // Custom — all 5 prayers, milestone
     case levelUp        // Custom — rising intensity
 }
 
@@ -138,12 +138,6 @@ final class HapticFeedbackService {
 
     /// Haptic for streak milestone
     func streakMilestone() {
-        guard isEnabled else { return }
-        playCustomPattern(.celebration)
-    }
-
-    /// Haptic for achievement unlocked
-    func achievementUnlocked() {
         guard isEnabled else { return }
         playCustomPattern(.celebration)
     }

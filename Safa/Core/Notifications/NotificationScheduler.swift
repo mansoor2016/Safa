@@ -360,26 +360,6 @@ final class NotificationScheduler {
         )
     }
 
-    // MARK: - Achievement Notifications
-
-    /// Show achievement unlocked notification
-    func showAchievementUnlocked(achievement: Achievement) async throws {
-        let content = UNMutableNotificationContent()
-        content.title = String(localized: "Achievement Unlocked!")
-        content.body = achievement.title
-        content.categoryIdentifier = FocusModeService.NotificationCategory.achievementUnlocked.rawValue
-        content.interruptionLevel = .passive // Silent notification
-        content.sound = nil
-
-        let request = UNNotificationRequest(
-            identifier: "achievement_\(achievement.id)",
-            content: content,
-            trigger: nil // Immediate
-        )
-
-        try await center.add(request)
-    }
-
     // MARK: - Ramadan Notifications
 
     /// Schedule Suhoor reminder
@@ -552,7 +532,7 @@ final class NotificationResponseHandler: NSObject, UNUserNotificationCenterDeleg
         if identifier.starts(with: "prayer_") {
             handlePrayerNotificationTap(action: actionIdentifier, userInfo: userInfo)
         }
-        // streak_ and achievement_ notifications open the app but don't need special routing
+        // streak_ notifications open the app but don't need special routing
 
         completionHandler()
     }

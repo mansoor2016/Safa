@@ -16,8 +16,6 @@ final class MockUserRepository: UserRepositoryProtocol {
     var statsToReturn = UserStats()
     var storedPreferences = UserPreferences()
     var streaksToReturn: [Streak] = StreakType.allCases.map { Streak(type: $0) }
-    var achievementsToReturn: [Achievement] = []
-    var unlockedAchievements: Set<String> = []
     var streakFreezesCount = 0
     var errorToThrow: Error?
 
@@ -71,23 +69,6 @@ final class MockUserRepository: UserRepositoryProtocol {
     nonisolated func recordStreakActivity(type: StreakType) async throws {
         if let error = await errorToThrow { throw error }
         await MainActor.run { recordStreakCalls.append(type) }
-    }
-
-    // MARK: - Achievements
-
-    nonisolated func getAchievements() async throws -> [Achievement] {
-        if let error = await errorToThrow { throw error }
-        return await achievementsToReturn
-    }
-
-    nonisolated func unlockAchievement(_ achievementId: String) async throws {
-        if let error = await errorToThrow { throw error }
-        await MainActor.run { unlockedAchievements.insert(achievementId) }
-    }
-
-    nonisolated func isAchievementUnlocked(_ achievementId: String) async throws -> Bool {
-        if let error = await errorToThrow { throw error }
-        return await unlockedAchievements.contains(achievementId)
     }
 
     // MARK: - Preferences

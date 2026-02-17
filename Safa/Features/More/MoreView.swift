@@ -59,11 +59,11 @@ struct MoreView: View {
 
             // Progress
             Section("Progress") {
-                DisabledFeatureRow(
-                    title: "Your Progress",
-                    icon: "chart.line.uptrend.xyaxis",
-                    feature: .progressDashboard
-                )
+                NavigationLink {
+                    ProgressDashboardView()
+                } label: {
+                    Label("Your Progress", systemImage: "chart.line.uptrend.xyaxis")
+                }
             }
 
             // Settings
