@@ -14,7 +14,6 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| S | Share banner dismissal logic: only mark dismissed after successful share completion (not on sheet close/cancel) |
 | M | Feature-claim parity audit for launch: align app behavior with QA/listing/docs (especially Learn/AI/Progress and "all features available" wording) |
 | M | Release gate verification: full checks + pre-release smoke/boundary/manual checklist from `.docs/TEST.md` before App Store upload |
 | L | App Store screenshots + preview video capture and final listing polish *(manual)* |
@@ -70,8 +69,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ## Completed
 
-Live Activity reliability + staleness fix (v1.4.1–v1.4.3), widget stale prayer fix, prayer time accuracy (adhan-swift v1.5.0), calculation method visibility, Settings refactor, notification action buttons, developer settings, TestFlight beta (v1.5.0), release notes in version bumps, adhan silent mode awareness, convention clarity disclaimer (v1.5.2), location fallback fix, Eid/Ramadan copy cleanup, test tooling. Qibla compass polish + location geobox tightening. Ramadan navigation consistency + copy polish. Wudhu reminder notifications (v1.5.3). System Status removal (v1.5.4), prayer progress stepper redesign (v1.5.5). os.Logger structured logging (v1.5.6), MetricKit diagnostics subscriber (v1.5.7). Language settings UI with QuranTranslation picker (v1.5.8). Real TestFlight link + unified downloadURL across all share surfaces.
+Live Activity reliability + staleness fix (v1.4.1–v1.4.3), widget stale prayer fix, prayer time accuracy (adhan-swift v1.5.0), calculation method visibility, Settings refactor, notification action buttons, developer settings, TestFlight beta (v1.5.0), release notes in version bumps, adhan silent mode awareness, convention clarity disclaimer (v1.5.2), location fallback fix, Eid/Ramadan copy cleanup, test tooling. Qibla compass polish + location geobox tightening. Ramadan navigation consistency + copy polish. Wudhu reminder notifications (v1.5.3). System Status removal (v1.5.4), prayer progress stepper redesign (v1.5.5). os.Logger structured logging (v1.5.6), MetricKit diagnostics subscriber (v1.5.7). Language settings UI with QuranTranslation picker (v1.5.8). Real TestFlight link + unified downloadURL across all share surfaces. Share banner dismissal fix (completionWithItemsHandler), duplicate review dialog removal, adhan notification sound fix (AAC→PCM re-encode), dead UX flags cleanup (inline header + adaptive tab bar), Quran scroll behavior unified with Duas/Home, dead feature flags removal, notification settings footer cleanup (v1.5.9). Hasanat dedup exploit fix (5 call sites routed through HasanatTracker, NSLock serialization, award-before-mark with rollback), MoreView progress rows combined, App Store ID set (6759136442), InviteFriends test fix (downloadURL vs appStore), lesson perfect score aligned to 100%.
 
 ---
 
-*Last Updated: February 16, 2026 — TestFlight/share URL placeholders replaced, 2 P0 tasks completed*
+*Last Updated: February 17, 2026 — hasanat dedup exploit fix, progress row cleanup, App Store ID set, InviteFriends test fix*
