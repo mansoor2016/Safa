@@ -63,10 +63,8 @@ enum DataCategory: String, CaseIterable, Identifiable {
         case .hadithBookmarks:
             return [AppConstants.StorageKeys.hadithBookmarks]
         case .chatHistory:
-            return [
-                AppConstants.StorageKeys.chatConversations,
-                AppConstants.StorageKeys.chatActiveConversation,
-            ]
+            // Chat deletion is handled by ChatRepository (Core Data), not UserDefaults
+            return []
         case .streaksAndProgress:
             return [
                 AppConstants.StorageKeys.userStats,
@@ -85,7 +83,8 @@ enum DataCategory: String, CaseIterable, Identifiable {
     var prefixKeys: [String] {
         switch self {
         case .chatHistory:
-            return [AppConstants.StorageKeys.chatMessagesPrefix]
+            // Chat deletion is handled by ChatRepository (Core Data), not UserDefaults
+            return []
         case .streaksAndProgress:
             return ["com.safa.hasanat.awarded.", "com.safa.hasanat.daily."]
         case .ramadanData:
@@ -232,7 +231,15 @@ struct DataManagementView: View {
 
         // Also clear chat via repository if it's chat history
         if category == .chatHistory {
-            Task { try? await dependencies.chatRepository.clearHistory() }
+            Task {
+                do {
+                    try await dependencies.chatRepository.clearHistory()
+                    ToastService.shared.show(Toast(message: "\(category.displayName) deleted", type: .success))
+                } catch {
+                    ToastService.shared.show(Toast(message: "Failed to delete \(category.displayName)", type: .warning))
+                }
+            }
+            return
         }
 
         // Reload user state if streaks/progress were cleared
@@ -246,11 +253,15 @@ struct DataManagementView: View {
     private func performDeleteAll() {
         DataDeletionService.deleteAllCategories(from: .standard, appGroupDefaults: appGroupDefaults)
         Task {
-            try? await dependencies.chatRepository.clearHistory()
+            do {
+                try await dependencies.chatRepository.clearHistory()
+            } catch {
+                ToastService.shared.show(Toast(message: "Failed to delete chat history", type: .warning))
+                return
+            }
             await dependencies.userState.loadUserData()
+            ToastService.shared.show(Toast(message: "All data deleted", type: .success))
         }
-
-        ToastService.shared.show(Toast(message: "All data deleted", type: .success))
     }
 }
 

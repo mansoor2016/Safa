@@ -10,10 +10,12 @@ struct ChatView: View {
 
     var body: some View {
         Group {
-            let availability = dependencies.llmService.availability
-            if !availability.isAvailable {
+            if FeatureFlags.shared.isDisabled(.aiCompanion) {
+                // Defense-in-depth: router is the primary gate, but guard here too
+                AIUnavailableView(message: "AI Companion is coming soon.")
+            } else if !dependencies.llmService.availability.isAvailable {
                 // Show fallback for older iOS versions
-                AIUnavailableView(message: availability.userMessage)
+                AIUnavailableView(message: dependencies.llmService.availability.userMessage)
             } else if let viewModel = viewModel {
                 ChatContentView(viewModel: viewModel)
             } else {
@@ -23,7 +25,8 @@ struct ChatView: View {
         .task {
             if viewModel == nil && dependencies.llmService.availability.isAvailable {
                 viewModel = ChatViewModel(
-                    chatRepository: dependencies.chatRepository
+                    chatRepository: dependencies.chatRepository,
+                    orchestrator: dependencies.chatOrchestrator
                 )
             }
         }
@@ -140,6 +143,13 @@ private struct ChatContentView: View {
                         welcomeView
                     } else {
                         ForEach(viewModel.messages) { message in
+                            // Show caution banner above the last assistant message
+                            if let caution = viewModel.cautionMessage,
+                               message.isAssistant,
+                               message.id == viewModel.messages.last(where: { $0.isAssistant })?.id {
+                                CautionBanner(message: caution)
+                            }
+
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
@@ -342,6 +352,28 @@ private struct MessageBubble: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             showCopied = false
         }
+    }
+}
+
+// MARK: - Caution Banner
+
+private struct CautionBanner: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: "info.circle.fill")
+                .foregroundColor(.orange)
+                .font(.subheadline)
+
+            Text(message)
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+        }
+        .padding(SafaSpacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
     }
 }
 

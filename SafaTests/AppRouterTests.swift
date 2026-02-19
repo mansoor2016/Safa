@@ -137,7 +137,18 @@ final class AppRouterTests: XCTestCase {
         XCTAssertEqual(sut.selectedTab, "learn")
     }
 
-    func testDeepLinkChat() {
+    func testDeepLinkChat_whenAIDisabled_returnsFalse() {
+        // AI companion is disabled by default, so deep link should return false
+        let url = URL(string: "safa://chat")!
+        XCTAssertFalse(sut.handleDeepLink(url))
+        XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
+    }
+
+    func testDeepLinkChat_whenAIEnabled_returnsTrue() {
+        // Enable AI companion via feature flag override
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+
         let url = URL(string: "safa://chat")!
         XCTAssertTrue(sut.handleDeepLink(url))
         XCTAssertEqual(sut.path.count, 1)

@@ -34,14 +34,13 @@ enum LLMAvailability {
 
 // MARK: - LLM Service
 
-final class LLMService {
+final class LLMService: LLMServiceProtocol {
     // MARK: - Properties
     private var model: MLModel?
     private var isLoading = false
-    private var ragService: RAGService?
 
     // Minimum iOS version for Apple Foundation Models
-    private static let minimumIOSVersion = "18.4"
+    static let minimumIOSVersion = "26.0"
 
     // MARK: - Model State
 
@@ -51,7 +50,7 @@ final class LLMService {
 
     var availability: LLMAvailability {
         // Check iOS version for Apple Foundation Models
-        if #available(iOS 18.4, *) {
+        if #available(iOS 26, *) {
             // TODO: Add device capability check when API is available
             return .available
         } else {
@@ -63,12 +62,6 @@ final class LLMService {
 
     init() {
         // Model loading deferred until first use
-    }
-
-    // MARK: - Configure
-
-    func configure(ragService: RAGService) {
-        self.ragService = ragService
     }
 
     // MARK: - Load Model
@@ -84,7 +77,7 @@ final class LLMService {
         defer { isLoading = false }
 
         // Apple Foundation Models integration placeholder
-        // When iOS 18.4 is available, this will use:
+        // When iOS 26 is available, this will use:
         // import FoundationModels
         // let session = LanguageModelSession()
 
@@ -104,32 +97,19 @@ final class LLMService {
             try await loadModel()
         }
 
-        // Retrieve RAG context if service is configured
-        var ragContext: RAGContext?
-        if let ragService = ragService {
-            ragContext = await ragService.retrieveContext(for: prompt)
-        }
-
-        // Build enhanced prompt with RAG context (used when Foundation Models inference is wired in)
-        _ = buildEnhancedPrompt(
-            userPrompt: prompt,
-            systemPrompt: systemPrompt,
-            ragContext: ragContext
-        )
-
         // TODO: Replace with actual Apple Foundation Models inference
-        // When iOS 18.4 is available:
+        // When iOS 26 is available:
         // let session = LanguageModelSession(systemPrompt: systemPrompt)
-        // let response = try await session.respond(to: enhancedPrompt)
+        // let response = try await session.respond(to: prompt)
         // return response.content
 
         // For now, return placeholder response
-        return generatePlaceholderResponse(for: prompt, ragContext: ragContext)
+        return generatePlaceholderResponse(for: prompt)
     }
 
     func generateResponseStreaming(prompt: String, systemPrompt: String, context: ChatContext? = nil) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            let streamTask = Task {
                 do {
                     // Check availability
                     guard self.availability.isAvailable else {
@@ -141,73 +121,41 @@ final class LLMService {
                         try await self.loadModel()
                     }
 
-                    // Retrieve RAG context
-                    var ragContext: RAGContext?
-                    if let ragService = self.ragService {
-                        ragContext = await ragService.retrieveContext(for: prompt)
-                    }
-
                     // TODO: Replace with actual streaming when Apple FM is available
-                    // When iOS 18.4 is available:
+                    // When iOS 26 is available:
                     // let session = LanguageModelSession(systemPrompt: systemPrompt)
                     // for try await chunk in session.streamResponse(to: prompt) {
                     //     continuation.yield(chunk)
                     // }
 
                     // For now, stream placeholder response
-                    let response = self.generatePlaceholderResponse(for: prompt, ragContext: ragContext)
+                    let response = self.generatePlaceholderResponse(for: prompt)
                     let words = response.split(separator: " ")
 
                     for word in words {
+                        try Task.checkCancellation()
                         continuation.yield(String(word) + " ")
                         try await Task.sleep(nanoseconds: 50_000_000) // 50ms per word
                     }
 
                     continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
                 }
+            }
+
+            continuation.onTermination = { _ in
+                streamTask.cancel()
             }
         }
     }
 
     // MARK: - Private Methods
 
-    private func buildEnhancedPrompt(userPrompt: String, systemPrompt: String, ragContext: RAGContext?) -> String {
-        var enhancedPrompt = userPrompt
-
-        // Add RAG context if available
-        if let context = ragContext, !context.isEmpty {
-            enhancedPrompt = """
-            User Question: \(userPrompt)
-
-            ## Retrieved Knowledge Base Context
-            \(context.formattedContext)
-
-            Please use the above context to help answer the user's question. Cite sources when referencing specific ayahs or hadiths.
-            """
-        }
-
-        return enhancedPrompt
-    }
-
-    private func generatePlaceholderResponse(for prompt: String, ragContext: RAGContext?) -> String {
+    private func generatePlaceholderResponse(for prompt: String) -> String {
         let lowercasePrompt = prompt.lowercased()
-
-        // Include RAG citations if available
-        var citations = ""
-        if let context = ragContext, !context.isEmpty {
-            var citationParts: [String] = []
-            for ref in context.quranReferences.prefix(2) {
-                citationParts.append("Quran \(ref.surahNumber):\(ref.ayahNumber)")
-            }
-            for ref in context.hadithReferences.prefix(2) {
-                citationParts.append("\(ref.collection) \(ref.hadithNumber)")
-            }
-            if !citationParts.isEmpty {
-                citations = "\n\n**Sources:** " + citationParts.joined(separator: ", ")
-            }
-        }
 
         // Knowledge-based responses
         if lowercasePrompt.contains("dua") && lowercasePrompt.contains("eating") {
@@ -276,7 +224,7 @@ final class LLMService {
             **Source:** Based on hadith in Sahih Bukhari, Sahih Muslim, and scholarly consensus
 
             For complex situations, please consult a qualified scholar. 🤲
-            """ + citations
+            """
         }
 
         if lowercasePrompt.contains("fatiha") || lowercasePrompt.contains("opening") {
@@ -321,7 +269,7 @@ final class LLMService {
         - Duas and dhikr with Arabic, transliteration, and translation
 
         **Note:** For complex religious rulings (fatawa), I recommend consulting a qualified scholar.
-        """ + citations
+        """
     }
 }
 

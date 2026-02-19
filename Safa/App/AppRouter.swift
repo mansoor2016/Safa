@@ -107,6 +107,12 @@ final class AppRouter {
     // MARK: - Navigation Methods
 
     func navigate(to destination: Destination) {
+        // Gate AI companion behind feature flag
+        if case .chat = destination, FeatureFlags.shared.isDisabled(.aiCompanion) {
+            ToastService.shared.showComingSoon(Feature.aiCompanion.displayName)
+            return
+        }
+
         path.append(destination)
     }
 
@@ -169,8 +175,9 @@ final class AppRouter {
             return true
 
         case "chat":
+            // navigate(to:) checks feature flag and shows toast if disabled
             navigate(to: .chat)
-            return true
+            return !FeatureFlags.shared.isDisabled(.aiCompanion)
 
         case "hadith":
             let collection = pathComponents.first

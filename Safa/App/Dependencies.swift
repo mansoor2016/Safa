@@ -29,6 +29,12 @@ final class Dependencies {
     let pronunciationService: PronunciationService
     let ramadanService: RamadanService
 
+    // MARK: - AI Pipeline
+    let inputSafety: InputSafetyServiceProtocol
+    let outputSafety: OutputSafetyServiceProtocol
+    let citationValidation: CitationValidationServiceProtocol
+    let chatOrchestrator: ChatOrchestratorProtocol
+
     // MARK: - Global State
     let userState: UserStateManager
 
@@ -61,11 +67,20 @@ final class Dependencies {
             hadithRepository: hadithRepository
         )
 
-        // Configure LLM with RAG service
-        self.llmService.configure(ragService: ragService)
+        // Initialize AI pipeline services
+        self.inputSafety = InputSafetyService()
+        self.outputSafety = OutputSafetyService()
+        self.citationValidation = PassthroughCitationValidationService()
+        self.chatOrchestrator = ChatOrchestrator(
+            llmService: llmService,
+            ragService: ragService,
+            inputSafety: inputSafety,
+            outputSafety: outputSafety,
+            citationValidation: citationValidation
+        )
 
-        // Initialize chat repository (depends on LLM service)
-        self.chatRepository = ChatRepository(llmService: llmService)
+        // Initialize chat repository (persist-only; generation moved to ChatOrchestrator)
+        self.chatRepository = ChatRepository(coreData: coreDataStack)
 
         // Initialize global state (depends on user repository)
         self.userState = UserStateManager(userRepository: userRepository)

@@ -136,7 +136,7 @@ final class AICompanionQueryTests: XCTestCase {
         // Test that all availability states have non-empty messages
         let testCases: [LLMAvailability] = [
             .available,
-            .requiresNewerOS(minimumVersion: "18.4"),
+            .requiresNewerOS(minimumVersion: "26.0"),
             .unsupportedDevice,
             .notConfigured
         ]
@@ -148,8 +148,8 @@ final class AICompanionQueryTests: XCTestCase {
     }
 
     func testRequiresNewerOSMessage() {
-        let availability = LLMAvailability.requiresNewerOS(minimumVersion: "18.4")
-        XCTAssertTrue(availability.userMessage.contains("18.4"))
+        let availability = LLMAvailability.requiresNewerOS(minimumVersion: "26.0")
+        XCTAssertTrue(availability.userMessage.contains("26.0"))
     }
 
     func testAvailableMessage() {
@@ -162,7 +162,7 @@ final class AICompanionQueryTests: XCTestCase {
         // Verify all availability cases have messages
         let cases: [LLMAvailability] = [
             .available,
-            .requiresNewerOS(minimumVersion: "18.4"),
+            .requiresNewerOS(minimumVersion: "26.0"),
             .unsupportedDevice,
             .notConfigured
         ]
@@ -178,7 +178,7 @@ final class AICompanionQueryTests: XCTestCase {
     }
 
     func testLLMUnavailableStatesAreNotAvailable() {
-        XCTAssertFalse(LLMAvailability.requiresNewerOS(minimumVersion: "18.4").isAvailable)
+        XCTAssertFalse(LLMAvailability.requiresNewerOS(minimumVersion: "26.0").isAvailable)
         XCTAssertFalse(LLMAvailability.unsupportedDevice.isAvailable)
         XCTAssertFalse(LLMAvailability.notConfigured.isAvailable)
     }
@@ -191,7 +191,7 @@ final class AICompanionQueryTests: XCTestCase {
  ==============================
 
  For each query below, verify:
- 1. Response is generated (or appropriate fallback on < iOS 18.4)
+ 1. Response is generated (or appropriate fallback on < iOS 26)
  2. Response contains expected keywords
  3. Citations are included where applicable
  4. Response time is under 5 seconds

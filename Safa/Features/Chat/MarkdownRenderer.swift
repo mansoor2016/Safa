@@ -334,7 +334,7 @@ extension MarkdownRenderer {
 
         // Bold **text**
         if let boldRegex = try? Regex(#"\*\*(.+?)\*\*"#) {
-            while let match = text.firstMatch(of: boldRegex) {
+            for match in text.matches(of: boldRegex) {
                 if let range = result.range(of: String(match.0)) {
                     result[range].font = .body.bold()
                 }
@@ -343,7 +343,7 @@ extension MarkdownRenderer {
 
         // Italic *text* or _text_
         if let italicRegex = try? Regex(#"(?<!\*)\*([^*]+)\*(?!\*)"#) {
-            while let match = text.firstMatch(of: italicRegex) {
+            for match in text.matches(of: italicRegex) {
                 if let range = result.range(of: String(match.0)) {
                     result[range].font = .body.italic()
                 }
@@ -352,7 +352,7 @@ extension MarkdownRenderer {
 
         // Inline code `code`
         if let codeRegex = try? Regex(#"`([^`]+)`"#) {
-            while let match = text.firstMatch(of: codeRegex) {
+            for match in text.matches(of: codeRegex) {
                 if let range = result.range(of: String(match.0)) {
                     result[range].font = .system(.body, design: .monospaced)
                     result[range].backgroundColor = UIColor.tertiarySystemBackground

@@ -37,6 +37,9 @@ struct ChatMessage: Identifiable, Codable, Hashable {
     let role: Role
     let content: String
     let timestamp: Date
+    var feedbackRating: Int16
+    var citations: [Citation]
+    var status: Status
 
     enum Role: String, Codable {
         case user
@@ -44,18 +47,32 @@ struct ChatMessage: Identifiable, Codable, Hashable {
         case system
     }
 
+    enum Status: String, Codable {
+        case pending
+        case streaming
+        case complete
+        case aborted
+        case error
+    }
+
     init(
         id: UUID = UUID(),
         conversationId: UUID,
         role: Role,
         content: String,
-        timestamp: Date = Date()
+        timestamp: Date = Date(),
+        feedbackRating: Int16 = 0,
+        citations: [Citation] = [],
+        status: Status = .complete
     ) {
         self.id = id
         self.conversationId = conversationId
         self.role = role
         self.content = content
         self.timestamp = timestamp
+        self.feedbackRating = feedbackRating
+        self.citations = citations
+        self.status = status
     }
 
     var isUser: Bool {

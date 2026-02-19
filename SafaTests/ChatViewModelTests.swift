@@ -135,40 +135,24 @@ final class ChatViewModelTests: XCTestCase {
 
         // Then
         XCTAssertTrue(sut.messages.isEmpty)
-        XCTAssertFalse(sut.isGenerating)
     }
 
     func test_sendMessage_addsUserMessageImmediately() async {
         // Given
         sut.inputText = "Hello"
-        mockRepository.responseToReturn = ChatMessage(
-            conversationId: UUID(),
-            role: .assistant,
-            content: "Hi!"
-        )
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
 
-        // When - start message but check during
-        let task = Task {
-            await sut.sendMessage()
-        }
-
-        // Allow task to start
-        try? await Task.sleep(nanoseconds: 10_000_000)
+        // When
+        await sut.sendMessage()
 
         // Then - user message should be added
         XCTAssertTrue(sut.messages.contains { $0.content == "Hello" && $0.role == .user })
-
-        await task.value
     }
 
     func test_sendMessage_clearsInputText() async {
         // Given
         sut.inputText = "Hello"
-        mockRepository.responseToReturn = ChatMessage(
-            conversationId: UUID(),
-            role: .assistant,
-            content: "Hi!"
-        )
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
 
         // When
         await sut.sendMessage()
@@ -177,36 +161,18 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(sut.inputText.isEmpty)
     }
 
-    func test_sendMessage_success_addsResponseMessage() async {
+    // MARK: - Abort Turn Tests
+
+    func test_abortTurn_stopsGenerating() {
         // Given
-        sut.inputText = "Hello"
-        let expectedResponse = ChatMessage(
-            conversationId: UUID(),
-            role: .assistant,
-            content: "Hello! How can I help you?"
-        )
-        mockRepository.responseToReturn = expectedResponse
+        sut.isGenerating = true
 
         // When
-        await sut.sendMessage()
+        sut.abortTurn()
 
         // Then
-        XCTAssertTrue(sut.messages.contains { $0.content == "Hello! How can I help you?" })
         XCTAssertFalse(sut.isGenerating)
-    }
-
-    func test_sendMessage_failure_addsErrorMessage() async {
-        // Given
-        sut.inputText = "Hello"
-        mockRepository.errorToThrow = TestError.sendFailed
-
-        // When
-        await sut.sendMessage()
-
-        // Then
-        XCTAssertTrue(sut.messages.contains { $0.content.contains("error") })
-        XCTAssertNotNil(sut.error)
-        XCTAssertFalse(sut.isGenerating)
+        XCTAssertTrue(sut.isAborted)
     }
 
     // MARK: - Start New Conversation Tests
@@ -334,29 +300,9 @@ final class TestableChatRepository: ChatRepositoryProtocol {
     var activeConversationToReturn: Conversation?
     var conversationsToReturn: [Conversation] = []
     var messagesToReturn: [ChatMessage] = []
-    var responseToReturn: ChatMessage?
     var createdConversationToReturn: Conversation?
+    var savedMessages: [ChatMessage] = []
     var errorToThrow: Error?
-
-    nonisolated func sendMessage(_ message: String) async throws -> ChatMessage {
-        let error = await errorToThrow
-        let response = await responseToReturn
-        if let error {
-            throw error
-        }
-        return response ?? ChatMessage(
-            conversationId: UUID(),
-            role: .assistant,
-            content: "Default response"
-        )
-    }
-
-    nonisolated func sendMessageStreaming(_ message: String) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            continuation.yield("Response")
-            continuation.finish()
-        }
-    }
 
     nonisolated func getConversations() async throws -> [Conversation] {
         let error = await errorToThrow
@@ -403,6 +349,21 @@ final class TestableChatRepository: ChatRepositoryProtocol {
             throw error
         }
         return await activeConversationToReturn
+    }
+
+    nonisolated func saveMessage(_ message: ChatMessage) async throws {
+        let error = await errorToThrow
+        if let error {
+            throw error
+        }
+        await MainActor.run { savedMessages.append(message) }
+    }
+
+    nonisolated func updateConversation(_ conversation: Conversation) async throws {
+        let error = await errorToThrow
+        if let error {
+            throw error
+        }
     }
 
     nonisolated func clearHistory() async throws {

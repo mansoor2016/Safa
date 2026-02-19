@@ -83,7 +83,7 @@ enum RAGTopic: String, CaseIterable {
 
 // MARK: - RAG Service
 
-final class RAGService {
+final class RAGService: RAGServiceProtocol {
     // MARK: - Dependencies
     private let quranRepository: QuranRepositoryProtocol
     private let hadithRepository: HadithRepositoryProtocol
@@ -111,9 +111,22 @@ final class RAGService {
 
     // MARK: - Retrieve Context
 
-    func retrieveContext(for query: String) async -> RAGContext {
-        let topic = detectTopic(from: query)
-        let keywords = extractKeywords(from: query)
+    func retrieveContext(for query: String, context: ChatContext? = nil) async -> RAGContext {
+        let topic = context.map { mapChatTopic($0.topic) } ?? detectTopic(from: query)
+        var keywords = extractKeywords(from: query)
+
+        // Bias keywords from ChatContext if present
+        if let ctx = context {
+            if let surah = ctx.surahNumber {
+                keywords.append("surah \(surah)")
+            }
+            if let ayah = ctx.ayahNumber {
+                keywords.append("ayah \(ayah)")
+            }
+            if let hadithId = ctx.hadithId {
+                keywords.append("hadith \(hadithId)")
+            }
+        }
 
         async let quranResults = searchQuran(keywords: keywords, topic: topic)
         async let hadithResults = searchHadith(keywords: keywords, topic: topic)
@@ -126,6 +139,17 @@ final class RAGService {
             hadithReferences: hadithRefs,
             topic: topic
         )
+    }
+
+    /// Map ChatTopic to RAGTopic for context-biased retrieval.
+    private func mapChatTopic(_ chatTopic: ChatTopic) -> RAGTopic {
+        switch chatTopic {
+        case .quran: return .quran
+        case .hadith: return .hadith
+        case .fiqh: return .fiqh
+        case .seerah: return .seerah
+        case .general: return .general
+        }
     }
 
     // MARK: - Topic Detection

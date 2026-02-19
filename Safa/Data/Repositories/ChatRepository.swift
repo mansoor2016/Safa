@@ -1,181 +1,78 @@
 // MARK: - ChatRepository.swift
-// PURPOSE: Implementation of AI chat conversations and history
-// DEPENDENCIES: LLMService, ChatRepositoryProtocol
+// PURPOSE: Core Data persistence layer for AI chat conversations and messages
+// DATA SOURCE: Core Data (with one-time migration from UserDefaults)
+// NOTE: Generation/inference logic moved to ChatOrchestrator. This is persist-only.
 
 import Foundation
+import CoreData
 
 final class ChatRepository: ChatRepositoryProtocol {
     // MARK: - Dependencies
-    private let llmService: LLMService
+    private let coreData: CoreDataStack
 
-    // MARK: - Storage Keys
+    // MARK: - Legacy Storage Keys (for migration)
     private let conversationsKey = AppConstants.StorageKeys.chatConversations
     private let messagesKeyPrefix = AppConstants.StorageKeys.chatMessagesPrefix
     private let activeConversationKey = AppConstants.StorageKeys.chatActiveConversation
-
-    // MARK: - System Prompt
-    private let systemPrompt = """
-    You are the Safa AI Assistant, a knowledgeable and respectful companion for Muslims.
-
-    Your role is to:
-    - Answer questions about Islamic practices, duas, and daily worship
-    - Provide accurate information with sources (Quran verses, Hadith references)
-    - Be neutral on matters where scholars differ (mention different opinions)
-    - Recommend consulting a qualified scholar for complex fiqh matters
-    - Politely decline to discuss political topics
-
-    Always:
-    - Be respectful and kind
-    - Include Arabic text with transliteration and translation when relevant
-    - Cite sources (e.g., "Sahih Bukhari 1234", "Quran 2:255")
-    - Acknowledge when you're uncertain
-    """
+    private let migrationFlagKey = AppConstants.StorageKeys.chatMigratedToCoreData
 
     // MARK: - Init
-    init(llmService: LLMService) {
-        self.llmService = llmService
-    }
-
-    // MARK: - Send Message
-
-    func sendMessage(_ message: String) async throws -> ChatMessage {
-        // Get or create active conversation
-        var conversation: Conversation
-        if let existingConversation = try await getActiveConversation() {
-            conversation = existingConversation
-        } else {
-            conversation = try await createConversation()
-        }
-
-        // Save user message
-        let userMessage = ChatMessage(
-            conversationId: conversation.id,
-            role: .user,
-            content: message
-        )
-        try await saveMessage(userMessage)
-
-        // Generate response
-        let response = try await llmService.generateResponse(prompt: message, systemPrompt: systemPrompt)
-
-        // Save assistant message
-        let assistantMessage = ChatMessage(
-            conversationId: conversation.id,
-            role: .assistant,
-            content: response
-        )
-        try await saveMessage(assistantMessage)
-
-        // Update conversation
-        conversation.messageCount += 2
-        conversation.updatedAt = Date()
-        if conversation.title == nil && conversation.messageCount >= 2 {
-            conversation.title = generateTitle(from: message)
-        }
-        try await updateConversation(conversation)
-
-        return assistantMessage
-    }
-
-    func sendMessageStreaming(_ message: String) -> AsyncThrowingStream<String, Error> {
-        return AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    // Get or create active conversation
-                    var conversation: Conversation
-                    if let existingConversation = try await self.getActiveConversation() {
-                        conversation = existingConversation
-                    } else {
-                        conversation = try await self.createConversation()
-                    }
-
-                    // Save user message
-                    let userMessage = ChatMessage(
-                        conversationId: conversation.id,
-                        role: .user,
-                        content: message
-                    )
-                    try await saveMessage(userMessage)
-
-                    // Stream response
-                    var fullResponse = ""
-                    for try await chunk in llmService.generateResponseStreaming(prompt: message, systemPrompt: systemPrompt) {
-                        fullResponse += chunk
-                        continuation.yield(chunk)
-                    }
-
-                    // Save assistant message
-                    let assistantMessage = ChatMessage(
-                        conversationId: conversation.id,
-                        role: .assistant,
-                        content: fullResponse
-                    )
-                    try await saveMessage(assistantMessage)
-
-                    // Update conversation
-                    conversation.messageCount += 2
-                    conversation.updatedAt = Date()
-                    if conversation.title == nil && conversation.messageCount >= 2 {
-                        conversation.title = generateTitle(from: message)
-                    }
-                    try await updateConversation(conversation)
-
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
+    init(coreData: CoreDataStack = .shared) {
+        self.coreData = coreData
+        migrateFromUserDefaultsIfNeeded()
     }
 
     // MARK: - Conversations
 
     func getConversations() async throws -> [Conversation] {
-        guard let data = UserDefaults.standard.data(forKey: conversationsKey),
-              let conversations = try? JSONDecoder().decode([Conversation].self, from: data) else {
-            return []
+        try await coreData.viewContext.perform {
+            let request = ChatConversationMO.fetchRequest()
+            request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
+            let results = try self.coreData.viewContext.fetch(request)
+            return results.map { $0.toDomain() }
         }
-        return conversations.sorted { $0.updatedAt > $1.updatedAt }
     }
 
     func getConversation(id conversationId: String) async throws -> Conversation? {
-        let conversations = try await getConversations()
-        return conversations.first { $0.id.uuidString == conversationId }
+        guard let uuid = UUID(uuidString: conversationId) else { return nil }
+        return try await coreData.viewContext.perform {
+            try self.fetchConversationMO(id: uuid)?.toDomain()
+        }
     }
 
     func getMessages(forConversation conversationId: String) async throws -> [ChatMessage] {
-        let key = messagesKeyPrefix + conversationId
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let messages = try? JSONDecoder().decode([ChatMessage].self, from: data) else {
-            return []
+        guard let uuid = UUID(uuidString: conversationId) else { return [] }
+        return try await coreData.viewContext.perform {
+            guard let conversationMO = try self.fetchConversationMO(id: uuid) else { return [] }
+            let messageSet = conversationMO.messages as? Set<ChatMessageMO> ?? []
+            return messageSet
+                .map { $0.toDomain() }
+                .sorted { $0.timestamp < $1.timestamp }
         }
-        return messages.sorted { $0.timestamp < $1.timestamp }
     }
 
     func createConversation() async throws -> Conversation {
         let conversation = Conversation()
-        var conversations = try await getConversations()
-        conversations.append(conversation)
+        try await coreData.viewContext.perform {
+            let conversationMO = ChatConversationMO(context: self.coreData.viewContext)
+            conversationMO.update(from: conversation)
+            try self.coreData.viewContext.saveIfNeeded()
+        }
 
-        let data = try JSONEncoder().encode(conversations)
-        UserDefaults.standard.set(data, forKey: conversationsKey)
-
-        // Set as active
-        try await setActiveConversation(id: conversation.id.uuidString)
+        // Set as active (UserDefaults is thread-safe)
+        UserDefaults.standard.set(conversation.id.uuidString, forKey: activeConversationKey)
 
         return conversation
     }
 
     func deleteConversation(id conversationId: String) async throws {
-        var conversations = try await getConversations()
-        conversations.removeAll { $0.id.uuidString == conversationId }
-
-        let data = try JSONEncoder().encode(conversations)
-        UserDefaults.standard.set(data, forKey: conversationsKey)
-
-        // Delete messages
-        let messagesKey = messagesKeyPrefix + conversationId
-        UserDefaults.standard.removeObject(forKey: messagesKey)
+        guard let uuid = UUID(uuidString: conversationId) else { return }
+        try await coreData.viewContext.perform {
+            if let conversationMO = try self.fetchConversationMO(id: uuid) {
+                self.coreData.viewContext.delete(conversationMO)
+                try self.coreData.viewContext.saveIfNeeded()
+            }
+        }
 
         // Clear active if this was active
         if let active = UserDefaults.standard.string(forKey: activeConversationKey),
@@ -195,48 +92,210 @@ final class ChatRepository: ChatRepositoryProtocol {
         return try await getConversation(id: activeId)
     }
 
-    func clearHistory() async throws {
-        let conversations = try await getConversations()
+    // MARK: - Messages
 
-        // Delete all message stores
-        for conversation in conversations {
-            let messagesKey = messagesKeyPrefix + conversation.id.uuidString
-            UserDefaults.standard.removeObject(forKey: messagesKey)
+    func saveMessage(_ message: ChatMessage) async throws {
+        try await coreData.viewContext.perform {
+            guard let conversationMO = try self.fetchConversationMO(id: message.conversationId) else {
+                throw ChatError.conversationNotFound
+            }
+
+            if let existing = try self.fetchMessageMO(id: message.id) {
+                existing.update(from: message)
+            } else {
+                let messageMO = ChatMessageMO(context: self.coreData.viewContext)
+                messageMO.update(from: message)
+                messageMO.conversation = conversationMO
+            }
+
+            try self.coreData.viewContext.saveIfNeeded()
+        }
+    }
+
+    func updateConversation(_ conversation: Conversation) async throws {
+        try await coreData.viewContext.perform {
+            if let conversationMO = try self.fetchConversationMO(id: conversation.id) {
+                conversationMO.update(from: conversation)
+                try self.coreData.viewContext.saveIfNeeded()
+            }
+        }
+    }
+
+    // MARK: - Clear History
+
+    func clearHistory() async throws {
+        try await deleteAllData()
+    }
+
+    /// Batch delete all chat data from Core Data and clean up legacy UserDefaults keys.
+    func deleteAllData() async throws {
+        try await coreData.viewContext.perform {
+            let context = self.coreData.viewContext
+
+            // Batch delete conversations (cascade deletes messages)
+            let conversationRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "ChatConversationMO")
+            let conversationDelete = NSBatchDeleteRequest(fetchRequest: conversationRequest)
+            conversationDelete.resultType = .resultTypeObjectIDs
+            let convResult = try context.execute(conversationDelete) as? NSBatchDeleteResult
+
+            // Also batch delete messages explicitly (safety net for orphans)
+            let messageRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "ChatMessageMO")
+            let messageDelete = NSBatchDeleteRequest(fetchRequest: messageRequest)
+            messageDelete.resultType = .resultTypeObjectIDs
+            let msgResult = try context.execute(messageDelete) as? NSBatchDeleteResult
+
+            // Merge deleted object IDs into context to avoid stale in-memory objects
+            var deletedIDs: [NSManagedObjectID] = []
+            if let convIDs = convResult?.result as? [NSManagedObjectID] { deletedIDs.append(contentsOf: convIDs) }
+            if let msgIDs = msgResult?.result as? [NSManagedObjectID] { deletedIDs.append(contentsOf: msgIDs) }
+
+            if !deletedIDs.isEmpty {
+                NSManagedObjectContext.mergeChanges(
+                    fromRemoteContextSave: [NSDeletedObjectsKey: deletedIDs],
+                    into: [context]
+                )
+            }
+
+            context.reset()
         }
 
-        // Clear conversations
-        UserDefaults.standard.removeObject(forKey: conversationsKey)
+        // Clean up legacy UserDefaults keys
+        cleanupLegacyUserDefaultsKeys()
+
+        // Reset migration flag so future migration logic starts clean
+        UserDefaults.standard.removeObject(forKey: migrationFlagKey)
         UserDefaults.standard.removeObject(forKey: activeConversationKey)
     }
 
-    // MARK: - Private Helpers
+    // MARK: - Private Fetch Helpers
 
-    private func saveMessage(_ message: ChatMessage) async throws {
-        let key = messagesKeyPrefix + message.conversationId.uuidString
-        var messages = try await getMessages(forConversation: message.conversationId.uuidString)
-        messages.append(message)
-
-        let data = try JSONEncoder().encode(messages)
-        UserDefaults.standard.set(data, forKey: key)
+    private func fetchConversationMO(id: UUID) throws -> ChatConversationMO? {
+        let context = coreData.viewContext
+        let request = ChatConversationMO.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+        return try context.fetch(request).first
     }
 
-    private func updateConversation(_ conversation: Conversation) async throws {
-        var conversations = try await getConversations()
-        if let index = conversations.firstIndex(where: { $0.id == conversation.id }) {
-            conversations[index] = conversation
-        }
-
-        let data = try JSONEncoder().encode(conversations)
-        UserDefaults.standard.set(data, forKey: conversationsKey)
+    private func fetchMessageMO(id: UUID) throws -> ChatMessageMO? {
+        let context = coreData.viewContext
+        let request = ChatMessageMO.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+        return try context.fetch(request).first
     }
 
-    private func generateTitle(from message: String) -> String {
-        // Generate a short title from the first message
-        let words = message.split(separator: " ").prefix(5)
-        var title = words.joined(separator: " ")
-        if message.split(separator: " ").count > 5 {
-            title += "..."
+    // MARK: - UserDefaults → Core Data Migration
+
+    /// One-time, crash-safe, idempotent migration from UserDefaults to Core Data.
+    private func migrateFromUserDefaultsIfNeeded() {
+        // Step 1: Check flag
+        guard !UserDefaults.standard.bool(forKey: migrationFlagKey) else { return }
+
+        // Step 2: Read existing data from UserDefaults
+        guard let conversationsData = UserDefaults.standard.data(forKey: conversationsKey) else {
+            // No data key at all — nothing to migrate, set flag and return
+            UserDefaults.standard.set(true, forKey: migrationFlagKey)
+            return
         }
-        return title
+
+        guard let legacyConversations = try? JSONDecoder().decode([Conversation].self, from: conversationsData),
+              !legacyConversations.isEmpty else {
+            // Data key exists but decode failed or array is empty — don't set flag on decode failure.
+            // If the data is genuinely empty (decoded to []), set flag. Otherwise leave for retry.
+            if let decoded = try? JSONDecoder().decode([Conversation].self, from: conversationsData),
+               decoded.isEmpty {
+                UserDefaults.standard.set(true, forKey: migrationFlagKey)
+            }
+            // Decode failure: don't set flag — retry on next launch
+            return
+        }
+
+        let context = coreData.viewContext
+
+        // Step 3: Fetch-or-insert each conversation and its messages
+        context.performAndWait {
+            var expectedMessageCount = 0
+
+            for conversation in legacyConversations {
+                // Fetch-or-insert conversation
+                let conversationMO: ChatConversationMO
+                let convRequest = ChatConversationMO.fetchRequest()
+                convRequest.predicate = NSPredicate(format: "id == %@", conversation.id as CVarArg)
+                convRequest.fetchLimit = 1
+
+                if let existing = try? context.fetch(convRequest).first {
+                    conversationMO = existing
+                    conversationMO.update(from: conversation)
+                } else {
+                    conversationMO = ChatConversationMO(context: context)
+                    conversationMO.update(from: conversation)
+                }
+
+                // Load messages for this conversation
+                let messagesKey = messagesKeyPrefix + conversation.id.uuidString
+                if let messagesData = UserDefaults.standard.data(forKey: messagesKey),
+                   let legacyMessages = try? JSONDecoder().decode([ChatMessage].self, from: messagesData) {
+
+                    expectedMessageCount += legacyMessages.count
+
+                    for message in legacyMessages {
+                        // Fetch-or-insert message
+                        let msgRequest = ChatMessageMO.fetchRequest()
+                        msgRequest.predicate = NSPredicate(format: "id == %@", message.id as CVarArg)
+                        msgRequest.fetchLimit = 1
+
+                        if let existing = try? context.fetch(msgRequest).first {
+                            existing.update(from: message)
+                            existing.conversation = conversationMO
+                        } else {
+                            let messageMO = ChatMessageMO(context: context)
+                            messageMO.update(from: message)
+                            messageMO.conversation = conversationMO
+                        }
+                    }
+                }
+            }
+
+            // Step 4: Save
+            do {
+                try context.saveIfNeeded()
+            } catch {
+                // Save failed — return without setting flag, retry on next launch
+                return
+            }
+
+            // Step 5: Verify count
+            let convCount = (try? context.count(for: ChatConversationMO.fetchRequest())) ?? 0
+            let msgCount = (try? context.count(for: ChatMessageMO.fetchRequest())) ?? 0
+
+            guard convCount == legacyConversations.count else {
+                // Mismatch — don't set flag, don't delete keys, retry next launch
+                return
+            }
+
+            guard msgCount == expectedMessageCount else {
+                // Message count mismatch — don't set flag, retry next launch
+                return
+            }
+
+            // Step 6: Set flag
+            UserDefaults.standard.set(true, forKey: migrationFlagKey)
+
+            // Step 7: Delete legacy keys
+            cleanupLegacyUserDefaultsKeys()
+        }
+    }
+
+    /// Remove legacy UserDefaults chat keys.
+    private func cleanupLegacyUserDefaultsKeys() {
+        // Remove conversation list
+        UserDefaults.standard.removeObject(forKey: conversationsKey)
+
+        // Remove all message keys (prefix-based)
+        let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
+        for key in allKeys where key.hasPrefix(messagesKeyPrefix) {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
     }
 }

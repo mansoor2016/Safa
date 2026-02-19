@@ -216,6 +216,14 @@ enum SystemPrompts {
         return prompt
     }
 
+    // MARK: - Canned Fallback Responses
+
+    static let genericFallback = """
+    I apologize, but I'm unable to provide a response right now. Please try again or rephrase your question. For complex religious questions, I recommend consulting a qualified scholar. 🤲
+    """
+
+    static let cautionBannerText = "This topic may have varying scholarly interpretations. Sources are provided for your reference."
+
     // MARK: - Decline Templates
 
     static let politicalDecline = """

@@ -26,6 +26,8 @@ final class CoreDataStack {
         ) {
             let storeURL = appGroupURL.appendingPathComponent("\(Self.modelName).sqlite")
             let storeDescription = NSPersistentStoreDescription(url: storeURL)
+            storeDescription.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
+            storeDescription.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
             container.persistentStoreDescriptions = [storeDescription]
         } else {
             // App Group unavailable — fall back to in-memory store

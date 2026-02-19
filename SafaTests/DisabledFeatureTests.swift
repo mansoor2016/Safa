@@ -179,9 +179,9 @@ final class DisabledFeatureTests: XCTestCase {
     }
 
     func test_upcomingFeatures_areDisabledByDefault() {
-        // Features requiring Widget extension target or iOS 18.4+
+        // Features requiring Widget extension target or iOS 26+
         let upcomingFeatures: [Feature] = [
-            .aiCompanion,       // Requires iOS 18.4+
+            .aiCompanion,       // Requires iOS 26+
             .learning,          // Content not yet ready
             .ramadanMode,       // Debug override, not user-facing
             .interactiveWidgets  // Requires Widget extension target
