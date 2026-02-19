@@ -282,6 +282,179 @@ final class ChatViewModelTests: XCTestCase {
         // Then
         XCTAssertNotNil(sut.error)
     }
+
+    // MARK: - Feedback Tests
+
+    func test_saveFeedback_updatesMessageRating() {
+        // Given — add a completed assistant message
+        let conversationId = UUID()
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Response", status: .complete)
+        ]
+        let messageId = sut.messages[0].id
+
+        // When
+        sut.saveFeedback(messageId: messageId, rating: 1)
+
+        // Then
+        XCTAssertEqual(sut.messages[0].feedbackRating, 1)
+    }
+
+    func test_saveFeedback_togglesOff_whenSameRatingTapped() {
+        // Given
+        let conversationId = UUID()
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Response", feedbackRating: 1, status: .complete)
+        ]
+        let messageId = sut.messages[0].id
+
+        // When — tap the same rating again
+        sut.saveFeedback(messageId: messageId, rating: 1)
+
+        // Then — should toggle to 0
+        XCTAssertEqual(sut.messages[0].feedbackRating, 0)
+    }
+
+    func test_saveFeedback_switchesRating() {
+        // Given
+        let conversationId = UUID()
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Response", feedbackRating: 1, status: .complete)
+        ]
+        let messageId = sut.messages[0].id
+
+        // When — tap different rating
+        sut.saveFeedback(messageId: messageId, rating: -1)
+
+        // Then — should switch to new rating
+        XCTAssertEqual(sut.messages[0].feedbackRating, -1)
+    }
+
+    func test_saveFeedback_callsRepositoryUpdateFeedback() async {
+        // Given
+        let conversationId = UUID()
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Response", status: .complete)
+        ]
+        let messageId = sut.messages[0].id
+
+        // When
+        sut.saveFeedback(messageId: messageId, rating: 1)
+
+        // Wait for the fire-and-forget Task to complete
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // Then — repository should have received the update
+        XCTAssertEqual(mockRepository.feedbackUpdates.count, 1)
+        XCTAssertEqual(mockRepository.feedbackUpdates.first?.messageId, messageId)
+        XCTAssertEqual(mockRepository.feedbackUpdates.first?.rating, 1)
+    }
+
+    func test_saveFeedback_toggleCallsRepositoryWithZero() async {
+        // Given — already rated 1
+        let conversationId = UUID()
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Response", feedbackRating: 1, status: .complete)
+        ]
+        let messageId = sut.messages[0].id
+
+        // When — tap same rating to toggle off
+        sut.saveFeedback(messageId: messageId, rating: 1)
+
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // Then — repository should get rating 0
+        XCTAssertEqual(mockRepository.feedbackUpdates.count, 1)
+        XCTAssertEqual(mockRepository.feedbackUpdates.first?.rating, 0)
+    }
+
+    func test_saveFeedback_nonexistentMessageId_doesNotCrash() {
+        // Given — no messages
+        sut.messages = []
+
+        // When — call with a random ID (should be a no-op)
+        sut.saveFeedback(messageId: UUID(), rating: 1)
+
+        // Then — no crash, no updates
+        XCTAssertTrue(mockRepository.feedbackUpdates.isEmpty)
+    }
+
+    // MARK: - Context Threading Tests
+
+    func test_beginTurn_passesContextToOrchestrator() async {
+        // Given — ViewModel with a capturing orchestrator
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+        vm.pendingContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
+        vm.inputText = "Explain this ayah"
+
+        // When — beginTurn spawns a streaming task; wait for it to complete
+        await vm.beginTurn()
+        // Allow the streaming task to run and capture the request
+        try? await Task.sleep(for: .milliseconds(200))
+
+        // Then — orchestrator should have received the context
+        XCTAssertNotNil(capturingOrchestrator.lastRequest)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.topic, .quran)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.surahNumber, 2)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.ayahNumber, 255)
+    }
+
+    func test_beginTurn_clearsContextAfterUse() async {
+        // Given
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+        vm.pendingContext = ChatContext(topic: .dua, duaId: "dua_sleep_001")
+        vm.inputText = "Tell me about this dua"
+
+        // When — pendingContext is consumed synchronously in beginTurn before the Task spawns
+        await vm.beginTurn()
+
+        // Then — pendingContext should be nil after use
+        XCTAssertNil(vm.pendingContext, "pendingContext should be cleared after beginTurn consumes it")
+    }
+
+    func test_beginTurn_withoutContext_passesNilContext() async {
+        // Given — no pending context
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+        vm.inputText = "General question"
+
+        // When
+        await vm.beginTurn()
+        try? await Task.sleep(for: .milliseconds(200))
+
+        // Then — request context should be nil
+        XCTAssertNotNil(capturingOrchestrator.lastRequest)
+        XCTAssertNil(capturingOrchestrator.lastRequest?.context)
+    }
+}
+
+// MARK: - Capturing Chat Orchestrator
+
+/// Test double that captures the ChatRequest for inspection without performing real LLM work.
+@MainActor
+final class CapturingChatOrchestrator: ChatOrchestratorProtocol {
+    var lastRequest: ChatRequest?
+
+    nonisolated func process(_ request: ChatRequest) -> AsyncThrowingStream<OrchestratorEvent, Error> {
+        // Capture on main actor
+        let stream = AsyncThrowingStream<OrchestratorEvent, Error> { continuation in
+            Task { @MainActor in
+                self.lastRequest = request
+                continuation.yield(.completed(AIResponse(
+                    answer: "Test response",
+                    citations: [],
+                    confidence: .low
+                )))
+                continuation.finish()
+            }
+        }
+        return stream
+    }
 }
 
 // MARK: - Test Error
@@ -364,6 +537,16 @@ final class TestableChatRepository: ChatRepositoryProtocol {
         if let error {
             throw error
         }
+    }
+
+    var feedbackUpdates: [(messageId: UUID, rating: Int16)] = []
+
+    nonisolated func updateFeedback(messageId: UUID, rating: Int16) async throws {
+        let error = await errorToThrow
+        if let error {
+            throw error
+        }
+        await MainActor.run { feedbackUpdates.append((messageId: messageId, rating: rating)) }
     }
 
     nonisolated func clearHistory() async throws {

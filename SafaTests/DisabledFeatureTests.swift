@@ -206,4 +206,36 @@ final class DisabledFeatureTests: XCTestCase {
             XCTAssertTrue(feature.isEnabledByDefault, "\(feature.displayName) should be enabled by default")
         }
     }
+
+    // MARK: - AskSafaIntent Tests
+
+    func test_askSafaIntent_disabledFeature_doesNotSetPendingInput() async throws {
+        // Given: AI companion is disabled
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
+        let router = AppRouter.shared
+        router.pendingChatInput = nil
+
+        // When: Intent performs (returns early before navigate — safe in test)
+        let intent = AskSafaIntent()
+        intent.question = "What is wudu?"
+        _ = try await intent.perform()
+
+        // Then: Router should NOT have pending input
+        XCTAssertNil(router.pendingChatInput, "Disabled feature should not set pending input")
+    }
+
+    func test_pendingChatInput_isSetAndCleared() {
+        // Test the router property directly (navigate() crashes without SwiftUI host)
+        let router = AppRouter.shared
+
+        // When: Setting pending input
+        router.pendingChatInput = "What is wudu?"
+
+        // Then: Should be stored
+        XCTAssertEqual(router.pendingChatInput, "What is wudu?")
+
+        // When: Clearing
+        router.pendingChatInput = nil
+        XCTAssertNil(router.pendingChatInput)
+    }
 }

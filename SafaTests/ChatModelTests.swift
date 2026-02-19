@@ -199,12 +199,13 @@ final class ChatModelTests: XCTestCase {
     // MARK: - ChatTopic Tests
 
     func testChatTopicAllCases() {
-        XCTAssertEqual(ChatTopic.allCases.count, 5)
+        XCTAssertEqual(ChatTopic.allCases.count, 6)
         XCTAssertTrue(ChatTopic.allCases.contains(.general))
         XCTAssertTrue(ChatTopic.allCases.contains(.quran))
         XCTAssertTrue(ChatTopic.allCases.contains(.hadith))
         XCTAssertTrue(ChatTopic.allCases.contains(.fiqh))
         XCTAssertTrue(ChatTopic.allCases.contains(.seerah))
+        XCTAssertTrue(ChatTopic.allCases.contains(.dua))
     }
 
     func testChatTopicDisplayNames() {

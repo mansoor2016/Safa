@@ -32,6 +32,9 @@ protocol ChatRepositoryProtocol {
     /// Updates a conversation (title, messageCount, etc.)
     func updateConversation(_ conversation: Conversation) async throws
 
+    /// Updates the feedback rating on a message
+    func updateFeedback(messageId: UUID, rating: Int16) async throws
+
     /// Clears all chat history
     func clearHistory() async throws
 }

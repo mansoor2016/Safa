@@ -18,6 +18,6 @@ protocol CitationValidationServiceProtocol {
 /// This ensures the OutputSafetyService citation check passes in Phase 0 (no real validation yet).
 struct PassthroughCitationValidationService: CitationValidationServiceProtocol {
     func validate(citations: [Citation], ragContext: RAGContext) -> [Citation] {
-        citations.map { Citation(source: $0.source, reference: $0.reference, verified: true) }
+        citations.map { $0.withVerified(true) }
     }
 }

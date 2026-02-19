@@ -64,13 +64,14 @@ final class Dependencies {
         // Initialize RAG service (depends on repositories)
         self.ragService = RAGService(
             quranRepository: quranRepository,
-            hadithRepository: hadithRepository
+            hadithRepository: hadithRepository,
+            duaRepository: duaRepository
         )
 
         // Initialize AI pipeline services
         self.inputSafety = InputSafetyService()
         self.outputSafety = OutputSafetyService()
-        self.citationValidation = PassthroughCitationValidationService()
+        self.citationValidation = CitationValidationService()
         self.chatOrchestrator = ChatOrchestrator(
             llmService: llmService,
             ragService: ragService,

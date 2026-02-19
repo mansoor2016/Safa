@@ -388,16 +388,23 @@ struct HadithDetailView: View {
     private var actionsSection: some View {
         HStack(spacing: SafaSpacing.md) {
             Button {
-                // Share
+                let router = AppRouter.shared
+                router.pendingChatContext = ChatContext(
+                    topic: .hadith,
+                    hadithId: "\(hadith.collectionId)_\(hadith.hadithNumber)"
+                )
+                router.pendingChatInput = "Explain hadith #\(hadith.hadithNumber) from \(hadith.collectionId)"
+                dismiss()
+                router.navigate(to: .chat)
             } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label("Explain", systemImage: "sparkles")
             }
             .buttonStyle(.bordered)
 
             Button {
-                // Bookmark
+                // Share
             } label: {
-                Label("Save", systemImage: "bookmark")
+                Label("Share", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.bordered)
 

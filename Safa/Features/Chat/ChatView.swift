@@ -13,9 +13,6 @@ struct ChatView: View {
             if FeatureFlags.shared.isDisabled(.aiCompanion) {
                 // Defense-in-depth: router is the primary gate, but guard here too
                 AIUnavailableView(message: "AI Companion is coming soon.")
-            } else if !dependencies.llmService.availability.isAvailable {
-                // Show fallback for older iOS versions
-                AIUnavailableView(message: dependencies.llmService.availability.userMessage)
             } else if let viewModel = viewModel {
                 ChatContentView(viewModel: viewModel)
             } else {
@@ -23,11 +20,26 @@ struct ChatView: View {
             }
         }
         .task {
-            if viewModel == nil && dependencies.llmService.availability.isAvailable {
+            if viewModel == nil {
                 viewModel = ChatViewModel(
                     chatRepository: dependencies.chatRepository,
                     orchestrator: dependencies.chatOrchestrator
                 )
+            }
+
+            // Hydrate existing conversation BEFORE any auto-send —
+            // prevents beginTurn from creating a spurious new conversation.
+            await viewModel?.loadActiveConversation()
+
+            // Set context BEFORE prefillAndSend — beginTurn snapshots and clears
+            // pendingContext early, so it must already be set.
+            if let context = AppRouter.shared.pendingChatContext {
+                AppRouter.shared.pendingChatContext = nil
+                viewModel?.pendingContext = context
+            }
+            if let pending = AppRouter.shared.pendingChatInput {
+                AppRouter.shared.pendingChatInput = nil
+                viewModel?.prefillAndSend(pending)
             }
         }
     }
@@ -128,9 +140,8 @@ private struct ChatContentView: View {
             ConversationHistoryView(viewModel: viewModel)
                 .fullSheet()
         }
-        .task {
-            await viewModel.loadActiveConversation()
-        }
+        // Note: loadActiveConversation is called in ChatView's .task (before auto-send)
+        // to ensure proper hydration ordering. No separate .task needed here.
     }
 
     // MARK: - Messages View
@@ -150,7 +161,9 @@ private struct ChatContentView: View {
                                 CautionBanner(message: caution)
                             }
 
-                            MessageBubble(message: message)
+                            MessageBubble(message: message, onFeedback: { rating in
+                                viewModel.saveFeedback(messageId: message.id, rating: rating)
+                            })
                                 .id(message.id)
                         }
 
@@ -272,6 +285,7 @@ private struct ChatContentView: View {
 
 private struct MessageBubble: View {
     let message: ChatMessage
+    var onFeedback: ((Int16) -> Void)?
     @State private var showCopied = false
 
     var body: some View {
@@ -310,6 +324,15 @@ private struct MessageBubble: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
 
+                // Citation chips for AI messages
+                if !message.isUser && !message.citations.isEmpty {
+                    FlowLayout(spacing: 6) {
+                        ForEach(message.citations, id: \.self) { citation in
+                            CitationChip(citation: citation)
+                        }
+                    }
+                }
+
                 // Actions row for AI messages
                 if !message.isUser {
                     HStack(spacing: SafaSpacing.md) {
@@ -323,6 +346,20 @@ private struct MessageBubble: View {
                             }
                             .font(SafaTypography.labelSmall)
                             .foregroundColor(SafaColors.Fallback.secondaryText)
+                        }
+
+                        // Feedback thumbs (only for complete messages)
+                        if message.status == .complete {
+                            HStack(spacing: SafaSpacing.sm) {
+                                Button { onFeedback?(1) } label: {
+                                    Image(systemName: message.feedbackRating == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                }
+                                Button { onFeedback?(-1) } label: {
+                                    Image(systemName: message.feedbackRating == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                }
+                            }
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            .font(.subheadline)
                         }
 
                         // Timestamp
@@ -351,6 +388,78 @@ private struct MessageBubble: View {
         // Reset after 2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             showCopied = false
+        }
+    }
+}
+
+// MARK: - Citation Chip
+
+private struct CitationChip: View {
+    let citation: Citation
+
+    private var icon: String {
+        switch citation.type {
+        case .quran: return "book.fill"
+        case .hadith: return "quote.bubble.fill"
+        case .dua: return "hands.sparkles.fill"
+        case .none: return "book.fill"
+        }
+    }
+
+    private var isNavigable: Bool {
+        guard let type = citation.type else { return false }
+        switch type {
+        case .quran: return citation.surahNumber != nil
+        case .hadith: return citation.collectionId != nil
+        case .dua: return true
+        }
+    }
+
+    var body: some View {
+        Button {
+            navigateToCitation()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.caption2)
+
+                Text(citation.reference)
+                    .font(SafaTypography.labelSmall)
+                    .lineLimit(1)
+
+                if citation.verified {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.caption2)
+                        .foregroundColor(.green)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .clipShape(Capsule())
+            .foregroundColor(SafaColors.Fallback.secondaryText)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isNavigable)
+    }
+
+    private func navigateToCitation() {
+        let router = AppRouter.shared
+        guard let type = citation.type else { return }
+        switch type {
+        case .quran:
+            if let surah = citation.surahNumber, let ayah = citation.ayahNumber {
+                router.navigate(to: .ayah(surah: surah, ayah: ayah))
+            } else if let surah = citation.surahNumber {
+                router.navigate(to: .surah(number: surah))
+            }
+        case .hadith:
+            router.navigate(to: .hadith(
+                collection: citation.collectionId,
+                hadithId: citation.hadithNumber.map(String.init)
+            ))
+        case .dua:
+            router.navigate(to: .dhikr)
         }
     }
 }

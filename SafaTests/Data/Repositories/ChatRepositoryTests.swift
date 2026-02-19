@@ -170,6 +170,47 @@ final class ChatRepositoryTests: XCTestCase {
         XCTAssertFalse(UserDefaults.standard.bool(forKey: AppConstants.StorageKeys.chatMigratedToCoreData))
     }
 
+    // MARK: - Feedback Persistence
+
+    func test_updateFeedback_roundTrips() async throws {
+        let conversation = try await sut.createConversation()
+        let message = ChatMessage(
+            conversationId: conversation.id,
+            role: .assistant,
+            content: "Test response",
+            status: .complete
+        )
+        try await sut.saveMessage(message)
+
+        // When — update feedback to thumbs up
+        try await sut.updateFeedback(messageId: message.id, rating: 1)
+
+        // Then — fetch and verify
+        let messages = try await sut.getMessages(forConversation: conversation.id.uuidString)
+        let fetched = try XCTUnwrap(messages.first)
+        XCTAssertEqual(fetched.feedbackRating, 1)
+    }
+
+    func test_updateFeedback_togglesOff() async throws {
+        let conversation = try await sut.createConversation()
+        let message = ChatMessage(
+            conversationId: conversation.id,
+            role: .assistant,
+            content: "Test response",
+            status: .complete
+        )
+        try await sut.saveMessage(message)
+
+        // When — set to 1, then reset to 0
+        try await sut.updateFeedback(messageId: message.id, rating: 1)
+        try await sut.updateFeedback(messageId: message.id, rating: 0)
+
+        // Then — should be reset
+        let messages = try await sut.getMessages(forConversation: conversation.id.uuidString)
+        let fetched = try XCTUnwrap(messages.first)
+        XCTAssertEqual(fetched.feedbackRating, 0)
+    }
+
     // MARK: - Active Conversation
 
     func test_createConversation_setsAsActive() async throws {

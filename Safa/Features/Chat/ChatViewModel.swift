@@ -17,6 +17,7 @@ final class ChatViewModel {
     var showConversations = false
     var error: Error?
     var cautionMessage: String?
+    var pendingContext: ChatContext?
 
     // MARK: - Dependencies
     private let chatRepository: ChatRepositoryProtocol
@@ -105,10 +106,12 @@ final class ChatViewModel {
 
         // Run through orchestrator if available, otherwise fall back to simple send
         if orchestrator != nil {
+            let context = pendingContext
+            pendingContext = nil
             let request = ChatRequest(
                 text: text,
                 conversationId: conversationId,
-                context: nil,
+                context: context,
                 conversationHistory: messages
             )
 
@@ -190,6 +193,23 @@ final class ChatViewModel {
                 try? await chatRepository.saveMessage(abortedMessage)
             }
         }
+    }
+
+    // MARK: - Prefill and Send (for Siri intent / contextual entry points)
+
+    func prefillAndSend(_ text: String) {
+        inputText = text
+        Task { await beginTurn() }
+    }
+
+    // MARK: - Feedback
+
+    func saveFeedback(messageId: UUID, rating: Int16) {
+        guard let index = messages.firstIndex(where: { $0.id == messageId }) else { return }
+        // Toggle: tapping same thumb again resets to 0
+        let newRating: Int16 = messages[index].feedbackRating == rating ? 0 : rating
+        messages[index].feedbackRating = newRating
+        Task { try? await chatRepository.updateFeedback(messageId: messageId, rating: newRating) }
     }
 
     // MARK: - Legacy Send (backwards compat for existing UI)

@@ -35,6 +35,10 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | L | Women-focused prayer/fasting mode — period-aware prayer logging, optional reminder pause, and fiqh-safe UX copy |
 | L | Mosque timetable integration (Iqamah/Jama'ah support) — let users follow local mosque times alongside calculated times |
 | M | Progressive Learn rollout — ship ready tracks incrementally instead of keeping all Learn content gated |
+| S | Ramadan page prayer timetable — show the daily prayer schedule (same as Prayer page) on the Ramadan screen so users can see prayer times alongside fasting info |
+| S | Adhan sound selection in onboarding — present adhan toggle and sound picker during onboarding (currently only available in Settings post-onboarding) |
+| S | Remove "coming soon" features from onboarding — remove Mosque Mode preview and any disabled-feature placeholders from onboarding flow; onboarding should only show functional options |
+| M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss; users who enable prayer notifications want to be alerted. Explore longer/custom notification sounds, repeated alerts, or critical alert style to make non-adhan notifications harder to ignore |
 
 ## P2 — Later
 

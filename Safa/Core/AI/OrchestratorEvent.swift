@@ -36,16 +36,59 @@ struct AIResponse {
     }
 }
 
+/// Type of citation source for navigation routing.
+enum CitationType: String, Codable {
+    case quran
+    case hadith
+    case dua
+}
+
 /// A source citation attached to an AI response.
 struct Citation: Codable, Hashable {
     let source: String
     let reference: String
     let verified: Bool
+    let type: CitationType?
+    let surahNumber: Int?
+    let ayahNumber: Int?
+    let collectionId: String?
+    let hadithNumber: Int?
+    let duaId: String?
 
-    init(source: String, reference: String, verified: Bool = false) {
+    init(
+        source: String,
+        reference: String,
+        verified: Bool = false,
+        type: CitationType? = nil,
+        surahNumber: Int? = nil,
+        ayahNumber: Int? = nil,
+        collectionId: String? = nil,
+        hadithNumber: Int? = nil,
+        duaId: String? = nil
+    ) {
         self.source = source
         self.reference = reference
         self.verified = verified
+        self.type = type
+        self.surahNumber = surahNumber
+        self.ayahNumber = ayahNumber
+        self.collectionId = collectionId
+        self.hadithNumber = hadithNumber
+        self.duaId = duaId
+    }
+
+    func withVerified(_ verified: Bool) -> Citation {
+        Citation(
+            source: source,
+            reference: reference,
+            verified: verified,
+            type: type,
+            surahNumber: surahNumber,
+            ayahNumber: ayahNumber,
+            collectionId: collectionId,
+            hadithNumber: hadithNumber,
+            duaId: duaId
+        )
     }
 }
 

@@ -371,7 +371,11 @@ struct SettingsView: View {
     private func deleteAllData() async {
         let appGroupDefaults = UserDefaults(suiteName: AppConstants.appGroupId)
         DataDeletionService.deleteAllCategories(from: .standard, appGroupDefaults: appGroupDefaults)
-        try? await dependencies.chatRepository.clearHistory()
+        do {
+            try await dependencies.chatRepository.clearHistory()
+        } catch {
+            ToastService.shared.show(Toast(message: "Failed to delete chat history", type: .warning))
+        }
         await dependencies.userState.loadUserData()
     }
 }

@@ -346,6 +346,19 @@ struct DuaCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
+        .contextMenu {
+            Button {
+                let router = AppRouter.shared
+                router.pendingChatContext = ChatContext(
+                    topic: .dua,
+                    duaId: dua.id
+                )
+                router.pendingChatInput = "Tell me about this dua: \(dua.titleEnglish)"
+                router.navigate(to: .chat)
+            } label: {
+                Label("Learn about this dua", systemImage: "sparkles")
+            }
+        }
     }
 }
 

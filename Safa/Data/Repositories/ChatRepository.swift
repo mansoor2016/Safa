@@ -121,6 +121,18 @@ final class ChatRepository: ChatRepositoryProtocol {
         }
     }
 
+    // MARK: - Feedback
+
+    func updateFeedback(messageId: UUID, rating: Int16) async throws {
+        try await coreData.viewContext.perform {
+            guard let messageMO = try self.fetchMessageMO(id: messageId) else {
+                throw ChatError.conversationNotFound
+            }
+            messageMO.feedbackRating = rating
+            try self.coreData.viewContext.saveIfNeeded()
+        }
+    }
+
     // MARK: - Clear History
 
     func clearHistory() async throws {

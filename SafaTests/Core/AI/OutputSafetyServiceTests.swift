@@ -313,4 +313,43 @@ final class OutputSafetyServiceTests: XCTestCase {
         // Then
         assertFail(decision, containingReason: "sectarian")
     }
+
+    // MARK: - Additional Red-Team Output Cases
+
+    func test_missingCitationsOnReligiousGuidance_fails() {
+        // Given — Islamic guidance claims without any citations
+        let answer = "According to Islam, fasting is obligatory. The Prophet said you must fast the whole month."
+
+        // When
+        let decision = sut.validate(answer: answer, citations: [])
+
+        // Then
+        assertFail(decision, containingReason: "citation")
+    }
+
+    func test_politicalContentInResponse_fails() {
+        // Given — political content slipped into a response
+        let answer = "You should vote for candidates from the Republican Party who uphold religious values."
+
+        // When
+        let decision = sut.validate(answer: answer, citations: [])
+
+        // Then
+        assertFail(decision, containingReason: "political")
+    }
+
+    func test_violenceIncitement_fails() {
+        // Given — response that encourages harm
+        let answer = "You should overthrow the government and fight against the infidels."
+
+        // When
+        let decision = sut.validate(answer: answer, citations: [])
+
+        // Then — should catch either political or sectarian content
+        if case .fail = decision {
+            // Pass
+        } else {
+            XCTFail("Expected .fail for violence incitement")
+        }
+    }
 }

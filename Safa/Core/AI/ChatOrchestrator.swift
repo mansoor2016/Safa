@@ -87,7 +87,7 @@ final class ChatOrchestrator: ChatOrchestratorProtocol {
         let ragContext = await ragService.retrieveContext(for: request.text, context: request.context)
         continuation.yield(.ragContextRetrieved(
             topic: ragContext.topic,
-            sourceCount: ragContext.quranReferences.count + ragContext.hadithReferences.count
+            sourceCount: ragContext.quranReferences.count + ragContext.hadithReferences.count + ragContext.duaReferences.count
         ))
 
         try Task.checkCancellation()
@@ -151,17 +151,41 @@ final class ChatOrchestrator: ChatOrchestratorProtocol {
             if text.contains(pattern) {
                 citations.append(Citation(
                     source: "Quran",
-                    reference: "\(ref.surahName) \(ref.surahNumber):\(ref.ayahNumber)"
+                    reference: "\(ref.surahName) \(ref.surahNumber):\(ref.ayahNumber)",
+                    type: .quran,
+                    surahNumber: ref.surahNumber,
+                    ayahNumber: ref.ayahNumber
                 ))
             }
         }
 
         for ref in ragContext.hadithReferences {
-            let pattern = "\(ref.hadithNumber)"
-            if text.contains(pattern) {
+            let lowercaseText = text.lowercased()
+            // Require collection name or "hadith" keyword alongside the number
+            // to avoid false positives from bare numeric matches (e.g. "7 pillars" matching hadith #7)
+            let hasCollectionMention = lowercaseText.contains(ref.collection.lowercased())
+            let hasHadithKeyword = lowercaseText.contains("hadith \(ref.hadithNumber)")
+                || lowercaseText.contains("hadith #\(ref.hadithNumber)")
+                || lowercaseText.contains("hadith no. \(ref.hadithNumber)")
+                || lowercaseText.contains("hadeeth \(ref.hadithNumber)")
+            if hasCollectionMention || hasHadithKeyword {
                 citations.append(Citation(
                     source: ref.collection,
-                    reference: "\(ref.collection) \(ref.hadithNumber)"
+                    reference: "\(ref.collection) \(ref.hadithNumber)",
+                    type: .hadith,
+                    collectionId: ref.collection,
+                    hadithNumber: ref.hadithNumber
+                ))
+            }
+        }
+
+        for ref in ragContext.duaReferences {
+            if text.lowercased().contains(ref.title.lowercased()) || text.contains(ref.duaId) {
+                citations.append(Citation(
+                    source: "Dua",
+                    reference: ref.title,
+                    type: .dua,
+                    duaId: ref.duaId
                 ))
             }
         }

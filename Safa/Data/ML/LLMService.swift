@@ -1,9 +1,13 @@
 // MARK: - LLMService.swift
 // PURPOSE: On-device LLM inference for AI companion chat with Apple Foundation Models
-// DEPENDENCIES: CoreML, Foundation
+// DEPENDENCIES: Foundation, CoreML
 
 import Foundation
 import CoreML
+
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
 // MARK: - LLM Availability
 
@@ -49,13 +53,17 @@ final class LLMService: LLMServiceProtocol {
     }
 
     var availability: LLMAvailability {
-        // Check iOS version for Apple Foundation Models
+        #if canImport(FoundationModels)
         if #available(iOS 26, *) {
-            // TODO: Add device capability check when API is available
-            return .available
-        } else {
-            return .requiresNewerOS(minimumVersion: Self.minimumIOSVersion)
+            // Runtime check — false on simulator, true on supported device
+            if SystemLanguageModel.default.isAvailable {
+                return .available
+            }
+            return .unsupportedDevice
         }
+        #endif
+        // iOS 26 SDK available but running on older OS, OR SDK not available at all
+        return .requiresNewerOS(minimumVersion: Self.minimumIOSVersion)
     }
 
     // MARK: - Init
@@ -73,62 +81,82 @@ final class LLMService: LLMServiceProtocol {
 
         guard !isLoading && model == nil else { return }
 
-        isLoading = true
-        defer { isLoading = false }
-
-        // Apple Foundation Models integration placeholder
-        // When iOS 26 is available, this will use:
-        // import FoundationModels
-        // let session = LanguageModelSession()
-
-        // For now, simulate model loading
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
+        // For Foundation Models, no explicit model loading is needed —
+        // LanguageModelSession handles model lifecycle internally.
+        // This method exists for protocol compatibility and future use.
     }
 
     // MARK: - Generate Response
 
     func generateResponse(prompt: String, systemPrompt: String, context: ChatContext? = nil) async throws -> String {
-        // Check availability
         guard availability.isAvailable else {
             throw LLMError.unavailable(availability.userMessage)
         }
 
-        if !isModelLoaded {
-            try await loadModel()
+        #if canImport(FoundationModels)
+        if #available(iOS 26, *), availability.isAvailable {
+            return try await realFMResponse(prompt: prompt, systemPrompt: systemPrompt)
         }
+        #endif
 
-        // TODO: Replace with actual Apple Foundation Models inference
-        // When iOS 26 is available:
-        // let session = LanguageModelSession(systemPrompt: systemPrompt)
-        // let response = try await session.respond(to: prompt)
-        // return response.content
-
-        // For now, return placeholder response
         return generatePlaceholderResponse(for: prompt)
     }
 
     func generateResponseStreaming(prompt: String, systemPrompt: String, context: ChatContext? = nil) -> AsyncThrowingStream<String, Error> {
+        #if canImport(FoundationModels)
+        if #available(iOS 26, *), availability.isAvailable {
+            return realFMStream(prompt: prompt, systemPrompt: systemPrompt)
+        }
+        #endif
+
+        return placeholderStream(prompt: prompt)
+    }
+
+    // MARK: - Apple Foundation Models (iOS 26+)
+
+    #if canImport(FoundationModels)
+    @available(iOS 26, *)
+    private func realFMResponse(prompt: String, systemPrompt: String) async throws -> String {
+        let session = LanguageModelSession(instructions: systemPrompt)
+        let response = try await session.respond(to: prompt)
+        return response.content
+    }
+
+    @available(iOS 26, *)
+    private func realFMStream(prompt: String, systemPrompt: String) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let session = LanguageModelSession(instructions: systemPrompt)
+                    var previousContent = ""
+                    for try await snapshot in session.streamResponse(to: prompt) {
+                        try Task.checkCancellation()
+                        let currentContent = snapshot.content
+                        // Each snapshot contains cumulative text — yield only the new delta
+                        let newChunk = String(currentContent.dropFirst(previousContent.count))
+                        if !newChunk.isEmpty {
+                            continuation.yield(newChunk)
+                        }
+                        previousContent = currentContent
+                    }
+                    continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+    #endif
+
+    // MARK: - Placeholder Path (iOS <26 / Simulator)
+
+    private func placeholderStream(prompt: String) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let streamTask = Task {
                 do {
-                    // Check availability
-                    guard self.availability.isAvailable else {
-                        continuation.finish(throwing: LLMError.unavailable(self.availability.userMessage))
-                        return
-                    }
-
-                    if !self.isModelLoaded {
-                        try await self.loadModel()
-                    }
-
-                    // TODO: Replace with actual streaming when Apple FM is available
-                    // When iOS 26 is available:
-                    // let session = LanguageModelSession(systemPrompt: systemPrompt)
-                    // for try await chunk in session.streamResponse(to: prompt) {
-                    //     continuation.yield(chunk)
-                    // }
-
-                    // For now, stream placeholder response
                     let response = self.generatePlaceholderResponse(for: prompt)
                     let words = response.split(separator: " ")
 
@@ -173,8 +201,6 @@ final class LLMService: LLMServiceProtocol {
             **Translation:** In the name of Allah at the beginning and at the end
 
             **Source:** Sunan Abu Dawud 3767, graded Sahih
-
-            Saying Bismillah brings barakah (blessing) to your food! 🤲
             """
         }
 
@@ -194,8 +220,6 @@ final class LLMService: LLMServiceProtocol {
             10. **Wash feet** - Including ankles, three times each
 
             **Source:** Based on hadith in Sahih Bukhari and Sahih Muslim
-
-            Would you like me to explain any step in more detail? 🤲
             """
         }
 
@@ -223,7 +247,7 @@ final class LLMService: LLMServiceProtocol {
 
             **Source:** Based on hadith in Sahih Bukhari, Sahih Muslim, and scholarly consensus
 
-            For complex situations, please consult a qualified scholar. 🤲
+            For complex situations, please consult a qualified scholar.
             """
         }
 
@@ -251,13 +275,11 @@ final class LLMService: LLMServiceProtocol {
             Guide us along the Straight Path,
             the Path of those You have blessed—not those You are displeased with, or those who are astray.
 
-            **Virtues:** The Prophet ﷺ said: "Whoever does not recite Al-Fatiha in his prayer, his prayer is incomplete." (Sahih Bukhari 756)
-
-            Would you like me to explain the tafsir (interpretation) of any specific verse? 🤲
+            **Virtues:** The Prophet (peace be upon him) said: "Whoever does not recite Al-Fatiha in his prayer, his prayer is incomplete." (Sahih Bukhari 756)
             """
         }
 
-        // Default response with RAG citations if available
+        // Default response
         return """
         Thank you for your question. I'm Safa, your Islamic companion assistant.
 

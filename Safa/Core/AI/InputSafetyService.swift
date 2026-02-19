@@ -129,20 +129,29 @@ struct InputSafetyService: InputSafetyServiceProtocol {
             return .decline(refusalText: Self.jailbreakRefusal)
         }
 
-        // If ChatContext provides a topic, trust it (came from a contextual entry point
-        // like "Ask about this ayah"). Still classify text to catch off-topic/jailbreak,
-        // but use the context topic to avoid false off-topic declines.
+        // Classify topic from text
+        let topicResult = classifyTopic(sanitized)
+
+        // If ChatContext provides a topic (from a contextual entry point like
+        // "Ask about this ayah"), still enforce off-topic/political/medical/financial
+        // declines, but use the context topic for the Islamic topic decision
+        // to avoid false off-topic declines on short or ambiguous text.
         if let context {
-            switch context.topic {
-            case .fiqh:
-                return .allowWithCaution(warning: Self.cautionWarning)
-            case .quran, .hadith, .seerah, .general:
-                return .allow
+            switch topicResult {
+            case .decline(let reason):
+                // Off-topic content is declined even with context
+                return .decline(refusalText: reason)
+            case .caution, .allow:
+                // Use context topic to determine caution level
+                switch context.topic {
+                case .fiqh:
+                    return .allowWithCaution(warning: Self.cautionWarning)
+                case .quran, .hadith, .seerah, .dua, .general:
+                    return .allow
+                }
             }
         }
 
-        // Classify topic from text alone
-        let topicResult = classifyTopic(sanitized)
         switch topicResult {
         case .decline(let reason):
             return .decline(refusalText: reason)

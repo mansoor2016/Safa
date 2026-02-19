@@ -14,6 +14,8 @@ final class AppRouter {
     var activeAlert: AlertType?
     var pendingQuranTarget: QuranNavigationTarget?
     var pendingNotificationAction: NotificationAction?
+    var pendingChatInput: String?
+    var pendingChatContext: ChatContext?
 
     // MARK: - Injectable State
     var isRamadanActive: () -> Bool = {
@@ -109,6 +111,8 @@ final class AppRouter {
     func navigate(to destination: Destination) {
         // Gate AI companion behind feature flag
         if case .chat = destination, FeatureFlags.shared.isDisabled(.aiCompanion) {
+            pendingChatInput = nil
+            pendingChatContext = nil
             ToastService.shared.showComingSoon(Feature.aiCompanion.displayName)
             return
         }

@@ -115,6 +115,7 @@ final class ChatOrchestratorTests: XCTestCase {
                 arabic: "...", translation: "...", relevanceScore: 0.9
             )],
             hadithReferences: [],
+            duaReferences: [],
             topic: .quran
         )
         let orchestrator = makeOrchestrator(
@@ -146,6 +147,7 @@ final class ChatOrchestratorTests: XCTestCase {
                 arabic: "...", translation: "...", relevanceScore: 0.9
             )],
             hadithReferences: [],
+            duaReferences: [],
             topic: .quran
         )
         let orchestrator = makeOrchestrator(
@@ -176,6 +178,7 @@ final class ChatOrchestratorTests: XCTestCase {
                 narrator: "Umar", text: "Actions are by intentions.",
                 grading: "Sahih", relevanceScore: 0.95
             )],
+            duaReferences: [],
             topic: .hadith
         )
         let orchestrator = makeOrchestrator(
@@ -195,6 +198,58 @@ final class ChatOrchestratorTests: XCTestCase {
         XCTAssertNotNil(response)
         XCTAssertEqual(response?.citations.count, 1)
         XCTAssertEqual(response?.citations.first?.source, "Sahih al-Bukhari")
+    }
+
+    // MARK: - Dua Citation Extraction
+
+    func test_process_duaReferenceMatchedInResponse_extractsCitation() async throws {
+        // Given — RAG returns a dua reference, LLM echoes the dua title
+        let ragContext = RAGContext(
+            quranReferences: [],
+            hadithReferences: [],
+            duaReferences: [DuaReference(
+                duaId: "dua_sleep_001", title: "Dua before sleeping",
+                arabic: "...", translation: "...", source: nil,
+                relevanceScore: 0.8
+            )],
+            topic: .dua
+        )
+        let orchestrator = makeOrchestrator(
+            llmService: StubLLMService(chunks: ["The ", "Dua before sleeping ", "is recited at night."]),
+            ragService: StubRAGService(context: ragContext)
+        )
+
+        // When
+        let events = try await collectEvents(from: orchestrator.process(makeRequest(text: "What dua before sleep?")))
+
+        // Then
+        let response = events.compactMap { event -> AIResponse? in
+            if case .completed(let r) = event { return r }
+            return nil
+        }.first
+
+        XCTAssertNotNil(response)
+        XCTAssertEqual(response?.citations.count, 1, "Should extract dua citation from title match")
+        XCTAssertEqual(response?.citations.first?.type, .dua)
+        XCTAssertEqual(response?.citations.first?.duaId, "dua_sleep_001")
+    }
+
+    // MARK: - Context Threading Through Pipeline
+
+    func test_process_passesContextToRAGService() async throws {
+        // Given — RAG service that captures the context
+        let capturingRAG = CapturingRAGService()
+        let orchestrator = makeOrchestrator(ragService: capturingRAG)
+        let context = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
+        let request = ChatRequest(text: "Explain this ayah", conversationId: UUID(), context: context)
+
+        // When
+        _ = try await collectEvents(from: orchestrator.process(request))
+
+        // Then — RAG should receive the context
+        XCTAssertEqual(capturingRAG.lastContext?.topic, .quran)
+        XCTAssertEqual(capturingRAG.lastContext?.surahNumber, 2)
+        XCTAssertEqual(capturingRAG.lastContext?.ayahNumber, 255)
     }
 
     // MARK: - Cancellation Tests
@@ -263,12 +318,23 @@ private struct StubLLMService: LLMServiceProtocol {
     }
 }
 
+// MARK: - Capturing RAG Service
+
+private final class CapturingRAGService: RAGServiceProtocol {
+    var lastContext: ChatContext?
+
+    func retrieveContext(for query: String, context: ChatContext?) async -> RAGContext {
+        lastContext = context
+        return RAGContext(quranReferences: [], hadithReferences: [], duaReferences: [], topic: .general)
+    }
+}
+
 // MARK: - Stub RAG Service
 
 private struct StubRAGService: RAGServiceProtocol {
     let context: RAGContext
 
-    init(context: RAGContext = RAGContext(quranReferences: [], hadithReferences: [], topic: .general)) {
+    init(context: RAGContext = RAGContext(quranReferences: [], hadithReferences: [], duaReferences: [], topic: .general)) {
         self.context = context
     }
 

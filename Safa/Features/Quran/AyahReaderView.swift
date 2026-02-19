@@ -136,6 +136,7 @@ private struct AyahReaderContent: View {
                         ForEach(Array(viewModel.ayahs.enumerated()), id: \.element.id) { index, ayah in
                             AyahRow(
                                 ayah: ayah,
+                                surahNumber: surah.number,
                                 surahName: surah.nameEnglish,
                                 showTranslation: viewModel.showTranslation,
                                 isBookmarked: viewModel.isBookmarked(ayah),
@@ -391,6 +392,7 @@ private struct AyahReaderContent: View {
 
 private struct AyahRow: View {
     let ayah: Ayah
+    let surahNumber: Int
     let surahName: String
     let showTranslation: Bool
     let isBookmarked: Bool
@@ -441,6 +443,20 @@ private struct AyahRow: View {
             }
         }
         .padding(SafaSpacing.md)
+        .contextMenu {
+            Button {
+                let router = AppRouter.shared
+                router.pendingChatContext = ChatContext(
+                    topic: .quran,
+                    surahNumber: surahNumber,
+                    ayahNumber: ayah.ayahNumber
+                )
+                router.pendingChatInput = "Explain \(surahName) \(surahNumber):\(ayah.ayahNumber)"
+                router.navigate(to: .chat)
+            } label: {
+                Label("Ask about this ayah", systemImage: "sparkles")
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(formatAyahAccessibilityLabel(
             surahName: surahName,
