@@ -613,8 +613,21 @@
     "Category" : {
 
     },
+    "Caution: %@" : {
+
+    },
     "Choose a Greeting" : {
 
+    },
+    "Citation: %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Citation: %1$@%2$@"
+          }
+        }
+      }
     },
     "Clear" : {
 
@@ -681,7 +694,13 @@
     "Copied" : {
 
     },
+    "Copied to clipboard" : {
+
+    },
     "Copy" : {
+
+    },
+    "Copy message" : {
 
     },
     "Core Location" : {
@@ -837,7 +856,16 @@
     "Direction to Kaaba in Makkah" : {
 
     },
+    "Dislike response" : {
+
+    },
+    "Disliked" : {
+
+    },
     "Dismiss" : {
+
+    },
+    "Dismiss error" : {
 
     },
     "Don't ask again" : {
@@ -1013,6 +1041,9 @@
 
     },
     "Enter your assets and liabilities to calculate the Zakat due" : {
+
+    },
+    "Error: %@" : {
 
     },
     "Evening" : {
@@ -1356,6 +1387,12 @@
       }
     },
     "Level %lld" : {
+
+    },
+    "Like response" : {
+
+    },
+    "Liked" : {
 
     },
     "Live Activity" : {
@@ -1858,6 +1895,12 @@
     "Retention Period" : {
 
     },
+    "Retry" : {
+
+    },
+    "Retry last message" : {
+
+    },
     "Rotate your device to align with the Qibla direction" : {
 
     },
@@ -1874,6 +1917,9 @@
 
     },
     "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
+
+    },
+    "Safa is thinking" : {
 
     },
     "Save" : {
@@ -2029,6 +2075,9 @@
     "Stop Adhan" : {
 
     },
+    "Stop generating" : {
+
+    },
     "Storage Used" : {
 
     },
@@ -2123,6 +2172,9 @@
 
     },
     "Tap to log" : {
+
+    },
+    "Tap to navigate to source" : {
 
     },
     "Tap to Record" : {

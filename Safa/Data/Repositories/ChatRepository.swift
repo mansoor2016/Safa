@@ -177,6 +177,7 @@ final class ChatRepository: ChatRepositoryProtocol {
         // Reset migration flag so future migration logic starts clean
         UserDefaults.standard.removeObject(forKey: migrationFlagKey)
         UserDefaults.standard.removeObject(forKey: Self.migrationRetryKey)
+        UserDefaults.standard.removeObject(forKey: Self.migrationSchemaVersionKey)
         UserDefaults.standard.removeObject(forKey: activeConversationKey)
     }
 
@@ -205,11 +206,22 @@ final class ChatRepository: ChatRepositoryProtocol {
     /// If messages are permanently undecodable, finishes after max retries
     /// (successfully decoded messages are already persisted from earlier attempts).
     private static let migrationRetryKey = "chat_migration_retry_count"
+    private static let migrationSchemaVersionKey = "chat_migration_schema_version"
     private static let maxMigrationRetries = 3
+    /// Bump this when ChatMessage decode logic changes to auto-reset the retry counter.
+    private static let currentMigrationSchemaVersion = 1
 
     private func migrateFromUserDefaultsIfNeeded() {
         // Step 1: Check flag
         guard !UserDefaults.standard.bool(forKey: migrationFlagKey) else { return }
+
+        // Auto-recovery: if the schema version changed (new build with improved decode),
+        // reset the retry counter so migration gets another chance.
+        let storedSchemaVersion = UserDefaults.standard.integer(forKey: Self.migrationSchemaVersionKey)
+        if storedSchemaVersion != Self.currentMigrationSchemaVersion {
+            UserDefaults.standard.set(Self.currentMigrationSchemaVersion, forKey: Self.migrationSchemaVersionKey)
+            UserDefaults.standard.set(0, forKey: Self.migrationRetryKey)
+        }
 
         // Cap retries to avoid running migration on every launch for permanently bad data
         let retryCount = UserDefaults.standard.integer(forKey: Self.migrationRetryKey)

@@ -27,6 +27,9 @@ final class ChatViewModel {
     /// The assistant message ID for the current turn. Set when the placeholder is appended,
     /// cleared when the turn completes/aborts. Prevents abort from targeting old messages.
     var currentTurnAssistantId: UUID?
+    /// The conversation snapshot for the current turn. Used by commitTurn/abortTurn
+    /// so metadata updates target the correct conversation even if activeConversation changes.
+    private var currentTurnConversation: Conversation?
 
     // MARK: - Init
     init(chatRepository: ChatRepositoryProtocol, orchestrator: ChatOrchestratorProtocol? = nil) {
@@ -83,6 +86,7 @@ final class ChatViewModel {
         }
 
         let conversationId = activeConversation!.id
+        currentTurnConversation = activeConversation
 
         // Add user message to UI immediately
         let userMessage = ChatMessage(
@@ -156,21 +160,26 @@ final class ChatViewModel {
             do {
                 try await chatRepository.saveMessage(finalMessage)
 
-                // Update conversation metadata
-                if var conversation = activeConversation {
+                // Update conversation metadata on the turn's conversation (not activeConversation,
+                // which may have changed if the user switched conversations mid-stream)
+                if var conversation = currentTurnConversation {
                     conversation.messageCount += 2
                     conversation.updatedAt = Date()
                     if conversation.title == nil && conversation.messageCount >= 2 {
                         conversation.title = generateTitle(from: messages.first(where: { $0.role == .user })?.content ?? "")
                     }
                     try await chatRepository.updateConversation(conversation)
-                    activeConversation = conversation
+                    // Only update activeConversation if it still matches
+                    if activeConversation?.id == conversation.id {
+                        activeConversation = conversation
+                    }
                 }
             } catch {
                 self.error = error
             }
         }
 
+        currentTurnConversation = nil
         currentTurnAssistantId = nil
         isGenerating = false
     }
@@ -201,18 +210,23 @@ final class ChatViewModel {
             )
             messages[lastIndex] = abortedMessage
 
+            let turnConversation = currentTurnConversation
+            currentTurnConversation = nil
+
             Task {
                 try? await chatRepository.saveMessage(abortedMessage)
 
-                // Update conversation metadata
-                if var conversation = activeConversation {
+                // Update conversation metadata on the turn's conversation
+                if var conversation = turnConversation {
                     conversation.messageCount += 2
                     conversation.updatedAt = Date()
                     if conversation.title == nil && conversation.messageCount >= 2 {
                         conversation.title = generateTitle(from: messages.first(where: { $0.role == .user })?.content ?? "")
                     }
                     try? await chatRepository.updateConversation(conversation)
-                    activeConversation = conversation
+                    if activeConversation?.id == conversation.id {
+                        activeConversation = conversation
+                    }
                 }
             }
         }
@@ -268,6 +282,7 @@ final class ChatViewModel {
     // MARK: - Conversation Management
 
     func startNewConversation() async {
+        if isGenerating { abortTurn() }
         generationError = nil
         cautionMessage = nil
         do {
@@ -280,6 +295,7 @@ final class ChatViewModel {
     }
 
     func selectConversation(_ conversation: Conversation) async {
+        if isGenerating { abortTurn() }
         generationError = nil
         cautionMessage = nil
         do {

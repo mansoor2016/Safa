@@ -17,6 +17,7 @@ final class ChatRepositoryTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.chatConversations)
         UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.chatActiveConversation)
         UserDefaults.standard.removeObject(forKey: "chat_migration_retry_count")
+        UserDefaults.standard.removeObject(forKey: "chat_migration_schema_version")
         let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
         for key in allKeys where key.hasPrefix(AppConstants.StorageKeys.chatMessagesPrefix) {
             UserDefaults.standard.removeObject(forKey: key)
@@ -324,6 +325,61 @@ final class ChatRepositoryTests: XCTestCase {
 
         let messages = try await repo.getMessages(forConversation: conversation.id.uuidString)
         XCTAssertEqual(messages.first?.content, "Legacy message")
+    }
+
+    func test_migration_retryCapReached_setsFlagAndPreservesLegacyKeys() async throws {
+        sut = nil
+        cleanUserDefaults()
+        cleanCoreData()
+
+        // Simulate 3 failed retries (max) with current schema version
+        UserDefaults.standard.set(3, forKey: "chat_migration_retry_count")
+        UserDefaults.standard.set(1, forKey: "chat_migration_schema_version")
+        // Put legacy data that would normally trigger migration
+        let conversation = Conversation(title: "Stuck Chat")
+        let convData = try JSONEncoder().encode([conversation])
+        UserDefaults.standard.set(convData, forKey: AppConstants.StorageKeys.chatConversations)
+
+        _ = ChatRepository(coreData: .shared)
+
+        // Flag should be set (give up retrying)
+        XCTAssertTrue(
+            UserDefaults.standard.bool(forKey: AppConstants.StorageKeys.chatMigratedToCoreData),
+            "Flag should be set after max retries"
+        )
+        // Legacy keys should be preserved for potential future re-migration
+        XCTAssertNotNil(
+            UserDefaults.standard.data(forKey: AppConstants.StorageKeys.chatConversations),
+            "Legacy keys should be preserved when retry cap is reached"
+        )
+    }
+
+    func test_migration_schemaVersionBump_resetsRetryCounter() async throws {
+        sut = nil
+        cleanUserDefaults()
+        cleanCoreData()
+
+        // Simulate old schema version with exhausted retries
+        UserDefaults.standard.set(999, forKey: "chat_migration_schema_version")
+        UserDefaults.standard.set(3, forKey: "chat_migration_retry_count")
+
+        // Put valid legacy data so migration succeeds after reset
+        let conversation = Conversation(title: "Recoverable Chat")
+        let message = ChatMessage(conversationId: conversation.id, role: .user, content: "Recovered message")
+        let convData = try JSONEncoder().encode([conversation])
+        let msgData = try JSONEncoder().encode([message])
+        UserDefaults.standard.set(convData, forKey: AppConstants.StorageKeys.chatConversations)
+        UserDefaults.standard.set(msgData, forKey: AppConstants.StorageKeys.chatMessagesPrefix + conversation.id.uuidString)
+
+        let repo = ChatRepository(coreData: .shared)
+
+        // Schema version change should have reset retry counter and allowed migration
+        XCTAssertTrue(
+            UserDefaults.standard.bool(forKey: AppConstants.StorageKeys.chatMigratedToCoreData),
+            "Migration should succeed after schema version reset"
+        )
+        let conversations = try await repo.getConversations()
+        XCTAssertFalse(conversations.isEmpty, "Data should be migrated after schema version bump")
     }
 
     func test_migration_alreadyMigrated_skips() async throws {
