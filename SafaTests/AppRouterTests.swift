@@ -341,6 +341,63 @@ final class AppRouterTests: XCTestCase {
         XCTAssertEqual(sut.path.count, 1)
     }
 
+    // MARK: - Chat Launch Mode Tests
+
+    func test_pendingChatLaunchMode_defaultsToPreFillOnly() {
+        // Then — default value should be prefillOnly
+        if case .prefillOnly = sut.pendingChatLaunchMode {
+            // Expected
+        } else {
+            XCTFail("Default launch mode should be .prefillOnly")
+        }
+    }
+
+    func test_navigateToChat_whenDisabled_resetsLaunchMode() {
+        // Given — launch mode set to autoSend
+        sut.pendingChatLaunchMode = .autoSend
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When — navigate to chat (blocked)
+        sut.navigate(to: .chat)
+
+        // Then — launch mode reset to prefillOnly
+        if case .prefillOnly = sut.pendingChatLaunchMode {
+            // Expected
+        } else {
+            XCTFail("Launch mode should be reset to .prefillOnly when navigation is blocked")
+        }
+    }
+
+    // MARK: - Cross-Tab Chat Navigation Tests
+
+    func test_navigateToChat_switchesToHomeTab() {
+        // Given — AI enabled, on a different tab
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+        sut.selectedTab = "prayer"
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — tab switches to home
+        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func test_navigateToChat_fromMoreTab_switchesAndPushes() {
+        // Given — AI enabled, on more tab
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+        sut.selectedTab = "more"
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — switched to home tab with chat pushed
+        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
     // MARK: - Destination Enum Tests
 
     func testDestinationIsHashable() {

@@ -16,6 +16,7 @@ final class ChatRepositoryTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.chatMigratedToCoreData)
         UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.chatConversations)
         UserDefaults.standard.removeObject(forKey: AppConstants.StorageKeys.chatActiveConversation)
+        UserDefaults.standard.removeObject(forKey: "chat_migration_retry_count")
         let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
         for key in allKeys where key.hasPrefix(AppConstants.StorageKeys.chatMessagesPrefix) {
             UserDefaults.standard.removeObject(forKey: key)

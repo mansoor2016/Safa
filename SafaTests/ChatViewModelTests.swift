@@ -164,8 +164,11 @@ final class ChatViewModelTests: XCTestCase {
     // MARK: - Abort Turn Tests
 
     func test_abortTurn_stopsGenerating() {
-        // Given
+        // Given — must have currentTurnAssistantId for abort to take effect
+        let msg = ChatMessage(conversationId: UUID(), role: .assistant, content: "", status: .streaming)
         sut.isGenerating = true
+        sut.currentTurnAssistantId = msg.id
+        sut.messages = [msg]
 
         // When
         sut.abortTurn()
@@ -173,6 +176,7 @@ final class ChatViewModelTests: XCTestCase {
         // Then
         XCTAssertFalse(sut.isGenerating)
         XCTAssertTrue(sut.isAborted)
+        XCTAssertNil(sut.currentTurnAssistantId)
     }
 
     // MARK: - Start New Conversation Tests
@@ -430,6 +434,137 @@ final class ChatViewModelTests: XCTestCase {
         // Then — request context should be nil
         XCTAssertNotNil(capturingOrchestrator.lastRequest)
         XCTAssertNil(capturingOrchestrator.lastRequest?.context)
+    }
+
+    // MARK: - Dismiss Error Tests
+
+    func test_dismissError_clearsGenerationError() {
+        // Given — generation error is set
+        sut.generationError = TestError.sendFailed
+
+        // When
+        sut.dismissError()
+
+        // Then
+        XCTAssertNil(sut.generationError)
+    }
+
+    // MARK: - Retry Tests
+
+    func test_retryLastMessage_sendsNewTurn() async {
+        // Given — a conversation with a user message and a failed assistant message
+        let conversation = Conversation(title: "Test")
+        mockRepository.createdConversationToReturn = conversation
+        sut.activeConversation = conversation
+        sut.messages = [
+            ChatMessage(conversationId: conversation.id, role: .user, content: "What is wudu?"),
+            ChatMessage(conversationId: conversation.id, role: .assistant, content: "I apologize, but I encountered an error.", status: .complete)
+        ]
+        sut.generationError = TestError.sendFailed
+
+        // When
+        await sut.retryLastMessage()
+
+        // Then — generation error cleared, new messages added (original 2 + new user + new assistant)
+        XCTAssertNil(sut.generationError)
+        XCTAssertTrue(sut.messages.count > 2, "Retry should add new messages, not remove old ones")
+        // New user message should have the same content
+        let userMessages = sut.messages.filter { $0.role == .user }
+        XCTAssertEqual(userMessages.last?.content, "What is wudu?")
+    }
+
+    func test_retryLastMessage_clearsError() async {
+        // Given
+        let conversation = Conversation(title: "Test")
+        mockRepository.createdConversationToReturn = conversation
+        sut.activeConversation = conversation
+        sut.messages = [
+            ChatMessage(conversationId: conversation.id, role: .user, content: "Question")
+        ]
+        sut.generationError = TestError.sendFailed
+
+        // When
+        await sut.retryLastMessage()
+
+        // Then
+        XCTAssertNil(sut.generationError)
+    }
+
+    func test_retryLastMessage_noUserMessages_doesNothing() async {
+        // Given — no messages at all
+        sut.messages = []
+        sut.generationError = TestError.sendFailed
+
+        // When
+        await sut.retryLastMessage()
+
+        // Then — no crash, generationError remains (retry was a no-op)
+        XCTAssertNotNil(sut.generationError)
+        XCTAssertTrue(sut.messages.isEmpty)
+    }
+
+    // MARK: - Stop/Abort Tests
+
+    func test_abortTurn_marksCurrentTurnAssistantAsAborted() {
+        // Given — a streaming assistant message with currentTurnAssistantId set
+        let conversationId = UUID()
+        let assistantMsg = ChatMessage(conversationId: conversationId, role: .assistant, content: "Partial response...", status: .streaming)
+        sut.isGenerating = true
+        sut.currentTurnAssistantId = assistantMsg.id
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .user, content: "Question"),
+            assistantMsg
+        ]
+
+        // When
+        sut.abortTurn()
+
+        // Then — current turn's assistant message should have .aborted status
+        XCTAssertFalse(sut.isGenerating)
+        XCTAssertNil(sut.currentTurnAssistantId)
+        let lastAssistant = sut.messages.last(where: { $0.isAssistant })
+        XCTAssertEqual(lastAssistant?.status, .aborted)
+        XCTAssertEqual(lastAssistant?.content, "Partial response...")
+    }
+
+    func test_abortTurn_withoutCurrentTurnId_doesNotCorruptOldMessages() {
+        // Given — isGenerating is true but currentTurnAssistantId is nil
+        // (e.g. stop tapped during conversation creation, before placeholder appended)
+        let conversationId = UUID()
+        sut.isGenerating = true
+        sut.currentTurnAssistantId = nil
+        sut.messages = [
+            ChatMessage(conversationId: conversationId, role: .user, content: "Old question"),
+            ChatMessage(conversationId: conversationId, role: .assistant, content: "Old complete answer", status: .complete)
+        ]
+
+        // When
+        sut.abortTurn()
+
+        // Then — old assistant message should NOT be modified
+        let lastAssistant = sut.messages.last(where: { $0.isAssistant })
+        XCTAssertEqual(lastAssistant?.status, .complete, "Old message should not be corrupted")
+        XCTAssertEqual(lastAssistant?.content, "Old complete answer")
+    }
+
+    // MARK: - Force Error Tests
+
+    func test_forceError_setsErrorState() async {
+        // Given — ViewModel with orchestrator and forceError flag
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+        vm.inputText = "Test question"
+        vm.forceError = true
+
+        // When
+        await vm.beginTurn()
+        // Allow the streaming task to complete
+        try? await Task.sleep(for: .milliseconds(300))
+
+        // Then — generation error should be set
+        XCTAssertNotNil(vm.generationError)
+        XCTAssertFalse(vm.isGenerating)
     }
 
     // MARK: - Prefill + Context Ordering Tests (Gap 1)

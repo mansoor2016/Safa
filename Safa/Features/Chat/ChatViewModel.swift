@@ -16,6 +16,7 @@ final class ChatViewModel {
     var isAborted = false
     var showConversations = false
     var error: Error?
+    var generationError: Error?
     var cautionMessage: String?
     var pendingContext: ChatContext?
 
@@ -23,6 +24,9 @@ final class ChatViewModel {
     private let chatRepository: ChatRepositoryProtocol
     private let orchestrator: ChatOrchestratorProtocol?
     private var streamingTask: Task<Void, Never>?
+    /// The assistant message ID for the current turn. Set when the placeholder is appended,
+    /// cleared when the turn completes/aborts. Prevents abort from targeting old messages.
+    var currentTurnAssistantId: UUID?
 
     // MARK: - Init
     init(chatRepository: ChatRepositoryProtocol, orchestrator: ChatOrchestratorProtocol? = nil) {
@@ -33,6 +37,7 @@ final class ChatViewModel {
     // MARK: - Load Methods
 
     func loadActiveConversation() async {
+        generationError = nil
         cautionMessage = nil
         do {
             activeConversation = try await chatRepository.getActiveConversation()
@@ -58,11 +63,12 @@ final class ChatViewModel {
     /// Begin a new turn: add user message to UI, start pipeline.
     func beginTurn() async {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+        guard !text.isEmpty, !isGenerating else { return }
 
         inputText = ""
         isGenerating = true
         isAborted = false
+        generationError = nil
         cautionMessage = nil
 
         // Ensure we have a conversation
@@ -103,6 +109,7 @@ final class ChatViewModel {
             content: ""
         )
         messages.append(assistantMessage)
+        currentTurnAssistantId = assistantMessage.id
 
         let context = pendingContext
         pendingContext = nil
@@ -164,18 +171,24 @@ final class ChatViewModel {
             }
         }
 
+        currentTurnAssistantId = nil
         isGenerating = false
     }
 
     /// Abort the current turn: cancel the stream, mark message as aborted, stop generating.
+    /// Only targets the current turn's assistant message (via `currentTurnAssistantId`)
+    /// to prevent corrupting old messages if stop is tapped during early turn setup.
     func abortTurn() {
+        guard let turnId = currentTurnAssistantId else { return }
+
         isAborted = true
         streamingTask?.cancel()
         streamingTask = nil
+        currentTurnAssistantId = nil
         isGenerating = false
 
-        // Update the last assistant message status to .aborted and persist
-        if let lastIndex = messages.lastIndex(where: { $0.isAssistant }) {
+        // Update only the current turn's assistant message
+        if let lastIndex = messages.lastIndex(where: { $0.id == turnId }) {
             let msg = messages[lastIndex]
             let abortedMessage = ChatMessage(
                 id: msg.id,
@@ -190,9 +203,40 @@ final class ChatViewModel {
 
             Task {
                 try? await chatRepository.saveMessage(abortedMessage)
+
+                // Update conversation metadata
+                if var conversation = activeConversation {
+                    conversation.messageCount += 2
+                    conversation.updatedAt = Date()
+                    if conversation.title == nil && conversation.messageCount >= 2 {
+                        conversation.title = generateTitle(from: messages.first(where: { $0.role == .user })?.content ?? "")
+                    }
+                    try? await chatRepository.updateConversation(conversation)
+                    activeConversation = conversation
+                }
             }
         }
     }
+
+    // MARK: - Error Handling
+
+    func dismissError() {
+        generationError = nil
+    }
+
+    func retryLastMessage() async {
+        guard !isGenerating,
+              let lastUserMessage = messages.last(where: { $0.isUser }) else { return }
+        generationError = nil
+        inputText = lastUserMessage.content
+        await beginTurn()
+    }
+
+    // MARK: - Debug Support
+
+    #if DEBUG
+    var forceError: Bool = false
+    #endif
 
     // MARK: - Prefill and Send (for Siri intent / contextual entry points)
 
@@ -224,6 +268,7 @@ final class ChatViewModel {
     // MARK: - Conversation Management
 
     func startNewConversation() async {
+        generationError = nil
         cautionMessage = nil
         do {
             let conversation = try await chatRepository.createConversation()
@@ -235,6 +280,7 @@ final class ChatViewModel {
     }
 
     func selectConversation(_ conversation: Conversation) async {
+        generationError = nil
         cautionMessage = nil
         do {
             try await chatRepository.setActiveConversation(id: conversation.id.uuidString)
@@ -278,6 +324,9 @@ final class ChatViewModel {
         var fullContent = ""
 
         do {
+            #if DEBUG
+            if forceError { throw LLMError.generationFailed("Debug forced error") }
+            #endif
             for try await event in orchestrator.process(request) {
                 guard !isAborted else { break }
 
@@ -322,7 +371,7 @@ final class ChatViewModel {
             }
         } catch {
             if !isAborted {
-                self.error = error
+                self.generationError = error
                 commitTurn(
                     assistantMessage: assistantMessage,
                     content: "I apologize, but I encountered an error. Please try again.",

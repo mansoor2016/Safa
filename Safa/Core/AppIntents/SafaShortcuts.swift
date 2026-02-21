@@ -438,6 +438,7 @@ struct AskSafaIntent: AppIntent {
             return .result()
         }
         if let question {
+            AppRouter.shared.pendingChatLaunchMode = .autoSend
             AppRouter.shared.pendingChatInput = question
         }
         AppRouter.shared.navigate(to: .chat)

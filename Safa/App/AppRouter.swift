@@ -16,6 +16,13 @@ final class AppRouter {
     var pendingNotificationAction: NotificationAction?
     var pendingChatInput: String?
     var pendingChatContext: ChatContext?
+    var pendingChatLaunchMode: ChatLaunchMode = .prefillOnly
+
+    // MARK: - Chat Launch Mode
+    enum ChatLaunchMode {
+        case prefillOnly    // Contextual entries: fill input, user reviews before sending
+        case autoSend       // Siri intent: send immediately
+    }
 
     // MARK: - Injectable State
     var isRamadanActive: () -> Bool = {
@@ -113,8 +120,14 @@ final class AppRouter {
         if case .chat = destination, FeatureFlags.shared.isDisabled(.aiCompanion) {
             pendingChatInput = nil
             pendingChatContext = nil
+            pendingChatLaunchMode = .prefillOnly
             ToastService.shared.showComingSoon(Feature.aiCompanion.displayName)
             return
+        }
+
+        // Chat lives in the Home tab's NavigationStack — switch tab first
+        if case .chat = destination {
+            selectedTab = "home"
         }
 
         path.append(destination)

@@ -176,6 +176,7 @@ final class ChatRepository: ChatRepositoryProtocol {
 
         // Reset migration flag so future migration logic starts clean
         UserDefaults.standard.removeObject(forKey: migrationFlagKey)
+        UserDefaults.standard.removeObject(forKey: Self.migrationRetryKey)
         UserDefaults.standard.removeObject(forKey: activeConversationKey)
     }
 
@@ -200,9 +201,26 @@ final class ChatRepository: ChatRepositoryProtocol {
     // MARK: - UserDefaults → Core Data Migration
 
     /// One-time, crash-safe, idempotent migration from UserDefaults to Core Data.
+    /// Retries up to 3 times across app launches for transient failures.
+    /// If messages are permanently undecodable, finishes after max retries
+    /// (successfully decoded messages are already persisted from earlier attempts).
+    private static let migrationRetryKey = "chat_migration_retry_count"
+    private static let maxMigrationRetries = 3
+
     private func migrateFromUserDefaultsIfNeeded() {
         // Step 1: Check flag
         guard !UserDefaults.standard.bool(forKey: migrationFlagKey) else { return }
+
+        // Cap retries to avoid running migration on every launch for permanently bad data
+        let retryCount = UserDefaults.standard.integer(forKey: Self.migrationRetryKey)
+        if retryCount >= Self.maxMigrationRetries {
+            // Give up retrying — mark migration complete so we stop running on every launch.
+            // Preserve legacy keys: if a future build improves decoding, a manual
+            // re-migration can be triggered by clearing the flag.
+            UserDefaults.standard.set(true, forKey: migrationFlagKey)
+            return
+        }
+        UserDefaults.standard.set(retryCount + 1, forKey: Self.migrationRetryKey)
 
         // Step 2: Read existing data from UserDefaults
         guard let conversationsData = UserDefaults.standard.data(forKey: conversationsKey) else {
@@ -228,6 +246,7 @@ final class ChatRepository: ChatRepositoryProtocol {
         // Step 3: Fetch-or-insert each conversation and its messages
         context.performAndWait {
             var expectedMessageCount = 0
+            var hadDecodeFailures = false
 
             for conversation in legacyConversations {
                 // Fetch-or-insert conversation
@@ -246,8 +265,24 @@ final class ChatRepository: ChatRepositoryProtocol {
 
                 // Load messages for this conversation
                 let messagesKey = messagesKeyPrefix + conversation.id.uuidString
-                if let messagesData = UserDefaults.standard.data(forKey: messagesKey),
-                   let legacyMessages = try? JSONDecoder().decode([ChatMessage].self, from: messagesData) {
+                if let messagesData = UserDefaults.standard.data(forKey: messagesKey) {
+                    let decoder = JSONDecoder()
+                    // Fast path: decode entire array at once
+                    let legacyMessages: [ChatMessage]
+                    if let allMessages = try? decoder.decode([ChatMessage].self, from: messagesData) {
+                        legacyMessages = allMessages
+                    } else if let jsonArray = try? JSONSerialization.jsonObject(with: messagesData) as? [[String: Any]] {
+                        // Fallback: decode each message individually, skip failures
+                        legacyMessages = jsonArray.compactMap { dict in
+                            guard let data = try? JSONSerialization.data(withJSONObject: dict) else { return nil }
+                            return try? decoder.decode(ChatMessage.self, from: data)
+                        }
+                        if legacyMessages.count < jsonArray.count {
+                            hadDecodeFailures = true
+                        }
+                    } else {
+                        legacyMessages = []
+                    }
 
                     expectedMessageCount += legacyMessages.count
 
@@ -290,6 +325,11 @@ final class ChatRepository: ChatRepositoryProtocol {
                 // Message count mismatch — don't set flag, retry next launch
                 return
             }
+
+            // If any messages failed to decode, don't finalize migration.
+            // Successfully decoded messages are saved (so progress is preserved),
+            // but legacy keys are kept so a future app update can re-attempt.
+            guard !hadDecodeFailures else { return }
 
             // Step 6: Set flag
             UserDefaults.standard.set(true, forKey: migrationFlagKey)
