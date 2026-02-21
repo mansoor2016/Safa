@@ -22,16 +22,17 @@ enum LLMAvailability {
         return false
     }
 
+    /// Developer-facing description. Not shown in UI — entry points are hidden on unsupported devices.
     var userMessage: String {
         switch self {
         case .available:
             return "AI Companion is ready"
         case .requiresNewerOS(let version):
-            return "AI Companion requires iOS \(version) or later on a supported device (iPhone 16 or newer). Responses are currently based on a curated knowledge base."
+            return "Requires iOS \(version) or later on a supported device"
         case .unsupportedDevice:
-            return "Full AI requires iPhone 16 or newer with iOS 26. Responses are currently based on a curated knowledge base."
+            return "Requires iPhone 16 or newer with iOS 26"
         case .notConfigured:
-            return "AI Companion is getting ready. Responses are currently based on a curated knowledge base."
+            return "AI model not yet configured"
         }
     }
 }
@@ -55,14 +56,16 @@ final class LLMService: LLMServiceProtocol {
     var availability: LLMAvailability {
         #if canImport(FoundationModels)
         if #available(iOS 26, *) {
-            // Runtime check — false on simulator, true on supported device
+            // Runtime check — covers both device and simulator.
+            // On iOS 26 simulator: true (FM works). On older simulators: never reaches here.
+            // On physical device: true for iPhone 16+, false for older hardware.
             if SystemLanguageModel.default.isAvailable {
                 return .available
             }
             return .unsupportedDevice
         }
         #endif
-        // iOS 26 SDK available but running on older OS, OR SDK not available at all
+        // Running on iOS <26 (device or simulator), or SDK doesn't include FoundationModels
         return .requiresNewerOS(minimumVersion: Self.minimumIOSVersion)
     }
 
@@ -94,12 +97,14 @@ final class LLMService: LLMServiceProtocol {
         }
 
         #if canImport(FoundationModels)
-        if #available(iOS 26, *), availability.isAvailable {
+        if #available(iOS 26, *) {
             return try await realFMResponse(prompt: prompt, systemPrompt: systemPrompt)
         }
         #endif
 
-        return generatePlaceholderResponse(for: prompt)
+        // Unreachable in production — availability gate above ensures this.
+        // Kept for compiler completeness on non-FM SDK builds.
+        throw LLMError.unavailable(availability.userMessage)
     }
 
     func generateResponseStreaming(prompt: String, systemPrompt: String, context: ChatContext? = nil) -> AsyncThrowingStream<String, Error> {
@@ -109,7 +114,8 @@ final class LLMService: LLMServiceProtocol {
         }
         #endif
 
-        return placeholderStream(prompt: prompt)
+        // Unreachable in production — entry points hidden when FM unavailable.
+        return AsyncThrowingStream { $0.finish(throwing: LLMError.unavailable(self.availability.userMessage)) }
     }
 
     // MARK: - Apple Foundation Models (iOS 26+)
@@ -150,146 +156,6 @@ final class LLMService: LLMServiceProtocol {
         }
     }
     #endif
-
-    // MARK: - Placeholder Path (iOS <26 / Simulator)
-
-    private func placeholderStream(prompt: String) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            let streamTask = Task {
-                do {
-                    let response = self.generatePlaceholderResponse(for: prompt)
-                    let words = response.split(separator: " ")
-
-                    for word in words {
-                        try Task.checkCancellation()
-                        continuation.yield(String(word) + " ")
-                        try await Task.sleep(nanoseconds: 50_000_000) // 50ms per word
-                    }
-
-                    continuation.finish()
-                } catch is CancellationError {
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-
-            continuation.onTermination = { _ in
-                streamTask.cancel()
-            }
-        }
-    }
-
-    // MARK: - Private Methods
-
-    private func generatePlaceholderResponse(for prompt: String) -> String {
-        let lowercasePrompt = prompt.lowercased()
-
-        // Knowledge-based responses
-        if lowercasePrompt.contains("dua") && lowercasePrompt.contains("eating") {
-            return """
-            Before eating, the Prophet ﷺ taught us to say:
-
-            **Arabic:** بِسْمِ اللَّهِ
-            **Transliteration:** Bismillah
-            **Translation:** In the name of Allah
-
-            If you forget to say it at the beginning, you can say:
-
-            **Arabic:** بِسْمِ اللَّهِ فِي أَوَّلِهِ وَآخِرِهِ
-            **Transliteration:** Bismillahi fi awwalihi wa akhirihi
-            **Translation:** In the name of Allah at the beginning and at the end
-
-            **Source:** Sunan Abu Dawud 3767, graded Sahih
-            """
-        }
-
-        if lowercasePrompt.contains("wudu") || lowercasePrompt.contains("ablution") {
-            return """
-            The steps of Wudu (ablution) are:
-
-            1. **Intention (Niyyah)** - Make the intention in your heart
-            2. **Say Bismillah** - Begin in the name of Allah
-            3. **Wash hands** - Three times
-            4. **Rinse mouth** - Three times
-            5. **Rinse nose** - Three times
-            6. **Wash face** - Three times
-            7. **Wash arms** - Including elbows, three times each
-            8. **Wipe head** - Once
-            9. **Wipe ears** - Once
-            10. **Wash feet** - Including ankles, three times each
-
-            **Source:** Based on hadith in Sahih Bukhari and Sahih Muslim
-            """
-        }
-
-        if lowercasePrompt.contains("break") && lowercasePrompt.contains("fast") {
-            return """
-            Things that **break the fast**:
-
-            **Definitely break the fast:**
-            - Eating or drinking intentionally
-            - Sexual intercourse
-            - Intentional vomiting
-            - Menstruation or post-partum bleeding
-
-            **Do NOT break the fast:**
-            - Eating or drinking forgetfully
-            - Unintentional vomiting
-            - Blood tests or injections (scholars differ on IV drips with nutrients)
-            - Brushing teeth (be careful not to swallow water)
-            - Swimming or showering
-            - Using eye drops, ear drops (most scholars)
-
-            **Requires making up the fast:**
-            - If you broke your fast unintentionally, make up that day after Ramadan
-            - Consult a scholar for the specific kaffarah (expiation) required for intentional breaking
-
-            **Source:** Based on hadith in Sahih Bukhari, Sahih Muslim, and scholarly consensus
-
-            For complex situations, please consult a qualified scholar.
-            """
-        }
-
-        if lowercasePrompt.contains("fatiha") || lowercasePrompt.contains("opening") {
-            return """
-            **Surah Al-Fatiha (The Opening)**
-
-            This is the first surah of the Quran and is recited in every unit (rak'ah) of prayer. It is also known as "Umm al-Kitab" (Mother of the Book).
-
-            **Arabic:**
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-            الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ
-            الرَّحْمَٰنِ الرَّحِيمِ
-            مَالِكِ يَوْمِ الدِّينِ
-            إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ
-            اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ
-            صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ
-
-            **Translation:**
-            In the name of Allah, the Most Gracious, the Most Merciful.
-            All praise is for Allah—Lord of all worlds,
-            the Most Gracious, the Most Merciful,
-            Master of the Day of Judgment.
-            You alone we worship and You alone we ask for help.
-            Guide us along the Straight Path,
-            the Path of those You have blessed—not those You are displeased with, or those who are astray.
-
-            **Virtues:** The Prophet (peace be upon him) said: "Whoever does not recite Al-Fatiha in his prayer, his prayer is incomplete." (Sahih Bukhari 756)
-            """
-        }
-
-        // Default response
-        return """
-        Thank you for your question. I'm Safa, your Islamic companion.
-
-        I can help you explore topics across the Quran, hadith, fiqh, duas, and more. On devices with Apple Intelligence (iPhone 16 or newer running iOS 26), I provide personalised answers powered by on-device AI. On this device, my responses draw from a curated knowledge base.
-
-        Try asking about a specific topic — for example, "What is the dua before sleeping?" or "How many rakats in Fajr?"
-
-        **Note:** For complex religious rulings (fatawa), please consult a qualified scholar.
-        """
-    }
 }
 
 // MARK: - LLM Errors

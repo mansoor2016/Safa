@@ -104,25 +104,24 @@ final class ChatViewModel {
         )
         messages.append(assistantMessage)
 
-        // Run through orchestrator if available, otherwise fall back to simple send
-        if orchestrator != nil {
-            let context = pendingContext
-            pendingContext = nil
-            let request = ChatRequest(
-                text: text,
-                conversationId: conversationId,
-                context: context,
-                conversationHistory: messages
-            )
+        let context = pendingContext
+        pendingContext = nil
+        let request = ChatRequest(
+            text: text,
+            conversationId: conversationId,
+            context: context,
+            conversationHistory: messages
+        )
 
+        if orchestrator != nil {
             streamingTask = Task { [weak self] in
                 await self?.processOrchestrator(request: request, assistantMessage: assistantMessage)
             }
         } else {
-            // Legacy path: no orchestrator available (e.g. testing)
+            // Test-only path: orchestrator is always present in production
             commitTurn(
                 assistantMessage: assistantMessage,
-                content: "AI Companion requires iOS 26 or later.",
+                content: "No orchestrator configured.",
                 citations: []
             )
         }
