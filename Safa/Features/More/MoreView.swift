@@ -37,6 +37,13 @@ struct MoreView: View {
 
             // Knowledge & Tools
             Section("Knowledge & Tools") {
+                Button {
+                    router.navigate(to: .chat)
+                } label: {
+                    Label("Ask Safa", systemImage: "sparkles")
+                }
+                .disabledFeature(.aiCompanion)
+
                 NavigationLink {
                     NamesOfAllahView()
                 } label: {

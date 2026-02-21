@@ -12,10 +12,12 @@ final class AppRouterTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        FeatureFlags.shared.removeOverride(.aiCompanion)
         sut = AppRouter()
     }
 
     override func tearDown() {
+        FeatureFlags.shared.removeOverride(.aiCompanion)
         sut = nil
         super.tearDown()
     }
