@@ -12,10 +12,12 @@ final class AppRouterTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        FeatureFlags.shared.removeOverride(.aiCompanion)
         sut = AppRouter()
     }
 
     override func tearDown() {
+        FeatureFlags.shared.removeOverride(.aiCompanion)
         sut = nil
         super.tearDown()
     }
@@ -137,7 +139,18 @@ final class AppRouterTests: XCTestCase {
         XCTAssertEqual(sut.selectedTab, "learn")
     }
 
-    func testDeepLinkChat() {
+    func testDeepLinkChat_whenAIDisabled_returnsFalse() {
+        // AI companion is disabled by default, so deep link should return false
+        let url = URL(string: "safa://chat")!
+        XCTAssertFalse(sut.handleDeepLink(url))
+        XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
+    }
+
+    func testDeepLinkChat_whenAIEnabled_returnsTrue() {
+        // Enable AI companion via feature flag override
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+
         let url = URL(string: "safa://chat")!
         XCTAssertTrue(sut.handleDeepLink(url))
         XCTAssertEqual(sut.path.count, 1)
@@ -269,6 +282,120 @@ final class AppRouterTests: XCTestCase {
     func testSpotlightIdentifierFeatureUnknown() {
         XCTAssertFalse(sut.handleSpotlightIdentifier("feature_nonexistent"))
         XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    // MARK: - Blocked Chat Navigation Clears Pending State (Gap 4)
+
+    func testNavigateToChat_whenDisabled_clearsPendingInput() {
+        // Given — pending input was set (e.g. Siri intent set it before navigation)
+        sut.pendingChatInput = "How do I pray Fajr?"
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion), "AI should be disabled by default")
+
+        // When — attempt to navigate to chat
+        sut.navigate(to: .chat)
+
+        // Then — pending input cleared, path not appended
+        XCTAssertNil(sut.pendingChatInput, "Pending input should be cleared when navigation is blocked")
+        XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
+    }
+
+    func testNavigateToChat_whenDisabled_clearsPendingContext() {
+        // Given — pending context was set (e.g. contextual entry point set it)
+        sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then
+        XCTAssertNil(sut.pendingChatContext, "Pending context should be cleared when navigation is blocked")
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    func testNavigateToChat_whenDisabled_clearsBothPendingInputAndContext() {
+        // Given — both pending input and context set simultaneously
+        sut.pendingChatInput = "Explain this ayah"
+        sut.pendingChatContext = ChatContext(topic: .hadith, hadithId: "bukhari_1")
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — both cleared
+        XCTAssertNil(sut.pendingChatInput)
+        XCTAssertNil(sut.pendingChatContext)
+    }
+
+    func testNavigateToChat_whenEnabled_preservesPendingState() {
+        // Given — AI enabled, pending state set
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        sut.pendingChatInput = "How do I pray?"
+        sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 1)
+
+        // When — navigation succeeds
+        sut.navigate(to: .chat)
+
+        // Then — pending state preserved for ChatView to consume
+        XCTAssertEqual(sut.pendingChatInput, "How do I pray?")
+        XCTAssertNotNil(sut.pendingChatContext)
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    // MARK: - Chat Launch Mode Tests
+
+    func test_pendingChatLaunchMode_defaultsToPreFillOnly() {
+        // Then — default value should be prefillOnly
+        if case .prefillOnly = sut.pendingChatLaunchMode {
+            // Expected
+        } else {
+            XCTFail("Default launch mode should be .prefillOnly")
+        }
+    }
+
+    func test_navigateToChat_whenDisabled_resetsLaunchMode() {
+        // Given — launch mode set to autoSend
+        sut.pendingChatLaunchMode = .autoSend
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When — navigate to chat (blocked)
+        sut.navigate(to: .chat)
+
+        // Then — launch mode reset to prefillOnly
+        if case .prefillOnly = sut.pendingChatLaunchMode {
+            // Expected
+        } else {
+            XCTFail("Launch mode should be reset to .prefillOnly when navigation is blocked")
+        }
+    }
+
+    // MARK: - Cross-Tab Chat Navigation Tests
+
+    func test_navigateToChat_switchesToHomeTab() {
+        // Given — AI enabled, on a different tab
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+        sut.selectedTab = "prayer"
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — tab switches to home
+        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func test_navigateToChat_fromMoreTab_switchesAndPushes() {
+        // Given — AI enabled, on more tab
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+        sut.selectedTab = "more"
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — switched to home tab with chat pushed
+        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.path.count, 1)
     }
 
     // MARK: - Destination Enum Tests

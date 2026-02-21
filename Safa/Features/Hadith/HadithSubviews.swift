@@ -286,6 +286,7 @@ struct BookHadithListView: View {
 
 struct HadithDetailView: View {
     let hadith: Hadith
+    @Environment(Dependencies.self) private var dependencies
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -387,17 +388,24 @@ struct HadithDetailView: View {
 
     private var actionsSection: some View {
         HStack(spacing: SafaSpacing.md) {
-            Button {
-                // Share
-            } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
+            if dependencies.llmService.availability.isAvailable {
+                Button {
+                    let router = AppRouter.shared
+                    router.pendingChatContext = ChatContext(
+                        topic: .hadith,
+                        hadithId: "\(hadith.collectionId)_\(hadith.hadithNumber)"
+                    )
+                    router.pendingChatInput = "Explain hadith #\(hadith.hadithNumber) from \(hadith.collectionId)"
+                    dismiss()
+                    router.navigate(to: .chat)
+                } label: {
+                    Label("Explain", systemImage: "sparkles")
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
 
-            Button {
-                // Bookmark
-            } label: {
-                Label("Save", systemImage: "bookmark")
+            ShareLink(item: "\(hadith.textEnglish)\n\n— \(hadith.reference)") {
+                Label("Share", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.bordered)
 

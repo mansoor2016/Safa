@@ -89,9 +89,13 @@
         <attribute name="unlockedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
     <entity name="ChatMessageMO" representedClassName="ChatMessageMO" syncable="YES" codeGenerationType="class">
+        <attribute name="citationsJSON" optional="YES" attributeType="String"/>
         <attribute name="content" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="feedbackRating" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isFromUser" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="role" optional="YES" attributeType="String" defaultValueString="user"/>
+        <attribute name="status" optional="YES" attributeType="String" defaultValueString="complete"/>
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChatConversationMO" inverseName="messages" inverseEntity="ChatConversationMO"/>
     </entity>

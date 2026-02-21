@@ -72,7 +72,7 @@ enum Feature: String, CaseIterable {
 
     var isEnabledByDefault: Bool {
         switch self {
-        // Requires iOS 18.4+ for Apple Foundation Models
+        // Requires iOS 26+ for Apple Foundation Models
         case .aiCompanion:
             return false
         // Content not yet ready

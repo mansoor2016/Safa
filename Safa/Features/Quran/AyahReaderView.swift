@@ -20,7 +20,10 @@ struct AyahReaderView: View {
     var body: some View {
         Group {
             if let viewModel = viewModel {
-                AyahReaderContent(viewModel: viewModel)
+                AyahReaderContent(
+                    viewModel: viewModel,
+                    isAIAvailable: dependencies.llmService.availability.isAvailable
+                )
             } else {
                 LoadingView(message: "Loading surah...")
             }
@@ -42,6 +45,7 @@ struct AyahReaderView: View {
 
 private struct AyahReaderContent: View {
     @Bindable var viewModel: AyahReaderViewModel
+    let isAIAvailable: Bool
     @State private var autoScrollTimer: Timer?
     @State private var currentScrollIndex = 0
     @State private var isAutoScrollControlVisible = true
@@ -136,11 +140,13 @@ private struct AyahReaderContent: View {
                         ForEach(Array(viewModel.ayahs.enumerated()), id: \.element.id) { index, ayah in
                             AyahRow(
                                 ayah: ayah,
+                                surahNumber: surah.number,
                                 surahName: surah.nameEnglish,
                                 showTranslation: viewModel.showTranslation,
                                 isBookmarked: viewModel.isBookmarked(ayah),
                                 arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
                                 translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
+                                isAIAvailable: isAIAvailable,
                                 onBookmarkToggle: {
                                     Task {
                                         let wasAdded = await viewModel.toggleBookmark(ayah)
@@ -391,11 +397,13 @@ private struct AyahReaderContent: View {
 
 private struct AyahRow: View {
     let ayah: Ayah
+    let surahNumber: Int
     let surahName: String
     let showTranslation: Bool
     let isBookmarked: Bool
     let arabicFontSize: CGFloat
     let translationFontSize: CGFloat
+    let isAIAvailable: Bool
     let onBookmarkToggle: () -> Void
 
     var body: some View {
@@ -441,6 +449,22 @@ private struct AyahRow: View {
             }
         }
         .padding(SafaSpacing.md)
+        .contextMenu {
+            if isAIAvailable {
+                Button {
+                    let router = AppRouter.shared
+                    router.pendingChatContext = ChatContext(
+                        topic: .quran,
+                        surahNumber: surahNumber,
+                        ayahNumber: ayah.ayahNumber
+                    )
+                    router.pendingChatInput = "Explain \(surahName) \(surahNumber):\(ayah.ayahNumber)"
+                    router.navigate(to: .chat)
+                } label: {
+                    Label("Ask about this ayah", systemImage: "sparkles")
+                }
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(formatAyahAccessibilityLabel(
             surahName: surahName,

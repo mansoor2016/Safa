@@ -513,6 +513,9 @@
     "Ask a question..." : {
 
     },
+    "Ask about this ayah" : {
+
+    },
     "Ask Safa" : {
 
     },
@@ -610,8 +613,21 @@
     "Category" : {
 
     },
+    "Caution: %@" : {
+
+    },
     "Choose a Greeting" : {
 
+    },
+    "Citation: %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Citation: %1$@%2$@"
+          }
+        }
+      }
     },
     "Clear" : {
 
@@ -678,7 +694,13 @@
     "Copied" : {
 
     },
+    "Copied to clipboard" : {
+
+    },
     "Copy" : {
+
+    },
+    "Copy message" : {
 
     },
     "Core Location" : {
@@ -834,7 +856,16 @@
     "Direction to Kaaba in Makkah" : {
 
     },
+    "Dislike response" : {
+
+    },
+    "Disliked" : {
+
+    },
     "Dismiss" : {
+
+    },
+    "Dismiss error" : {
 
     },
     "Don't ask again" : {
@@ -975,6 +1006,9 @@
     "Eid Prayer: %@" : {
 
     },
+    "Enable AI Companion" : {
+
+    },
     "Enable Fajr Alarm" : {
 
     },
@@ -1009,6 +1043,9 @@
     "Enter your assets and liabilities to calculate the Zakat due" : {
 
     },
+    "Error: %@" : {
+
+    },
     "Evening" : {
 
     },
@@ -1019,6 +1056,9 @@
 
     },
     "Exit" : {
+
+    },
+    "Explain" : {
 
     },
     "Explanation" : {
@@ -1055,9 +1095,6 @@
 
     },
     "Failed to generate response: %@" : {
-
-    },
-    "Failed to load the AI model. Please try again." : {
 
     },
     "Failed to open database: %@" : {
@@ -1330,6 +1367,9 @@
     "Learn About Isra & Mi'raj" : {
 
     },
+    "Learn about this dua" : {
+
+    },
     "Lesson" : {
 
     },
@@ -1347,6 +1387,12 @@
       }
     },
     "Level %lld" : {
+
+    },
+    "Like response" : {
+
+    },
+    "Liked" : {
 
     },
     "Live Activity" : {
@@ -1849,13 +1895,19 @@
     "Retention Period" : {
 
     },
+    "Retry" : {
+
+    },
+    "Retry last message" : {
+
+    },
     "Rotate your device to align with the Qibla direction" : {
 
     },
     "Safa" : {
 
     },
-    "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nAchievement Notifications: Passive\n- Low priority, silent\n- Shown in Notification Center only\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa" : {
+    "Safa Focus Mode Configuration:\n\nPrayer Notifications: Time Sensitive\n- Will break through most Focus modes\n- Includes prayer time alerts\n\nStreak Reminders: Active\n- Regular notification priority\n- Can be filtered by Focus\n\nTo customize, go to:\nSettings > Focus > [Your Focus] > Apps > Safa" : {
 
     },
     "Safa is a comprehensive Islamic companion app designed with privacy, simplicity, and intelligence at its core." : {
@@ -1865,6 +1917,9 @@
 
     },
     "Safa is provided \"as is\" without warranty. We are not liable for spiritual decisions, missed prayers due to technical issues, or any indirect damages." : {
+
+    },
+    "Safa is thinking" : {
 
     },
     "Save" : {
@@ -2020,6 +2075,9 @@
     "Stop Adhan" : {
 
     },
+    "Stop generating" : {
+
+    },
     "Storage Used" : {
 
     },
@@ -2114,6 +2172,9 @@
 
     },
     "Tap to log" : {
+
+    },
+    "Tap to navigate to source" : {
 
     },
     "Tap to Record" : {
@@ -2289,6 +2350,9 @@
 
     },
     "Unable to load surah" : {
+
+    },
+    "Unable to load the AI model. Please restart the app and try again." : {
 
     },
     "Undo" : {

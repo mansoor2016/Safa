@@ -276,6 +276,7 @@ struct DuaListView: View {
 // MARK: - Dua Card
 
 struct DuaCard: View {
+    @Environment(Dependencies.self) private var dependencies
     let dua: Dua
     var isFavorite: Bool = false
     var onToggleFavorite: (() -> Void)? = nil
@@ -346,6 +347,21 @@ struct DuaCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
+        .contextMenu {
+            if dependencies.llmService.availability.isAvailable {
+                Button {
+                    let router = AppRouter.shared
+                    router.pendingChatContext = ChatContext(
+                        topic: .dua,
+                        duaId: dua.id
+                    )
+                    router.pendingChatInput = "Tell me about this dua: \(dua.titleEnglish)"
+                    router.navigate(to: .chat)
+                } label: {
+                    Label("Learn about this dua", systemImage: "sparkles")
+                }
+            }
+        }
     }
 }
 

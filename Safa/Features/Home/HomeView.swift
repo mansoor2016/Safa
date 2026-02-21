@@ -148,8 +148,15 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { router.navigate(to: .settings) } label: {
-                    Image(systemName: "gearshape")
+                HStack(spacing: SafaSpacing.sm) {
+                    if dependencies.llmService.availability.isAvailable {
+                        Button { router.navigate(to: .chat) } label: {
+                            Image(systemName: "sparkles")
+                        }
+                    }
+                    Button { router.navigate(to: .settings) } label: {
+                        Image(systemName: "gearshape")
+                    }
                 }
             }
         }

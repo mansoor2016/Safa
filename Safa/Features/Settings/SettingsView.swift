@@ -264,6 +264,7 @@ struct SettingsView: View {
     @State private var forceRamadan = false
     @State private var forceEidAlFitr = false
     @State private var forceEidAlAdha = false
+    @State private var enableAICompanion = false
     @State private var isDeveloperExpanded = false
 
     private var ramadanBannerDismissKey: String {
@@ -325,6 +326,18 @@ struct SettingsView: View {
                     }
 
 
+                Toggle("Enable AI Companion", isOn: $enableAICompanion)
+                    .onAppear {
+                        enableAICompanion = FeatureFlags.shared.isEnabled(.aiCompanion)
+                    }
+                    .onChange(of: enableAICompanion) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.aiCompanion)
+                        }
+                    }
+
                 Button("Test Prayer Notification (5s)") {
                     Task {
                         let prefs = PreferencesManager.loadPreferencesSync()
@@ -371,7 +384,11 @@ struct SettingsView: View {
     private func deleteAllData() async {
         let appGroupDefaults = UserDefaults(suiteName: AppConstants.appGroupId)
         DataDeletionService.deleteAllCategories(from: .standard, appGroupDefaults: appGroupDefaults)
-        try? await dependencies.chatRepository.clearHistory()
+        do {
+            try await dependencies.chatRepository.clearHistory()
+        } catch {
+            ToastService.shared.show(Toast(message: "Failed to delete chat history", type: .warning))
+        }
         await dependencies.userState.loadUserData()
     }
 }

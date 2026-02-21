@@ -164,6 +164,17 @@ enum SystemPrompts {
     Adapt your explanations to be educational and encouraging. Break down complex topics.
     """
 
+    static let duaContext = """
+    The user is asking about duas (supplications) and dhikr (remembrance of Allah). They may ask about:
+    - Specific duas for occasions (travel, eating, sleeping, etc.)
+    - Meanings and explanations of duas
+    - When and how to recite specific duas
+    - Virtues and rewards of certain supplications
+    - Dhikr practices (morning/evening adhkar, tasbeeh)
+
+    Always provide: Arabic text, transliteration, English translation, and source reference when available.
+    """
+
     // MARK: - RAG Context Injection
 
     static let ragInstructions = """
@@ -208,6 +219,11 @@ enum SystemPrompts {
                 prompt += "\nUser has a fiqh (Islamic jurisprudence) question."
             case .seerah:
                 prompt += "\nUser is learning about the life of the Prophet ﷺ."
+            case .dua:
+                prompt += duaContext
+                if let duaId = context.duaId {
+                    prompt += "\nUser is asking about dua ID: \(duaId)."
+                }
             case .general:
                 break
             }
@@ -215,6 +231,14 @@ enum SystemPrompts {
 
         return prompt
     }
+
+    // MARK: - Canned Fallback Responses
+
+    static let genericFallback = """
+    I apologize, but I'm unable to provide a response right now. Please try again or rephrase your question. For complex religious questions, I recommend consulting a qualified scholar. 🤲
+    """
+
+    static let cautionBannerText = "This topic may have varying scholarly interpretations. Sources are provided for your reference."
 
     // MARK: - Decline Templates
 

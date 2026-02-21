@@ -95,19 +95,21 @@ final class DataDeletionTests: XCTestCase {
 
     // MARK: - Chat History Deletion
 
-    func test_deleteChatHistory_clearsConversations() {
-        // Given
+    func test_deleteChatHistory_doesNotTouchUserDefaults() {
+        // Chat history deletion is now handled by ChatRepository (Core Data),
+        // not by the UserDefaults-based DataDeletionService.
+        // Given — legacy chat keys still in UserDefaults
         testDefaults.set(["conv1"], forKey: AppConstants.StorageKeys.chatConversations)
         testDefaults.set("conv1", forKey: AppConstants.StorageKeys.chatActiveConversation)
-        testDefaults.set(["msg1"], forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)conv1")
 
         // When
         DataDeletionService.deleteCategory(.chatHistory, from: testDefaults)
 
-        // Then
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatConversations))
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatActiveConversation))
-        XCTAssertNil(testDefaults.object(forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)conv1"))
+        // Then — UserDefaults keys are untouched (Core Data handles actual deletion)
+        XCTAssertNotNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatConversations),
+                        "Chat deletion is now via Core Data; UserDefaults keys should remain")
+        XCTAssertNotNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatActiveConversation),
+                        "Chat deletion is now via Core Data; UserDefaults keys should remain")
     }
 
     // MARK: - Streaks & Progress Deletion
@@ -161,9 +163,6 @@ final class DataDeletionTests: XCTestCase {
         testDefaults.set("pos", forKey: AppConstants.StorageKeys.quranProgress)
         testDefaults.set("pos", forKey: AppConstants.StorageKeys.lastQuranPosition)
         testDefaults.set(["h"], forKey: AppConstants.StorageKeys.hadithBookmarks)
-        testDefaults.set(["c"], forKey: AppConstants.StorageKeys.chatConversations)
-        testDefaults.set("a", forKey: AppConstants.StorageKeys.chatActiveConversation)
-        testDefaults.set(["m"], forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1")
         testDefaults.set("s", forKey: AppConstants.StorageKeys.userStats)
         testDefaults.set("st", forKey: AppConstants.StorageKeys.userStreaks)
         testDefaults.set(true, forKey: "com.safa.hasanat.awarded.prayer_2026-01-01")
@@ -175,15 +174,12 @@ final class DataDeletionTests: XCTestCase {
         // When
         DataDeletionService.deleteAllCategories(from: testDefaults)
 
-        // Then - all cleared
+        // Then - UserDefaults-backed categories cleared
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.prayerLogs))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.quranBookmarks))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.quranProgress))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.lastQuranPosition))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.hadithBookmarks))
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatConversations))
-        XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.chatActiveConversation))
-        XCTAssertNil(testDefaults.object(forKey: "\(AppConstants.StorageKeys.chatMessagesPrefix)c1"))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStats))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.userStreaks))
         XCTAssertNil(testDefaults.object(forKey: "com.safa.hasanat.awarded.prayer_2026-01-01"))
@@ -191,6 +187,7 @@ final class DataDeletionTests: XCTestCase {
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanFastingDays))
         XCTAssertNil(testDefaults.object(forKey: AppConstants.StorageKeys.ramadanTaraweehDays))
         XCTAssertNil(testDefaults.object(forKey: "dailyGoals_2026-01-01"))
+        // Note: Chat history deletion is handled separately by ChatRepository (Core Data)
     }
 
     // MARK: - Edge Cases
@@ -259,12 +256,12 @@ final class DataDeletionTests: XCTestCase {
     // MARK: - Category Isolation Matrix
 
     func test_deletingOneCategory_doesNotAffectOthers() {
-        // Given - populate one key per category
+        // Given - populate one key per category (only UserDefaults-backed categories)
+        // chatHistory is excluded because its deletion is handled by Core Data, not UserDefaults
         let categoryKeys: [(DataCategory, String)] = [
             (.prayerHistory, AppConstants.StorageKeys.prayerLogs),
             (.quranProgress, AppConstants.StorageKeys.quranBookmarks),
             (.hadithBookmarks, AppConstants.StorageKeys.hadithBookmarks),
-            (.chatHistory, AppConstants.StorageKeys.chatConversations),
             (.streaksAndProgress, AppConstants.StorageKeys.userStats),
             (.ramadanData, AppConstants.StorageKeys.ramadanFastingDays),
         ]
@@ -301,12 +298,23 @@ final class DataDeletionTests: XCTestCase {
 
     // MARK: - DataCategory Coverage
 
-    func test_allCategories_haveStorageKeys() {
+    func test_allCategories_haveStorageKeysOrCoreDateDeletion() {
+        // chatHistory uses Core Data deletion (via ChatRepository) instead of UserDefaults keys
+        let coreDataCategories: Set<DataCategory> = [.chatHistory]
+
         for category in DataCategory.allCases {
-            XCTAssertFalse(
-                category.storageKeys.isEmpty,
-                "\(category.displayName) should have at least one storage key"
-            )
+            if coreDataCategories.contains(category) {
+                // These categories handle deletion via Core Data, not UserDefaults
+                XCTAssertTrue(
+                    category.storageKeys.isEmpty,
+                    "\(category.displayName) should have empty storage keys (uses Core Data deletion)"
+                )
+            } else {
+                XCTAssertFalse(
+                    category.storageKeys.isEmpty,
+                    "\(category.displayName) should have at least one storage key"
+                )
+            }
         }
     }
 

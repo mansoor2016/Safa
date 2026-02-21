@@ -346,6 +346,16 @@ final class HasanatIntegrationTests: XCTestCase {
     private var mockRepo: MockUserRepository!
     private var userState: UserStateManager!
 
+    /// Ramadan multiplier applied by UserStateManager.awardHasanat
+    private var ramadanMultiplier: Int {
+        HijriDateConverter.shared.isRamadan() ? 2 : 1
+    }
+
+    /// Expected points after Ramadan multiplier is applied
+    private func expectedPoints(for award: HasanatAward) -> Int {
+        award.points * ramadanMultiplier
+    }
+
     override func setUp() {
         super.setUp()
         clearTrackerKeys()
@@ -376,7 +386,7 @@ final class HasanatIntegrationTests: XCTestCase {
 
         XCTAssertTrue(awarded)
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
-        XCTAssertEqual(mockRepo.addHasanatCalls.first, HasanatAward.prayerLogged.points)
+        XCTAssertEqual(mockRepo.addHasanatCalls.first, expectedPoints(for: .prayerLogged))
     }
 
     func test_awardOnce_secondCall_doesNotAwardAgain() async {
@@ -403,7 +413,7 @@ final class HasanatIntegrationTests: XCTestCase {
 
         XCTAssertTrue(awarded)
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
-        XCTAssertEqual(mockRepo.addHasanatCalls.first, HasanatAward.lessonComplete.points)
+        XCTAssertEqual(mockRepo.addHasanatCalls.first, expectedPoints(for: .lessonComplete))
     }
 
     func test_awardOnceEver_secondCall_blocked() async {
@@ -422,7 +432,7 @@ final class HasanatIntegrationTests: XCTestCase {
         XCTAssertEqual(mockRepo.recordStreakCalls, [.daily])
         // dailyOpen uses HasanatTracker.awardOnce, which calls addHasanat
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
-        XCTAssertEqual(mockRepo.addHasanatCalls.first, HasanatAward.dailyOpen.points)
+        XCTAssertEqual(mockRepo.addHasanatCalls.first, expectedPoints(for: .dailyOpen))
     }
 
     func test_recordActivityDaily_twice_awardsDailyOpenOnce() async {
@@ -476,7 +486,7 @@ final class HasanatIntegrationTests: XCTestCase {
         XCTAssertTrue(awarded)
         XCTAssertTrue(wasFirsTPrayer)
         XCTAssertEqual(userState.userStats.totalPrayersLogged, 1)
-        XCTAssertEqual(mockRepo.addHasanatCalls, [HasanatAward.prayerLogged.points])
+        XCTAssertEqual(mockRepo.addHasanatCalls, [expectedPoints(for: .prayerLogged)])
         XCTAssertEqual(mockRepo.recordStreakCalls, [.prayer])
     }
 

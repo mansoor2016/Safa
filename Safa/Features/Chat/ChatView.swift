@@ -10,10 +10,9 @@ struct ChatView: View {
 
     var body: some View {
         Group {
-            let availability = dependencies.llmService.availability
-            if !availability.isAvailable {
-                // Show fallback for older iOS versions
-                AIUnavailableView(message: availability.userMessage)
+            if FeatureFlags.shared.isDisabled(.aiCompanion) {
+                // Defense-in-depth: router is the primary gate, but guard here too
+                AIUnavailableView(message: "AI Companion is coming soon.")
             } else if let viewModel = viewModel {
                 ChatContentView(viewModel: viewModel)
             } else {
@@ -21,10 +20,38 @@ struct ChatView: View {
             }
         }
         .task {
-            if viewModel == nil && dependencies.llmService.availability.isAvailable {
+            guard !FeatureFlags.shared.isDisabled(.aiCompanion) else { return }
+
+            if viewModel == nil {
                 viewModel = ChatViewModel(
-                    chatRepository: dependencies.chatRepository
+                    chatRepository: dependencies.chatRepository,
+                    orchestrator: dependencies.chatOrchestrator
                 )
+            }
+
+            guard let viewModel else { return }
+
+            // Hydrate existing conversation BEFORE any auto-send —
+            // prevents beginTurn from creating a spurious new conversation.
+            await viewModel.loadActiveConversation()
+
+            // Set context BEFORE prefillAndSend — beginTurn snapshots and clears
+            // pendingContext early, so it must already be set.
+            if let context = AppRouter.shared.pendingChatContext {
+                AppRouter.shared.pendingChatContext = nil
+                viewModel.pendingContext = context
+            }
+            if let pending = AppRouter.shared.pendingChatInput {
+                AppRouter.shared.pendingChatInput = nil
+                let mode = AppRouter.shared.pendingChatLaunchMode
+                AppRouter.shared.pendingChatLaunchMode = .prefillOnly
+
+                switch mode {
+                case .autoSend:
+                    viewModel.prefillAndSend(pending)
+                case .prefillOnly:
+                    viewModel.inputText = pending
+                }
             }
         }
     }
@@ -100,6 +127,15 @@ private struct ChatContentView: View {
             // Messages
             messagesView
 
+            // Error banner (only for generation failures, not load/select/delete errors)
+            if let error = viewModel.generationError {
+                ErrorBanner(
+                    message: error.localizedDescription,
+                    onRetry: { Task { await viewModel.retryLastMessage() } },
+                    onDismiss: { viewModel.dismissError() }
+                )
+            }
+
             // Input
             inputView
         }
@@ -125,9 +161,8 @@ private struct ChatContentView: View {
             ConversationHistoryView(viewModel: viewModel)
                 .fullSheet()
         }
-        .task {
-            await viewModel.loadActiveConversation()
-        }
+        // Note: loadActiveConversation is called in ChatView's .task (before auto-send)
+        // to ensure proper hydration ordering. No separate .task needed here.
     }
 
     // MARK: - Messages View
@@ -140,7 +175,16 @@ private struct ChatContentView: View {
                         welcomeView
                     } else {
                         ForEach(viewModel.messages) { message in
-                            MessageBubble(message: message)
+                            // Show caution banner above the last assistant message
+                            if let caution = viewModel.cautionMessage,
+                               message.isAssistant,
+                               message.id == viewModel.messages.last(where: { $0.isAssistant })?.id {
+                                CautionBanner(message: caution)
+                            }
+
+                            MessageBubble(message: message, onFeedback: { rating in
+                                viewModel.saveFeedback(messageId: message.id, rating: rating)
+                            })
                                 .id(message.id)
                         }
 
@@ -236,21 +280,31 @@ private struct ChatContentView: View {
                     .lineLimit(1...5)
                     .focused($isInputFocused)
                     .onSubmit {
+                        guard !viewModel.isGenerating else { return }
                         Task { await viewModel.sendMessage() }
                     }
 
-                Button {
-                    Task { await viewModel.sendMessage() }
-                } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(
-                            viewModel.inputText.isEmpty || viewModel.isGenerating
-                            ? SafaColors.Fallback.tertiaryText
-                            : .accentColor
-                        )
+                if viewModel.isGenerating, viewModel.currentTurnAssistantId != nil {
+                    Button { viewModel.abortTurn() } label: {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.red)
+                    }
+                    .accessibilityLabel("Stop generating")
+                } else {
+                    Button {
+                        Task { await viewModel.sendMessage() }
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(
+                                viewModel.inputText.isEmpty
+                                ? SafaColors.Fallback.tertiaryText
+                                : .accentColor
+                            )
+                    }
+                    .disabled(viewModel.inputText.isEmpty)
                 }
-                .disabled(viewModel.inputText.isEmpty || viewModel.isGenerating)
             }
             .padding(SafaSpacing.md)
             .background(Color(UIColor.systemBackground))
@@ -262,6 +316,7 @@ private struct ChatContentView: View {
 
 private struct MessageBubble: View {
     let message: ChatMessage
+    var onFeedback: ((Int16) -> Void)?
     @State private var showCopied = false
 
     var body: some View {
@@ -300,6 +355,15 @@ private struct MessageBubble: View {
                 )
                 .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
 
+                // Citation chips for AI messages
+                if !message.isUser && !message.citations.isEmpty {
+                    FlowLayout(spacing: 6) {
+                        ForEach(message.citations, id: \.self) { citation in
+                            CitationChip(citation: citation)
+                        }
+                    }
+                }
+
                 // Actions row for AI messages
                 if !message.isUser {
                     HStack(spacing: SafaSpacing.md) {
@@ -313,6 +377,24 @@ private struct MessageBubble: View {
                             }
                             .font(SafaTypography.labelSmall)
                             .foregroundColor(SafaColors.Fallback.secondaryText)
+                        }
+                        .accessibilityLabel(showCopied ? "Copied to clipboard" : "Copy message")
+
+                        // Feedback thumbs (only for complete messages)
+                        if message.status == .complete {
+                            HStack(spacing: SafaSpacing.sm) {
+                                Button { onFeedback?(1) } label: {
+                                    Image(systemName: message.feedbackRating == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                }
+                                .accessibilityLabel(message.feedbackRating == 1 ? "Liked" : "Like response")
+
+                                Button { onFeedback?(-1) } label: {
+                                    Image(systemName: message.feedbackRating == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                }
+                                .accessibilityLabel(message.feedbackRating == -1 ? "Disliked" : "Dislike response")
+                            }
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                            .font(.subheadline)
                         }
 
                         // Timestamp
@@ -345,6 +427,84 @@ private struct MessageBubble: View {
     }
 }
 
+// MARK: - Citation Chip
+
+private struct CitationChip: View {
+    let citation: Citation
+
+    private var icon: String {
+        switch citation.type {
+        case .quran: return "book.fill"
+        case .hadith: return "quote.bubble.fill"
+        case .dua: return "hands.sparkles.fill"
+        case .none: return "book.fill"
+        }
+    }
+
+    private var isNavigable: Bool {
+        citation.navigationDestination() != nil
+    }
+
+    var body: some View {
+        Button {
+            navigateToCitation()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.caption2)
+
+                Text(citation.reference)
+                    .font(SafaTypography.labelSmall)
+                    .lineLimit(1)
+
+                if citation.verified {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.caption2)
+                        .foregroundColor(.green)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .clipShape(Capsule())
+            .foregroundColor(SafaColors.Fallback.secondaryText)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isNavigable)
+        .accessibilityLabel("Citation: \(citation.reference)\(citation.verified ? ", verified" : "")")
+        .accessibilityHint(isNavigable ? "Tap to navigate to source" : "")
+    }
+
+    private func navigateToCitation() {
+        guard let destination = citation.navigationDestination() else { return }
+        AppRouter.shared.navigate(to: destination)
+    }
+}
+
+// MARK: - Caution Banner
+
+private struct CautionBanner: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: "info.circle.fill")
+                .foregroundColor(.orange)
+                .font(.subheadline)
+
+            Text(message)
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+        }
+        .padding(SafaSpacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.sm))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Caution: \(message)")
+    }
+}
+
 // MARK: - Typing Indicator
 
 private struct TypingIndicator: View {
@@ -366,11 +526,52 @@ private struct TypingIndicator: View {
 
             Spacer()
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Safa is thinking")
         .onAppear {
             withAnimation(.easeInOut(duration: 0.5).repeatForever()) {
                 animationOffset = (animationOffset + 1) % 3
             }
         }
+    }
+}
+
+// MARK: - Error Banner
+
+private struct ErrorBanner: View {
+    let message: String
+    let onRetry: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: SafaSpacing.xs) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.red)
+                .font(.subheadline)
+                .accessibilityHidden(true)
+
+            Text(message)
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(SafaColors.Fallback.secondaryText)
+                .lineLimit(2)
+                .accessibilityLabel("Error: \(message)")
+
+            Spacer()
+
+            Button("Retry", action: onRetry)
+                .font(SafaTypography.labelSmall)
+                .foregroundColor(.accentColor)
+                .accessibilityLabel("Retry last message")
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+            }
+            .accessibilityLabel("Dismiss error")
+        }
+        .padding(SafaSpacing.sm)
+        .background(Color.red.opacity(0.1))
     }
 }
 

@@ -89,6 +89,7 @@ enum AppConstants {
         static let chatConversations = "com.safa.chat.conversations"
         static let chatMessagesPrefix = "com.safa.chat.messages."
         static let chatActiveConversation = "com.safa.chat.active"
+        static let chatMigratedToCoreData = "com.safa.chat.migratedToCoreData"
 
         // Learning
         static let learningProgress = "com.safa.learning.progress"
