@@ -13,6 +13,7 @@
 		76F0B0BA2F37DB1F007EB798 /* SafaShared in Frameworks */ = {isa = PBXBuildFile; productRef = 76F0B0B92F37DB1F007EB798 /* SafaShared */; };
 		76F0B0BC2F37DBC1007EB798 /* SafaShared in Frameworks */ = {isa = PBXBuildFile; productRef = 76F0B0BB2F37DBC1007EB798 /* SafaShared */; };
 		B1A2C3D42F40000000000003 /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = B1A2C3D42F40000000000002 /* Adhan */; };
+		B1F0C0012F50000000000002 /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F0C0012F50000000000001 /* FoundationModels.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		76F0B0672F37B493007EB798 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		76F0B0692F37B493007EB798 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		76F0B0AD2F37D6C2007EB798 /* SafaWidgetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SafaWidgetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1F0C0012F50000000000001 /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -123,6 +125,7 @@
 			files = (
 				B1A2C3D42F40000000000003 /* Adhan in Frameworks */,
 				76F0B0BA2F37DB1F007EB798 /* SafaShared in Frameworks */,
+				B1F0C0012F50000000000002 /* FoundationModels.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,6 +190,7 @@
 		76F0B0662F37B493007EB798 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B1F0C0012F50000000000001 /* FoundationModels.framework */,
 				76F0B0672F37B493007EB798 /* WidgetKit.framework */,
 				76F0B0692F37B493007EB798 /* SwiftUI.framework */,
 			);
