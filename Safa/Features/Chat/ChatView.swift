@@ -20,6 +20,8 @@ struct ChatView: View {
             }
         }
         .task {
+            guard !FeatureFlags.shared.isDisabled(.aiCompanion) else { return }
+
             if viewModel == nil {
                 viewModel = ChatViewModel(
                     chatRepository: dependencies.chatRepository,
@@ -27,19 +29,21 @@ struct ChatView: View {
                 )
             }
 
+            guard let viewModel else { return }
+
             // Hydrate existing conversation BEFORE any auto-send —
             // prevents beginTurn from creating a spurious new conversation.
-            await viewModel?.loadActiveConversation()
+            await viewModel.loadActiveConversation()
 
             // Set context BEFORE prefillAndSend — beginTurn snapshots and clears
             // pendingContext early, so it must already be set.
             if let context = AppRouter.shared.pendingChatContext {
                 AppRouter.shared.pendingChatContext = nil
-                viewModel?.pendingContext = context
+                viewModel.pendingContext = context
             }
             if let pending = AppRouter.shared.pendingChatInput {
                 AppRouter.shared.pendingChatInput = nil
-                viewModel?.prefillAndSend(pending)
+                viewModel.prefillAndSend(pending)
             }
         }
     }
@@ -407,12 +411,7 @@ private struct CitationChip: View {
     }
 
     private var isNavigable: Bool {
-        guard let type = citation.type else { return false }
-        switch type {
-        case .quran: return citation.surahNumber != nil
-        case .hadith: return citation.collectionId != nil
-        case .dua: return true
-        }
+        citation.navigationDestination() != nil
     }
 
     var body: some View {
@@ -444,23 +443,8 @@ private struct CitationChip: View {
     }
 
     private func navigateToCitation() {
-        let router = AppRouter.shared
-        guard let type = citation.type else { return }
-        switch type {
-        case .quran:
-            if let surah = citation.surahNumber, let ayah = citation.ayahNumber {
-                router.navigate(to: .ayah(surah: surah, ayah: ayah))
-            } else if let surah = citation.surahNumber {
-                router.navigate(to: .surah(number: surah))
-            }
-        case .hadith:
-            router.navigate(to: .hadith(
-                collection: citation.collectionId,
-                hadithId: citation.hadithNumber.map(String.init)
-            ))
-        case .dua:
-            router.navigate(to: .dhikr)
-        }
+        guard let destination = citation.navigationDestination() else { return }
+        AppRouter.shared.navigate(to: destination)
     }
 }
 

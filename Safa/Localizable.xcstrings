@@ -513,6 +513,9 @@
     "Ask a question..." : {
 
     },
+    "Ask about this ayah" : {
+
+    },
     "Ask Safa" : {
 
     },
@@ -975,6 +978,9 @@
     "Eid Prayer: %@" : {
 
     },
+    "Enable AI Companion" : {
+
+    },
     "Enable Fajr Alarm" : {
 
     },
@@ -1021,6 +1027,9 @@
     "Exit" : {
 
     },
+    "Explain" : {
+
+    },
     "Explanation" : {
 
     },
@@ -1055,9 +1064,6 @@
 
     },
     "Failed to generate response: %@" : {
-
-    },
-    "Failed to load the AI model. Please try again." : {
 
     },
     "Failed to open database: %@" : {
@@ -1328,6 +1334,9 @@
 
     },
     "Learn About Isra & Mi'raj" : {
+
+    },
+    "Learn about this dua" : {
 
     },
     "Lesson" : {
@@ -2289,6 +2298,9 @@
 
     },
     "Unable to load surah" : {
+
+    },
+    "Unable to load the AI model. Please restart the app and try again." : {
 
     },
     "Undo" : {

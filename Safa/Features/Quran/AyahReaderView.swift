@@ -444,17 +444,19 @@ private struct AyahRow: View {
         }
         .padding(SafaSpacing.md)
         .contextMenu {
-            Button {
-                let router = AppRouter.shared
-                router.pendingChatContext = ChatContext(
-                    topic: .quran,
-                    surahNumber: surahNumber,
-                    ayahNumber: ayah.ayahNumber
-                )
-                router.pendingChatInput = "Explain \(surahName) \(surahNumber):\(ayah.ayahNumber)"
-                router.navigate(to: .chat)
-            } label: {
-                Label("Ask about this ayah", systemImage: "sparkles")
+            if Dependencies.shared.llmService.availability.isAvailable {
+                Button {
+                    let router = AppRouter.shared
+                    router.pendingChatContext = ChatContext(
+                        topic: .quran,
+                        surahNumber: surahNumber,
+                        ayahNumber: ayah.ayahNumber
+                    )
+                    router.pendingChatInput = "Explain \(surahName) \(surahNumber):\(ayah.ayahNumber)"
+                    router.navigate(to: .chat)
+                } label: {
+                    Label("Ask about this ayah", systemImage: "sparkles")
+                }
             }
         }
         .accessibilityElement(children: .contain)

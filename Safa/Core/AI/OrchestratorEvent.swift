@@ -90,6 +90,28 @@ struct Citation: Codable, Hashable {
             duaId: duaId
         )
     }
+
+    /// Returns the navigation destination for this citation, if navigable.
+    func navigationDestination() -> AppRouter.Destination? {
+        guard let type else { return nil }
+        switch type {
+        case .quran:
+            if let surah = surahNumber, let ayah = ayahNumber {
+                return .ayah(surah: surah, ayah: ayah)
+            } else if let surah = surahNumber {
+                return .surah(number: surah)
+            }
+            return nil
+        case .hadith:
+            guard collectionId != nil else { return nil }
+            return .hadith(
+                collection: collectionId,
+                hadithId: hadithNumber.map(String.init)
+            )
+        case .dua:
+            return .dhikr
+        }
+    }
 }
 
 /// Confidence level of the AI response.

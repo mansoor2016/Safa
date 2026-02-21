@@ -27,11 +27,11 @@ enum LLMAvailability {
         case .available:
             return "AI Companion is ready"
         case .requiresNewerOS(let version):
-            return "AI Companion requires iOS \(version) or later. Please update your device to use this feature."
+            return "AI Companion requires iOS \(version) or later on a supported device (iPhone 16 or newer). Responses are currently based on a curated knowledge base."
         case .unsupportedDevice:
-            return "AI Companion is not supported on this device."
+            return "Full AI requires iPhone 16 or newer with iOS 26. Responses are currently based on a curated knowledge base."
         case .notConfigured:
-            return "AI Companion is being set up. Please try again later."
+            return "AI Companion is getting ready. Responses are currently based on a curated knowledge base."
         }
     }
 }
@@ -281,16 +281,13 @@ final class LLMService: LLMServiceProtocol {
 
         // Default response
         return """
-        Thank you for your question. I'm Safa, your Islamic companion assistant.
+        Thank you for your question. I'm Safa, your Islamic companion.
 
-        This is a placeholder response while the AI model integration is being completed. In the full version, I will provide detailed, sourced answers to your questions about Islam, including:
+        I can help you explore topics across the Quran, hadith, fiqh, duas, and more. On devices with Apple Intelligence (iPhone 16 or newer running iOS 26), I provide personalised answers powered by on-device AI. On this device, my responses draw from a curated knowledge base.
 
-        - Quran verses and their explanations
-        - Authentic hadith with proper citations
-        - Fiqh rulings from the major madhabs
-        - Duas and dhikr with Arabic, transliteration, and translation
+        Try asking about a specific topic — for example, "What is the dua before sleeping?" or "How many rakats in Fajr?"
 
-        **Note:** For complex religious rulings (fatawa), I recommend consulting a qualified scholar.
+        **Note:** For complex religious rulings (fatawa), please consult a qualified scholar.
         """
     }
 }
@@ -307,7 +304,7 @@ enum LLMError: LocalizedError {
         case .unavailable(let message):
             return message
         case .modelLoadFailed:
-            return String(localized: "Failed to load the AI model. Please try again.")
+            return String(localized: "Unable to load the AI model. Please restart the app and try again.")
         case .generationFailed(let reason):
             return String(localized: "Failed to generate response: \(reason)")
         }

@@ -37,12 +37,13 @@ struct MoreView: View {
 
             // Knowledge & Tools
             Section("Knowledge & Tools") {
-                Button {
-                    router.navigate(to: .chat)
-                } label: {
-                    Label("Ask Safa", systemImage: "sparkles")
+                if dependencies.llmService.availability.isAvailable {
+                    NavigationLink {
+                        ChatView()
+                    } label: {
+                        Label("Ask Safa", systemImage: "sparkles")
+                    }
                 }
-                .disabledFeature(.aiCompanion)
 
                 NavigationLink {
                     NamesOfAllahView()

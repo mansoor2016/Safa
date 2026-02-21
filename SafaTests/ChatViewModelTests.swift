@@ -431,6 +431,47 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertNotNil(capturingOrchestrator.lastRequest)
         XCTAssertNil(capturingOrchestrator.lastRequest?.context)
     }
+
+    // MARK: - Prefill + Context Ordering Tests (Gap 1)
+
+    func test_prefillAndSend_withPendingContext_sendsTextAndContextTogether() async {
+        // Given — simulate the ChatView .task flow: set context, then prefillAndSend
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+
+        // Set context first (simulating ChatView reading pendingChatContext)
+        vm.pendingContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
+
+        // When — prefillAndSend (simulating ChatView reading pendingChatInput)
+        vm.prefillAndSend("Explain Al-Baqarah 2:255")
+
+        // Allow the fire-and-forget Task inside prefillAndSend to complete
+        try? await Task.sleep(for: .milliseconds(300))
+
+        // Then — orchestrator should have received BOTH the text and context
+        XCTAssertNotNil(capturingOrchestrator.lastRequest, "Orchestrator should have received a request")
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.text, "Explain Al-Baqarah 2:255")
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.topic, .quran)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.surahNumber, 2)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.context?.ayahNumber, 255)
+    }
+
+    func test_prefillAndSend_withoutContext_sendsTextOnly() async {
+        // Given — no pending context (Siri path: only text, no context)
+        let capturingOrchestrator = CapturingChatOrchestrator()
+        let vm = ChatViewModel(chatRepository: mockRepository, orchestrator: capturingOrchestrator)
+        mockRepository.createdConversationToReturn = Conversation(title: "New")
+
+        // When — prefillAndSend without setting context
+        vm.prefillAndSend("How many rakats in Fajr?")
+        try? await Task.sleep(for: .milliseconds(300))
+
+        // Then — text sent, context is nil
+        XCTAssertNotNil(capturingOrchestrator.lastRequest)
+        XCTAssertEqual(capturingOrchestrator.lastRequest?.text, "How many rakats in Fajr?")
+        XCTAssertNil(capturingOrchestrator.lastRequest?.context)
+    }
 }
 
 // MARK: - Capturing Chat Orchestrator

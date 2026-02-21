@@ -284,6 +284,63 @@ final class AppRouterTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 
+    // MARK: - Blocked Chat Navigation Clears Pending State (Gap 4)
+
+    func testNavigateToChat_whenDisabled_clearsPendingInput() {
+        // Given — pending input was set (e.g. Siri intent set it before navigation)
+        sut.pendingChatInput = "How do I pray Fajr?"
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion), "AI should be disabled by default")
+
+        // When — attempt to navigate to chat
+        sut.navigate(to: .chat)
+
+        // Then — pending input cleared, path not appended
+        XCTAssertNil(sut.pendingChatInput, "Pending input should be cleared when navigation is blocked")
+        XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
+    }
+
+    func testNavigateToChat_whenDisabled_clearsPendingContext() {
+        // Given — pending context was set (e.g. contextual entry point set it)
+        sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then
+        XCTAssertNil(sut.pendingChatContext, "Pending context should be cleared when navigation is blocked")
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    func testNavigateToChat_whenDisabled_clearsBothPendingInputAndContext() {
+        // Given — both pending input and context set simultaneously
+        sut.pendingChatInput = "Explain this ayah"
+        sut.pendingChatContext = ChatContext(topic: .hadith, hadithId: "bukhari_1")
+        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
+
+        // When
+        sut.navigate(to: .chat)
+
+        // Then — both cleared
+        XCTAssertNil(sut.pendingChatInput)
+        XCTAssertNil(sut.pendingChatContext)
+    }
+
+    func testNavigateToChat_whenEnabled_preservesPendingState() {
+        // Given — AI enabled, pending state set
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        sut.pendingChatInput = "How do I pray?"
+        sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 1)
+
+        // When — navigation succeeds
+        sut.navigate(to: .chat)
+
+        // Then — pending state preserved for ChatView to consume
+        XCTAssertEqual(sut.pendingChatInput, "How do I pray?")
+        XCTAssertNotNil(sut.pendingChatContext)
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
     // MARK: - Destination Enum Tests
 
     func testDestinationIsHashable() {
