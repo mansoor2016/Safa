@@ -38,10 +38,14 @@ struct MoreView: View {
             // Knowledge & Tools
             Section("Knowledge & Tools") {
                 if dependencies.llmService.availability.isAvailable {
-                    NavigationLink {
-                        ChatView()
-                    } label: {
-                        Label("Ask Safa", systemImage: "sparkles")
+                    Button { router.navigate(to: .chat) } label: {
+                        HStack {
+                            Label("Ask Safa", systemImage: "sparkles")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
                     }
                 }
 

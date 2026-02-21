@@ -20,7 +20,10 @@ struct AyahReaderView: View {
     var body: some View {
         Group {
             if let viewModel = viewModel {
-                AyahReaderContent(viewModel: viewModel)
+                AyahReaderContent(
+                    viewModel: viewModel,
+                    isAIAvailable: dependencies.llmService.availability.isAvailable
+                )
             } else {
                 LoadingView(message: "Loading surah...")
             }
@@ -42,6 +45,7 @@ struct AyahReaderView: View {
 
 private struct AyahReaderContent: View {
     @Bindable var viewModel: AyahReaderViewModel
+    let isAIAvailable: Bool
     @State private var autoScrollTimer: Timer?
     @State private var currentScrollIndex = 0
     @State private var isAutoScrollControlVisible = true
@@ -142,6 +146,7 @@ private struct AyahReaderContent: View {
                                 isBookmarked: viewModel.isBookmarked(ayah),
                                 arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
                                 translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
+                                isAIAvailable: isAIAvailable,
                                 onBookmarkToggle: {
                                     Task {
                                         let wasAdded = await viewModel.toggleBookmark(ayah)
@@ -398,6 +403,7 @@ private struct AyahRow: View {
     let isBookmarked: Bool
     let arabicFontSize: CGFloat
     let translationFontSize: CGFloat
+    let isAIAvailable: Bool
     let onBookmarkToggle: () -> Void
 
     var body: some View {
@@ -444,7 +450,7 @@ private struct AyahRow: View {
         }
         .padding(SafaSpacing.md)
         .contextMenu {
-            if Dependencies.shared.llmService.availability.isAvailable {
+            if isAIAvailable {
                 Button {
                     let router = AppRouter.shared
                     router.pendingChatContext = ChatContext(
