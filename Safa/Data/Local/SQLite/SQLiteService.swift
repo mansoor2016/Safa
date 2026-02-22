@@ -76,6 +76,7 @@ final class SQLiteService {
     }
 
     /// Decompress a .gz database to Application Support, re-decompressing when the bundled .gz changes.
+    /// Thread-safe: uses connectionLock (same lock as openDatabase) to prevent races and deadlocks.
     private func decompressIfNeeded(gzPath: URL, name: String) -> URL? {
         let fileManager = FileManager.default
         guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
@@ -86,7 +87,7 @@ final class SQLiteService {
         let targetPath = dbDir.appendingPathComponent("\(name).sqlite")
         let markerPath = dbDir.appendingPathComponent("\(name).gz.size")
 
-        // Check if cached DB is up-to-date with the bundled .gz
+        // Fast path (no lock): cached DB is up-to-date
         let bundledSize = (try? fileManager.attributesOfItem(atPath: gzPath.path)[.size] as? Int) ?? 0
         if fileManager.fileExists(atPath: targetPath.path),
            let markerData = try? Data(contentsOf: markerPath),
@@ -96,12 +97,23 @@ final class SQLiteService {
             return targetPath
         }
 
-        // Close any existing persistent connection before replacing the file
+        // Slow path: need to decompress — acquire lock to prevent races
         connectionLock.lock()
+        defer { connectionLock.unlock() }
+
+        // Re-check under lock (another thread may have completed decompression while we waited)
+        if fileManager.fileExists(atPath: targetPath.path),
+           let markerData = try? Data(contentsOf: markerPath),
+           let markerString = String(data: markerData, encoding: .utf8),
+           let cachedSize = Int(markerString),
+           cachedSize == bundledSize {
+            return targetPath
+        }
+
+        // Close any existing persistent connection before replacing the file
         if let existing = persistentConnections.removeValue(forKey: name) {
             sqlite3_close(existing)
         }
-        connectionLock.unlock()
 
         // Decompress gzip to Application Support
         do {
@@ -120,16 +132,26 @@ final class SQLiteService {
 
     /// Get or create a persistent read-only connection for a database
     func openDatabase(named name: String) throws -> OpaquePointer {
+        // Check for cached connection first (fast path)
+        connectionLock.lock()
+        if let existing = persistentConnections[name] {
+            connectionLock.unlock()
+            return existing
+        }
+        connectionLock.unlock()
+
+        // Resolve path outside the lock (may trigger decompression, which also uses connectionLock)
+        guard let dbPath = databasePath(for: name) else {
+            throw SQLiteError.databaseNotFound(name)
+        }
+
+        // Re-acquire lock to create and cache the connection
         connectionLock.lock()
         defer { connectionLock.unlock() }
 
-        // Return cached connection if available
+        // Re-check: another thread may have opened it while we were resolving the path
         if let existing = persistentConnections[name] {
             return existing
-        }
-
-        guard let dbPath = databasePath(for: name) else {
-            throw SQLiteError.databaseNotFound(name)
         }
 
         var db: OpaquePointer?

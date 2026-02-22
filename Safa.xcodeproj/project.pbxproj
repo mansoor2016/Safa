@@ -533,7 +533,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Safa/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Safa;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Safa can read selected Apple Health data when you enable Health sync to support Ramadan and fasting-related insights.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Safa writes your fasting sessions to Apple Health only when you choose to sync your Ramadan fasting activity.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Safa uses your location to calculate accurate prayer times, determine Qibla direction, and recommend settings for your region.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Safa uses your microphone during pronunciation practice so it can compare recitation and provide feedback.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Safa uses speech recognition during pronunciation practice to transcribe your recitation and help improve accuracy.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -575,7 +581,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Safa/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Safa;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Safa can read selected Apple Health data when you enable Health sync to support Ramadan and fasting-related insights.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Safa writes your fasting sessions to Apple Health only when you choose to sync your Ramadan fasting activity.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Safa uses your location to calculate accurate prayer times, determine Qibla direction, and recommend settings for your region.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Safa uses your microphone during pronunciation practice so it can compare recitation and provide feedback.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Safa uses speech recognition during pronunciation practice to transcribe your recitation and help improve accuracy.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

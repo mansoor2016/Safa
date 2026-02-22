@@ -6,7 +6,5 @@
 	<array>
 		<string>group.com.safa.app</string>
 	</array>
-	<key>com.apple.developer.foundation-models</key>
-	<true/>
 </dict>
 </plist>
