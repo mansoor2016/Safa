@@ -72,6 +72,8 @@ struct EidBanner: View {
             Text(eidType.acceptanceDuaArabic)
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(.white.opacity(0.95))
+                .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             Text(eidType.acceptanceDua)
                 .font(SafaTypography.bodySmall)

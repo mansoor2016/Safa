@@ -309,6 +309,9 @@ private struct LessonStepView: View {
             if let arabic = step.arabicText {
                 Text(arabic)
                     .font(SafaTypography.arabicLarge)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
                     .padding()
             }
 
@@ -335,6 +338,9 @@ private struct LessonStepView: View {
             if let arabic = step.arabicText {
                 Text(arabic)
                     .font(SafaTypography.arabicLarge)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
                     .padding()
             }
 

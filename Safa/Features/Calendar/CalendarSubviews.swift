@@ -118,6 +118,8 @@ struct EventDetailSheet: View {
             Text(event.arabicName)
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
+                .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
         }
     }
 

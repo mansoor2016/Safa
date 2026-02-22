@@ -100,6 +100,8 @@ struct EidGreetingCard: View {
                 Text(eidType.acceptanceDuaArabic)
                     .font(.system(size: 20, weight: .regular, design: .serif))
                     .foregroundColor(backTextColor.opacity(0.8))
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
 
                 ornamentalDivider(color: backTextColor.opacity(0.3))
 

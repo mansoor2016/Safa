@@ -292,6 +292,8 @@ struct SearchResultRow: View {
             Text(result.arabicText)
                 .font(.system(size: 18, weight: .medium, design: .serif))
                 .lineLimit(2)
+                .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             // Translation with highlighted search term
             highlightedText(result.translation, query: searchQuery)
@@ -337,7 +339,9 @@ struct AyahDetailView: View {
                 // Arabic text
                 Text(result.arabicText)
                     .font(.system(size: 32, weight: .medium, design: .serif))
-                    .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.trailing)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .accessibilityArabic()
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color(.secondarySystemBackground))

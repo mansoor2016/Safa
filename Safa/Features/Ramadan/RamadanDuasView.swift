@@ -154,6 +154,8 @@ struct RamadanDuaCard: View {
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundColor(SafaColors.Fallback.text)
+                .environment(\.layoutDirection, .rightToLeft)
+                .accessibilityArabic()
 
             if isExpanded {
                 Divider()

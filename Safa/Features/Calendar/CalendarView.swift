@@ -318,6 +318,8 @@ struct CalendarView: View {
                                     Text(event.arabicName)
                                         .font(SafaTypography.labelSmall)
                                         .foregroundColor(SafaColors.Fallback.secondaryText)
+                                        .environment(\.layoutDirection, .rightToLeft)
+                                        .accessibilityArabic()
                                 }
 
                                 Spacer()

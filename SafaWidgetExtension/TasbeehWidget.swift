@@ -213,6 +213,7 @@ struct SmallTasbeehView: View {
                     Text(entry.dhikrArabic)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .environment(\.layoutDirection, .rightToLeft)
                 }
 
                 // Count with circular progress
@@ -274,6 +275,7 @@ struct MediumTasbeehView: View {
                         Text(entry.dhikrArabic)
                             .font(.title3)
                             .foregroundColor(.primary)
+                            .environment(\.layoutDirection, .rightToLeft)
                     }
 
                     Text(entry.dhikrType)
