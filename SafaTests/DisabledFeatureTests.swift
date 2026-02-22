@@ -179,9 +179,8 @@ final class DisabledFeatureTests: XCTestCase {
     }
 
     func test_upcomingFeatures_areDisabledByDefault() {
-        // Features requiring Widget extension target or iOS 26+
+        // Features requiring additional work or debug-only toggles
         let upcomingFeatures: [Feature] = [
-            .aiCompanion,       // Requires iOS 26+
             .learning,          // Content not yet ready
             .ramadanMode,       // Debug override, not user-facing
             .interactiveWidgets  // Requires Widget extension target
@@ -189,6 +188,15 @@ final class DisabledFeatureTests: XCTestCase {
 
         for feature in upcomingFeatures {
             XCTAssertFalse(feature.isEnabledByDefault, "\(feature.displayName) should be disabled by default")
+        }
+    }
+
+    func test_aiCompanion_enabledOnlyOnIOS26() {
+        // .aiCompanion is auto-enabled on iOS 26+ via #available, disabled on older OS
+        if #available(iOS 26, *) {
+            XCTAssertTrue(Feature.aiCompanion.isEnabledByDefault, "AI Companion should be enabled on iOS 26+")
+        } else {
+            XCTAssertFalse(Feature.aiCompanion.isEnabledByDefault, "AI Companion should be disabled on pre-iOS 26")
         }
     }
 

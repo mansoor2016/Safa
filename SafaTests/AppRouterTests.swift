@@ -140,7 +140,7 @@ final class AppRouterTests: XCTestCase {
     }
 
     func testDeepLinkChat_whenAIDisabled_returnsFalse() {
-        // AI companion is disabled by default, so deep link should return false
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         let url = URL(string: "safa://chat")!
         XCTAssertFalse(sut.handleDeepLink(url))
         XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
@@ -288,8 +288,8 @@ final class AppRouterTests: XCTestCase {
 
     func testNavigateToChat_whenDisabled_clearsPendingInput() {
         // Given — pending input was set (e.g. Siri intent set it before navigation)
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatInput = "How do I pray Fajr?"
-        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion), "AI should be disabled by default")
 
         // When — attempt to navigate to chat
         sut.navigate(to: .chat)
@@ -301,8 +301,8 @@ final class AppRouterTests: XCTestCase {
 
     func testNavigateToChat_whenDisabled_clearsPendingContext() {
         // Given — pending context was set (e.g. contextual entry point set it)
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
-        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
 
         // When
         sut.navigate(to: .chat)
@@ -314,9 +314,9 @@ final class AppRouterTests: XCTestCase {
 
     func testNavigateToChat_whenDisabled_clearsBothPendingInputAndContext() {
         // Given — both pending input and context set simultaneously
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatInput = "Explain this ayah"
         sut.pendingChatContext = ChatContext(topic: .hadith, hadithId: "bukhari_1")
-        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
 
         // When
         sut.navigate(to: .chat)
@@ -354,8 +354,8 @@ final class AppRouterTests: XCTestCase {
 
     func test_navigateToChat_whenDisabled_resetsLaunchMode() {
         // Given — launch mode set to autoSend
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatLaunchMode = .autoSend
-        XCTAssertTrue(FeatureFlags.shared.isDisabled(.aiCompanion))
 
         // When — navigate to chat (blocked)
         sut.navigate(to: .chat)

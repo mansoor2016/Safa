@@ -15,7 +15,8 @@ final class AIEntryPointConsistencyTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        FeatureFlags.shared.removeOverride(.aiCompanion)
+        // Disabled-state tests need explicit override since .aiCompanion is enabled on iOS 26+
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         router = AppRouter()
     }
 
