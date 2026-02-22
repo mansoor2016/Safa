@@ -673,40 +673,13 @@ struct HomeView: View {
     @ViewBuilder
     private var contextualReminders: some View {
         let hour = Calendar.current.component(.hour, from: Date())
-        let showTahajjud = hour >= 4 && hour < 6
-        let showMorning = hour >= 6 && hour < 9
-        let showEvening = hour >= 17 && hour < 20
 
-        if showTahajjud || showMorning || showEvening {
-            VStack(spacing: SafaSpacing.sm) {
-                if showTahajjud {
-                    ReminderCard(
-                        icon: "moon.stars",
-                        title: "Tahajjud Time",
-                        message: "The last third of the night is a blessed time for prayer."
-                    )
-                }
-
-                if showMorning {
-                    ReminderCard(
-                        icon: "sunrise",
-                        title: "Morning Dhikr",
-                        message: "Start your day with morning remembrance."
-                    ) {
-                        router.navigate(to: .dhikr)
-                    }
-                }
-
-                if showEvening {
-                    ReminderCard(
-                        icon: "sunset",
-                        title: "Evening Dhikr",
-                        message: "Complete your evening remembrance."
-                    ) {
-                        router.navigate(to: .dhikr)
-                    }
-                }
-            }
+        if hour >= 4 && hour < 6 {
+            ReminderCard(
+                icon: "moon.stars",
+                title: "Tahajjud Time",
+                message: "The last third of the night is a blessed time for prayer."
+            )
         }
     }
 
@@ -934,7 +907,6 @@ private struct ReminderCard: View {
     let icon: String
     let title: String
     let message: String
-    var action: (() -> Void)?
 
     var body: some View {
         HStack(spacing: SafaSpacing.md) {
@@ -956,13 +928,6 @@ private struct ReminderCard: View {
             }
 
             Spacer()
-
-            if action != nil {
-                Button(action: { action?() }) {
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
-                }
-            }
         }
         .padding(SafaSpacing.md)
         .background(Color(UIColor.secondarySystemBackground))
