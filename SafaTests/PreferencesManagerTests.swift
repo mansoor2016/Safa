@@ -371,26 +371,37 @@ final class PreferencesManagerTests: XCTestCase {
 
     // MARK: - Beta Migration Tests
 
-    func test_betaMigration_resetsCalculationMethodToMakkah() async {
-        // Simulate a user with the old MWL default
-        mockRepository.preferences.calculationMethod = .muslimWorldLeague
+    func test_betaMigration_resetsOldMakkahDefault() async {
+        // Simulate a user still on the old hard-coded .makkah default
+        mockRepository.preferences.calculationMethod = .makkah
 
-        // Clear migration key so it runs again
+        // Clear migration key so it runs
         UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
 
-        // Re-configure triggers migration
         sut.configure(userRepository: mockRepository)
-
-        // Give the async Task time to run
         try? await Task.sleep(for: .milliseconds(100))
 
         let prefs = await sut.getPreferences()
-        XCTAssertEqual(prefs.calculationMethod, .makkah,
-                       "Beta migration should reset calculation method to Makkah")
+        XCTAssertEqual(prefs.calculationMethod, AppDefaults.calculationMethod,
+                       "Beta migration should reset old .makkah default to AppDefaults")
+    }
+
+    func test_betaMigration_preservesExplicitChoice() async {
+        // Simulate a user who explicitly chose ISNA — migration should NOT overwrite
+        mockRepository.preferences.calculationMethod = .isna
+
+        UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
+
+        sut.configure(userRepository: mockRepository)
+        try? await Task.sleep(for: .milliseconds(100))
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.calculationMethod, .isna,
+                       "Migration should not overwrite user's explicit ISNA choice")
     }
 
     func test_betaMigration_onlyRunsOnce() async {
-        mockRepository.preferences.calculationMethod = .muslimWorldLeague
+        mockRepository.preferences.calculationMethod = .makkah
         UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
 
         // First configure — migration runs
