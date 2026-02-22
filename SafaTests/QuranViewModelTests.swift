@@ -490,6 +490,7 @@ final class TestableQuranRepository: QuranRepositoryProtocol {
     }
 
     nonisolated func resetSurahProgress(surahNumber: Int) async throws {}
+    nonisolated func getDailyVerse(for date: Date) async -> Ayah? { nil }
 }
 
 // MARK: - Stub User Repository

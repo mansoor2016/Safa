@@ -38,12 +38,12 @@
         }
       }
     },
-    "%@ at %@%@" : {
+    "%@ at %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ at %2$@%3$@"
+            "value" : "%1$@ at %2$@"
           }
         }
       }
@@ -236,6 +236,9 @@
 
     },
     "%lld percent complete" : {
+
+    },
+    "%lld rak'ahs" : {
 
     },
     "%lld results" : {
@@ -453,6 +456,9 @@
     "Adhan" : {
 
     },
+    "Adhan Voice" : {
+
+    },
     "Adhan won't play when your iPhone is on silent mode." : {
 
     },
@@ -580,6 +586,9 @@
     "Birth of Prophet Muhammad ﷺ" : {
 
     },
+    "Bismi Allahi arrahmani arraheem" : {
+
+    },
     "Bismillah! Time to break your fast." : {
 
     },
@@ -639,9 +648,6 @@
 
     },
     "Coming Soon" : {
-
-    },
-    "Common: 8 or 20 rak'ahs" : {
 
     },
     "Complete" : {
@@ -938,9 +944,6 @@
 
     },
     "Double tap to subtract one from the counter" : {
-
-    },
-    "Double tap to toggle notification" : {
 
     },
     "Double tap to undo" : {
@@ -1241,9 +1244,6 @@
     "Iftar Duas" : {
 
     },
-    "Iftar in" : {
-
-    },
     "Iftar in %lld minutes" : {
 
     },
@@ -1401,9 +1401,6 @@
     "Location" : {
 
     },
-    "Location based auto-silence" : {
-
-    },
     "Location permission was denied. Please enable in Settings." : {
 
     },
@@ -1500,9 +1497,6 @@
     "Morning" : {
 
     },
-    "Mosque Mode" : {
-
-    },
     "Name Detail" : {
 
     },
@@ -1587,16 +1581,19 @@
     "Notes (Optional)" : {
 
     },
-    "Notification off for %@" : {
+    "Notification off, double tap to turn on" : {
 
     },
-    "Notification on for %@" : {
+    "Notification on, double tap to turn off" : {
 
     },
     "Notifications" : {
 
     },
     "Notifications are disabled in Settings" : {
+
+    },
+    "Notifications on" : {
 
     },
     "Number %lld, %@, %@" : {
@@ -1645,13 +1642,13 @@
     "Open the tasbeeh counter" : {
 
     },
-    "Opens prayer settings" : {
-
-    },
     "Pause auto-scroll" : {
 
     },
     "Play adhan" : {
+
+    },
+    "Play adhan for prayer notifications" : {
 
     },
     "Play auto-scroll" : {
@@ -2000,10 +1997,16 @@
     "Show Night Prayer Times" : {
 
     },
+    "Show Prayer Page (skip Ramadan)" : {
+
+    },
     "Show Ramadan Banner" : {
 
     },
     "Show Translation" : {
+
+    },
+    "Show Transliteration" : {
 
     },
     "Shows time until next prayer" : {
@@ -2091,9 +2094,6 @@
 
     },
     "Suhoor Dua" : {
-
-    },
-    "Suhoor ends in" : {
 
     },
     "Suhoor Reminder" : {
@@ -2297,16 +2297,6 @@
     "Time until next prayer" : {
 
     },
-    "Times may vary — %@ · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Times may vary — %1$@ · %2$@"
-          }
-        }
-      }
-    },
     "Tips" : {
 
     },
@@ -2340,6 +2330,9 @@
     "Transliteration" : {
 
     },
+    "Transliteration Text Size" : {
+
+    },
     "Triple-tap the version number to hide." : {
 
     },
@@ -2364,10 +2357,16 @@
     "Unknown prayer type." : {
 
     },
+    "until %@" : {
+
+    },
     "until Iftar" : {
 
     },
     "until Suhoor ends" : {
+
+    },
+    "until Suhoor tomorrow" : {
 
     },
     "Upcoming: %@" : {

@@ -1,19 +1,15 @@
 // MARK: - RamadanView.swift
 // PURPOSE: Ramadan mode dashboard — replaces Prayer tab during Ramadan
-// DEPENDENCIES: SwiftUI, RamadanSubviews, DailyGoalsCard
+// DEPENDENCIES: SwiftUI, PrayerViewModel, RamadanSubviews, shared components
 
 import SwiftUI
 
 struct RamadanView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
+    @State private var prayerViewModel: PrayerViewModel?
     @State private var todayFasted = false
     @State private var currentDay = 1
-    @State private var suhoorTime: Date?
-    @State private var iftarTime: Date?
-    @State private var todayPrayers: [PrayerTime] = []
-    @State private var loggedPrayers: Set<PrayerType> = []
-    @State private var nextPrayer: PrayerTime?
     @State private var fastingDays: Set<Int> = []
     @State private var showTaraweehTracker = false
     @State private var showSettings = false
@@ -27,6 +23,16 @@ struct RamadanView: View {
     private let hijriConverter = HijriDateConverter.shared
     private let totalDays = 30
 
+    // MARK: - Computed Properties
+
+    private var suhoorTime: Date? {
+        prayerViewModel?.todayPrayers.first { $0.type == .fajr }?.time
+    }
+
+    private var iftarTime: Date? {
+        prayerViewModel?.todayPrayers.first { $0.type == .maghrib }?.time
+    }
+
     var body: some View {
         ScrollableScreen {
             VStack(spacing: SafaSpacing.lg) {
@@ -36,25 +42,43 @@ struct RamadanView: View {
                 // 1. Iftar/Suhoor countdown platter
                 iftarPlatter
 
-                // 2. Prayer progress (full-width, expanded)
-                prayerProgressCard
+                // 2. Today's prayer timetable (with notification toggles)
+                if let vm = prayerViewModel {
+                    PrayerTimePreviewCard(
+                        prayers: vm.todayPrayers,
+                        notificationEnabledPrayers: vm.notificationEnabledPrayers,
+                        onToggleNotification: { prayerType in
+                            Task { await vm.toggleNotification(for: prayerType) }
+                        }
+                    )
 
-                // 3. Daily goals
-                DailyGoalsCard(isRamadan: true, loggedPrayers: loggedPrayers, todayPrayers: todayPrayers)
+                    // 3. Prayer progress (full-width, expanded)
+                    PrayerProgressCard(
+                        prayers: vm.todayPrayers,
+                        loggedPrayers: vm.loggedPrayers,
+                        nextPrayer: vm.nextPrayer,
+                        onLogPrayer: { prayerType in
+                            Task { await vm.togglePrayer(prayerType) }
+                        }
+                    )
 
-                // 4. Ramadan quick actions (Quran, Taraweeh, Zakat, Duas)
+                    // 4. Daily goals
+                    DailyGoalsCard(isRamadan: true, loggedPrayers: vm.loggedPrayers, todayPrayers: vm.todayPrayers)
+                }
+
+                // 5. Ramadan quick actions (Quran, Taraweeh, Zakat, Duas)
                 quickActionsGrid
 
-                // 5. Adhan + Qibla buttons (same as Prayer page)
-                adhanQiblaButtons
+                // 6. Adhan + Qibla buttons (same as Prayer page)
+                PrayerQuickActionsBar(onQibla: { showingQibla = true })
 
-                // 6. Fasting tracker (Ramadan-only)
+                // 7. Fasting tracker (Ramadan-only)
                 fastingTrackerCard
 
-                // 7. Quran Khatm goal
+                // 8. Quran Khatm goal
                 quranGoalCard
             }
-            .padding()
+            .padding(SafaSpacing.md)
         }
         .navigationTitle("Ramadan Mubarak")
         .navigationBarTitleDisplayMode(.large)
@@ -83,6 +107,13 @@ struct RamadanView: View {
                 .fullSheet()
         }
         .task {
+            if prayerViewModel == nil {
+                prayerViewModel = PrayerViewModel(
+                    prayerRepository: dependencies.prayerRepository,
+                    locationService: dependencies.locationService,
+                    userState: dependencies.userState
+                )
+            }
             await loadRamadanData()
             healthSyncEnabled = healthKitService.syncEnabled
         }
@@ -93,10 +124,10 @@ struct RamadanView: View {
         .onChange(of: router.pendingNotificationAction) { _, newValue in
             if newValue != nil { handlePendingNotificationAction() }
         }
-        .onChange(of: todayPrayers.isEmpty) { wasEmpty, isEmpty in
-            if wasEmpty && !isEmpty, let prayerType = deferredLogPrayer {
+        .onChange(of: prayerViewModel?.todayPrayers.isEmpty) { wasEmpty, isEmpty in
+            if wasEmpty == true && isEmpty == false, let prayerType = deferredLogPrayer {
                 deferredLogPrayer = nil
-                Task { await optimisticLogPrayer(prayerType) }
+                Task { await prayerViewModel?.logPrayer(prayerType) }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
@@ -182,28 +213,25 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
+                case .nextSuhoor(let time):
+                    HStack {
+                        Image(systemName: "timer")
+                            .foregroundStyle(.secondary)
+                        Text(time, style: .timer)
+                            .font(SafaTypography.headlineLarge)
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                            .foregroundStyle(.secondary)
+                        Text("until Suhoor tomorrow")
+                            .font(SafaTypography.labelMedium)
+                            .foregroundStyle(.tertiary)
+                    }
                 case .complete:
                     Label("Fasting complete for today", systemImage: "checkmark.circle.fill")
                         .font(SafaTypography.titleSmall)
                         .foregroundStyle(.green)
                 }
             }
-        }
-    }
-
-    // MARK: - Prayer Progress (Full Width, Expanded)
-
-    private var prayerProgressCard: some View {
-        ContentCard {
-            PrayerProgressIndicator(
-                prayers: todayPrayers,
-                loggedPrayers: loggedPrayers,
-                nextPrayer: nextPrayer,
-                style: .expanded,
-                onLogPrayer: { prayerType in
-                    Task { await togglePrayer(prayerType) }
-                }
-            )
         }
     }
 
@@ -223,32 +251,6 @@ struct RamadanView: View {
             RamadanQuickAction(icon: "hands.sparkles.fill", title: "Duas", subtitle: "Iftar duas", color: .orange) {
                 router.selectedTab = "duas"
             }
-        }
-    }
-
-    // MARK: - Adhan + Qibla Buttons
-
-    private var adhanQiblaButtons: some View {
-        HStack(spacing: SafaSpacing.md) {
-            // Qibla
-            Button {
-                showingQibla = true
-            } label: {
-                VStack(spacing: SafaSpacing.xs) {
-                    Image(systemName: "location.north.fill")
-                        .font(.title2)
-                    Text("Qibla")
-                        .font(SafaTypography.labelSmall)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, SafaSpacing.sm)
-                .background(Color(UIColor.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-            }
-            .buttonStyle(.plain)
-
-            // Adhan
-            AdhanPlayButton(style: .quickAction)
         }
     }
 
@@ -354,89 +356,6 @@ struct RamadanView: View {
         UserDefaults.standard.set(Array(fastingDays), forKey: "ramadan_fasting_days_\(year)")
     }
 
-    private func togglePrayer(_ prayerType: PrayerType) async {
-        if loggedPrayers.contains(prayerType) {
-            await optimisticUnlogPrayer(prayerType)
-        } else {
-            await optimisticLogPrayer(prayerType)
-        }
-    }
-
-    private func optimisticLogPrayer(_ prayerType: PrayerType) async {
-        guard !loggedPrayers.contains(prayerType) else { return }
-        // Optimistic: update UI immediately
-        loggedPrayers.insert(prayerType)
-        WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-
-        let displayName = prayerType.displayName
-        ToastService.shared.show(Toast.undoAction(message: "\(displayName) logged") {
-            Task { @MainActor [self] in
-                loggedPrayers.remove(prayerType)
-                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-                // Best-effort: delete from repo
-                do {
-                    let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
-                    if let log = logs.first(where: { $0.prayerType == prayerType }) {
-                        try await dependencies.prayerRepository.deletePrayerLog(log)
-                    }
-                } catch {}
-            }
-        })
-
-        // Persist
-        do {
-            let prayer = todayPrayers.first { $0.type == prayerType }
-            let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
-            try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
-
-            await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: dependencies.userState)
-            await dependencies.userState.incrementPrayersLogged()
-            await dependencies.userState.recordActivity(type: .prayer)
-
-            if PrayerType.obligatoryPrayers.allSatisfy({ loggedPrayers.contains($0) }) {
-                await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: dependencies.userState)
-            }
-        } catch {
-            // Revert on failure
-            loggedPrayers.remove(prayerType)
-            WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-        }
-    }
-
-    private func optimisticUnlogPrayer(_ prayerType: PrayerType) async {
-        // Optimistic: update UI immediately
-        loggedPrayers.remove(prayerType)
-        WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-
-        let displayName = prayerType.displayName
-        ToastService.shared.show(Toast.undoAction(message: "\(displayName) unlogged", type: .info) {
-            Task { @MainActor [self] in
-                loggedPrayers.insert(prayerType)
-                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-                // Best-effort: re-log to repo
-                do {
-                    let prayer = todayPrayers.first { $0.type == prayerType }
-                    let isOnTime = prayer.map { abs(Date().timeIntervalSince($0.time)) < 30 * 60 } ?? false
-                    try await dependencies.prayerRepository.logPrayer(prayerType, for: Date(), at: Date(), isOnTime: isOnTime)
-                } catch {}
-            }
-        })
-
-        // Persist
-        do {
-            let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
-            if let log = logs.first(where: { $0.prayerType == prayerType }) {
-                try await dependencies.prayerRepository.deletePrayerLog(log)
-            }
-        } catch {
-            // Revert on failure
-            loggedPrayers.insert(prayerType)
-            WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-        }
-    }
-
-    // Adhan play/stop logic extracted to AdhanPlayButton shared component
-
     // MARK: - Notification Action Handling
 
     private func handlePendingNotificationAction() {
@@ -446,10 +365,10 @@ struct RamadanView: View {
         case .openQibla:
             showingQibla = true
         case .logPrayer(let prayerType):
-            if todayPrayers.isEmpty {
+            if prayerViewModel?.todayPrayers.isEmpty != false {
                 deferredLogPrayer = prayerType
             } else {
-                Task { await optimisticLogPrayer(prayerType) }
+                Task { await prayerViewModel?.logPrayer(prayerType) }
             }
         }
     }
@@ -460,23 +379,8 @@ struct RamadanView: View {
         let (_, month, day) = hijriConverter.hijriComponents(from: Date())
         if month == 9 { currentDay = day }
 
-        if let location = dependencies.locationService.coordinates {
-            do {
-                let prefs = PreferencesManager.loadPreferencesSync()
-                let prayers = try await dependencies.prayerRepository.getPrayers(for: Date(), location: location, method: prefs.calculationMethod, madhab: prefs.madhab)
-                todayPrayers = prayers
-                nextPrayer = prayers.first { $0.time > Date() && $0.type.isObligatory }
-                suhoorTime = prayers.first { $0.type == .fajr }?.time
-                iftarTime = prayers.first { $0.type == .maghrib }?.time
-
-                let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
-                loggedPrayers = Set(logs.map { $0.prayerType })
-
-                // Sync to widgets
-                WidgetDataService.shared.writePrayerTimes(prayers)
-                WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-            } catch {}
-        }
+        // Delegate prayer loading to PrayerViewModel
+        await prayerViewModel?.loadPrayerTimes()
 
         // Load persisted fasting days
         let year = String(Calendar.current.component(.year, from: Date()))

@@ -94,4 +94,9 @@ protocol QuranRepositoryProtocol {
     /// Resets read progress for a surah (marks as unread)
     /// - Parameter surahNumber: The surah number to reset
     func resetSurahProgress(surahNumber: Int) async throws
+
+    /// Gets a deterministic daily verse from curated list (same verse all day)
+    /// - Parameter date: The date to get the verse for
+    /// - Returns: The daily verse ayah, or nil if unavailable
+    func getDailyVerse(for date: Date) async -> Ayah?
 }

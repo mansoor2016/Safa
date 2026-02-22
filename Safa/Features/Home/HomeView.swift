@@ -198,7 +198,20 @@ struct HomeView: View {
             dismiss: dismissState
         )
 
-        if visibility != .hidden {
+        // Hide banner after iftar until next suhoor countdown begins.
+        // Only evaluate when times are loaded — if nil, show the banner (don't hide it).
+        let isPostIftar: Bool = {
+            guard isRamadan, suhoorTime != nil || iftarTime != nil else { return false }
+            let target = RamadanCountdownHelpers.resolveTarget(
+                now: Date(), suhoorTime: suhoorTime, iftarTime: iftarTime
+            )
+            switch target {
+            case .nextSuhoor, .complete: return true
+            case .suhoor, .iftar: return false
+            }
+        }()
+
+        if visibility != .hidden && !isPostIftar {
             ramadanBannerExpandedContent
                 .onTapGesture {
                     if isRamadan {
@@ -464,6 +477,8 @@ struct HomeView: View {
             case "dhikr": router.navigate(to: .dhikr)
             case "qibla": router.navigate(to: .qibla)
             case "learn": router.navigate(to: .learn)
+            case "hadith": router.navigate(to: .hadith(collection: nil, hadithId: nil))
+            case "chat": router.navigate(to: .chat)
             default: break
             }
         case .disabled:
@@ -736,8 +751,8 @@ struct HomeView: View {
         // Load Quran reading progress for resume card
         quranProgress = try? await dependencies.quranRepository.getReadingProgress()
 
-        // Load daily verse
-        dailyVerse = Ayah.alFatiha.randomElement()
+        // Load daily verse (deterministic — same verse all day)
+        dailyVerse = await dependencies.quranRepository.getDailyVerse(for: Date())
 
         // Award dailyVerse hasanat (once per day)
         if dailyVerse != nil {

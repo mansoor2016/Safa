@@ -11,7 +11,7 @@ enum AppDefaults {
     // MARK: - Prayer Settings
 
     /// Default calculation method when location is unknown
-    static let calculationMethod: CalculationMethod = .muslimWorldLeague
+    static let calculationMethod: CalculationMethod = .makkah
 
     /// Default madhab for Asr calculation
     static let madhab: Madhab = .hanafi
@@ -34,6 +34,9 @@ enum AppDefaults {
 
     /// Enable notifications by default
     static let notificationsEnabled: Bool = true
+
+    /// Adhan sound off by default (presented as opt-in during onboarding)
+    static let adhanEnabled: Bool = false
 
     /// Wudhu reminder off by default (opt-in)
     static let wudhuReminderEnabled: Bool = false

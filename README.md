@@ -10,9 +10,9 @@ Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed
 |---------------------------|-----------------|
 | Cluttered, outdated UI | Clean, calm design inspired by Apple's design language |
 | Aggressive advertisements | No ads |
-| Need 5+ apps for different features | All-in-one: Prayer, Quran, Hadith, Learning, AI |
+| Need 5+ apps for different features | All-in-one: Prayer, Quran, Hadith, Duas, Dhikr, and more |
 | No intelligence | Contextually aware — adapts to time, location, and Islamic calendar |
-| No habit formation | Gamification with Hasanat points, streaks, and achievements |
+| No habit formation | Gamification with Hasanat points, streaks, and daily goals |
 
 ## Features
 
@@ -22,8 +22,8 @@ Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed
 - **Quran Reader** — Full 6,236 ayahs with Arabic (Uthmani), Sahih International translation, and FTS search
 - **Hadith Collections** — 34,178 hadiths across all 6 Kutub al-Sittah (Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasa'i, Ibn Majah)
 - **Dua & Dhikr** — Morning/evening dhikr, sleep duas (incl. Ayatul Kursi), categorized duas
-- **AI Companion** — On-device Islamic Q&A powered by Apple Foundation Models (coming soon)
-- **Learning** — Arabic alphabet, Tajweed rules, pronunciation practice
+- **AI Companion** — On-device Islamic Q&A powered by Apple Foundation Models (requires iOS 26+ with Apple Intelligence)
+- **Learning** — Arabic alphabet, Tajweed rules, pronunciation practice (coming soon)
 
 ### Intelligent Features
 - **Contextual Reminders** — Relevant prompts based on time of day and Islamic calendar
@@ -43,9 +43,8 @@ Safa (صفا — meaning purity/clarity) is a comprehensive Islamic app designed
 - **Notifications** — Prayer time alerts with optional adhan sounds (11 reciters)
 
 ### Gamification
-- **Hasanat Points** — Earn rewards for prayers, Quran reading, and learning
-- **Streaks** — Track daily consistency across prayer, Quran, dhikr, and learning
-- **Achievements** — Unlock badges for milestones (20+ achievements)
+- **Hasanat Points** — Earn rewards for prayers, Quran reading, and dhikr
+- **Streaks** — Track daily consistency across prayer, Quran, and dhikr
 - **Levels** — Progress from Beginner to Muhsin (10 levels)
 
 ### Privacy First

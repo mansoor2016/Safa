@@ -284,7 +284,7 @@ final class UserPreferencesLocationTests: XCTestCase {
             country: "Jordan",
             countryCode: "JO",
             timezone: nil,
-            recommendedMethod: .muslimWorldLeague,
+            recommendedMethod: .makkah,
             recommendedMadhab: .hanafi,
             recommendedLanguage: "Arabic",
             regionName: "Amman"
@@ -292,7 +292,7 @@ final class UserPreferencesLocationTests: XCTestCase {
 
         prefs.applyLocationDefaults(from: context)
 
-        XCTAssertEqual(prefs.calculationMethod, .muslimWorldLeague,
+        XCTAssertEqual(prefs.calculationMethod, .makkah,
                        "Should overwrite previous ISNA setting")
         XCTAssertEqual(prefs.madhab, .hanafi,
                        "Should overwrite previous Shafi'i setting")

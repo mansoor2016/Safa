@@ -262,6 +262,7 @@ struct SettingsView: View {
     // MARK: - Developer Section
 
     @State private var forceRamadan = false
+    @State private var forcePrayerPage = false
     @State private var forceEidAlFitr = false
     @State private var forceEidAlAdha = false
     @State private var enableAICompanion = false
@@ -292,6 +293,18 @@ struct SettingsView: View {
                             UserDefaults.standard.removeObject(forKey: ramadanBannerDismissKey)
                         } else {
                             FeatureFlags.shared.removeOverride(.ramadanMode)
+                        }
+                    }
+
+                Toggle("Show Prayer Page (skip Ramadan)", isOn: $forcePrayerPage)
+                    .onAppear {
+                        forcePrayerPage = FeatureFlags.shared.isEnabled(.forcePrayerPage)
+                    }
+                    .onChange(of: forcePrayerPage) { _, newValue in
+                        if newValue {
+                            FeatureFlags.shared.setOverride(.forcePrayerPage, enabled: true)
+                        } else {
+                            FeatureFlags.shared.removeOverride(.forcePrayerPage)
                         }
                     }
 

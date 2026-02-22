@@ -343,7 +343,8 @@ struct MainTabView: View {
 
             // Prayer Tab (swaps to Ramadan view during Ramadan)
             NavigationStack {
-                if HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode) {
+                if (HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode))
+                    && !FeatureFlags.shared.isEnabled(.forcePrayerPage) {
                     RamadanView()
                 } else {
                     PrayerView()

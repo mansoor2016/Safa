@@ -20,6 +20,7 @@ enum Feature: String, CaseIterable {
     case ramadanMode = "ramadan_mode"
     case forceEidAlFitr = "force_eid_al_fitr"
     case forceEidAlAdha = "force_eid_al_adha"
+    case forcePrayerPage = "force_prayer_page"
     case windDown = "wind_down"
     case namesOfAllah = "names_of_allah"
 
@@ -36,8 +37,10 @@ enum Feature: String, CaseIterable {
     case predictiveDownload = "predictive_download"
     case smartCleanup = "smart_cleanup"
 
-    // Coming Soon Features (Disabled - partially implemented or requires additional work)
+    // AI (runtime-gated by LLMService.availability)
     case aiCompanion = "ai_companion"
+
+    // Coming Soon Features (Disabled - partially implemented or requires additional work)
     case interactiveWidgets = "interactive_widgets"
 
     var displayName: String {
@@ -54,6 +57,7 @@ enum Feature: String, CaseIterable {
         case .ramadanMode: return "Ramadan Mode"
         case .forceEidAlFitr: return "Force Eid al-Fitr"
         case .forceEidAlAdha: return "Force Eid al-Adha"
+        case .forcePrayerPage: return "Force Prayer Page"
         case .windDown: return "Wind Down"
         case .namesOfAllah: return "99 Names of Allah"
         case .widgets: return "Widgets"
@@ -72,14 +76,15 @@ enum Feature: String, CaseIterable {
 
     var isEnabledByDefault: Bool {
         switch self {
-        // Requires iOS 26+ for Apple Foundation Models
+        // Auto-enabled on iOS 26+; disabled on older OS where Foundation Models aren't available
         case .aiCompanion:
+            if #available(iOS 26, *) { return true }
             return false
         // Content not yet ready
         case .learning:
             return false
         // Debug overrides — not user-facing features
-        case .ramadanMode, .forceEidAlFitr, .forceEidAlAdha:
+        case .ramadanMode, .forceEidAlFitr, .forceEidAlAdha, .forcePrayerPage:
             return false
         // Requires Widget extension target setup in Xcode
         case .interactiveWidgets:

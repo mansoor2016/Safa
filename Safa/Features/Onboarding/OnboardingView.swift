@@ -15,6 +15,8 @@ struct OnboardingView: View {
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
+    @State private var adhanEnabled = false
+    @State private var selectedAdhan: AdhanSound = .misharyAlafasy
     @State private var notificationAuthStatus: UNAuthorizationStatus = .notDetermined
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
@@ -290,28 +292,41 @@ struct OnboardingView: View {
                         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
                     }
 
-                    // Mosque mode info (future feature)
-                    HStack {
-                        Image(systemName: "building.columns")
-                            .foregroundColor(.accentColor)
-                            .frame(width: 24)
+                    // Adhan sound (shown when notifications enabled)
+                    if notificationsEnabled {
+                        Toggle(isOn: $adhanEnabled) {
+                            HStack {
+                                Image(systemName: "speaker.wave.2")
+                                    .foregroundColor(.accentColor)
+                                    .frame(width: 24)
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Mosque Mode")
-                                .font(SafaTypography.bodyMedium)
-                                .foregroundColor(SafaColors.Fallback.text)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Use Adhan Sound")
+                                        .font(SafaTypography.bodyMedium)
+                                        .foregroundColor(SafaColors.Fallback.text)
 
-                            Text("Location based auto-silence")
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                                    Text("Play adhan for prayer notifications")
+                                        .font(SafaTypography.bodySmall)
+                                        .foregroundColor(SafaColors.Fallback.tertiaryText)
+                                }
+                            }
                         }
+                        .padding()
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
 
-                        Spacer()
+                        if adhanEnabled {
+                            Picker("Adhan Voice", selection: $selectedAdhan) {
+                                ForEach(AdhanSound.regularOptions, id: \.self) { adhan in
+                                    Text(adhan.displayName).tag(adhan)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .padding()
+                            .background(Color(UIColor.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                        }
                     }
-                    .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    .disabledFeature(isDisabled: true, name: "Mosque Mode")
                 }
                 .padding(.horizontal)
 
@@ -402,6 +417,9 @@ struct OnboardingView: View {
                     summaryItem(icon: "person", value: selectedMadhab.displayName)
                     if notificationsEnabled {
                         summaryItem(icon: "bell", value: "Notifications On")
+                        if adhanEnabled {
+                            summaryItem(icon: "speaker.wave.2", value: "Adhan: \(selectedAdhan.displayName)")
+                        }
                     }
                 }
                 .padding()
@@ -641,6 +659,8 @@ struct OnboardingView: View {
             prefs.madhab = selectedMadhab
             prefs.selectedTranslation = selectedLanguage
             prefs.notificationsEnabled = notificationsEnabled
+            prefs.adhanEnabled = adhanEnabled && notificationsEnabled
+            prefs.selectedAdhan = selectedAdhan.rawValue
             prefs.hasCompletedOnboarding = true
 
             if let context = locationContext {

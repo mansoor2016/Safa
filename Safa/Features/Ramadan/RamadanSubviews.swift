@@ -144,6 +144,8 @@ struct TaraweehTrackerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var rakahsPrayed = 8
 
+    private static let presets = [8, 12, 20]
+
     var body: some View {
         NavigationStack {
             VStack(spacing: SafaSpacing.xl) {
@@ -155,6 +157,8 @@ struct TaraweehTrackerSheet: View {
 
                 Text("Taraweeh Tonight")
                     .font(SafaTypography.headlineMedium)
+
+                presetButtons
 
                 rakahsCounter
 
@@ -170,11 +174,31 @@ struct TaraweehTrackerSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .onAppear(perform: loadSavedValue)
         }
-        .compactSheet()
+        .largeSheet()
     }
 
     // MARK: - Subviews
+
+    private var presetButtons: some View {
+        HStack(spacing: SafaSpacing.md) {
+            ForEach(Self.presets, id: \.self) { preset in
+                Button {
+                    withAnimation { rakahsPrayed = preset }
+                } label: {
+                    Text("\(preset)")
+                        .font(SafaTypography.bodyLarge)
+                        .fontWeight(rakahsPrayed == preset ? .semibold : .regular)
+                        .foregroundColor(rakahsPrayed == preset ? .white : .accentColor)
+                        .frame(width: 56, height: 36)
+                        .background(rakahsPrayed == preset ? Color.accentColor : Color.accentColor.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                }
+                .accessibilityLabel("\(preset) rak'ahs")
+            }
+        }
+    }
 
     private var rakahsCounter: some View {
         VStack(spacing: SafaSpacing.sm) {
@@ -184,37 +208,44 @@ struct TaraweehTrackerSheet: View {
 
             HStack(spacing: SafaSpacing.lg) {
                 Button {
-                    if rakahsPrayed > 0 { rakahsPrayed -= 2 }
+                    withAnimation { rakahsPrayed = max(rakahsPrayed - 2, 0) }
                 } label: {
                     Image(systemName: "minus.circle.fill")
                         .font(.system(size: 44))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(rakahsPrayed > 0 ? .accentColor : .gray.opacity(0.4))
                 }
+                .disabled(rakahsPrayed <= 0)
 
                 Text("\(rakahsPrayed)")
                     .font(SafaTypography.counterLarge)
-                    .frame(width: 80)
+                    .frame(minWidth: 100)
                     .contentTransition(.numericText())
 
                 Button {
-                    if rakahsPrayed < 20 { rakahsPrayed += 2 }
+                    withAnimation { rakahsPrayed = min(rakahsPrayed + 2, 20) }
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 44))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(rakahsPrayed < 20 ? .accentColor : .gray.opacity(0.4))
                 }
+                .disabled(rakahsPrayed >= 20)
             }
-
-            Text("Common: 8 or 20 rak'ahs")
-                .font(SafaTypography.labelSmall)
-                .foregroundColor(SafaColors.Fallback.tertiaryText)
         }
     }
 
     private var saveButton: some View {
         Button {
-            Task {
-                await HasanatTracker.awardOnce(.taraweeh, key: "taraweeh", via: dependencies.userState)
+            let service = dependencies.ramadanService
+            let day = service.currentRamadanDay
+            if day > 0 {
+                service.saveTaraweeh(day: day, rakaahs: rakahsPrayed)
+                Task {
+                    await HasanatTracker.awardOnce(
+                        .taraweeh,
+                        key: "taraweeh_day\(day)",
+                        via: dependencies.userState
+                    )
+                }
             }
             dismiss()
         } label: {
@@ -226,6 +257,16 @@ struct TaraweehTrackerSheet: View {
                 .padding()
                 .background(Color.accentColor)
                 .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func loadSavedValue() {
+        let service = dependencies.ramadanService
+        let day = service.currentRamadanDay
+        if day > 0, let saved = service.getTaraweehDays()[day] {
+            rakahsPrayed = saved
         }
     }
 }

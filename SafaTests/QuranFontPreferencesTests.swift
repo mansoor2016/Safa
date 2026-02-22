@@ -25,6 +25,11 @@ final class QuranFontPreferencesTests: XCTestCase {
         XCTAssertEqual(prefs.translationFontSize, .medium)
     }
 
+    func test_defaultTransliterationFontSize_isMedium() {
+        let prefs = QuranFontPreferences()
+        XCTAssertEqual(prefs.transliterationFontSize, .medium)
+    }
+
     // MARK: - Point Size Mappings
 
     func test_arabicFontSize_pointSizes() {
@@ -38,6 +43,12 @@ final class QuranFontPreferencesTests: XCTestCase {
         XCTAssertEqual(QuranFontPreferences.TranslationFontSize.small.pointSize, 14)
         XCTAssertEqual(QuranFontPreferences.TranslationFontSize.medium.pointSize, 16)
         XCTAssertEqual(QuranFontPreferences.TranslationFontSize.large.pointSize, 20)
+    }
+
+    func test_transliterationFontSize_pointSizes() {
+        XCTAssertEqual(QuranFontPreferences.TransliterationFontSize.small.pointSize, 14)
+        XCTAssertEqual(QuranFontPreferences.TransliterationFontSize.medium.pointSize, 16)
+        XCTAssertEqual(QuranFontPreferences.TransliterationFontSize.large.pointSize, 20)
     }
 
     // MARK: - Labels
@@ -61,11 +72,13 @@ final class QuranFontPreferencesTests: XCTestCase {
         var prefs = QuranFontPreferences()
         prefs.arabicFontSize = .extraLarge
         prefs.translationFontSize = .small
+        prefs.transliterationFontSize = .large
         prefs.save()
 
         let loaded = QuranFontPreferences.load()
         XCTAssertEqual(loaded.arabicFontSize, .extraLarge)
         XCTAssertEqual(loaded.translationFontSize, .small)
+        XCTAssertEqual(loaded.transliterationFontSize, .large)
     }
 
     func test_load_returnsDefaults_whenNoDataStored() {
@@ -73,6 +86,20 @@ final class QuranFontPreferencesTests: XCTestCase {
         let loaded = QuranFontPreferences.load()
         XCTAssertEqual(loaded.arabicFontSize, .medium)
         XCTAssertEqual(loaded.translationFontSize, .medium)
+        XCTAssertEqual(loaded.transliterationFontSize, .medium)
+    }
+
+    func test_decode_oldDataWithoutTransliteration_defaultsToMedium() {
+        // Simulate data saved before transliterationFontSize was added
+        let oldJSON = """
+        {"arabicFontSize":"large","translationFontSize":"small"}
+        """
+        UserDefaults.standard.set(oldJSON.data(using: .utf8), forKey: "quranFontPreferences")
+
+        let loaded = QuranFontPreferences.load()
+        XCTAssertEqual(loaded.arabicFontSize, .large, "Existing arabic size should be preserved")
+        XCTAssertEqual(loaded.translationFontSize, .small, "Existing translation size should be preserved")
+        XCTAssertEqual(loaded.transliterationFontSize, .medium, "Missing transliteration size should default to medium")
     }
 
     // MARK: - All Cases
@@ -83,6 +110,10 @@ final class QuranFontPreferencesTests: XCTestCase {
 
     func test_translationFontSize_hasThreeCases() {
         XCTAssertEqual(QuranFontPreferences.TranslationFontSize.allCases.count, 3)
+    }
+
+    func test_transliterationFontSize_hasThreeCases() {
+        XCTAssertEqual(QuranFontPreferences.TransliterationFontSize.allCases.count, 3)
     }
 
     // MARK: - Equatable

@@ -26,7 +26,8 @@ final class AppRouter {
 
     // MARK: - Injectable State
     var isRamadanActive: () -> Bool = {
-        HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
+        (HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode))
+            && !FeatureFlags.shared.isEnabled(.forcePrayerPage)
     }
 
     // MARK: - Shared Instance (for notification handler access before SwiftUI mounts)

@@ -15,6 +15,7 @@ struct RamadanBanner: View {
 
     @State private var countdown = ""
     @State private var isUntilSuhoor = false
+    @State private var isNextSuhoor = false
     @State private var quranProgress: QuranProgress?
     @State private var showingIftarDuaPrompt = false
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -190,22 +191,29 @@ struct RamadanBanner: View {
 
     private var countdownView: some View {
         VStack(spacing: SafaSpacing.xxs) {
-            Text(isUntilSuhoor ? "Suhoor ends in" : "Iftar in")
+            Text(countdownLabel)
                 .font(SafaTypography.labelSmall)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(.white.opacity(isNextSuhoor ? 0.5 : 0.7))
 
             Text(countdown)
-                .font(SafaTypography.counterSmall)
-                .foregroundColor(.white)
+                .font(isNextSuhoor ? SafaTypography.counterSmall : SafaTypography.counterSmall)
+                .foregroundColor(.white.opacity(isNextSuhoor ? 0.6 : 1.0))
                 .monospacedDigit()
 
-            if let time = isUntilSuhoor ? suhoorTime : iftarTime {
+            if !isNextSuhoor, let time = isUntilSuhoor ? suhoorTime : iftarTime {
                 Text(time.formatted(date: .omitted, time: .shortened))
                     .font(SafaTypography.labelSmall)
                     .foregroundColor(.white.opacity(0.7))
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var countdownLabel: String {
+        if isNextSuhoor {
+            return "Suhoor tomorrow in"
+        }
+        return isUntilSuhoor ? "Suhoor ends in" : "Iftar in"
     }
 
     // MARK: - Quick Actions
@@ -253,13 +261,21 @@ struct RamadanBanner: View {
         switch target {
         case .suhoor(let time):
             isUntilSuhoor = true
+            isNextSuhoor = false
             let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         case .iftar(let time):
             isUntilSuhoor = false
+            isNextSuhoor = false
+            let (hours, minutes, seconds) = time.countdown()
+            countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        case .nextSuhoor(let time):
+            isUntilSuhoor = true
+            isNextSuhoor = true
             let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         case .complete:
+            isNextSuhoor = false
             countdown = "--:--:--"
         }
     }

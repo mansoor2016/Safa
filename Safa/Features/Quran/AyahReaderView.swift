@@ -101,6 +101,9 @@ private struct AyahReaderContent: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Toggle("Show Translation", isOn: $viewModel.showTranslation)
+                    Toggle("Show Transliteration", isOn: $viewModel.showTransliteration)
+
+                    Divider()
 
                     Menu("Arabic Text Size") {
                         Picker("Arabic Text Size", selection: $viewModel.fontPreferences.arabicFontSize) {
@@ -114,6 +117,16 @@ private struct AyahReaderContent: View {
                         Picker("Translation Text Size", selection: $viewModel.fontPreferences.translationFontSize) {
                             ForEach(QuranFontPreferences.TranslationFontSize.allCases, id: \.self) { size in
                                 Text(size.label).tag(size)
+                            }
+                        }
+                    }
+
+                    if viewModel.showTransliteration {
+                        Menu("Transliteration Text Size") {
+                            Picker("Transliteration Text Size", selection: $viewModel.fontPreferences.transliterationFontSize) {
+                                ForEach(QuranFontPreferences.TransliterationFontSize.allCases, id: \.self) { size in
+                                    Text(size.label).tag(size)
+                                }
                             }
                         }
                     }
@@ -143,9 +156,11 @@ private struct AyahReaderContent: View {
                                 surahNumber: surah.number,
                                 surahName: surah.nameEnglish,
                                 showTranslation: viewModel.showTranslation,
+                                showTransliteration: viewModel.showTransliteration,
                                 isBookmarked: viewModel.isBookmarked(ayah),
                                 arabicFontSize: viewModel.fontPreferences.arabicFontSize.pointSize,
                                 translationFontSize: viewModel.fontPreferences.translationFontSize.pointSize,
+                                transliterationFontSize: viewModel.fontPreferences.transliterationFontSize.pointSize,
                                 isAIAvailable: isAIAvailable,
                                 onBookmarkToggle: {
                                     Task {
@@ -400,9 +415,11 @@ private struct AyahRow: View {
     let surahNumber: Int
     let surahName: String
     let showTranslation: Bool
+    let showTransliteration: Bool
     let isBookmarked: Bool
     let arabicFontSize: CGFloat
     let translationFontSize: CGFloat
+    let transliterationFontSize: CGFloat
     let isAIAvailable: Bool
     let onBookmarkToggle: () -> Void
 
@@ -439,6 +456,15 @@ private struct AyahRow: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .environment(\.layoutDirection, .rightToLeft)
                 .accessibilityArabic()
+
+            // Transliteration (between Arabic and Translation)
+            if showTransliteration, let transliteration = ayah.textTransliteration {
+                Text(transliteration)
+                    .font(.system(size: transliterationFontSize, design: .serif))
+                    .italic()
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             // Translation
             if showTranslation {

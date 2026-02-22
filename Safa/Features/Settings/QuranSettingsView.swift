@@ -7,6 +7,7 @@ import SwiftUI
 struct QuranSettingsView: View {
     // MARK: - State
     @State private var autoScrollEnabled: Bool
+    @State private var showTransliteration: Bool
 
     private let prefsManager = PreferencesManager.shared
 
@@ -14,6 +15,7 @@ struct QuranSettingsView: View {
     init() {
         let prefs = PreferencesManager.loadPreferencesSync()
         _autoScrollEnabled = State(initialValue: prefs.autoScrollEnabled)
+        _showTransliteration = State(initialValue: prefs.showTransliteration)
     }
 
     // MARK: - Body
@@ -25,6 +27,11 @@ struct QuranSettingsView: View {
                 } label: {
                     Text("Font Settings")
                 }
+
+                Toggle("Show Transliteration", isOn: $showTransliteration)
+                    .onChange(of: showTransliteration) { _, newValue in
+                        Task { await prefsManager.update(\.showTransliteration, to: newValue) }
+                    }
 
                 Toggle("Auto-Scroll Reader", isOn: $autoScrollEnabled)
                     .onChange(of: autoScrollEnabled) { _, newValue in

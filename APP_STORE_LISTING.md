@@ -80,9 +80,8 @@ ISLAMIC CALENDAR & EVENTS
 - Export Islamic events to Apple Calendar or as .ics files
 
 GAMIFICATION & PROGRESS
-- Earn Hasanat (good deed points) for prayers, Quran reading, dhikr, and learning
+- Earn Hasanat (good deed points) for prayers, Quran reading, and dhikr
 - Build and maintain streaks across prayers, Quran, and dhikr
-- Unlock meaningful achievements tied to Islamic milestones
 - Set personalised daily goals and track your spiritual journey
 
 iOS INTEGRATION
@@ -109,11 +108,11 @@ prayer times,quran,islamic,muslim,adhan,salah,ramadan,dhikr,dua,hadith,qibla,tas
 
 **What's New** (for current version):
 ```
-- Adhan silent mode awareness: see a reminder when your ringer is off so you never miss the adhan
-- Live Activity reliability improvements with stale state handling
-- Notification action buttons on your Lock Screen: Mark as Prayed and Open Qibla
-- Prayer time accuracy improvements with adhan-swift engine
-- Settings redesign with cleaner navigation
+- Ask Safa: on-device Islamic AI assistant powered by Apple Intelligence (iPhone 17 and later)
+- Progress Dashboard with daily hasanat tracking, prayer consistency calendar, and weekly activity
+- Improved prayer logging with undo support
+- Enhanced accessibility with VoiceOver labels throughout
+- Ramadan tools polish and reliability improvements
 ```
 
 **Support URL**:
@@ -167,6 +166,7 @@ Key areas to review:
 - Ramadan features: automatically active during the Islamic month of Ramadan
 - Live Activities: shows prayer countdown on Lock Screen and Dynamic Island
 - Notifications: prayer reminders with optional adhan sound
+- AI Companion ("Ask Safa"): Available on devices running iOS 26 or later with Apple Intelligence enabled. On earlier iOS versions, the feature is gracefully hidden — this is expected behavior.
 
 No account or demo credentials needed — the app is fully functional immediately after launch.
 ```

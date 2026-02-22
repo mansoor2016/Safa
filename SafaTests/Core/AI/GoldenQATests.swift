@@ -88,6 +88,7 @@ private final class StubQuranRepository: QuranRepositoryProtocol {
     func updateBookmarkNote(surahNumber: Int, ayahNumber: Int, note: String?) async throws {}
     func getCompletedSurahNumbers() async throws -> Set<Int> { [] }
     func resetSurahProgress(surahNumber: Int) async throws {}
+    func getDailyVerse(for date: Date) async -> Ayah? { nil }
 }
 
 private final class StubHadithRepository: HadithRepositoryProtocol {

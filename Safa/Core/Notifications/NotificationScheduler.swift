@@ -136,6 +136,7 @@ final class NotificationScheduler {
                     content.body = String(localized: "It's time for \(prayer.type.displayName) prayer")
                     content.sound = .default
                     content.interruptionLevel = .timeSensitive
+                    content.relevanceScore = 1.0
                     content.categoryIdentifier = FocusModeService.NotificationCategory.prayerTime.rawValue
                     content.userInfo = ["prayerType": prayer.type.rawValue]
 

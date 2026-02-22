@@ -23,6 +23,25 @@ final class PreferencesManager {
     /// Configure with dependencies (call from Dependencies.swift)
     func configure(userRepository: UserRepositoryProtocol) {
         self.userRepository = userRepository
+        applyBetaMigrations()
+    }
+
+    // MARK: - Beta Migrations
+
+    /// One-time migrations for beta builds. Remove after public launch.
+    private func applyBetaMigrations() {
+        let key = "beta_migration_makkah_default_v2"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+
+        Task {
+            let prefs = await getPreferences()
+            // Only migrate users still on the old hard-coded default (.makkah).
+            // Users who explicitly chose another method keep their choice.
+            if prefs.calculationMethod == .makkah {
+                await update(\.calculationMethod, to: AppDefaults.calculationMethod)
+            }
+            UserDefaults.standard.set(true, forKey: key)
+        }
     }
 
     // MARK: - Generic Update Method

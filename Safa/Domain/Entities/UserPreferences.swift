@@ -83,7 +83,7 @@ struct UserPreferences: Codable, Hashable {
         savedCountryCode: String? = nil,
         useLocationBasedDefaults: Bool = AppDefaults.useLocationBasedDefaults,
         autoUpdateLocationForPrayers: Bool = true,
-        adhanEnabled: Bool = false,
+        adhanEnabled: Bool = AppDefaults.adhanEnabled,
         selectedAdhan: String = AdhanSound.misharyAlafasy.rawValue,
         selectedFajrAdhan: String = AdhanSound.misharyAlafasyFajr.rawValue,
         smartAdhanEnabled: Bool = false,

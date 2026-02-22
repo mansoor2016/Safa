@@ -68,9 +68,13 @@ struct HomeIntentResolver {
         id: "learn", icon: "graduationcap.fill", title: "Learn",
         subtitle: "Arabic & Tajweed", colorName: .purple, destination: .disabled("learning")
     )
+    static let hadith = HomeAction(
+        id: "hadith", icon: "text.book.closed.fill", title: "Hadith",
+        subtitle: "Prophetic traditions", colorName: .indigo, destination: .route("hadith")
+    )
     static let askSafa = HomeAction(
         id: "askSafa", icon: "sparkles", title: "Ask Safa",
-        subtitle: "AI companion", colorName: .orange, destination: .disabled("aiCompanion")
+        subtitle: "AI companion", colorName: .orange, destination: .route("chat")
     )
 
     // MARK: - Resolve
@@ -113,17 +117,8 @@ struct HomeIntentResolver {
             if ranked.count >= 4 { break }
         }
 
-        // Safety: ensure Prayer is always included
-        if !ranked.contains(prayer) {
-            if ranked.count >= 4 {
-                ranked[3] = prayer
-            } else {
-                ranked.append(prayer)
-            }
-        }
-
-        // Pad to 4 if needed
-        let fallback = [prayer, quran, duas, dhikr]
+        // Pad to 4 if needed (Prayer, Quran, Duas omitted — accessible via tab bar)
+        let fallback = [hadith, dhikr, askSafa, qibla]
         for action in fallback where ranked.count < 4 {
             if !ranked.contains(action) {
                 ranked.append(action)
@@ -192,19 +187,20 @@ struct HomeIntentResolver {
         return promotions
     }
 
-    /// Returns 5+ actions ordered by time-of-day relevance.
+    /// Returns 4 actions ordered by time-of-day relevance.
+    /// Prayer, Quran, Duas omitted — they're accessible via the tab bar.
     static func timeBasedDefaults(hour: Int) -> [HomeAction] {
         switch hour {
         case 4..<9:
-            return [dhikr.with(subtitle: "Morning adhkar"), prayer, quran, duas, qibla]
+            return [dhikr.with(subtitle: "Morning adhkar"), hadith, askSafa, qibla]
         case 9..<14:
-            return [quran, prayer, duas, dhikr, qibla]
+            return [hadith, dhikr, askSafa, qibla]
         case 14..<17:
-            return [prayer, quran, duas, dhikr, qibla]
+            return [hadith, dhikr, askSafa, qibla]
         case 17..<21:
-            return [prayer, dhikr.with(subtitle: "Evening adhkar"), duas, quran, qibla]
+            return [dhikr.with(subtitle: "Evening adhkar"), hadith, askSafa, qibla]
         default:
-            return [duas.with(subtitle: "Sleep supplications"), dhikr, prayer, quran, qibla]
+            return [dhikr, hadith, askSafa, qibla]
         }
     }
 }

@@ -59,13 +59,16 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertEqual(actions.count, 4)
     }
 
-    // MARK: - Prayer Always Included
+    // MARK: - Tab Bar Actions Not in Default Grid
 
-    func test_resolve_prayerAlwaysPresent() {
-        for hour in [0, 5, 10, 15, 20, 23] {
+    func test_resolve_neutralDay_noTabBarActionsInGrid() {
+        // Prayer, Quran, and Duas are accessible via tab bar — should not appear in default grid
+        for hour in [0, 10, 15, 22] {
             let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: hour))
-            let hasPrayer = actions.contains { $0.id == "prayer" }
-            XCTAssertTrue(hasPrayer, "Prayer should be present at hour \(hour)")
+            let ids = actions.map { $0.id }
+            XCTAssertFalse(ids.contains("prayer"), "Prayer should not be in default grid at hour \(hour)")
+            XCTAssertFalse(ids.contains("quran"), "Quran should not be in default grid at hour \(hour)")
+            XCTAssertFalse(ids.contains("duas"), "Duas should not be in default grid at hour \(hour)")
         }
     }
 
@@ -83,7 +86,7 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertEqual(actions.first?.id, "prayer", "Prayer should be first when within 30 minutes")
     }
 
-    func test_resolve_prayerFarAway_prayerNotNecessarilyFirst() {
+    func test_resolve_prayerFarAway_prayerNotInGrid() {
         let now = neutralDate(hour: 7, minute: 0)
         let prayerFar = prayerTime(type: .dhuhr, at: neutralDate(hour: 12, minute: 0))
 
@@ -92,45 +95,55 @@ final class HomeIntentResolverTests: XCTestCase {
             nextPrayer: prayerFar
         )
 
+        // Prayer far away and accessible via tab — should not appear
+        let ids = actions.map { $0.id }
+        XCTAssertFalse(ids.contains("prayer"))
         // At 7am (morning), Dhikr should be first by time defaults
         XCTAssertEqual(actions.first?.id, "dhikr")
     }
 
     // MARK: - Morning Defaults (Neutral Day)
 
-    func test_resolve_morning_dhikrInTopTwo() {
+    func test_resolve_morning_dhikrFirst() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 7))
-        let topTwo = Array(actions.prefix(2)).map { $0.id }
-        XCTAssertTrue(topTwo.contains("dhikr"), "Morning should have Dhikr in top 2, got: \(topTwo)")
+        XCTAssertEqual(actions.first?.id, "dhikr")
     }
 
     func test_resolve_morning_defaultOrder() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 6))
         let ids = actions.map { $0.id }
-        XCTAssertEqual(ids, ["dhikr", "prayer", "quran", "duas"])
+        XCTAssertEqual(ids, ["dhikr", "hadith", "askSafa", "qibla"])
     }
 
     // MARK: - Afternoon Defaults (Neutral Day)
 
-    func test_resolve_afternoon_prayerFirst() {
+    func test_resolve_afternoon_hadithFirst() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 15))
-        XCTAssertEqual(actions.first?.id, "prayer")
+        XCTAssertEqual(actions.first?.id, "hadith")
     }
 
     // MARK: - Evening Defaults (Neutral Day)
 
-    func test_resolve_evening_prayerFirst_dhikrSecond() {
+    func test_resolve_evening_dhikrFirst() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 18))
         let ids = actions.map { $0.id }
-        XCTAssertEqual(ids[0], "prayer")
-        XCTAssertEqual(ids[1], "dhikr")
+        XCTAssertEqual(ids[0], "dhikr")
+        XCTAssertEqual(ids[1], "hadith")
     }
 
     // MARK: - Night Defaults (Neutral Day)
 
-    func test_resolve_night_duasFirst() {
+    func test_resolve_night_dhikrFirst() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 22))
-        XCTAssertEqual(actions.first?.id, "duas")
+        XCTAssertEqual(actions.first?.id, "dhikr")
+    }
+
+    // MARK: - Ask Safa in Grid
+
+    func test_resolve_askSafaInDefaultGrid() {
+        let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10))
+        let ids = actions.map { $0.id }
+        XCTAssertTrue(ids.contains("askSafa"), "Ask Safa should appear in default grid")
     }
 
     // MARK: - Streak At Risk
@@ -150,7 +163,7 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertLessThanOrEqual(quranIndex, 1, "At-risk streak action should appear near top")
     }
 
-    func test_resolve_prayerStreakAtRisk_prayerStillFirst() {
+    func test_resolve_prayerStreakAtRisk_prayerPromoted() {
         let now = neutralDate(hour: 10)
         let prayerStreak = streakAtRisk(.prayer, count: 5)
 
@@ -159,7 +172,7 @@ final class HomeIntentResolverTests: XCTestCase {
             streaks: [prayerStreak]
         )
 
-        XCTAssertTrue(actions.contains { $0.id == "prayer" })
+        XCTAssertTrue(actions.contains { $0.id == "prayer" }, "Prayer should be promoted when streak is at risk")
     }
 
     func test_resolve_lowStreakCount_notPromoted() {
@@ -216,14 +229,14 @@ final class HomeIntentResolverTests: XCTestCase {
 
     // MARK: - Time-Based Defaults
 
-    func test_timeBasedDefaults_morningHasFiveItems() {
+    func test_timeBasedDefaults_morningHasFourItems() {
         let defaults = HomeIntentResolver.timeBasedDefaults(hour: 7)
-        XCTAssertGreaterThanOrEqual(defaults.count, 5)
+        XCTAssertGreaterThanOrEqual(defaults.count, 4)
     }
 
-    func test_timeBasedDefaults_midday_quranFirst() {
+    func test_timeBasedDefaults_midday_hadithFirst() {
         let defaults = HomeIntentResolver.timeBasedDefaults(hour: 10)
-        XCTAssertEqual(defaults.first?.id, "quran")
+        XCTAssertEqual(defaults.first?.id, "hadith")
     }
 
     // MARK: - Seasonal: Ramadan (March 15, 2025 = Ramadan 15, Saturday)
@@ -239,7 +252,7 @@ final class HomeIntentResolverTests: XCTestCase {
     }
 
     func test_seasonal_ramadan_quranAppearsInResolvedGrid() {
-        // Ramadan afternoon (when time defaults would put Prayer first)
+        // Ramadan afternoon (when time defaults would put Duas first)
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: ramadanDate)
         let ids = actions.map { $0.id }
@@ -271,7 +284,7 @@ final class HomeIntentResolverTests: XCTestCase {
     }
 
     func test_seasonal_dhulHijjah_dhikrInResolvedGrid() {
-        // Dhul Hijjah afternoon — dhikr should appear even though time defaults put Prayer first
+        // Dhul Hijjah afternoon — dhikr should appear
         let dhDate = dateOn(year: 2025, month: 6, day: 1, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: dhDate)
         let ids = actions.map { $0.id }
@@ -302,7 +315,7 @@ final class HomeIntentResolverTests: XCTestCase {
     }
 
     func test_seasonal_friday_quranInResolvedGrid() {
-        // Friday afternoon (when time defaults start with Prayer)
+        // Friday afternoon
         let friday = dateOn(year: 2025, month: 1, day: 17, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: friday)
         let ids = actions.map { $0.id }
@@ -341,16 +354,6 @@ final class HomeIntentResolverTests: XCTestCase {
         let prayerAction = actions.first { $0.id == "prayer" }
 
         XCTAssertEqual(prayerAction?.subtitle, "Dhuhr in 20 min")
-    }
-
-    func test_subtitle_prayerFar_showsDefault() {
-        let now = neutralDate(hour: 10, minute: 0)
-        let prayerFar = prayerTime(type: .dhuhr, at: neutralDate(hour: 12, minute: 0))
-
-        let actions = HomeIntentResolver.resolve(currentDate: now, nextPrayer: prayerFar)
-        let prayerAction = actions.first { $0.id == "prayer" }
-
-        XCTAssertEqual(prayerAction?.subtitle, "Times & logging")
     }
 
     // MARK: - Contextual Subtitles: Streak At Risk
@@ -407,11 +410,11 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertEqual(dhikrAction?.subtitle, "Evening adhkar")
     }
 
-    func test_subtitle_night_duasShowsSleepSupplications() {
+    func test_subtitle_night_hadithShowsDefault() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 22))
-        let duasAction = actions.first { $0.id == "duas" }
+        let hadithAction = actions.first { $0.id == "hadith" }
 
-        XCTAssertEqual(duasAction?.subtitle, "Sleep supplications")
+        XCTAssertEqual(hadithAction?.subtitle, "Prophetic traditions")
     }
 
     // MARK: - Contextual Subtitles: Priority (higher rule wins)

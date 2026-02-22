@@ -75,8 +75,8 @@ final class LocationInferenceServiceTests: XCTestCase {
         let coordinates = Coordinates(latitude: 51.5074, longitude: -0.1278)
         let context = sut.inferContextFast(from: coordinates)
 
-        // Europe should get MWL
-        XCTAssertEqual(context.recommendedMethod, .muslimWorldLeague)
+        // Europe should get Makkah
+        XCTAssertEqual(context.recommendedMethod, .makkah)
     }
 
     func testInferContextFastForMakkah() {
@@ -102,8 +102,8 @@ final class LocationInferenceServiceTests: XCTestCase {
         let coordinates = Coordinates(latitude: -6.2088, longitude: 106.8456)
         let context = sut.inferContextFast(from: coordinates)
 
-        // Southeast Asia should get MWL
-        XCTAssertEqual(context.recommendedMethod, .muslimWorldLeague)
+        // Southeast Asia should get Makkah
+        XCTAssertEqual(context.recommendedMethod, .makkah)
     }
 
     func testInferContextFastForCairo() {
@@ -368,9 +368,9 @@ final class LocationInferenceServiceTests: XCTestCase {
         // Indonesia should still work after Singapore/Malaysia boxes
         let coords = Coordinates(latitude: -6.2088, longitude: 106.8456)
         let context = sut.inferContextFast(from: coords)
-        // Indonesia uses MWL
-        XCTAssertEqual(context.recommendedMethod, .muslimWorldLeague,
-                       "Indonesia fallback should use MWL method, got \(context.recommendedMethod)")
+        // Indonesia uses Makkah
+        XCTAssertEqual(context.recommendedMethod, .makkah,
+                       "Indonesia fallback should use Makkah method, got \(context.recommendedMethod)")
     }
 
     func testFallback_kualaLumpur_getsSingaporeMethod() {

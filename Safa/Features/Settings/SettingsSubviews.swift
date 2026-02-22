@@ -661,6 +661,7 @@ struct NotificationScheduleView: View {
 struct FontSettingsView: View {
     @State private var arabicFontSize: Double = 28
     @State private var translationFontSize: Double = 16
+    @State private var transliterationFontSize: Double = 16
 
     var body: some View {
         List {
@@ -677,6 +678,15 @@ struct FontSettingsView: View {
                     Text("In the name of Allah, the Most Gracious, the Most Merciful")
                         .font(.system(size: translationFontSize))
                     Slider(value: $translationFontSize, in: 12...24, step: 1)
+                }
+            }
+
+            Section("Transliteration") {
+                VStack {
+                    Text("Bismi Allahi arrahmani arraheem")
+                        .font(.system(size: transliterationFontSize, design: .serif))
+                        .italic()
+                    Slider(value: $transliterationFontSize, in: 12...24, step: 1)
                 }
             }
         }

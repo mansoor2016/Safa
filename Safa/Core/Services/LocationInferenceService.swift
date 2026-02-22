@@ -110,7 +110,7 @@ final class LocationInferenceService {
         }
 
         // Middle East & North Africa
-        let mwlCountries: Set<String> = ["GB", "IE", "FR", "DE", "IT", "ES", "PT", "NL", "BE", "CH", "AT",
+        let mwlCountries: Set<String> = ["IE", "FR", "DE", "IT", "ES", "PT", "NL", "BE", "CH", "AT",
                                           "SE", "NO", "DK", "FI", "PL", "CZ", "HU", "RO", "BG", "GR",
                                           "AU", "NZ", "ZA", "BR", "AR", "MX", "CL", "CO", "PE"]
 
@@ -118,7 +118,7 @@ final class LocationInferenceService {
 
         let egyptCountries: Set<String> = ["EG", "LY", "SD"]
 
-        let makkahCountries: Set<String> = ["SA", "BH", "OM", "YE"]
+        let makkahCountries: Set<String> = ["SA", "BH", "OM", "YE", "GB"]
 
         let dubaiCountries: Set<String> = ["AE"]
         let kuwaitCountries: Set<String> = ["KW"]
@@ -164,13 +164,13 @@ final class LocationInferenceService {
         case _ where singaporeCountries.contains(code):
             return .singapore
         case _ where seAsiaCountries.contains(code):
-            return .muslimWorldLeague // Remaining SE Asia
+            return .makkah // Remaining SE Asia
         case _ where nwAfricaCountries.contains(code):
-            return .muslimWorldLeague // North/West Africa - MWL
+            return .makkah // North/West Africa - MWL
         case _ where levantCountries.contains(code):
-            return .muslimWorldLeague // Levant region
+            return .makkah // Levant region
         case _ where mwlCountries.contains(code):
-            return .muslimWorldLeague
+            return .makkah
         default:
             return inferMethodFromCoordinates(coordinates)
         }
@@ -189,7 +189,7 @@ final class LocationInferenceService {
 
         // Europe
         if lat > 35 && lat < 72 && lng > -10 && lng < 40 {
-            return .muslimWorldLeague
+            return .makkah
         }
 
         // Middle East (Arabian Peninsula)
@@ -204,7 +204,7 @@ final class LocationInferenceService {
 
         // Southeast Asia & Australia
         if lat > -50 && lat < 25 && lng > 90 && lng < 180 {
-            return .muslimWorldLeague
+            return .makkah
         }
 
         // Africa
@@ -213,7 +213,7 @@ final class LocationInferenceService {
         }
 
         // Default fallback
-        return .muslimWorldLeague
+        return .makkah
     }
 
     // MARK: - Madhab Inference

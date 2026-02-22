@@ -126,13 +126,16 @@ struct QuranProgress: Codable, Hashable {
 struct QuranFontPreferences: Codable, Equatable {
     var arabicFontSize: ArabicFontSize
     var translationFontSize: TranslationFontSize
+    var transliterationFontSize: TransliterationFontSize
 
     init(
         arabicFontSize: ArabicFontSize = .medium,
-        translationFontSize: TranslationFontSize = .medium
+        translationFontSize: TranslationFontSize = .medium,
+        transliterationFontSize: TransliterationFontSize = .medium
     ) {
         self.arabicFontSize = arabicFontSize
         self.translationFontSize = translationFontSize
+        self.transliterationFontSize = transliterationFontSize
     }
 
     enum ArabicFontSize: String, Codable, CaseIterable {
@@ -177,6 +180,26 @@ struct QuranFontPreferences: Codable, Equatable {
         }
     }
 
+    enum TransliterationFontSize: String, Codable, CaseIterable {
+        case small, medium, large
+
+        var label: String {
+            switch self {
+            case .small: return "Small"
+            case .medium: return "Medium"
+            case .large: return "Large"
+            }
+        }
+
+        var pointSize: CGFloat {
+            switch self {
+            case .small: return 14
+            case .medium: return 16
+            case .large: return 20
+            }
+        }
+    }
+
     private static let storageKey = "quranFontPreferences"
 
     static func load() -> QuranFontPreferences {
@@ -185,6 +208,17 @@ struct QuranFontPreferences: Codable, Equatable {
             return QuranFontPreferences()
         }
         return prefs
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        arabicFontSize = try container.decode(ArabicFontSize.self, forKey: .arabicFontSize)
+        translationFontSize = try container.decode(TranslationFontSize.self, forKey: .translationFontSize)
+        transliterationFontSize = try container.decodeIfPresent(TransliterationFontSize.self, forKey: .transliterationFontSize) ?? .medium
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case arabicFontSize, translationFontSize, transliterationFontSize
     }
 
     func save() {

@@ -245,6 +245,28 @@ final class QuranRepository: QuranRepositoryProtocol {
         UserDefaults.standard.removeObject(forKey: key)
     }
 
+    // MARK: - Daily Verse
+
+    private static let dailyVerseReferences: [[Int]] = {
+        guard let url = Bundle.main.url(forResource: "daily_verses", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let refs = try? JSONDecoder().decode([[Int]].self, from: data),
+              !refs.isEmpty else {
+            return []
+        }
+        return refs
+    }()
+
+    func getDailyVerse(for date: Date) async -> Ayah? {
+        let refs = Self.dailyVerseReferences
+        guard !refs.isEmpty else { return nil }
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 1
+        let index = (dayOfYear - 1) % refs.count
+        let ref = refs[index]
+        guard ref.count == 2 else { return nil }
+        return try? await getAyah(surah: ref[0], ayah: ref[1])
+    }
+
     // MARK: - Juz
 
     func getJuz(number: Int) async throws -> Juz? {

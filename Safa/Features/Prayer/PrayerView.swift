@@ -3,7 +3,6 @@
 // DEPENDENCIES: SwiftUI, PrayerViewModel
 
 import SwiftUI
-import Combine
 import CoreLocation
 
 struct PrayerView: View {
@@ -46,16 +45,16 @@ private struct PrayerContentView: View {
                 ErrorView.prayerTimesError(retry: { await viewModel.loadPrayerTimes() })
             } else {
             VStack(spacing: SafaSpacing.lg) {
-                // Date Header
+                // 1. Date Header
                 dateHeader
 
-                // Next Prayer Card
+                // 2. Next Prayer countdown (iftar-platter style)
                 if let nextPrayer = viewModel.nextPrayer {
                     NextPrayerCard(prayer: nextPrayer)
                 }
 
-                // All Prayer Times
-                PrayerTimesCard(
+                // 3. Compact prayer times with notification toggles
+                PrayerTimePreviewCard(
                     prayers: viewModel.todayPrayers,
                     notificationEnabledPrayers: viewModel.notificationEnabledPrayers,
                     onToggleNotification: { prayerType in
@@ -63,32 +62,26 @@ private struct PrayerContentView: View {
                     }
                 )
 
-                // Calculation disclaimer
-                Button {
-                    showingSettings = true
-                } label: {
-                    Label {
-                        Text("Times may vary — \(viewModel.calculationMethod.shortDisplayName) · \(viewModel.madhab.displayName)")
-                    } icon: {
-                        Image(systemName: "info.circle")
+                // 4. Prayer progress dots in ContentCard
+                PrayerProgressCard(
+                    prayers: viewModel.todayPrayers,
+                    loggedPrayers: viewModel.loggedPrayers,
+                    nextPrayer: viewModel.nextPrayer,
+                    onLogPrayer: { prayerType in
+                        Task { await viewModel.togglePrayer(prayerType) }
                     }
-                    .font(SafaTypography.labelSmall)
-                    .foregroundStyle(SafaColors.Fallback.tertiaryText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint(String(localized: "Opens prayer settings"))
+                )
 
-                // Sunnah Times
+                // 5. Daily Goals
+                DailyGoalsCard(isRamadan: false, loggedPrayers: viewModel.loggedPrayers, todayPrayers: viewModel.todayPrayers)
+
+                // 6. Quick actions (Qibla + Adhan)
+                quickActionsSection
+
+                // 7. Sunnah Times (below quick actions if enabled)
                 if viewModel.showSunnahTimes && !viewModel.sunnahTimes.isEmpty {
                     SunnahTimesCard(sunnahTimes: viewModel.sunnahTimes)
                 }
-
-                // Daily Goals
-                DailyGoalsCard(isRamadan: false, loggedPrayers: viewModel.loggedPrayers, todayPrayers: viewModel.todayPrayers)
-
-                // Quick Actions
-                quickActionsSection
             }
             .padding(SafaSpacing.md)
             } // end error check
@@ -189,18 +182,6 @@ private struct PrayerContentView: View {
                 && dependencies.locationService.authorizationStatus != .authorizedAlways {
                 DegradedStateBanner.locationFallback(locationName: AppDefaults.defaultLocationName)
             }
-
-            // Prayer progress indicator
-            PrayerProgressIndicator(
-                prayers: viewModel.todayPrayers,
-                loggedPrayers: viewModel.loggedPrayers,
-                nextPrayer: viewModel.nextPrayer,
-                style: .expanded,
-                onLogPrayer: { prayerType in
-                    Task { await viewModel.togglePrayer(prayerType) }
-                }
-            )
-            .padding(.top, SafaSpacing.sm)
         }
         .frame(maxWidth: .infinity)
     }
@@ -208,64 +189,52 @@ private struct PrayerContentView: View {
     // MARK: - Quick Actions
 
     private var quickActionsSection: some View {
-        HStack(spacing: SafaSpacing.md) {
-            QuickActionButton(
-                icon: "location.north.fill",
-                title: "Qibla",
-                action: { showingQibla = true }
-            )
-
-            AdhanPlayButton(style: .quickAction, isFajr: viewModel.nextPrayer?.type == .fajr)
-        }
+        PrayerQuickActionsBar(
+            isFajr: viewModel.nextPrayer?.type == .fajr,
+            onQibla: { showingQibla = true }
+        )
     }
-
-    // Adhan play/stop logic extracted to AdhanPlayButton shared component
 }
 
 // MARK: - Next Prayer Card
 
 private struct NextPrayerCard: View {
     let prayer: PrayerTime
-    @State private var countdown = ""
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ContentCard {
-            VStack(spacing: SafaSpacing.md) {
-                Text("Next Prayer")
-                    .font(SafaTypography.labelMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                Text(prayer.type.displayName)
-                    .font(SafaTypography.headlineMedium)
+            HStack(spacing: SafaSpacing.md) {
+                // Prayer icon
+                Image(systemName: prayer.type.iconName)
+                    .font(.title2)
                     .foregroundColor(prayer.type.color)
+                    .frame(width: 32)
 
-                Text("Time until next prayer")
-                    .font(SafaTypography.labelSmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                // Countdown + prayer info
+                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                    HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
+                        Text(prayer.time, style: .timer)
+                            .font(SafaTypography.headlineLarge)
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
 
-                Text(countdown)
-                    .font(SafaTypography.counterSmall)
-                    .foregroundColor(SafaColors.Fallback.text)
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
+                        Text("until \(prayer.type.displayName)")
+                            .font(SafaTypography.labelMedium)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                    }
 
-                Text(prayer.time.formatted(date: .omitted, time: .shortened))
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                    Text(prayer.time.formatted(date: .omitted, time: .shortened))
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(SafaColors.Fallback.tertiaryText)
+                        .monospacedDigit()
+                }
+
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, SafaSpacing.md)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(nextPrayerAccessibilityLabel)
         .accessibilityHint("Shows time until next prayer")
-        .onReceive(timer) { _ in
-            updateCountdown()
-        }
-        .onAppear {
-            updateCountdown()
-        }
     }
 
     private var nextPrayerAccessibilityLabel: String {
@@ -276,120 +245,6 @@ private struct NextPrayerCard: View {
         } else {
             return "Next prayer is \(prayer.type.displayName) at \(timeString), \(minutes) minutes remaining"
         }
-    }
-
-    private func updateCountdown() {
-        let (hours, minutes, seconds) = prayer.time.countdown()
-        countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-}
-
-// MARK: - Prayer Times Card
-
-private struct PrayerTimesCard: View {
-    let prayers: [PrayerTime]
-    let notificationEnabledPrayers: Set<PrayerType>
-    let onToggleNotification: (PrayerType) -> Void
-
-    var body: some View {
-        ContentCard {
-            VStack(spacing: 0) {
-                ForEach(prayers) { prayer in
-                    PrayerTimeRow(
-                        prayer: prayer,
-                        isNotificationEnabled: notificationEnabledPrayers.contains(prayer.type),
-                        onToggleNotification: { onToggleNotification(prayer.type) }
-                    )
-
-                    if prayer.id != prayers.last?.id {
-                        Divider()
-                            .padding(.horizontal, SafaSpacing.md)
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Prayer Time Row
-
-private struct PrayerTimeRow: View {
-    let prayer: PrayerTime
-    let isNotificationEnabled: Bool
-    let onToggleNotification: () -> Void
-
-    var body: some View {
-        HStack {
-            // Prayer indicator
-            Circle()
-                .fill(prayer.type.color)
-                .frame(width: 8, height: 8)
-                .accessibilityHidden(true)
-
-            // Prayer name (with Sunset note for Maghrib)
-            Text(prayer.type == .maghrib ? "Maghrib (Sunset)" : prayer.type.displayName)
-                .font(SafaTypography.bodyLarge)
-                .foregroundColor(SafaColors.Fallback.text)
-
-            Spacer()
-
-            // Time
-            Text(prayer.time.formatted(date: .omitted, time: .shortened))
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.secondaryText)
-                .monospacedDigit()
-
-            // Notification bell (obligatory prayers only)
-            if prayer.type.isObligatory {
-                Button {
-                    onToggleNotification()
-                } label: {
-                    Image(systemName: isNotificationEnabled ? "bell.fill" : "bell.slash")
-                        .font(.system(size: 14))
-                        .foregroundColor(isNotificationEnabled ? .accentColor : SafaColors.Fallback.tertiaryText)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isNotificationEnabled ? "Notification on for \(prayer.type.displayName)" : "Notification off for \(prayer.type.displayName)")
-                .accessibilityHint("Double tap to toggle notification")
-            }
-        }
-        .padding(.horizontal, SafaSpacing.md)
-        .padding(.vertical, SafaSpacing.sm)
-        .background(prayer.isNext ? Color.accentColor.opacity(0.1) : Color.clear)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(prayer.type.displayName) at \(prayer.time.formatted(date: .omitted, time: .shortened))\(prayer.isNext ? ", upcoming" : "")")
-    }
-}
-
-// MARK: - Quick Action Button
-
-private struct QuickActionButton: View {
-    let icon: String
-    let title: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: {
-            HapticFeedbackService.shared.play(.tap)
-            action()
-        }) {
-            VStack(spacing: SafaSpacing.xs) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
-                    .frame(height: 28)
-
-                Text(title)
-                    .font(SafaTypography.labelSmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, SafaSpacing.md)
-            .background(Color(UIColor.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-        }
-        .accessibilityLabel(title)
-        .accessibilityHint("Double tap to open \(title)")
     }
 }
 

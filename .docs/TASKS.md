@@ -14,9 +14,6 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| M | Feature-claim parity audit for launch: align app behavior with QA/listing/docs (especially Learn/AI/Progress and "all features available" wording) |
-| M | Release gate verification: full checks + pre-release smoke/boundary/manual checklist from `.docs/TEST.md` before App Store upload |
-| L | App Store screenshots + preview video capture and final listing polish *(manual)* |
 | S | App Store Connect submission *(manual)* |
 ## P1 — Near-Term
 
@@ -35,10 +32,7 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | L | Women-focused prayer/fasting mode — period-aware prayer logging, optional reminder pause, and fiqh-safe UX copy |
 | L | Mosque timetable integration (Iqamah/Jama'ah support) — let users follow local mosque times alongside calculated times |
 | M | Progressive Learn rollout — ship ready tracks incrementally instead of keeping all Learn content gated |
-| S | Ramadan page prayer timetable — show the daily prayer schedule (same as Prayer page) on the Ramadan screen so users can see prayer times alongside fasting info |
-| S | Adhan sound selection in onboarding — present adhan toggle and sound picker during onboarding (currently only available in Settings post-onboarding) |
-| S | Remove "coming soon" features from onboarding — remove Mosque Mode preview and any disabled-feature placeholders from onboarding flow; onboarding should only show functional options |
-| M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss; users who enable prayer notifications want to be alerted. Explore longer/custom notification sounds, repeated alerts, or critical alert style to make non-adhan notifications harder to ignore |
+| M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss; users who enable prayer notifications want to be alerted. Explore longer/custom notification sounds, repeated alerts, or critical alert style to make non-adhan notifications harder to ignore. relevanceScore=1.0 already added. |
 
 ## P2 — Later
 
@@ -54,7 +48,6 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | S | `URLSessionTaskMetrics` network monitoring |
 | M | Additional App Intents (PlayAdhan, OpenSurah, StartTasbeeh, location automations) |
 | L | Weekly reflection summary (achievements removed, progress dashboard shipped) |
-| M | Quran: transliteration data |
 | M | Prayer quality logs (on-time, congregation, focus rating) |
 | L | Manual backup/restore |
 | L | Mosque Mode (geofence-based) |
@@ -71,8 +64,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ## Completed
 
-Live Activity reliability + staleness fix (v1.4.1–v1.4.3), widget stale prayer fix, prayer time accuracy (adhan-swift v1.5.0), calculation method visibility, Settings refactor, notification action buttons, developer settings, TestFlight beta (v1.5.0), release notes in version bumps, adhan silent mode awareness, convention clarity disclaimer (v1.5.2), location fallback fix, Eid/Ramadan copy cleanup, test tooling. Qibla compass polish + location geobox tightening. Ramadan navigation consistency + copy polish. Wudhu reminder notifications (v1.5.3). System Status removal (v1.5.4), prayer progress stepper redesign (v1.5.5). os.Logger structured logging (v1.5.6), MetricKit diagnostics subscriber (v1.5.7). Language settings UI with QuranTranslation picker (v1.5.8). Real TestFlight link + unified downloadURL across all share surfaces. Share banner dismissal fix (completionWithItemsHandler), duplicate review dialog removal, adhan notification sound fix (AAC→PCM re-encode), dead UX flags cleanup (inline header + adaptive tab bar), Quran scroll behavior unified with Duas/Home, dead feature flags removal, notification settings footer cleanup (v1.5.9). Hasanat dedup exploit fix (5 call sites routed through HasanatTracker, NSLock serialization, award-before-mark with rollback), MoreView progress rows combined, App Store ID set (6759136442), InviteFriends test fix (downloadURL vs appStore), lesson perfect score aligned to 100%. In-app review prompt (exponential backoff + action-triggered + UI polish), large widget removed (v1.5.10). Progress Dashboard wired to real data (daily hasanat recording, live repo queries for prayers/Quran/lessons, monthly prayer consistency calendar, weekly activity chart), TasbeehCounterView multi-cycle session fix, achievements system removed entirely (badges felt inappropriate for faith app — hasanat/streaks kept), data deletion gaps fixed (hasanat tracker keys + legacy achievements key), month boundary bug fixed, dead progressDashboard feature flag removed. AI companion Phase 0 pipeline (InputSafety → RAG → SystemPrompts → LLM placeholder → CitationValidation → OutputSafety, behind feature flag, v1.6.0). AI companion Phase 1 (Apple Foundation Models integration with iOS 26+ runtime gate, Dua RAG retrieval with diversity-aware truncation, real citation validation with structured navigation fields, tappable citation chips + FlowLayout + feedback thumbs, contextual entry points from Quran/Hadith/Dua screens, AskSafaIntent Siri wiring, golden QA + red-team benchmark test sets, deterministic topic detection + keyword extraction, input safety enforced with ChatContext, stale pending state cleanup, v1.7.0). AI companion UX hardening (stop button with turn-scoped abort, error banner + retry as new turn, cross-tab chat navigation, prefill vs auto-send launch modes, accessibility labels on all chat controls, FoundationModels framework weak link + entitlement, dead LLM placeholder removal, entry-point consistency fix, v2.0). Migration safety (per-message decode fallback, retry cap with schema-version auto-recovery, legacy key preservation on give-up). Conversation switch safety (abort on switch, turn-scoped metadata via currentTurnConversation, concurrent turn guard).
+**v1.4–v1.5:** Live Activity reliability, widget staleness fix, prayer time accuracy (adhan-swift v1.5.0), Settings refactor, notification actions, TestFlight beta, adhan silent mode, Qibla compass polish, location geobox tightening, Ramadan navigation/copy, wudhu reminders, prayer stepper redesign, os.Logger + MetricKit, language settings, share banner fix, adhan sound fix (AAC→PCM), dead flags cleanup, Quran scroll unification, hasanat dedup exploit fix, in-app review prompt, large widget removed, progress dashboard (real data + calendar + charts), achievements removed, data deletion gaps fixed. **v1.6–v1.8:** AI companion Phase 0 pipeline (behind flag), Phase 1 (Foundation Models + iOS 26 gate, Dua RAG, citation validation, chat UI, Siri intent, QA/red-team benchmarks, topic detection, input safety). **v2.0:** AI UX hardening (stop/abort, error retry, cross-tab nav, accessibility labels, weak FoundationModels link), migration safety (per-message decode, auto-recovery), conversation switch safety, feature-claim parity audit (App Store listing + README aligned). **v2.0 polish:** Default MWL→Makkah (AppDefaults + LocationInferenceService + beta migration), Taraweeh counter fix (step-by-2, presets 8/12/20, per-day persistence), Ramadan post-Iftar suhoor countdown (subdued style), Quran transliteration (6,236 ayahs populated, reader toggle, font settings, backward-compat decoder). Release gate passed (20+ beta users, no major issues). **Post-v2.0 polish:** Ramadan prayer timetable (PrayerTimePreviewCard between iftar platter and progress), adhan onboarding (toggle + picker on page 2, saved to prefs), Mosque Mode removed from onboarding, notification relevanceScore=1.0.
 
 ---
 
-*Last Updated: February 21, 2026 — AI companion v2.0 UX hardening complete (stop button, error banner, accessibility, cross-tab nav, migration safety, conversation switch safety), ready for merge review*
+*Last Updated: February 22, 2026 — Post-v2.0 polish: Ramadan timetable, adhan onboarding, Mosque Mode removed from onboarding, notification relevanceScore. Non-adhan notification sound deferred to P1.*

@@ -368,4 +368,47 @@ final class PreferencesManagerTests: XCTestCase {
         XCTAssertTrue(prefs.notificationsEnabled)
         XCTAssertEqual(prefs.accentColorName, "purple")
     }
+
+    // MARK: - Beta Migration Tests
+
+    func test_betaMigration_resetsCalculationMethodToMakkah() async {
+        // Simulate a user with the old MWL default
+        mockRepository.preferences.calculationMethod = .muslimWorldLeague
+
+        // Clear migration key so it runs again
+        UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
+
+        // Re-configure triggers migration
+        sut.configure(userRepository: mockRepository)
+
+        // Give the async Task time to run
+        try? await Task.sleep(for: .milliseconds(100))
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.calculationMethod, .makkah,
+                       "Beta migration should reset calculation method to Makkah")
+    }
+
+    func test_betaMigration_onlyRunsOnce() async {
+        mockRepository.preferences.calculationMethod = .muslimWorldLeague
+        UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
+
+        // First configure — migration runs
+        sut.configure(userRepository: mockRepository)
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // User manually changes to ISNA after migration
+        await sut.saveCalculationMethod(.isna)
+        let countAfterFirstMigration = mockRepository.updateCallCount
+
+        // Second configure — migration should NOT run again
+        sut.configure(userRepository: mockRepository)
+        try? await Task.sleep(for: .milliseconds(100))
+
+        let prefs = await sut.getPreferences()
+        XCTAssertEqual(prefs.calculationMethod, .isna,
+                       "Second configure should not re-run migration — user's ISNA choice should be preserved")
+        XCTAssertEqual(mockRepository.updateCallCount, countAfterFirstMigration,
+                       "No additional update call should have been made")
+    }
 }

@@ -68,8 +68,8 @@ final class RamadanCountdownHelpersTests: XCTestCase {
 
     // MARK: - After Iftar
 
-    func test_afterIftar_showsComplete() {
-        // 8:00 PM, both times passed
+    func test_afterIftar_showsNextSuhoor() {
+        // 8:00 PM, both times passed → should show tomorrow's suhoor
         let now = date(hour: 20)
         let suhoor = date(hour: 5, minute: 30)
         let iftar = date(hour: 18, minute: 30)
@@ -78,7 +78,8 @@ final class RamadanCountdownHelpersTests: XCTestCase {
             now: now, suhoorTime: suhoor, iftarTime: iftar
         )
 
-        XCTAssertEqual(target, .complete)
+        let expectedTomorrow = Calendar.current.date(byAdding: .day, value: 1, to: suhoor)!
+        XCTAssertEqual(target, .nextSuhoor(time: expectedTomorrow))
     }
 
     // MARK: - Edge Cases
