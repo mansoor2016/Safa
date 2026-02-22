@@ -889,6 +889,9 @@
     "Double tap to bookmark" : {
 
     },
+    "Double tap to collapse" : {
+
+    },
     "Double tap to complete" : {
 
     },
@@ -896,6 +899,9 @@
 
     },
     "Double tap to edit bookmark note" : {
+
+    },
+    "Double tap to expand" : {
 
     },
     "Double tap to expand, then tap to open Quran" : {
@@ -2139,6 +2145,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Surah %1$lld, Ayah %2$lld"
+          }
+        }
+      }
+    },
+    "Surah %lld:%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Surah %1$lld:%2$lld"
           }
         }
       }

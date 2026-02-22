@@ -29,6 +29,9 @@ final class AppRouter {
         (HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode))
             && !FeatureFlags.shared.isEnabled(.forcePrayerPage)
     }
+    var onNavigationBlocked: ((Feature) -> Void) = { feature in
+        ToastService.shared.showComingSoon(feature.displayName)
+    }
 
     // MARK: - Shared Instance (for notification handler access before SwiftUI mounts)
     static let shared = AppRouter()
@@ -116,13 +119,24 @@ final class AppRouter {
 
     // MARK: - Navigation Methods
 
+    /// Handles "Ask Safa" intent — sets pending chat state and navigates.
+    /// Feature flag check gates the entire flow.
+    func handleAskSafa(question: String?) {
+        guard !FeatureFlags.shared.isDisabled(.aiCompanion) else { return }
+        if let question {
+            pendingChatLaunchMode = .autoSend
+            pendingChatInput = question
+        }
+        navigate(to: .chat)
+    }
+
     func navigate(to destination: Destination) {
         // Gate AI companion behind feature flag
         if case .chat = destination, FeatureFlags.shared.isDisabled(.aiCompanion) {
             pendingChatInput = nil
             pendingChatContext = nil
             pendingChatLaunchMode = .prefillOnly
-            ToastService.shared.showComingSoon(Feature.aiCompanion.displayName)
+            onNavigationBlocked(.aiCompanion)
             return
         }
 

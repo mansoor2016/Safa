@@ -80,16 +80,12 @@ final class ToastService {
     func show(_ toast: Toast) {
         dismissTask?.cancel()
 
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentToast = toast
-        }
+        currentToast = toast
 
         dismissTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(toast.duration))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeInOut(duration: 0.3)) {
-                currentToast = nil
-            }
+            currentToast = nil
         }
     }
 
@@ -99,9 +95,7 @@ final class ToastService {
 
     func dismiss() {
         dismissTask?.cancel()
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentToast = nil
-        }
+        currentToast = nil
     }
 }
 
@@ -140,7 +134,6 @@ struct ToastView: View {
                 .fill(.regularMaterial)
                 .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
         }
-        .transition(.move(edge: .top).combined(with: .opacity))
     }
 }
 
@@ -156,9 +149,11 @@ struct ToastContainerModifier: ViewModifier {
                     ToastView(toast: toast)
                         .padding(.top, 60)
                         .padding(.horizontal, 20)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                         .zIndex(999)
                 }
             }
+            .animation(.easeInOut(duration: 0.3), value: toastService.currentToast?.id)
     }
 }
 

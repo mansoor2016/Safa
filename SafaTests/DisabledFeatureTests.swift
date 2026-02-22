@@ -3,6 +3,7 @@
 // DEPENDENCIES: XCTest, Safa
 
 import XCTest
+import SwiftUI
 @testable import Safa
 
 final class DisabledFeatureTests: XCTestCase {
@@ -217,19 +218,22 @@ final class DisabledFeatureTests: XCTestCase {
 
     // MARK: - AskSafaIntent Tests
 
-    func test_askSafaIntent_disabledFeature_doesNotSetPendingInput() async throws {
+    func test_handleAskSafa_whenDisabled_doesNotSetPendingInput() {
         // Given: AI companion is disabled
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         let router = AppRouter.shared
+        router.onNavigationBlocked = { _ in }
         router.pendingChatInput = nil
 
-        // When: Intent performs (returns early before navigate — safe in test)
-        let intent = AskSafaIntent()
-        intent.question = "What is wudu?"
-        _ = try await intent.perform()
+        // When: Intent logic fires
+        router.handleAskSafa(question: "What is wudu?")
 
-        // Then: Router should NOT have pending input
+        // Then: Guard returned early — no pending state set, no navigation
         XCTAssertNil(router.pendingChatInput, "Disabled feature should not set pending input")
+        XCTAssertTrue(router.path.isEmpty, "Navigation should be blocked when AI is disabled")
+
+        // Cleanup shared state
+        FeatureFlags.shared.removeOverride(.aiCompanion)
     }
 
     func test_pendingChatInput_isSetAndCleared() {

@@ -14,6 +14,7 @@ final class AppRouterTests: XCTestCase {
         super.setUp()
         FeatureFlags.shared.removeOverride(.aiCompanion)
         sut = AppRouter()
+        sut.onNavigationBlocked = { _ in }
     }
 
     override func tearDown() {

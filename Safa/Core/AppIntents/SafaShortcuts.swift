@@ -434,14 +434,7 @@ struct AskSafaIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        guard !FeatureFlags.shared.isDisabled(.aiCompanion) else {
-            return .result()
-        }
-        if let question {
-            AppRouter.shared.pendingChatLaunchMode = .autoSend
-            AppRouter.shared.pendingChatInput = question
-        }
-        AppRouter.shared.navigate(to: .chat)
+        AppRouter.shared.handleAskSafa(question: question)
         return .result()
     }
 }
