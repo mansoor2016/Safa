@@ -34,8 +34,16 @@ final class DuaCategoryTests: XCTestCase {
         XCTAssertNil(combined, "Should not have a combined morning_evening category")
     }
 
-    func test_allCategories_hasTwelveEntries() {
-        XCTAssertEqual(bundle.categories.count, 12)
+    func test_allCategories_hasExpectedEntries() {
+        XCTAssertGreaterThanOrEqual(bundle.categories.count, 21)
+        let ids = Set(bundle.categories.map(\.id))
+        let required = ["morning", "evening", "prayer", "daily", "protection",
+                        "forgiveness", "travel", "food", "sleep", "anxiety",
+                        "funeral", "ramadan", "istikharah", "illness", "parents",
+                        "marriage", "children", "knowledge", "hajj", "weather", "gratitude"]
+        for id in required {
+            XCTAssertTrue(ids.contains(id), "Missing required category: \(id)")
+        }
     }
 
     func test_allCategories_haveUniqueIds() {
@@ -63,16 +71,23 @@ final class DuaCategoryTests: XCTestCase {
     func test_foodDuas_areAboutFood() {
         let foodDuas = bundle.duas.filter { $0.categoryId == "food" }
         for dua in foodDuas {
-            let isRelevant = dua.titleEnglish.lowercased().contains("eat") ||
-                             dua.titleEnglish.lowercased().contains("food") ||
-                             dua.titleEnglish.lowercased().contains("drink") ||
-                             dua.titleEnglish.lowercased().contains("fast") ||
-                             dua.titleEnglish.lowercased().contains("bismillah") ||
-                             dua.textTranslation.lowercased().contains("fed") ||
-                             dua.textTranslation.lowercased().contains("eat") ||
-                             dua.textTranslation.lowercased().contains("drink") ||
-                             dua.textTranslation.lowercased().contains("thirst") ||
-                             dua.textTranslation.lowercased().contains("name of allah")
+            let title = dua.titleEnglish.lowercased()
+            let translation = dua.textTranslation.lowercased()
+            let isRelevant = title.contains("eat") ||
+                             title.contains("food") ||
+                             title.contains("drink") ||
+                             title.contains("fast") ||
+                             title.contains("bismillah") ||
+                             title.contains("host") ||
+                             title.contains("guest") ||
+                             title.contains("invit") ||
+                             translation.contains("fed") ||
+                             translation.contains("eat") ||
+                             translation.contains("drink") ||
+                             translation.contains("thirst") ||
+                             translation.contains("name of allah") ||
+                             translation.contains("bless") ||
+                             translation.contains("provision")
             XCTAssertTrue(isRelevant,
                           "Food dua '\(dua.titleEnglish)' should be about food/drink")
         }

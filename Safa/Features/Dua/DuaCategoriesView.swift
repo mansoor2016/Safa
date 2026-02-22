@@ -86,7 +86,7 @@ struct DuaCategoriesView: View {
                         duas: viewModel.duas(forCategory: "prayer"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Prayer", arabicTitle: "بعد الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                        QuickAccessButton(title: "Prayer", arabicTitle: "أدعية الصلاة", iconName: "hands.sparkles.fill", color: .teal)
                     }
                     .buttonStyle(.plain)
 

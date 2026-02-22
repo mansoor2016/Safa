@@ -1,17 +1,131 @@
 {
   "categories": [
-    { "id": "morning", "nameEnglish": "Morning", "nameArabic": "أذكار الصباح", "iconName": "sunrise" },
-    { "id": "evening", "nameEnglish": "Evening", "nameArabic": "أذكار المساء", "iconName": "sunset" },
-    { "id": "prayer", "nameEnglish": "Prayer", "nameArabic": "أدعية الصلاة", "iconName": "moon.stars" },
-    { "id": "daily", "nameEnglish": "Daily Activities", "nameArabic": "أذكار اليومية", "iconName": "sun.max" },
-    { "id": "protection", "nameEnglish": "Protection", "nameArabic": "أدعية الحفظ", "iconName": "shield" },
-    { "id": "forgiveness", "nameEnglish": "Forgiveness", "nameArabic": "أدعية الاستغفار", "iconName": "heart" },
-    { "id": "travel", "nameEnglish": "Travel", "nameArabic": "أذكار السفر", "iconName": "airplane" },
-    { "id": "food", "nameEnglish": "Food & Drink", "nameArabic": "أذكار الطعام", "iconName": "fork.knife" },
-    { "id": "sleep", "nameEnglish": "Sleep", "nameArabic": "أذكار النوم", "iconName": "moon.zzz" },
-    { "id": "anxiety", "nameEnglish": "Anxiety & Distress", "nameArabic": "أدعية الهم والحزن", "iconName": "heart.circle" },
-    { "id": "funeral", "nameEnglish": "Funeral & Bereavement", "nameArabic": "أدعية الجنازة", "iconName": "leaf" },
-    { "id": "ramadan", "nameEnglish": "Ramadan", "nameArabic": "أدعية رمضان", "iconName": "moon.stars" }
+    {
+      "id": "morning",
+      "nameEnglish": "Morning",
+      "nameArabic": "أذكار الصباح",
+      "iconName": "sunrise"
+    },
+    {
+      "id": "evening",
+      "nameEnglish": "Evening",
+      "nameArabic": "أذكار المساء",
+      "iconName": "sunset"
+    },
+    {
+      "id": "prayer",
+      "nameEnglish": "Prayer",
+      "nameArabic": "أدعية الصلاة",
+      "iconName": "moon.stars"
+    },
+    {
+      "id": "daily",
+      "nameEnglish": "Daily Activities",
+      "nameArabic": "أذكار اليومية",
+      "iconName": "sun.max"
+    },
+    {
+      "id": "protection",
+      "nameEnglish": "Protection",
+      "nameArabic": "أدعية الحفظ",
+      "iconName": "shield"
+    },
+    {
+      "id": "forgiveness",
+      "nameEnglish": "Forgiveness",
+      "nameArabic": "أدعية الاستغفار",
+      "iconName": "heart"
+    },
+    {
+      "id": "travel",
+      "nameEnglish": "Travel",
+      "nameArabic": "أذكار السفر",
+      "iconName": "airplane"
+    },
+    {
+      "id": "food",
+      "nameEnglish": "Food & Drink",
+      "nameArabic": "أذكار الطعام",
+      "iconName": "fork.knife"
+    },
+    {
+      "id": "sleep",
+      "nameEnglish": "Sleep",
+      "nameArabic": "أذكار النوم",
+      "iconName": "moon.zzz"
+    },
+    {
+      "id": "anxiety",
+      "nameEnglish": "Anxiety & Distress",
+      "nameArabic": "أدعية الهم والحزن",
+      "iconName": "heart.circle"
+    },
+    {
+      "id": "funeral",
+      "nameEnglish": "Funeral & Bereavement",
+      "nameArabic": "أدعية الجنازة",
+      "iconName": "leaf"
+    },
+    {
+      "id": "ramadan",
+      "nameEnglish": "Ramadan",
+      "nameArabic": "أدعية رمضان",
+      "iconName": "moon.stars"
+    },
+    {
+      "id": "istikharah",
+      "nameEnglish": "Istikharah",
+      "nameArabic": "صلاة الاستخارة",
+      "iconName": "hand.raised"
+    },
+    {
+      "id": "illness",
+      "nameEnglish": "Illness & Healing",
+      "nameArabic": "أدعية المرض والشفاء",
+      "iconName": "cross.case"
+    },
+    {
+      "id": "parents",
+      "nameEnglish": "Parents & Family",
+      "nameArabic": "أدعية الوالدين",
+      "iconName": "figure.2"
+    },
+    {
+      "id": "marriage",
+      "nameEnglish": "Marriage",
+      "nameArabic": "أدعية الزواج",
+      "iconName": "heart.fill"
+    },
+    {
+      "id": "children",
+      "nameEnglish": "Children",
+      "nameArabic": "أدعية الأولاد",
+      "iconName": "figure.and.child.holdinghands"
+    },
+    {
+      "id": "knowledge",
+      "nameEnglish": "Knowledge",
+      "nameArabic": "أدعية العلم",
+      "iconName": "book"
+    },
+    {
+      "id": "hajj",
+      "nameEnglish": "Hajj & Umrah",
+      "nameArabic": "أدعية الحج والعمرة",
+      "iconName": "building.columns"
+    },
+    {
+      "id": "weather",
+      "nameEnglish": "Weather",
+      "nameArabic": "أدعية الطقس",
+      "iconName": "cloud.rain"
+    },
+    {
+      "id": "gratitude",
+      "nameEnglish": "Gratitude",
+      "nameArabic": "أدعية الشكر",
+      "iconName": "hands.clap"
+    }
   ],
   "duas": [
     {
@@ -348,6 +462,28 @@
       "occasion": "When returning from a journey"
     },
     {
+      "id": "f8",
+      "categoryId": "food",
+      "titleEnglish": "Gratitude After Eating",
+      "titleArabic": "الحمد بعد الأكل",
+      "textArabic": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
+      "textTransliteration": "Alhamdulillahil-ladhi at'amana wa saqana wa ja'alana minal-muslimeen",
+      "textTranslation": "All praise is due to Allah who fed us, gave us drink, and made us Muslims.",
+      "source": "Abu Dawud 3850, Tirmidhi 3457",
+      "occasion": "Said after finishing a meal"
+    },
+    {
+      "id": "f9",
+      "categoryId": "food",
+      "titleEnglish": "Abundant Praise After Eating",
+      "titleArabic": "الحمد الكثير بعد الطعام",
+      "textArabic": "الْحَمْدُ لِلَّهِ حَمْدًا كَثِيرًا طَيِّبًا مُبَارَكًا فِيهِ غَيْرَ مُوَدَّعٍ وَلَا مُسْتَغْنًى عَنْهُ رَبُّنَا",
+      "textTransliteration": "Alhamdu lillahi hamdan kathiran tayyiban mubarakan feehi, ghayra muwadda'in wa la mustaghnan 'anhu Rabbuna",
+      "textTranslation": "All praise is due to Allah, abundant, pure, and blessed praise. It cannot be denied, nor can it be dispensed with, O our Lord.",
+      "source": "Bukhari 5458",
+      "occasion": "Said after finishing a meal — the Prophet ﷺ would say this after eating"
+    },
+    {
       "id": "f1",
       "categoryId": "food",
       "titleEnglish": "Before Eating",
@@ -396,6 +532,28 @@
       "textTranslation": "All praise is due to Allah.",
       "source": "Ibn Majah",
       "occasion": "After drinking water or any beverage"
+    },
+    {
+      "id": "f6",
+      "categoryId": "food",
+      "titleEnglish": "Dua for the Host",
+      "titleArabic": "الدعاء لصاحب الطعام",
+      "textArabic": "اللَّهُمَّ بَارِكْ لَهُمْ فِيمَا رَزَقْتَهُمْ، وَاغْفِرْ لَهُمْ وَارْحَمْهُمْ",
+      "textTransliteration": "Allahumma barik lahum feema razaqtahum, waghfir lahum warhamhum",
+      "textTranslation": "O Allah, bless them in what You have provided for them, forgive them, and have mercy on them.",
+      "source": "Muslim 2042",
+      "occasion": "Said for the host after being fed and finishing a meal"
+    },
+    {
+      "id": "f7",
+      "categoryId": "food",
+      "titleEnglish": "Guest's Dua When Invited to Eat",
+      "titleArabic": "دعاء الضيف عند الدعوة للطعام",
+      "textArabic": "اللَّهُمَّ أَطْعِمْ مَنْ أَطْعَمَنِي وَاسْقِ مَنْ سَقَانِي",
+      "textTransliteration": "Allahumma at'im man at'amani wasqi man saqani",
+      "textTranslation": "O Allah, feed the one who fed me and give drink to the one who gave me drink.",
+      "source": "Muslim 2037",
+      "occasion": "Said by the guest when invited to eat at someone's home"
     },
     {
       "id": "s_ayatul_kursi",
@@ -635,6 +793,661 @@
       "textTranslation": "O Allah, I ask You for Paradise and seek refuge in You from the Fire.",
       "source": "Abu Dawud",
       "occasion": "Laylatul Qadr"
+    },
+    {
+      "id": "m6",
+      "categoryId": "morning",
+      "titleEnglish": "Entering a New Day",
+      "titleArabic": "دعاء دخول يوم جديد",
+      "textArabic": "اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+      "textTransliteration": "Allahumma bika asbahna wa bika amsayna wa bika nahya wa bika namutu wa ilaykan-nushur",
+      "textTranslation": "O Allah, by Your grace we have reached the morning, by Your grace we reach the evening, by Your grace we live and by Your grace we die, and to You is the resurrection.",
+      "source": "Tirmidhi 3391",
+      "occasion": "Said every morning"
+    },
+    {
+      "id": "m7",
+      "categoryId": "morning",
+      "titleEnglish": "Morning Salawat",
+      "titleArabic": "الصلاة على النبي صباحاً",
+      "textArabic": "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ",
+      "textTransliteration": "Allahumma salli wa sallim 'ala nabiyyina Muhammad",
+      "textTranslation": "O Allah, send prayers and peace upon our Prophet Muhammad.",
+      "source": "Abu Dawud 5077",
+      "occasion": "10 times in the morning — the Prophet's intercession becomes due",
+      "repetitions": 10
+    },
+    {
+      "id": "m8",
+      "categoryId": "morning",
+      "titleEnglish": "Entrusting Affairs to Allah",
+      "titleArabic": "تفويض الأمر لله",
+      "textArabic": "وَأُفَوِّضُ أَمْرِي إِلَى اللَّهِ ۚ إِنَّ اللَّهَ بَصِيرٌ بِالْعِبَادِ",
+      "textTransliteration": "Wa ufawwidu amri ilAllah, innAllaha baseerun bil-'ibad",
+      "textTranslation": "And I entrust my affair to Allah. Indeed, Allah is Seeing of His servants.",
+      "source": "Quran 40:44",
+      "occasion": "Morning supplication — entrusting all affairs to Allah"
+    },
+    {
+      "id": "e5",
+      "categoryId": "evening",
+      "titleEnglish": "Ayatul Kursi (Evening)",
+      "titleArabic": "آية الكرسي مساءً",
+      "textArabic": "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+      "textTransliteration": "Allahu la ilaha illa Huwal-Hayyul-Qayyum. La ta'khudhhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydeehim wa ma khalfahum. Wa la yuheetuna bishay'in min 'ilmihi illa bima sha'. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifdhuhuma. Wa Huwal-'Aliyyul-'Adheem.",
+      "textTranslation": "Allah - there is no deity except Him, the Ever-Living, the Self-Sustaining. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+      "source": "Quran 2:255, Bukhari",
+      "occasion": "Recite in the evening for night protection"
+    },
+    {
+      "id": "e6",
+      "categoryId": "evening",
+      "titleEnglish": "Evening Tahleel",
+      "titleArabic": "التهليل مساءً",
+      "textArabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+      "textTransliteration": "La ilaha illallahu wahdahu la shareeka lah, lahul-mulku wa lahul-hamdu wa Huwa 'ala kulli shay'in Qadeer",
+      "textTranslation": "There is no god but Allah alone, with no partner. His is the dominion and His is the praise, and He is over all things competent.",
+      "source": "Bukhari & Muslim",
+      "occasion": "100 times in evening — like freeing 10 slaves, 100 good deeds, and a shield from Shaytan",
+      "repetitions": 100
+    },
+    {
+      "id": "e7",
+      "categoryId": "evening",
+      "titleEnglish": "Evening Salawat",
+      "titleArabic": "الصلاة على النبي مساءً",
+      "textArabic": "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ",
+      "textTransliteration": "Allahumma salli wa sallim 'ala nabiyyina Muhammad",
+      "textTranslation": "O Allah, send prayers and peace upon our Prophet Muhammad.",
+      "source": "Abu Dawud 5077",
+      "occasion": "10 times in the evening — the Prophet's intercession becomes due",
+      "repetitions": 10
+    },
+    {
+      "id": "p5",
+      "categoryId": "prayer",
+      "titleEnglish": "After the Adhan",
+      "titleArabic": "بعد الأذان",
+      "textArabic": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+      "textTransliteration": "Allahumma Rabba hadhihid-da'watit-tammah, was-salatil-qa'imah, aati Muhammadanil-waseelata wal-fadeelah, wab'athhu maqaman mahmoodanil-ladhi wa'adtah",
+      "textTranslation": "O Allah, Lord of this perfect call and the prayer to be offered, grant Muhammad the intercession and favour, and raise him to the honourable station You have promised him.",
+      "source": "Bukhari 614",
+      "occasion": "After hearing the adhan — whoever says this, my intercession becomes due for him"
+    },
+    {
+      "id": "p6",
+      "categoryId": "prayer",
+      "titleEnglish": "Opening Supplication (Istiftah)",
+      "titleArabic": "دعاء الاستفتاح",
+      "textArabic": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، وَتَبَارَكَ اسْمُكَ، وَتَعَالَى جَدُّكَ، وَلَا إِلَٰهَ غَيْرُكَ",
+      "textTransliteration": "Subhanakallahumma wa bihamdika, wa tabarakasmuka, wa ta'ala jadduka, wa la ilaha ghayruk",
+      "textTranslation": "Glory and praise be to You, O Allah. Blessed is Your name, exalted is Your majesty, and there is no god but You.",
+      "source": "Abu Dawud, Tirmidhi",
+      "occasion": "After the opening takbeer of prayer, before reciting Al-Fatiha"
+    },
+    {
+      "id": "p7",
+      "categoryId": "prayer",
+      "titleEnglish": "Supplication in Sujud",
+      "titleArabic": "دعاء السجود",
+      "textArabic": "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+      "textTransliteration": "Subhana Rabbiyal-A'la",
+      "textTranslation": "Glory is to my Lord, the Most High.",
+      "source": "Muslim 482",
+      "occasion": "Said in sujud (prostration) — the closest a servant is to his Lord",
+      "repetitions": 3
+    },
+    {
+      "id": "p8",
+      "categoryId": "prayer",
+      "titleEnglish": "Between the Two Prostrations",
+      "titleArabic": "بين السجدتين",
+      "textArabic": "رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاهْدِنِي وَعَافِنِي وَارْزُقْنِي",
+      "textTransliteration": "Rabbighfir li warhamni wahdini wa 'afini warzuqni",
+      "textTranslation": "My Lord, forgive me, have mercy on me, guide me, grant me well-being, and provide for me.",
+      "source": "Abu Dawud 850",
+      "occasion": "Sitting between the two prostrations"
+    },
+    {
+      "id": "p9",
+      "categoryId": "prayer",
+      "titleEnglish": "Glorification in Ruku",
+      "titleArabic": "تسبيح الركوع",
+      "textArabic": "سُبْحَانَ رَبِّيَ الْعَظِيمِ",
+      "textTransliteration": "Subhana Rabbiyal-'Adheem",
+      "textTranslation": "Glory is to my Lord, the Almighty.",
+      "source": "Muslim 772",
+      "occasion": "Said in ruku (bowing)",
+      "repetitions": 3
+    },
+    {
+      "id": "p10",
+      "categoryId": "prayer",
+      "titleEnglish": "At-Tahiyyat (Tashahhud)",
+      "titleArabic": "التحيات",
+      "textArabic": "التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ",
+      "textTransliteration": "At-tahiyyatu lillahi was-salawatu wat-tayyibat, as-salamu 'alayka ayyuhan-Nabiyyu wa rahmatullahi wa barakatuh, as-salamu 'alayna wa 'ala 'ibadillahis-saliheen, ash-hadu an la ilaha illallahu wa ash-hadu anna Muhammadan 'abduhu wa rasuluh",
+      "textTranslation": "All greetings, prayers, and good things are due to Allah. Peace be upon you, O Prophet, and the mercy of Allah and His blessings. Peace be upon us and upon the righteous servants of Allah. I bear witness that there is no god but Allah and I bear witness that Muhammad is His servant and messenger.",
+      "source": "Bukhari & Muslim",
+      "occasion": "Recited in the sitting position (tashahhud) of every prayer"
+    },
+    {
+      "id": "d5",
+      "categoryId": "daily",
+      "titleEnglish": "Entering the Bathroom",
+      "titleArabic": "دخول الخلاء",
+      "textArabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ",
+      "textTransliteration": "Allahumma inni a'udhu bika minal-khubthi wal-khaba'ith",
+      "textTranslation": "O Allah, I seek refuge in You from the male and female evil spirits.",
+      "source": "Bukhari 142",
+      "occasion": "Before entering the bathroom"
+    },
+    {
+      "id": "d6",
+      "categoryId": "daily",
+      "titleEnglish": "Leaving the Bathroom",
+      "titleArabic": "الخروج من الخلاء",
+      "textArabic": "غُفْرَانَكَ",
+      "textTransliteration": "Ghufranaka",
+      "textTranslation": "I seek Your forgiveness.",
+      "source": "Abu Dawud 30",
+      "occasion": "After leaving the bathroom"
+    },
+    {
+      "id": "d7",
+      "categoryId": "daily",
+      "titleEnglish": "Looking in the Mirror",
+      "titleArabic": "النظر في المرآة",
+      "textArabic": "اللَّهُمَّ أَحْسَنْتَ خَلْقِي فَأَحْسِنْ خُلُقِي",
+      "textTransliteration": "Allahumma ahsanta khalqi fa ahsin khuluqi",
+      "textTranslation": "O Allah, You have made my appearance beautiful, so make my character beautiful.",
+      "source": "Tirmidhi",
+      "occasion": "When looking in the mirror"
+    },
+    {
+      "id": "d8",
+      "categoryId": "daily",
+      "titleEnglish": "Wearing New Clothes",
+      "titleArabic": "لبس الثوب الجديد",
+      "textArabic": "الْحَمْدُ لِلَّهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
+      "textTransliteration": "Alhamdu lillahil-ladhi kasani hadha ath-thawba wa razaqaneehi min ghayri hawlin minni wa la quwwah",
+      "textTranslation": "Praise be to Allah who clothed me with this garment and provided it for me without any power or strength on my part.",
+      "source": "Tirmidhi 3458",
+      "occasion": "When wearing new clothes"
+    },
+    {
+      "id": "d9",
+      "categoryId": "daily",
+      "titleEnglish": "Upon Sneezing",
+      "titleArabic": "عند العطاس",
+      "textArabic": "الْحَمْدُ لِلَّهِ",
+      "textTransliteration": "Alhamdulillah",
+      "textTranslation": "All praise is due to Allah.",
+      "source": "Bukhari 6224",
+      "occasion": "Said when sneezing. The listener responds: 'Yarhamukallah' (May Allah have mercy on you), and the sneezer replies: 'Yahdikumullahu wa yuslihu balakum' (May Allah guide you and rectify your condition)."
+    },
+    {
+      "id": "d10",
+      "categoryId": "daily",
+      "titleEnglish": "Riding a Vehicle",
+      "titleArabic": "ركوب الدابة",
+      "textArabic": "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَىٰ رَبِّنَا لَمُنقَلِبُونَ",
+      "textTransliteration": "Subhanal-ladhi sakh-khara lana hadha wa ma kunna lahu muqrineen, wa inna ila Rabbina lamunqalibun",
+      "textTranslation": "Glory to Him who has subjected this to us, for we could never have accomplished this by ourselves. And to our Lord we will surely return.",
+      "source": "Quran 43:13-14",
+      "occasion": "When riding any vehicle or mode of transport"
+    },
+    {
+      "id": "d11",
+      "categoryId": "daily",
+      "titleEnglish": "Entering the Marketplace",
+      "titleArabic": "دخول السوق",
+      "textArabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ يُحْيِي وَيُمِيتُ وَهُوَ حَيٌّ لَا يَمُوتُ، بِيَدِهِ الْخَيْرُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+      "textTransliteration": "La ilaha illallahu wahdahu la shareeka lah, lahul-mulku wa lahul-hamdu yuhyi wa yumeetu wa Huwa hayyun la yamutu, biyadihil-khayru wa Huwa 'ala kulli shay'in Qadeer",
+      "textTranslation": "There is no god but Allah alone, with no partner. His is the dominion and His is the praise. He gives life and causes death, and He is living and does not die. In His hand is all good, and He is over all things competent.",
+      "source": "Tirmidhi 3428",
+      "occasion": "When entering a marketplace or shopping area"
+    },
+    {
+      "id": "d12",
+      "categoryId": "daily",
+      "titleEnglish": "Upon Waking Up",
+      "titleArabic": "عند الاستيقاظ",
+      "textArabic": "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+      "textTransliteration": "Alhamdu lillahil-ladhi ahyana ba'da ma amatana wa ilayhin-nushur",
+      "textTranslation": "All praise is due to Allah, who gave us life after causing us to die, and to Him is the resurrection.",
+      "source": "Bukhari 6312",
+      "occasion": "The first words upon waking from sleep"
+    },
+    {
+      "id": "s5",
+      "categoryId": "sleep",
+      "titleEnglish": "Waking from a Bad Dream",
+      "titleArabic": "الاستيقاظ من حلم سيء",
+      "textArabic": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+      "textTransliteration": "A'udhu billahi minash-shaytanir-rajeem",
+      "textTranslation": "I seek refuge in Allah from the accursed Satan.",
+      "source": "Muslim 2262",
+      "occasion": "When waking from a bad dream: seek refuge in Allah, spit lightly to your left three times, change the side you were sleeping on, and do not tell anyone about the dream."
+    },
+    {
+      "id": "s6",
+      "categoryId": "sleep",
+      "titleEnglish": "Waking at Night",
+      "titleArabic": "الاستيقاظ في الليل",
+      "textArabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+      "textTransliteration": "La ilaha illallahu wahdahu la shareeka lah, lahul-mulku wa lahul-hamdu wa Huwa 'ala kulli shay'in Qadeer. SubhanAllah walhamdu lillah wa la ilaha illallahu wallahu Akbar wa la hawla wa la quwwata illa billah",
+      "textTranslation": "There is no god but Allah alone, with no partner. His is the dominion and His is the praise, and He is over all things competent. Glory be to Allah, all praise is due to Allah, there is no god but Allah, Allah is the Greatest, and there is no power nor strength except with Allah.",
+      "source": "Bukhari 1154",
+      "occasion": "When waking during the night — whoever says this and then supplicates will be answered"
+    },
+    {
+      "id": "pr5",
+      "categoryId": "protection",
+      "titleEnglish": "Protection for Family and Children",
+      "titleArabic": "حماية الأهل والأولاد",
+      "textArabic": "أُعِيذُكُمَا بِكَلِمَاتِ اللَّهِ التَّامَّةِ مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ",
+      "textTransliteration": "U'idhukuma bikalimatillahit-tammah min kulli shaytanin wa hammah wa min kulli 'aynin lammah",
+      "textTranslation": "I seek protection for you both in the perfect words of Allah from every devil and every poisonous creature, and from every envious evil eye.",
+      "source": "Bukhari 3371",
+      "occasion": "The Prophet ﷺ used to seek protection for Al-Hasan and Al-Husayn with these words"
+    },
+    {
+      "id": "pr6",
+      "categoryId": "protection",
+      "titleEnglish": "Against the Evil Eye",
+      "titleArabic": "ضد العين",
+      "textArabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ",
+      "textTransliteration": "A'udhu bikalimatillahit-tammati min kulli shaytanin wa hammah wa min kulli 'aynin lammah",
+      "textTranslation": "I seek refuge in the perfect words of Allah from every devil and every poisonous creature, and from every envious evil eye.",
+      "source": "Muslim",
+      "occasion": "For protection against the evil eye and harmful creatures"
+    },
+    {
+      "id": "t5",
+      "categoryId": "travel",
+      "titleEnglish": "Entering a Town",
+      "titleArabic": "دخول البلدة",
+      "textArabic": "اللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَمَا أَظْلَلْنَ، وَرَبَّ الْأَرَضِينَ السَّبْعِ وَمَا أَقْلَلْنَ، وَرَبَّ الشَّيَاطِينِ وَمَا أَضْلَلْنَ، وَرَبَّ الرِّيَاحِ وَمَا ذَرَيْنَ، أَسْأَلُكَ خَيْرَ هَذِهِ الْقَرْيَةِ وَخَيْرَ أَهْلِهَا وَخَيْرَ مَا فِيهَا، وَأَعُوذُ بِكَ مِنْ شَرِّهَا وَشَرِّ أَهْلِهَا وَشَرِّ مَا فِيهَا",
+      "textTransliteration": "Allahumma Rabbas-samawatis-sab'i wa ma adhlalna, wa Rabbal-aradeenas-sab'i wa ma aqlalna, wa Rabbash-shayateeni wa ma adlalna, wa Rabbar-riyahi wa ma dharayna, as'aluka khayra hadhihil-qaryati wa khayra ahliha wa khayra ma feeha, wa a'udhu bika min sharriha wa sharri ahliha wa sharri ma feeha",
+      "textTranslation": "O Allah, Lord of the seven heavens and all they overshadow, Lord of the seven earths and all they carry, Lord of the devils and all they mislead, Lord of the winds and all they scatter, I ask You for the good of this town and the good of its people and the good of what is in it, and I seek refuge in You from its evil, the evil of its people, and the evil of what is in it.",
+      "source": "Hisnul Muslim",
+      "occasion": "When entering a new town or city"
+    },
+    {
+      "id": "t6",
+      "categoryId": "travel",
+      "titleEnglish": "Stopping at a Place",
+      "titleArabic": "النزول في مكان",
+      "textArabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+      "textTransliteration": "A'udhu bikalimatillahit-tammati min sharri ma khalaq",
+      "textTranslation": "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+      "source": "Muslim 2708",
+      "occasion": "When stopping at any place during travel — nothing will harm you until you depart from that place"
+    },
+    {
+      "id": "ax6",
+      "categoryId": "anxiety",
+      "titleEnglish": "Comprehensive Distress Dua",
+      "titleArabic": "دعاء الكرب الشامل",
+      "textArabic": "اللَّهُمَّ إِنِّي عَبْدُكَ ابْنُ عَبْدِكَ ابْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُلِّ اسْمٍ هُوَ لَكَ سَمَّيْتَ بِهِ نَفْسَكَ أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ أَوْ عَلَّمْتَهُ أَحَدًا مِنْ خَلْقِكَ أَوِ اسْتَأْثَرْتَ بِهِ فِي عِلْمِ الْغَيْبِ عِنْدَكَ أَنْ تَجْعَلَ الْقُرْآنَ رَبِيعَ قَلْبِي وَنُورَ صَدْرِي وَجَلَاءَ حُزْنِي وَذَهَابَ هَمِّي",
+      "textTransliteration": "Allahumma inni 'abduka ibnu 'abdika ibnu amatik, nasiyati biyadik, madin fiyya hukmuk, 'adlun fiyya qada'uk, as'aluka bikulli ismin huwa laka sammayta bihi nafsaka aw anzaltahu fi kitabika aw 'allamtahu ahadan min khalqika awista'tharta bihi fi 'ilmil-ghaybi 'indaka an taj'alal-Qur'ana rabee'a qalbi wa nura sadri wa jala'a huzni wa dhahaba hammi",
+      "textTranslation": "O Allah, I am Your servant, son of Your servant, son of Your maidservant. My forelock is in Your hand, Your command over me is forever executed, and Your decree over me is just. I ask You by every name belonging to You which You have named Yourself with, or revealed in Your Book, or taught to any of Your creation, or kept in the knowledge of the unseen with You, that You make the Quran the spring of my heart, the light of my chest, the departure of my sorrow, and the release of my anxiety.",
+      "source": "Ahmad, Abu Dawud",
+      "occasion": "A comprehensive dua for distress — whoever says it, Allah will replace his sorrow with joy"
+    },
+    {
+      "id": "ax7",
+      "categoryId": "anxiety",
+      "titleEnglish": "When Overwhelmed by Debt",
+      "titleArabic": "عند غلبة الدين",
+      "textArabic": "اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+      "textTransliteration": "Allahumma-kfini bihalalika 'an haramika wa aghnini bifadlika 'amman siwak",
+      "textTranslation": "O Allah, suffice me with what You have made lawful instead of what You have made unlawful, and enrich me with Your bounty so I need no one besides You.",
+      "source": "Tirmidhi",
+      "occasion": "When overwhelmed by debt or financial hardship"
+    },
+    {
+      "id": "ik1",
+      "categoryId": "istikharah",
+      "titleEnglish": "Istikharah Prayer",
+      "titleArabic": "دعاء الاستخارة",
+      "textArabic": "اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ وَتَعْلَمُ وَلَا أَعْلَمُ وَأَنْتَ عَلَّامُ الْغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ وَاقْدُرْ لِيَ الْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ",
+      "textTransliteration": "Allahumma inni astakheeruka bi'ilmika wa astaqdiruka biqudratika wa as'aluka min fadlikal-'adheem, fa innaka taqdiru wa la aqdiru wa ta'lamu wa la a'lamu wa Anta 'allamul-ghuyub. Allahumma in kunta ta'lamu anna hadhal-amra khayrun li fi deeni wa ma'ashi wa 'aqibati amri faqdurhu li wa yassirhu li thumma barik li feehi, wa in kunta ta'lamu anna hadhal-amra sharrun li fi deeni wa ma'ashi wa 'aqibati amri fasrifhu 'anni wasrifni 'anhu waqdur liyal-khayra haythu kana thumma ardini bih",
+      "textTranslation": "O Allah, I seek Your guidance by virtue of Your knowledge, and I seek ability by virtue of Your power, and I ask You of Your great bounty. You have power and I have none. You know and I know not. You are the Knower of hidden things. O Allah, if in Your knowledge this matter is good for my religion, my livelihood and my affairs, then ordain it for me, make it easy for me, and bless it for me. And if in Your knowledge this matter is bad for my religion, my livelihood and my affairs, then turn it away from me and turn me away from it, and ordain for me the good wherever it may be, and make me content with it.",
+      "source": "Bukhari 1162",
+      "occasion": "After praying two rak'ahs of voluntary prayer when seeking guidance on a decision"
+    },
+    {
+      "id": "ik2",
+      "categoryId": "istikharah",
+      "titleEnglish": "Seeking Guidance",
+      "titleArabic": "طلب الهداية",
+      "textArabic": "اللَّهُمَّ اهْدِنِي وَسَدِّدْنِي",
+      "textTransliteration": "Allahumma-hdini wa saddidni",
+      "textTranslation": "O Allah, guide me and direct me to the right path.",
+      "source": "Muslim",
+      "occasion": "A general dua for guidance in daily decisions"
+    },
+    {
+      "id": "ik3",
+      "categoryId": "istikharah",
+      "titleEnglish": "Seeking Clarity",
+      "titleArabic": "طلب الوضوح",
+      "textArabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنَ الْخَيْرِ كُلِّهِ عَاجِلِهِ وَآجِلِهِ مَا عَلِمْتُ مِنْهُ وَمَا لَمْ أَعْلَمْ، وَأَعُوذُ بِكَ مِنَ الشَّرِّ كُلِّهِ عَاجِلِهِ وَآجِلِهِ مَا عَلِمْتُ مِنْهُ وَمَا لَمْ أَعْلَمْ",
+      "textTransliteration": "Allahumma inni as'aluka minal-khayri kullihi 'ajilihi wa ajilihi ma 'alimtu minhu wa ma lam a'lam, wa a'udhu bika minash-sharri kullihi 'ajilihi wa ajilihi ma 'alimtu minhu wa ma lam a'lam",
+      "textTranslation": "O Allah, I ask You for all good, immediate and delayed, that which I know of and that which I do not know. And I seek refuge in You from all evil, immediate and delayed, that which I know of and that which I do not know.",
+      "source": "Tirmidhi",
+      "occasion": "When seeking clarity between choices or facing uncertainty"
+    },
+    {
+      "id": "il1",
+      "categoryId": "illness",
+      "titleEnglish": "Visiting the Sick",
+      "titleArabic": "عيادة المريض",
+      "textArabic": "لَا بَأْسَ، طَهُورٌ إِنْ شَاءَ اللَّهُ",
+      "textTransliteration": "La ba'sa, tahoorun in sha Allah",
+      "textTranslation": "No worry, it is a purification, if Allah wills.",
+      "source": "Tirmidhi 2083",
+      "occasion": "Said when visiting a sick person to comfort them"
+    },
+    {
+      "id": "il2",
+      "categoryId": "illness",
+      "titleEnglish": "Placing Hand on Pain",
+      "titleArabic": "وضع اليد على موضع الألم",
+      "textArabic": "بِسْمِ اللَّهِ، أَعُوذُ بِاللَّهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ",
+      "textTransliteration": "Bismillah, a'udhu billahi wa qudratihi min sharri ma ajidu wa uhadhir",
+      "textTranslation": "In the name of Allah. I seek refuge in Allah and His power from the evil of what I feel and what I fear.",
+      "source": "Muslim 2202",
+      "occasion": "Place your hand on the area of pain, say Bismillah three times, then recite this dua seven times",
+      "repetitions": 7
+    },
+    {
+      "id": "il3",
+      "categoryId": "illness",
+      "titleEnglish": "Dua for Healing",
+      "titleArabic": "دعاء الشفاء",
+      "textArabic": "اللَّهُمَّ رَبَّ النَّاسِ أَذْهِبِ الْبَأْسَ، اشْفِ أَنْتَ الشَّافِي لَا شِفَاءَ إِلَّا شِفَاؤُكَ، شِفَاءً لَا يُغَادِرُ سَقَمًا",
+      "textTransliteration": "Allahumma Rabban-nas, adhhibil-ba's, ishfi Antash-Shafi la shifa'a illa shifa'uk, shifa'an la yughadiru saqama",
+      "textTranslation": "O Allah, Lord of mankind, remove the affliction. Heal, for You are the Healer. There is no healing except Your healing, a healing that leaves no illness behind.",
+      "source": "Bukhari 5742",
+      "occasion": "Recite for yourself or when making dua for a sick person"
+    },
+    {
+      "id": "il4",
+      "categoryId": "illness",
+      "titleEnglish": "Ruqyah (Spiritual Healing)",
+      "titleArabic": "الرقية الشرعية",
+      "textArabic": "بِسْمِ اللَّهِ أَرْقِيكَ، مِنْ كُلِّ شَيْءٍ يُؤْذِيكَ، مِنْ شَرِّ كُلِّ نَفْسٍ أَوْ عَيْنِ حَاسِدٍ اللَّهُ يَشْفِيكَ، بِسْمِ اللَّهِ أَرْقِيكَ",
+      "textTransliteration": "Bismillahi arqeek, min kulli shay'in yu'dheek, min sharri kulli nafsin aw 'ayni hasidin Allahu yashfeek, bismillahi arqeek",
+      "textTranslation": "In the name of Allah I perform ruqyah on you, from everything that harms you, from the evil of every soul or envious eye may Allah heal you, in the name of Allah I perform ruqyah on you.",
+      "source": "Muslim 2186",
+      "occasion": "Recited over a sick person for spiritual healing"
+    },
+    {
+      "id": "il5",
+      "categoryId": "illness",
+      "titleEnglish": "When Afflicted with Illness",
+      "titleArabic": "عند الابتلاء بالمرض",
+      "textArabic": "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ، اللَّهُمَّ أْجُرْنِي فِي مُصِيبَتِي وَأَخْلِفْ لِي خَيْرًا مِنْهَا",
+      "textTransliteration": "Inna lillahi wa inna ilayhi raji'un, Allahumma-jurni fi museebati wa akhlif li khayran minha",
+      "textTranslation": "Indeed we belong to Allah and indeed to Him we will return. O Allah, reward me in my affliction and replace it with something better.",
+      "source": "Muslim 918",
+      "occasion": "When afflicted with illness or any calamity"
+    },
+    {
+      "id": "pa1",
+      "categoryId": "parents",
+      "titleEnglish": "Mercy for Parents",
+      "titleArabic": "الرحمة للوالدين",
+      "textArabic": "رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",
+      "textTransliteration": "Rabbir-hamhuma kama rabbayani sagheera",
+      "textTranslation": "My Lord, have mercy upon them as they brought me up when I was small.",
+      "source": "Quran 17:24",
+      "occasion": "A dua for parents taught by Allah in the Quran"
+    },
+    {
+      "id": "pa2",
+      "categoryId": "parents",
+      "titleEnglish": "Forgiveness for Parents",
+      "titleArabic": "المغفرة للوالدين",
+      "textArabic": "رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+      "textTransliteration": "Rabbanagh-fir li wa liwalidayya wa lil-mu'mineena yawma yaqumul-hisab",
+      "textTranslation": "Our Lord, forgive me and my parents and the believers the Day the account is established.",
+      "source": "Quran 14:41",
+      "occasion": "Ibrahim's supplication for his parents and all believers"
+    },
+    {
+      "id": "pa3",
+      "categoryId": "parents",
+      "titleEnglish": "Family Wellbeing",
+      "titleArabic": "صلاح الأسرة",
+      "textArabic": "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+      "textTransliteration": "Rabbana hab lana min azwajina wa dhurriyyatina qurrata a'yunin waj'alna lil-muttaqeena imama",
+      "textTranslation": "Our Lord, grant us from among our spouses and offspring comfort to our eyes and make us leaders for the righteous.",
+      "source": "Quran 25:74",
+      "occasion": "A comprehensive dua for family wellbeing and righteousness"
+    },
+    {
+      "id": "mg1",
+      "categoryId": "marriage",
+      "titleEnglish": "For the Newlyweds",
+      "titleArabic": "للعروسين",
+      "textArabic": "بَارَكَ اللَّهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ",
+      "textTransliteration": "Barakallahu laka wa baraka 'alayka wa jama'a baynakuma fi khayr",
+      "textTranslation": "May Allah bless you, and shower His blessings upon you, and join you together in goodness.",
+      "source": "Abu Dawud 2130",
+      "occasion": "Said to congratulate newlyweds"
+    },
+    {
+      "id": "mg2",
+      "categoryId": "marriage",
+      "titleEnglish": "For a Righteous Spouse",
+      "titleArabic": "طلب الزوج الصالح",
+      "textArabic": "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+      "textTransliteration": "Rabbana hab lana min azwajina wa dhurriyyatina qurrata a'yunin waj'alna lil-muttaqeena imama",
+      "textTranslation": "Our Lord, grant us from among our spouses and offspring comfort to our eyes and make us leaders for the righteous.",
+      "source": "Quran 25:74",
+      "occasion": "When seeking a righteous spouse or praying for one's marriage"
+    },
+    {
+      "id": "mg3",
+      "categoryId": "marriage",
+      "titleEnglish": "Love Between Spouses",
+      "titleArabic": "المودة بين الزوجين",
+      "textArabic": "اللَّهُمَّ أَلِّفْ بَيْنَ قُلُوبِنَا وَأَصْلِحْ ذَاتَ بَيْنِنَا",
+      "textTransliteration": "Allahumma allif bayna quloobina wa aslih dhata baynina",
+      "textTranslation": "O Allah, bring our hearts together and mend the relations between us.",
+      "source": "Abu Dawud",
+      "occasion": "For harmony and love between spouses"
+    },
+    {
+      "id": "mg4",
+      "categoryId": "marriage",
+      "titleEnglish": "Wedding Night Dua",
+      "titleArabic": "دعاء ليلة الزفاف",
+      "textArabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَهَا وَخَيْرَ مَا جَبَلْتَهَا عَلَيْهِ، وَأَعُوذُ بِكَ مِنْ شَرِّهَا وَشَرِّ مَا جَبَلْتَهَا عَلَيْهِ",
+      "textTransliteration": "Allahumma inni as'aluka khayraha wa khayra ma jabaltaha 'alayh, wa a'udhu bika min sharriha wa sharri ma jabaltaha 'alayh",
+      "textTranslation": "O Allah, I ask You for the good in her and the good in the disposition You have given her, and I seek refuge in You from the evil in her and the evil in the disposition You have given her.",
+      "source": "Abu Dawud 2161",
+      "occasion": "Said by the husband on the wedding night while placing his hand on his wife's forehead"
+    },
+    {
+      "id": "ch1",
+      "categoryId": "children",
+      "titleEnglish": "Protection of Children",
+      "titleArabic": "حماية الأطفال",
+      "textArabic": "أُعِيذُكُمَا بِكَلِمَاتِ اللَّهِ التَّامَّةِ مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ",
+      "textTransliteration": "U'idhukuma bikalimatillahit-tammah min kulli shaytanin wa hammah wa min kulli 'aynin lammah",
+      "textTranslation": "I seek protection for you both in the perfect words of Allah from every devil and every poisonous creature, and from every envious evil eye.",
+      "source": "Bukhari 3371",
+      "occasion": "The Prophet ﷺ used to seek protection for Al-Hasan and Al-Husayn with these words"
+    },
+    {
+      "id": "ch2",
+      "categoryId": "children",
+      "titleEnglish": "Righteous Offspring",
+      "titleArabic": "طلب الذرية الصالحة",
+      "textArabic": "رَبِّ هَبْ لِي مِنْ لَدُنْكَ ذُرِّيَّةً طَيِّبَةً ۖ إِنَّكَ سَمِيعُ الدُّعَاءِ",
+      "textTransliteration": "Rabbi hab li min ladunka dhurriyyatan tayyibah, innaka samee'ud-du'a",
+      "textTranslation": "My Lord, grant me from Yourself good offspring. Indeed, You are the Hearer of supplication.",
+      "source": "Quran 3:38",
+      "occasion": "Zakariyya's supplication for righteous children"
+    },
+    {
+      "id": "ch3",
+      "categoryId": "children",
+      "titleEnglish": "Congratulating New Parents",
+      "titleArabic": "تهنئة المولود الجديد",
+      "textArabic": "بَارَكَ اللَّهُ لَكَ فِي الْمَوْهُوبِ لَكَ، وَشَكَرْتَ الْوَاهِبَ، وَبَلَغَ أَشُدَّهُ، وَرُزِقْتَ بِرَّهُ",
+      "textTransliteration": "Barakallahu laka fil-mawhubi laka, wa shakarta al-wahib, wa balagha ashuddahu, wa ruziqta birrahu",
+      "textTranslation": "May Allah bless you with what He has given you, and may you give thanks to the Giver, and may the child reach full maturity, and may you be blessed with their righteousness.",
+      "source": "Hisnul Muslim",
+      "occasion": "Said to congratulate parents on the birth of a new child"
+    },
+    {
+      "id": "kn1",
+      "categoryId": "knowledge",
+      "titleEnglish": "Seeking Beneficial Knowledge",
+      "titleArabic": "طلب العلم النافع",
+      "textArabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا طَيِّبًا وَعَمَلًا مُتَقَبَّلًا",
+      "textTransliteration": "Allahumma inni as'aluka 'ilman nafi'an wa rizqan tayyiban wa 'amalan mutaqabbala",
+      "textTranslation": "O Allah, I ask You for beneficial knowledge, good provision, and accepted deeds.",
+      "source": "Muslim",
+      "occasion": "After the Fajr prayer — a comprehensive morning supplication for knowledge"
+    },
+    {
+      "id": "kn2",
+      "categoryId": "knowledge",
+      "titleEnglish": "Increase in Knowledge",
+      "titleArabic": "الزيادة في العلم",
+      "textArabic": "رَبِّ زِدْنِي عِلْمًا",
+      "textTransliteration": "Rabbi zidni 'ilma",
+      "textTranslation": "My Lord, increase me in knowledge.",
+      "source": "Quran 20:114",
+      "occasion": "Before studying, reading, or seeking any form of knowledge"
+    },
+    {
+      "id": "kn3",
+      "categoryId": "knowledge",
+      "titleEnglish": "For Understanding",
+      "titleArabic": "طلب الفهم",
+      "textArabic": "اللَّهُمَّ فَهِّمْنِي فِي الدِّينِ وَعَلِّمْنِي التَّأْوِيلَ",
+      "textTransliteration": "Allahumma fahhimni fid-deen wa 'allimni at-ta'weel",
+      "textTranslation": "O Allah, grant me understanding of the religion and teach me the interpretation.",
+      "source": "Bukhari & Muslim (narrated for Ibn Abbas)",
+      "occasion": "When seeking deeper understanding of religious knowledge"
+    },
+    {
+      "id": "hj1",
+      "categoryId": "hajj",
+      "titleEnglish": "Talbiyah",
+      "titleArabic": "التلبية",
+      "textArabic": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ",
+      "textTransliteration": "Labbayk Allahumma labbayk, labbayka la shareeka laka labbayk, innal-hamda wan-ni'mata laka wal-mulk, la shareeka lak",
+      "textTranslation": "Here I am, O Allah, here I am. Here I am, You have no partner, here I am. Indeed, all praise and blessings are Yours, and the dominion. You have no partner.",
+      "source": "Bukhari & Muslim",
+      "occasion": "Recited throughout Hajj and Umrah from the meeqat onwards"
+    },
+    {
+      "id": "hj2",
+      "categoryId": "hajj",
+      "titleEnglish": "Dua at Arafat",
+      "titleArabic": "دعاء عرفة",
+      "textArabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+      "textTransliteration": "La ilaha illallahu wahdahu la shareeka lah, lahul-mulku wa lahul-hamdu wa Huwa 'ala kulli shay'in Qadeer",
+      "textTranslation": "There is no god but Allah alone, with no partner. His is the dominion and His is the praise, and He is over all things competent.",
+      "source": "Tirmidhi 3585",
+      "occasion": "The best supplication is on the Day of Arafat"
+    },
+    {
+      "id": "hj3",
+      "categoryId": "hajj",
+      "titleEnglish": "During Tawaf",
+      "titleArabic": "أثناء الطواف",
+      "textArabic": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+      "textTransliteration": "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar",
+      "textTranslation": "Our Lord, give us in this world that which is good and in the Hereafter that which is good, and protect us from the punishment of the Fire.",
+      "source": "Quran 2:201, Abu Dawud",
+      "occasion": "Between the Yemeni corner and the Black Stone during tawaf"
+    },
+    {
+      "id": "hj4",
+      "categoryId": "hajj",
+      "titleEnglish": "Between Safa and Marwa",
+      "titleArabic": "بين الصفا والمروة",
+      "textArabic": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللَّهِ",
+      "textTransliteration": "Innas-Safa wal-Marwata min sha'a'irillah",
+      "textTranslation": "Indeed, Safa and Marwa are among the symbols of Allah.",
+      "source": "Quran 2:158, Muslim",
+      "occasion": "Recited when beginning the Sa'ee between Safa and Marwa"
+    },
+    {
+      "id": "wt1",
+      "categoryId": "weather",
+      "titleEnglish": "When It Rains",
+      "titleArabic": "عند نزول المطر",
+      "textArabic": "اللَّهُمَّ صَيِّبًا نَافِعًا",
+      "textTransliteration": "Allahumma sayyiban nafi'a",
+      "textTranslation": "O Allah, let it be a beneficial rain.",
+      "source": "Bukhari",
+      "occasion": "Said when rain begins to fall"
+    },
+    {
+      "id": "wt2",
+      "categoryId": "weather",
+      "titleEnglish": "After Rain",
+      "titleArabic": "بعد المطر",
+      "textArabic": "مُطِرْنَا بِفَضْلِ اللَّهِ وَرَحْمَتِهِ",
+      "textTransliteration": "Mutirna bifadlillahi wa rahmatihi",
+      "textTranslation": "We have been given rain by the grace and mercy of Allah.",
+      "source": "Muslim",
+      "occasion": "Said after the rain stops"
+    },
+    {
+      "id": "wt3",
+      "categoryId": "weather",
+      "titleEnglish": "During Strong Wind",
+      "titleArabic": "عند هبوب الرياح",
+      "textArabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَهَا وَخَيْرَ مَا فِيهَا وَخَيْرَ مَا أُرْسِلَتْ بِهِ، وَأَعُوذُ بِكَ مِنْ شَرِّهَا وَشَرِّ مَا فِيهَا وَشَرِّ مَا أُرْسِلَتْ بِهِ",
+      "textTransliteration": "Allahumma inni as'aluka khayraha wa khayra ma feeha wa khayra ma ursilat bih, wa a'udhu bika min sharriha wa sharri ma feeha wa sharri ma ursilat bih",
+      "textTranslation": "O Allah, I ask You for its good, the good of what it contains, and the good of what it has been sent with. And I seek refuge in You from its evil, the evil of what it contains, and the evil of what it has been sent with.",
+      "source": "Muslim",
+      "occasion": "When there is strong wind — do not curse the wind, for it is commanded by Allah"
+    },
+    {
+      "id": "gr1",
+      "categoryId": "gratitude",
+      "titleEnglish": "General Gratitude",
+      "titleArabic": "الشكر العام",
+      "textArabic": "رَبِّ أَوْزِعْنِي أَنْ أَشْكُرَ نِعْمَتَكَ الَّتِي أَنْعَمْتَ عَلَيَّ وَعَلَىٰ وَالِدَيَّ وَأَنْ أَعْمَلَ صَالِحًا تَرْضَاهُ",
+      "textTransliteration": "Rabbi awzi'ni an ashkura ni'matakal-lati an'amta 'alayya wa 'ala walidayya wa an a'mala salihan tardah",
+      "textTranslation": "My Lord, enable me to be grateful for Your favour which You have bestowed upon me and upon my parents, and to do righteousness of which You approve.",
+      "source": "Quran 27:19",
+      "occasion": "A Quranic supplication for gratitude — also used by Sulayman"
+    },
+    {
+      "id": "gr2",
+      "categoryId": "gratitude",
+      "titleEnglish": "Receiving Good News",
+      "titleArabic": "عند تلقي خبر سار",
+      "textArabic": "الْحَمْدُ لِلَّهِ الَّذِي بِنِعْمَتِهِ تَتِمُّ الصَّالِحَاتُ",
+      "textTransliteration": "Alhamdu lillahil-ladhi bini'matihi tatimmus-salihat",
+      "textTranslation": "All praise is due to Allah, by whose grace good deeds are completed.",
+      "source": "Bukhari (in Al-Adab Al-Mufrad)",
+      "occasion": "When receiving good news or when something pleasing happens"
+    },
+    {
+      "id": "gr3",
+      "categoryId": "gratitude",
+      "titleEnglish": "When Pleased",
+      "titleArabic": "عند الرضا والسرور",
+      "textArabic": "اللَّهُمَّ لَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
+      "textTransliteration": "Allahumma lakal-hamdu wa lakash-shukr",
+      "textTranslation": "O Allah, to You belongs all praise and to You belongs all gratitude.",
+      "source": "Abu Dawud",
+      "occasion": "When feeling pleased or content — expressing gratitude to Allah"
     }
   ]
 }
