@@ -28,6 +28,7 @@ struct HomeView: View {
     @State private var resolvedActions: [HomeAction] = []
     @State private var hideResumeCard = false
     @State private var isResumeCardExpanded = false
+    @State private var isDailyVerseExpanded = true
 
     // Eid state
     @State private var currentEidType: EidType?
@@ -489,23 +490,62 @@ struct HomeView: View {
     // MARK: - Daily Verse Card
 
     private func dailyVerseCard(_ verse: Ayah) -> some View {
-        TitledCard(title: "Daily Verse", subtitle: "Surah \(verse.surahNumber):\(verse.ayahNumber)") {
-            VStack(alignment: .trailing, spacing: SafaSpacing.sm) {
-                Text(verse.textArabic)
-                    .font(SafaTypography.arabicMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .environment(\.layoutDirection, .rightToLeft)
-                    .accessibilityArabic()
+        VStack(spacing: 0) {
+            // Collapsed header
+            HStack(spacing: SafaSpacing.sm) {
+                Image(systemName: "sun.max.fill")
+                    .font(.body)
+                    .foregroundColor(.orange)
 
-                Text(verse.textTranslation)
-                    .font(SafaTypography.bodySmall)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("Daily Verse")
+                    .font(SafaTypography.titleSmall)
+                    .foregroundColor(SafaColors.Fallback.text)
+
+                Text("Surah \(verse.surahNumber):\(verse.ayahNumber)")
+                    .font(SafaTypography.labelSmall)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+
+                Spacer()
+
+                Image(systemName: isDailyVerseExpanded ? "chevron.down" : "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+            }
+            .padding(.horizontal, SafaSpacing.md)
+            .padding(.vertical, SafaSpacing.sm)
+            .background(Color(UIColor.secondarySystemBackground))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isDailyVerseExpanded.toggle()
+                }
+            }
+
+            // Expanded content
+            if isDailyVerseExpanded {
+                VStack(alignment: .trailing, spacing: SafaSpacing.sm) {
+                    Text(verse.textArabic)
+                        .font(SafaTypography.arabicMedium)
+                        .foregroundColor(SafaColors.Fallback.text)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .environment(\.layoutDirection, .rightToLeft)
+                        .accessibilityArabic()
+
+                    Text(verse.textTranslation)
+                        .font(SafaTypography.bodySmall)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.horizontal, SafaSpacing.md)
+                .padding(.vertical, SafaSpacing.sm)
+                .background(Color(UIColor.secondarySystemBackground))
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Daily Verse, Surah \(verse.surahNumber) Ayah \(verse.ayahNumber). \(verse.textTranslation)")
+        .accessibilityHint(isDailyVerseExpanded ? "Double tap to collapse" : "Double tap to expand")
     }
 
     // MARK: - Resume Card
