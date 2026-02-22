@@ -76,12 +76,12 @@ final class ZakatCalculatorViewModelTests: XCTestCase {
         XCTAssertEqual(ZakatCalculatorViewModel.silverNisabGrams, 595)
     }
 
-    func test_goldPricePerGramConstant() {
-        XCTAssertEqual(ZakatCalculatorViewModel.goldPricePerGram, 65)
+    func test_goldPricePerGramDefault() {
+        XCTAssertEqual(sut.goldPricePerGram, 65)
     }
 
-    func test_silverPricePerGramConstant() {
-        XCTAssertEqual(ZakatCalculatorViewModel.silverPricePerGram, 0.80)
+    func test_silverPricePerGramDefault() {
+        XCTAssertEqual(sut.silverPricePerGram, 0.80)
     }
 
     // MARK: - Nisab Calculation Tests

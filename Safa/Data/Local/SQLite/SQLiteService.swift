@@ -75,7 +75,7 @@ final class SQLiteService {
         return nil
     }
 
-    /// Decompress a .gz database to Application Support (once, cached for future launches)
+    /// Decompress a .gz database to Application Support, re-decompressing when the bundled .gz changes.
     private func decompressIfNeeded(gzPath: URL, name: String) -> URL? {
         let fileManager = FileManager.default
         guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
@@ -84,11 +84,24 @@ final class SQLiteService {
 
         let dbDir = appSupport.appendingPathComponent("Databases")
         let targetPath = dbDir.appendingPathComponent("\(name).sqlite")
+        let markerPath = dbDir.appendingPathComponent("\(name).gz.size")
 
-        // Already decompressed from a previous launch
-        if fileManager.fileExists(atPath: targetPath.path) {
+        // Check if cached DB is up-to-date with the bundled .gz
+        let bundledSize = (try? fileManager.attributesOfItem(atPath: gzPath.path)[.size] as? Int) ?? 0
+        if fileManager.fileExists(atPath: targetPath.path),
+           let markerData = try? Data(contentsOf: markerPath),
+           let markerString = String(data: markerData, encoding: .utf8),
+           let cachedSize = Int(markerString),
+           cachedSize == bundledSize {
             return targetPath
         }
+
+        // Close any existing persistent connection before replacing the file
+        connectionLock.lock()
+        if let existing = persistentConnections.removeValue(forKey: name) {
+            sqlite3_close(existing)
+        }
+        connectionLock.unlock()
 
         // Decompress gzip to Application Support
         do {
@@ -96,6 +109,7 @@ final class SQLiteService {
             let compressedData = try Data(contentsOf: gzPath)
             guard let decompressed = compressedData.gunzip() else { return nil }
             try decompressed.write(to: targetPath)
+            try Data("\(bundledSize)".utf8).write(to: markerPath)
             return targetPath
         } catch {
             return nil

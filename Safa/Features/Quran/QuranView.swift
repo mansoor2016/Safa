@@ -58,7 +58,7 @@ private struct QuranContentView: View {
             if viewModel.error != nil {
                 ErrorView.loadFailed(retry: { await viewModel.loadSurahs() })
             } else {
-                ScrollView {
+                ScrollableScreen {
                     LazyVStack(spacing: 0) {
                         // Tab selector
                         Picker("View", selection: $selectedTab) {

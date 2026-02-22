@@ -197,6 +197,32 @@ final class QuranDataIntegrityTests: XCTestCase {
         }
     }
 
+    // MARK: - Transliteration Tests
+
+    func test_allAyahs_haveTransliteration() async throws {
+        let surahs = try await sut.getAllSurahs()
+        var ayahsWithTransliteration = 0
+        var totalAyahs = 0
+        for surah in surahs {
+            let ayahs = try await sut.getAyahs(forSurah: surah.id)
+            for ayah in ayahs {
+                totalAyahs += 1
+                if let transliteration = ayah.textTransliteration, !transliteration.isEmpty {
+                    ayahsWithTransliteration += 1
+                }
+            }
+        }
+        XCTAssertEqual(totalAyahs, 6236, "Should check all 6,236 ayahs")
+        XCTAssertEqual(ayahsWithTransliteration, 6236, "All ayahs should have transliteration data")
+    }
+
+    func test_fatiha_firstAyah_hasTransliteration() async throws {
+        let ayahs = try await sut.getAyahs(forSurah: 1)
+        let first = try XCTUnwrap(ayahs.first)
+        let transliteration = try XCTUnwrap(first.textTransliteration)
+        XCTAssertTrue(transliteration.lowercased().contains("bismi"), "Al-Fatihah 1:1 transliteration should contain 'Bismi'")
+    }
+
     // MARK: - Performance Tests
 
     func test_searchAyahs_performanceIsAcceptable() async throws {

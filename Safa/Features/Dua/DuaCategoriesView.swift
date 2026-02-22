@@ -19,7 +19,7 @@ struct DuaCategoriesView: View {
     }
 
     var body: some View {
-        ScrollView {
+        ScrollableScreen {
             LazyVStack(spacing: 12) {
                 headerView
                 quickAccessSection

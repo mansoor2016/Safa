@@ -27,18 +27,20 @@ final class ZakatCalculatorViewModel {
     var nisabType: NisabType = .gold
     var currency: String = "USD"
 
-    // Nisab thresholds (approximate values - should be updated)
+    // Nisab thresholds
     static let goldNisabGrams: Double = 85 // 85 grams of gold
     static let silverNisabGrams: Double = 595 // 595 grams of silver
-    static let goldPricePerGram: Double = 65 // Approximate USD
-    static let silverPricePerGram: Double = 0.80 // Approximate USD
+
+    // Adjustable price per gram (defaults are approximate USD)
+    var goldPricePerGram: Double = 65
+    var silverPricePerGram: Double = 0.80
 
     var goldNisab: Double {
-        Self.goldNisabGrams * Self.goldPricePerGram
+        Self.goldNisabGrams * goldPricePerGram
     }
 
     var silverNisab: Double {
-        Self.silverNisabGrams * Self.silverPricePerGram
+        Self.silverNisabGrams * silverPricePerGram
     }
 
     var currentNisab: Double {
@@ -80,6 +82,8 @@ final class ZakatCalculatorViewModel {
         otherAssets = 0
         debtsOwed = 0
         otherLiabilities = 0
+        goldPricePerGram = 65
+        silverPricePerGram = 0.80
     }
 }
 
@@ -197,6 +201,31 @@ struct ZakatCalculatorView: View {
                     .buttonStyle(.plain)
                 }
             }
+
+            // Editable price per gram for selected nisab type
+            HStack {
+                Text(viewModel.nisabType == .gold ? "Gold price per gram" : "Silver price per gram")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                TextField(
+                    "0",
+                    value: viewModel.nisabType == .gold
+                        ? $viewModel.goldPricePerGram
+                        : $viewModel.silverPricePerGram,
+                    format: .currency(code: viewModel.currency)
+                )
+                .textFieldStyle(.plain)
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.decimalPad)
+                .frame(width: 120)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(.secondarySystemGroupedBackground))
+            .cornerRadius(8)
         }
         .padding(.horizontal)
     }

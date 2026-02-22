@@ -117,6 +117,7 @@ struct PrayerTimePreviewCard: View {
                 .foregroundColor(SafaColors.Fallback.text)
                 .monospacedDigit()
                 .opacity(textOpacity)
+                .frame(minWidth: 46, alignment: .trailing)
 
             if showBell {
                 Image(systemName: isEnabled ? "bell.fill" : "bell.slash")

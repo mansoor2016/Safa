@@ -33,6 +33,7 @@ struct DhikrView: View {
         }
         .navigationTitle("Dhikr")
         .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .sheet(isPresented: $showTasbeehCounter) {
             TasbeehCounterView(dhikr: selectedDhikr)
                 .environment(dependencies)

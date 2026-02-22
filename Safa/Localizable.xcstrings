@@ -1190,6 +1190,9 @@
     "Get today's verse of the day" : {
 
     },
+    "Gold price per gram" : {
+
+    },
     "Got it" : {
 
     },
@@ -2012,6 +2015,9 @@
     "Shows time until next prayer" : {
 
     },
+    "Silver price per gram" : {
+
+    },
     "Skip" : {
 
     },
@@ -2357,8 +2363,15 @@
     "Unknown prayer type." : {
 
     },
-    "until %@" : {
-
+    "until %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "until %1$@ · %2$@"
+          }
+        }
+      }
     },
     "until Iftar" : {
 

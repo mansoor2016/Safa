@@ -211,22 +211,15 @@ private struct NextPrayerCard: View {
                     .frame(width: 32)
 
                 // Countdown + prayer info
-                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                    HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
-                        Text(prayer.time, style: .timer)
-                            .font(SafaTypography.headlineLarge)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-
-                        Text("until \(prayer.type.displayName)")
-                            .font(SafaTypography.labelMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                    }
-
-                    Text(prayer.time.formatted(date: .omitted, time: .shortened))
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(SafaColors.Fallback.tertiaryText)
+                HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
+                    Text(prayer.time, style: .timer)
+                        .font(SafaTypography.headlineLarge)
                         .monospacedDigit()
+                        .contentTransition(.numericText())
+
+                    Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                        .font(SafaTypography.labelMedium)
+                        .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
 
                 Spacer()

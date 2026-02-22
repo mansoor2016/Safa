@@ -69,11 +69,14 @@ final class PreferencesManagerTests: XCTestCase {
     override func setUp() {
         super.setUp()
         mockRepository = MockUserRepositoryForPrefs()
+        // Pre-set migration key so non-migration tests don't trigger async side-effects
+        UserDefaults.standard.set(true, forKey: "beta_migration_makkah_default_v2")
         sut = PreferencesManager.shared
         sut.configure(userRepository: mockRepository)
     }
 
     override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
         sut = nil
         mockRepository = nil
         super.tearDown()
@@ -371,33 +374,53 @@ final class PreferencesManagerTests: XCTestCase {
 
     // MARK: - Beta Migration Tests
 
-    func test_betaMigration_resetsOldMakkahDefault() async {
-        // Simulate a user still on the old hard-coded .makkah default
+    func test_betaMigration_writesForMakkahUsers() async {
+        // User on old .makkah default — migration should fire an update
         mockRepository.preferences.calculationMethod = .makkah
-
-        // Clear migration key so it runs
         UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
+        let countBefore = mockRepository.updateCallCount
 
         sut.configure(userRepository: mockRepository)
-        try? await Task.sleep(for: .milliseconds(100))
 
-        let prefs = await sut.getPreferences()
-        XCTAssertEqual(prefs.calculationMethod, AppDefaults.calculationMethod,
-                       "Beta migration should reset old .makkah default to AppDefaults")
+        // Wait for the async migration Task to set the completion key
+        let migrated = XCTestExpectation(description: "Migration task completes")
+        Task {
+            while !UserDefaults.standard.bool(forKey: "beta_migration_makkah_default_v2") {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            migrated.fulfill()
+        }
+        await fulfillment(of: [migrated], timeout: 2.0)
+
+        XCTAssertGreaterThan(mockRepository.updateCallCount, countBefore,
+                             "Migration should trigger an update call for .makkah users")
+        XCTAssertTrue(UserDefaults.standard.bool(forKey: "beta_migration_makkah_default_v2"),
+                      "Completion key should be set after migration")
     }
 
-    func test_betaMigration_preservesExplicitChoice() async {
-        // Simulate a user who explicitly chose ISNA — migration should NOT overwrite
+    func test_betaMigration_skipsNonMakkahUsers() async {
+        // User explicitly chose ISNA — migration should NOT write
         mockRepository.preferences.calculationMethod = .isna
-
         UserDefaults.standard.removeObject(forKey: "beta_migration_makkah_default_v2")
+        let countBefore = mockRepository.updateCallCount
 
         sut.configure(userRepository: mockRepository)
-        try? await Task.sleep(for: .milliseconds(100))
 
+        // Wait for the migration Task to finish (it sets the key even when skipping)
+        let completed = XCTestExpectation(description: "Migration task completes")
+        Task {
+            while !UserDefaults.standard.bool(forKey: "beta_migration_makkah_default_v2") {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            completed.fulfill()
+        }
+        await fulfillment(of: [completed], timeout: 2.0)
+
+        XCTAssertEqual(mockRepository.updateCallCount, countBefore,
+                       "Migration should NOT update preferences for non-.makkah users")
         let prefs = await sut.getPreferences()
         XCTAssertEqual(prefs.calculationMethod, .isna,
-                       "Migration should not overwrite user's explicit ISNA choice")
+                       "User's explicit ISNA choice should be preserved")
     }
 
     func test_betaMigration_onlyRunsOnce() async {
@@ -406,20 +429,27 @@ final class PreferencesManagerTests: XCTestCase {
 
         // First configure — migration runs
         sut.configure(userRepository: mockRepository)
-        try? await Task.sleep(for: .milliseconds(100))
+
+        let firstDone = XCTestExpectation(description: "First migration completes")
+        Task {
+            while !UserDefaults.standard.bool(forKey: "beta_migration_makkah_default_v2") {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            firstDone.fulfill()
+        }
+        await fulfillment(of: [firstDone], timeout: 2.0)
 
         // User manually changes to ISNA after migration
         await sut.saveCalculationMethod(.isna)
-        let countAfterFirstMigration = mockRepository.updateCallCount
+        let countAfterManualChange = mockRepository.updateCallCount
 
-        // Second configure — migration should NOT run again
+        // Second configure — guard returns synchronously because key is already set
         sut.configure(userRepository: mockRepository)
-        try? await Task.sleep(for: .milliseconds(100))
 
+        XCTAssertEqual(mockRepository.updateCallCount, countAfterManualChange,
+                       "No additional update — migration guard exits synchronously")
         let prefs = await sut.getPreferences()
         XCTAssertEqual(prefs.calculationMethod, .isna,
-                       "Second configure should not re-run migration — user's ISNA choice should be preserved")
-        XCTAssertEqual(mockRepository.updateCallCount, countAfterFirstMigration,
-                       "No additional update call should have been made")
+                       "User's post-migration ISNA choice should be preserved")
     }
 }

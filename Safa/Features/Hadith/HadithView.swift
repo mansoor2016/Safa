@@ -72,6 +72,7 @@ struct HadithContentView: View {
         }
         .navigationTitle("Hadith")
         .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .task {
             await viewModel.loadCollections()
             await viewModel.loadDailyHadith()
