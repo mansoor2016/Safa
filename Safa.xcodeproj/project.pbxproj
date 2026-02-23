@@ -356,6 +356,10 @@
 				id,
 				ur,
 				bn,
+				fr,
+				ms,
+				tr,
+				fa,
 				Base,
 			);
 			mainGroup = 76F09F7A2F32DE70007EB798;
