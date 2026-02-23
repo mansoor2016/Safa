@@ -37,17 +37,15 @@ struct Provider: AppIntentTimelineProvider {
             return defaultPrayers.forToday()
         }
 
-        let keys: [(String, String)] = [
-            ("Fajr", "fajrTime"),
-            ("Dhuhr", "dhuhrTime"),
-            ("Asr", "asrTime"),
-            ("Maghrib", "maghribTime"),
-            ("Isha", "ishaTime")
-        ]
+        // Read localized prayer names from App Group (written by main app on language change)
+        let namesFallback = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+        let names = defaults.stringArray(forKey: "prayerNames") ?? namesFallback
+        let timeKeys = ["fajrTime", "dhuhrTime", "asrTime", "maghribTime", "ishaTime"]
 
         var prayers: [PrayerInfo] = []
-        for (name, key) in keys {
+        for (index, key) in timeKeys.enumerated() {
             if let time = defaults.object(forKey: key) as? Date {
+                let name = index < names.count ? names[index] : namesFallback[index]
                 prayers.append(PrayerInfo(name: name, time: time))
             }
         }

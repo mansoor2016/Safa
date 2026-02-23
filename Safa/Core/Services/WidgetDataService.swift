@@ -57,10 +57,10 @@ final class WidgetDataService {
             }
         }
 
-        // Compute and write next prayer
+        // Compute and write next prayer (localized name for widget display)
         let now = Date()
         if let next = prayers.first(where: { $0.time > now && $0.type.isObligatory }) {
-            defaults.set(next.type.displayName, forKey: Keys.nextPrayerName)
+            defaults.set(next.type.localizedDisplayName, forKey: Keys.nextPrayerName)
             defaults.set(next.time, forKey: Keys.nextPrayerTime)
         }
 
@@ -138,9 +138,19 @@ final class WidgetDataService {
         defaults?.object(forKey: Keys.lastUpdated) as? Date
     }
 
-    // MARK: - Private
+    // MARK: - Write Localized Prayer Names
 
-    private func reloadWidgets() {
+    /// Writes localized prayer names to App Group for widget display
+    func writePrayerNames(_ prayers: [PrayerTime]) {
+        guard let defaults else { return }
+        let names = prayers.filter { $0.type.isObligatory }
+            .map { $0.type.localizedDisplayName }
+        defaults.set(names, forKey: "prayerNames")
+    }
+
+    // MARK: - Widget Reload
+
+    func reloadWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
     }
 }

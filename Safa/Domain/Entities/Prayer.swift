@@ -26,6 +26,11 @@ enum PrayerType: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Localized display name for user-facing surfaces (widgets, live activity, notifications)
+    var localizedDisplayName: String {
+        String(localized: String.LocalizationValue(displayName))
+    }
+
     var arabicName: String {
         switch self {
         case .fajr: return "الفجر"

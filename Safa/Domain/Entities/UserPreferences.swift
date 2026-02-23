@@ -11,6 +11,9 @@ struct UserPreferences: Codable, Hashable {
     var calculationMethod: CalculationMethod
     var madhab: Madhab
 
+    // MARK: - Language Settings
+    var appLanguageCode: String?
+
     // MARK: - Content Settings
     var selectedTranslation: String
     var quranTranslation: QuranTranslation
@@ -72,6 +75,7 @@ struct UserPreferences: Codable, Hashable {
         notificationsEnabled: Bool = AppDefaults.notificationsEnabled,
         hapticFeedbackEnabled: Bool = AppDefaults.hapticFeedbackEnabled,
         hasCompletedOnboarding: Bool = false,
+        appLanguageCode: String? = AppDefaults.appLanguageCode,
         selectedTranslation: String = AppDefaults.translationLanguage,
         quranTranslation: QuranTranslation = AppDefaults.quranTranslation,
         showArabicText: Bool = AppDefaults.showArabicText,
@@ -104,6 +108,7 @@ struct UserPreferences: Codable, Hashable {
         self.notificationsEnabled = notificationsEnabled
         self.hapticFeedbackEnabled = hapticFeedbackEnabled
         self.hasCompletedOnboarding = hasCompletedOnboarding
+        self.appLanguageCode = appLanguageCode
         self.selectedTranslation = selectedTranslation
         self.quranTranslation = quranTranslation
         self.showArabicText = showArabicText
@@ -136,6 +141,7 @@ struct UserPreferences: Codable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case calculationMethod, madhab
+        case appLanguageCode
         case selectedTranslation, quranTranslation, showArabicText, showTransliteration
         case notificationsEnabled, notificationEnabledPrayers
         case wudhuReminderEnabled, wudhuReminderMinutesBefore
@@ -154,6 +160,8 @@ struct UserPreferences: Codable, Hashable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         calculationMethod = try container.decode(CalculationMethod.self, forKey: .calculationMethod)
         madhab = try container.decode(Madhab.self, forKey: .madhab)
+        let rawAppLanguage = try container.decodeIfPresent(String.self, forKey: .appLanguageCode)
+        appLanguageCode = AppLanguageManager.sanitize(rawAppLanguage)
         selectedTranslation = try container.decode(String.self, forKey: .selectedTranslation)
         let rawQuranTranslation = try? container.decodeIfPresent(String.self, forKey: .quranTranslation)
         quranTranslation = rawQuranTranslation.flatMap { QuranTranslation(rawValue: $0) } ?? AppDefaults.quranTranslation

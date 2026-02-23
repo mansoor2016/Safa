@@ -84,6 +84,12 @@ final class PreferencesManager {
         await update(\.hapticFeedbackEnabled, to: enabled)
     }
 
+    /// Save app UI language override (nil = device default)
+    func saveAppLanguage(_ code: String?) async {
+        await update(\.appLanguageCode, to: code)
+        AppLanguageManager.shared.setLanguage(code)
+    }
+
     /// Save translation language
     func saveTranslation(_ language: String) async {
         await update(\.selectedTranslation, to: language)

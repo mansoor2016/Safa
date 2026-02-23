@@ -47,6 +47,7 @@ struct SafaApp: App {
     @State private var dependencies = Dependencies()
     @State private var router = AppRouter.shared
     @State private var themeManager = ThemeManager()
+    @State private var languageManager = AppLanguageManager.shared
     @State private var launchState: LaunchState = .loading
     @State private var qadaReminderPayload: RamadanQadaReminderService.ReminderPayload?
     @Environment(\.scenePhase) private var scenePhase
@@ -78,6 +79,7 @@ struct SafaApp: App {
             }
             .safaTheme(themeManager)
             .toastContainer()
+            .environment(\.locale, languageManager.currentLocale)
             .environment(dependencies)
             .environment(router)
             .environment(themeManager)

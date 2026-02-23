@@ -88,10 +88,10 @@ final class PrayerLiveActivityManager {
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
         let prayerInfos = prayers
             .filter { $0.type.isObligatory }
-            .map { PrayerInfo(name: $0.type.displayName, time: $0.time) }
+            .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
 
         await updateActivity(
-            prayerName: next.type.displayName,
+            prayerName: next.type.localizedDisplayName,
             prayerTime: next.time,
             hijriDate: hijri,
             locationName: location

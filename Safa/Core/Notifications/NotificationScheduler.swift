@@ -132,6 +132,8 @@ final class NotificationScheduler {
 
                 for prayer in toSchedule {
                     let content = UNMutableNotificationContent()
+                    // NOTE: Localization keys are "Fajr Time", "Dhuhr Time", etc. — stable because
+                    // PrayerType.displayName is a fixed English enum value. See Localizable.xcstrings.
                     content.title = String(localized: "\(prayer.type.displayName) Time")
                     content.body = String(localized: "It's time for \(prayer.type.displayName) prayer")
                     content.sound = .default

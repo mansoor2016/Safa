@@ -13,7 +13,10 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var selectedMethod: CalculationMethod = AppDefaults.calculationMethod
     @State private var selectedMadhab: Madhab = AppDefaults.madhab
+    /// Quran translation content language (location-inferred, e.g. "English", "Bahasa Indonesia")
     @State private var selectedLanguage: String = AppDefaults.translationLanguage
+    /// App UI language override (nil = device default). Distinct from Quran translation above.
+    @State private var selectedAppLanguage: SupportedAppLanguage?
     @State private var notificationsEnabled = AppDefaults.notificationsEnabled
     @State private var adhanEnabled = false
     @State private var selectedAdhan: AdhanSound = .misharyAlafasy
@@ -415,6 +418,11 @@ struct OnboardingView: View {
                     }
                     summaryItem(icon: "clock", value: selectedMethod.displayName)
                     summaryItem(icon: "person", value: selectedMadhab.displayName)
+                    summaryItem(
+                        icon: "globe",
+                        value: selectedAppLanguage?.nativeName
+                            ?? AppLanguageManager.deviceLanguageDisplayName
+                    )
                     if notificationsEnabled {
                         summaryItem(icon: "bell", value: "Notifications On")
                         if adhanEnabled {
@@ -474,6 +482,19 @@ struct OnboardingView: View {
                         )
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
+                }
+
+                Section {
+                    Picker("Language", selection: $selectedAppLanguage) {
+                        Text("Device Default").tag(SupportedAppLanguage?.none)
+                        ForEach(SupportedAppLanguage.allCases) { lang in
+                            Text(lang.nativeName).tag(SupportedAppLanguage?.some(lang))
+                        }
+                    }
+                } header: {
+                    Text("Language")
+                } footer: {
+                    Text("Translations are in beta and may be incomplete. English is used where unavailable.")
                 }
 
                 Section("Quran") {
@@ -658,6 +679,7 @@ struct OnboardingView: View {
             prefs.calculationMethod = selectedMethod
             prefs.madhab = selectedMadhab
             prefs.selectedTranslation = selectedLanguage
+            prefs.appLanguageCode = selectedAppLanguage?.rawValue
             prefs.notificationsEnabled = notificationsEnabled
             prefs.adhanEnabled = adhanEnabled && notificationsEnabled
             prefs.selectedAdhan = selectedAdhan.rawValue
@@ -672,6 +694,8 @@ struct OnboardingView: View {
             }
 
             try? await dependencies.userRepository.updatePreferences(prefs)
+
+            AppLanguageManager.shared.setLanguage(selectedAppLanguage?.rawValue)
 
             if notificationsEnabled {
                 _ = await NotificationScheduler.shared.requestAuthorization()

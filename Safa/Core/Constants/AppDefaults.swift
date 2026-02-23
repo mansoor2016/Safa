@@ -18,6 +18,9 @@ enum AppDefaults {
 
     // MARK: - Language & Content
 
+    /// In-app language override (nil = follow device setting)
+    static let appLanguageCode: String? = nil
+
     /// Default translation language (region-inferred, used by recommendation sheet)
     static let translationLanguage: String = "English"
 
