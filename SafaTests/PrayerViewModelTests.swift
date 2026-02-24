@@ -549,6 +549,54 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertTrue(prefs.smartAdhanEnabled)
     }
 
+    // MARK: - Prayer Streak Threshold Tests
+
+    func test_prayerStreak_firesAtThreeLoggedPrayers() async {
+        // Set up prayer times in the past so logging is valid
+        let prayers = createMockPrayersWithPast()
+        mockPrayerRepository.prayersToReturn = prayers
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5, longitude: -0.1)
+        mockLocationService.coordinatesToReturn = Coordinates(latitude: 51.5, longitude: -0.1)
+
+        await sut.loadPrayerTimes()
+        mockUserRepository.recordStreakCalls.removeAll()
+
+        // Log 3 obligatory prayers (fajr, dhuhr are in the past per createMockPrayersWithPast)
+        await sut.logPrayer(.fajr)
+        await sut.logPrayer(.dhuhr)
+
+        // After 2 prayers, streak should NOT have fired
+        let callsAfterTwo = mockUserRepository.recordStreakCalls.filter { $0 == .prayer }
+        XCTAssertEqual(callsAfterTwo.count, 0, "Streak should not fire with only 2 prayers logged")
+
+        // Log 3rd prayer — need one more past prayer. Use sunrise time trick:
+        // asr is in the future in createMockPrayersWithPast, so we need to set up
+        // a schedule where 3 prayers are in the past
+        // Actually fajr + sunrise (not obligatory) + dhuhr are past. Only 2 obligatory past.
+        // Let me log a prayer that's in the future — logPrayer checks todayPrayers.contains, not isPast
+        await sut.logPrayer(.asr)
+
+        let callsAfterThree = mockUserRepository.recordStreakCalls.filter { $0 == .prayer }
+        XCTAssertTrue(callsAfterThree.count > 0, "Streak should fire once 3 obligatory prayers are logged")
+    }
+
+    func test_prayerStreak_doesNotFireAtTwoPrayers() async {
+        let prayers = createMockPrayersWithPast()
+        mockPrayerRepository.prayersToReturn = prayers
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5, longitude: -0.1)
+        mockLocationService.coordinatesToReturn = Coordinates(latitude: 51.5, longitude: -0.1)
+
+        await sut.loadPrayerTimes()
+        mockUserRepository.recordStreakCalls.removeAll()
+
+        // Log only 2 obligatory prayers
+        await sut.logPrayer(.fajr)
+        await sut.logPrayer(.dhuhr)
+
+        let prayerStreakCalls = mockUserRepository.recordStreakCalls.filter { $0 == .prayer }
+        XCTAssertEqual(prayerStreakCalls.count, 0, "Streak should not fire with only 2 prayers logged")
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
@@ -689,7 +737,11 @@ final class PrayerTestMockUserRepository: UserRepositoryProtocol {
 
     nonisolated func updateStreak(_ streak: Streak) async throws {}
 
-    nonisolated func recordStreakActivity(type: StreakType) async throws {}
+    var recordStreakCalls: [StreakType] = []
+
+    nonisolated func recordStreakActivity(type: StreakType) async throws {
+        await MainActor.run { recordStreakCalls.append(type) }
+    }
 
     nonisolated func getPreference<T: Codable>(key: String) async throws -> T? {
         return nil
@@ -712,4 +764,117 @@ final class PrayerTestMockUserRepository: UserRepositoryProtocol {
     nonisolated func useStreakFreeze() async throws {}
 
     nonisolated func awardStreakFreeze() async throws {}
+}
+
+// MARK: - isPrayerOnTime Tests
+
+/// Tests for PrayerViewModel.isPrayerOnTime — verifies Islamic prayer window logic.
+/// Each prayer is on-time between its start and the next prayer's start.
+final class IsPrayerOnTimeTests: XCTestCase {
+
+    private var schedule: [PrayerTime]!
+    private let calendar = Calendar.current
+
+    override func setUp() {
+        super.setUp()
+        let today = calendar.startOfDay(for: Date())
+        schedule = [
+            PrayerTime(type: .fajr, time: calendar.date(bySettingHour: 5, minute: 30, second: 0, of: today)!),
+            PrayerTime(type: .sunrise, time: calendar.date(bySettingHour: 6, minute: 45, second: 0, of: today)!),
+            PrayerTime(type: .dhuhr, time: calendar.date(bySettingHour: 12, minute: 15, second: 0, of: today)!),
+            PrayerTime(type: .asr, time: calendar.date(bySettingHour: 15, minute: 45, second: 0, of: today)!),
+            PrayerTime(type: .maghrib, time: calendar.date(bySettingHour: 18, minute: 0, second: 0, of: today)!),
+            PrayerTime(type: .isha, time: calendar.date(bySettingHour: 20, minute: 0, second: 0, of: today)!)
+        ]
+    }
+
+    override func tearDown() {
+        schedule = nil
+        super.tearDown()
+    }
+
+    private func time(hour: Int, minute: Int) -> Date {
+        let today = calendar.startOfDay(for: Date())
+        return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: today)!
+    }
+
+    // MARK: - Fajr: on-time from 05:30 until Sunrise (06:45)
+
+    func test_fajr_duringWindow_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.fajr, at: time(hour: 6, minute: 0), schedule: schedule))
+    }
+
+    func test_fajr_afterSunrise_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.fajr, at: time(hour: 7, minute: 0), schedule: schedule))
+    }
+
+    func test_fajr_beforeFajrTime_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.fajr, at: time(hour: 5, minute: 0), schedule: schedule))
+    }
+
+    func test_fajr_exactStart_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.fajr, at: time(hour: 5, minute: 30), schedule: schedule))
+    }
+
+    func test_fajr_exactSunrise_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.fajr, at: time(hour: 6, minute: 45), schedule: schedule))
+    }
+
+    // MARK: - Dhuhr: on-time from 12:15 until Asr (15:45)
+
+    func test_dhuhr_duringWindow_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.dhuhr, at: time(hour: 14, minute: 0), schedule: schedule))
+    }
+
+    func test_dhuhr_afterAsr_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.dhuhr, at: time(hour: 16, minute: 0), schedule: schedule))
+    }
+
+    // MARK: - Asr: on-time from 15:45 until Maghrib (18:00)
+
+    func test_asr_duringWindow_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.asr, at: time(hour: 16, minute: 30), schedule: schedule),
+                       "Asr logged at 16:30 (before Maghrib 18:00) should be on-time")
+    }
+
+    func test_asr_afterMaghrib_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.asr, at: time(hour: 19, minute: 0), schedule: schedule))
+    }
+
+    // MARK: - Maghrib: on-time from 18:00 until Isha (20:00)
+
+    func test_maghrib_duringWindow_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.maghrib, at: time(hour: 19, minute: 0), schedule: schedule))
+    }
+
+    func test_maghrib_afterIsha_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.maghrib, at: time(hour: 21, minute: 0), schedule: schedule))
+    }
+
+    // MARK: - Isha: on-time from 20:00 until end of day
+
+    func test_isha_duringWindow_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.isha, at: time(hour: 23, minute: 0), schedule: schedule))
+    }
+
+    func test_isha_exactStart_isOnTime() {
+        XCTAssertTrue(PrayerViewModel.isPrayerOnTime(.isha, at: time(hour: 20, minute: 0), schedule: schedule))
+    }
+
+    func test_isha_beforeIshaTime_isLate() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.isha, at: time(hour: 19, minute: 30), schedule: schedule))
+    }
+
+    // MARK: - Edge: sunrise is not obligatory
+
+    func test_sunrise_alwaysFalse() {
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.sunrise, at: time(hour: 6, minute: 50), schedule: schedule))
+    }
+
+    // MARK: - Edge: prayer not in schedule
+
+    func test_missingPrayerInSchedule_returnsFalse() {
+        let partialSchedule = [PrayerTime(type: .fajr, time: time(hour: 5, minute: 30))]
+        XCTAssertFalse(PrayerViewModel.isPrayerOnTime(.dhuhr, at: time(hour: 12, minute: 30), schedule: partialSchedule))
+    }
 }

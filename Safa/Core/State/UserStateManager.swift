@@ -59,6 +59,8 @@ final class UserStateManager {
     @discardableResult
     func awardHasanat(_ award: HasanatAward) async -> Bool {
         do {
+            let previousLevel = userStats.currentLevel
+
             // Check for Ramadan multiplier
             let points = HijriDateConverter.shared.isRamadan() ? award.points * 2 : award.points
             let newTotal = try await userRepository.addHasanat(points)
@@ -69,6 +71,16 @@ final class UserStateManager {
 
             // Record daily hasanat for progress dashboard
             HasanatTracker.recordDailyPoints(points)
+
+            // Congratulate on level-up
+            if userStats.currentLevel > previousLevel {
+                let title = UserStats.levelTitle(for: userStats.currentLevel)
+                ToastService.shared.show(Toast(
+                    message: "Level \(userStats.currentLevel) — \(title)!",
+                    type: .success,
+                    duration: 3.5
+                ))
+            }
 
             return true
         } catch {

@@ -1,8 +1,9 @@
 // MARK: - ProgressDashboardViewModelTests.swift
-// PURPOSE: Unit tests for ProgressDashboardViewModel with real data sources
+// PURPOSE: Unit tests for ProgressDashboardViewModel — prayer consistency focus
 // DEPENDENCIES: XCTest, Safa
 
 import XCTest
+import CoreLocation
 @testable import Safa
 
 @MainActor
@@ -14,6 +15,9 @@ final class ProgressDashboardViewModelTests: XCTestCase {
     private var mockPrayerRepo: ConfigurableMockPrayerRepository!
     private var mockQuranRepo: ConfigurableMockQuranRepository!
     private var mockLearningRepo: ConfigurableMockLearningRepository!
+    private var mockLocationService: MockLocationService!
+    private var fixedDate: Date!
+    private var fixedCalendar: Calendar!
 
     override func setUp() {
         super.setUp()
@@ -22,13 +26,22 @@ final class ProgressDashboardViewModelTests: XCTestCase {
         mockPrayerRepo = ConfigurableMockPrayerRepository()
         mockQuranRepo = ConfigurableMockQuranRepository()
         mockLearningRepo = ConfigurableMockLearningRepository()
+        mockLocationService = MockLocationService()
 
-        sut = ProgressDashboardViewModel(
-            userState: userState,
-            prayerRepository: mockPrayerRepo,
-            quranRepository: mockQuranRepo,
-            learningRepository: mockLearningRepo
-        )
+        // Fixed date: Wednesday Feb 19, 2025 at 14:00
+        fixedCalendar = Calendar(identifier: .gregorian)
+        fixedCalendar.firstWeekday = 2 // Monday start
+        fixedCalendar.timeZone = TimeZone(identifier: "UTC")!
+
+        var components = DateComponents()
+        components.year = 2025
+        components.month = 2
+        components.day = 19
+        components.hour = 14
+        components.minute = 0
+        fixedDate = fixedCalendar.date(from: components)!
+
+        sut = makeViewModel()
     }
 
     override func tearDown() {
@@ -38,13 +51,32 @@ final class ProgressDashboardViewModelTests: XCTestCase {
         mockPrayerRepo = nil
         mockQuranRepo = nil
         mockLearningRepo = nil
+        mockLocationService = nil
+        fixedDate = nil
+        fixedCalendar = nil
         super.tearDown()
     }
 
-    // MARK: - Load Tests
+    private func makeViewModel(
+        now: Date? = nil,
+        calendar: Calendar? = nil,
+        locationService: MockLocationService? = nil
+    ) -> ProgressDashboardViewModel {
+        ProgressDashboardViewModel(
+            userState: userState,
+            prayerRepository: mockPrayerRepo,
+            quranRepository: mockQuranRepo,
+            learningRepository: mockLearningRepo,
+            locationService: locationService ?? mockLocationService,
+            preferencesManager: nil,
+            now: { now ?? self.fixedDate },
+            calendar: calendar ?? fixedCalendar
+        )
+    }
+
+    // MARK: - Preserved Tests: Load
 
     func test_load_setsStatsFromUserState() async {
-        // Configure mock repo so loadUserData() returns desired values
         mockUserRepo.statsToReturn = UserStats(
             totalHasanat: 500,
             currentLevel: 3,
@@ -103,15 +135,12 @@ final class ProgressDashboardViewModelTests: XCTestCase {
         XCTAssertEqual(sut.weeklyData.count, 7)
     }
 
-    // MARK: - Monthly Prayer Data Tests
+    // MARK: - Preserved Tests: Monthly Prayer Data
 
     func test_monthlyPrayerData_countsOnlyObligatoryPrayers() async {
-        let today = Date()
-        let calendar = Calendar.current
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-
-        // Add obligatory prayers + sunrise (non-obligatory) for day 1
+        let startOfMonth = fixedCalendar.date(from: fixedCalendar.dateComponents([.year, .month], from: fixedDate))!
         let day1 = startOfMonth
+
         mockPrayerRepo.logsToReturn = [
             PrayerLog(prayerType: .fajr, date: day1),
             PrayerLog(prayerType: .dhuhr, date: day1),
@@ -120,18 +149,14 @@ final class ProgressDashboardViewModelTests: XCTestCase {
 
         await sut.load()
 
-        // Day 1 should only count 2 obligatory prayers (fajr + dhuhr), not sunrise
         let day1Data = sut.monthlyPrayerData.first { $0.day == 1 }
         XCTAssertEqual(day1Data?.count, 2)
     }
 
     func test_monthlyPrayerData_capsAt5() async {
-        let today = Date()
-        let calendar = Calendar.current
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+        let startOfMonth = fixedCalendar.date(from: fixedCalendar.dateComponents([.year, .month], from: fixedDate))!
         let day1 = startOfMonth
 
-        // Simulate 6 different prayer types logged (impossible in practice, but tests the cap)
         mockPrayerRepo.logsToReturn = [
             PrayerLog(prayerType: .fajr, date: day1),
             PrayerLog(prayerType: .dhuhr, date: day1),
@@ -149,31 +174,26 @@ final class ProgressDashboardViewModelTests: XCTestCase {
     func test_monthlyPrayerData_hasCorrectDayCount() async {
         await sut.load()
 
-        let calendar = Calendar.current
-        let daysInMonth = calendar.range(of: .day, in: .month, for: Date())?.count ?? 30
+        let daysInMonth = fixedCalendar.range(of: .day, in: .month, for: fixedDate)?.count ?? 30
         XCTAssertEqual(sut.monthlyPrayerData.count, daysInMonth)
     }
 
-    // MARK: - Level Progress Tests
+    // MARK: - Preserved Tests: Level Progress
 
     func test_levelProgress_computation() async {
         sut.userStats = UserStats(totalHasanat: 1500, currentLevel: 5)
-        // Level 5: 1000, Level 6: 2000 → progress = 500/1000 = 0.5
         XCTAssertEqual(sut.levelProgress, 0.5, accuracy: 0.01)
     }
 
     func test_hasanatToNextLevel_computation() async {
         sut.userStats = UserStats(totalHasanat: 1500, currentLevel: 5)
-        // Level 6: 2000, so 500 remaining
         XCTAssertEqual(sut.hasanatToNextLevel, 500)
     }
 
     func test_levelProgress_maxLevel() async {
-        sut.userStats = UserStats(totalHasanat: 25000, currentLevel: 10)
-        // Level 10 is max — should not crash and return a valid value
+        sut.userStats = UserStats(totalHasanat: 800_000, currentLevel: 20)
         let progress = sut.levelProgress
-        XCTAssertGreaterThanOrEqual(progress, 0)
-        XCTAssertLessThanOrEqual(progress, 1.0)
+        XCTAssertEqual(progress, 1.0, "Max level should show full progress ring")
     }
 
     func test_levelProgress_atLevelStart_isZero() async {
@@ -186,12 +206,228 @@ final class ProgressDashboardViewModelTests: XCTestCase {
         XCTAssertEqual(sut.hasanatToNextLevel, 0)
     }
 
-    // MARK: - Loading State
-
     func test_load_setsIsLoadingDuringLoad() async {
-        // After load completes, isLoading should be false
         await sut.load()
         XCTAssertFalse(sut.isLoading)
+    }
+
+    // MARK: - Today Status Tests
+
+    func test_todayStatus_noLocation_allNeutral() async {
+        // No coordinates = no schedule
+        let noLocationService = MockLocationService()
+        noLocationService.coordinatesToReturn = nil
+        noLocationService.locationToReturn = nil
+        sut = makeViewModel(locationService: noLocationService)
+
+        mockPrayerRepo.logsToReturn = []
+
+        await sut.load()
+
+        // All 5 prayers should be present, none classified as missed
+        XCTAssertEqual(sut.todayPrayerStatuses.count, 5)
+        let missed = sut.todayPrayerStatuses.filter(\.isMissed)
+        XCTAssertEqual(missed.count, 0, "Without location, unlogged prayers should not be classified as missed")
+    }
+
+    func test_todayStatus_noLocation_todayScheduleAvailableFalse() async {
+        let noLocationService = MockLocationService()
+        noLocationService.coordinatesToReturn = nil
+        noLocationService.locationToReturn = nil
+        sut = makeViewModel(locationService: noLocationService)
+
+        await sut.load()
+
+        XCTAssertFalse(sut.todayScheduleAvailable)
+    }
+
+    func test_todayStatus_loggedPrayersShowAsLogged() async {
+        let today = fixedCalendar.startOfDay(for: fixedDate)
+        mockPrayerRepo.logsToReturn = [
+            PrayerLog(prayerType: .fajr, date: today, isOnTime: true),
+            PrayerLog(prayerType: .dhuhr, date: today, isOnTime: false)
+        ]
+
+        await sut.load()
+
+        let fajr = sut.todayPrayerStatuses.first { $0.prayerType == .fajr }
+        let dhuhr = sut.todayPrayerStatuses.first { $0.prayerType == .dhuhr }
+        XCTAssertTrue(fajr?.isLogged ?? false)
+        XCTAssertTrue(fajr?.isOnTime ?? false)
+        XCTAssertTrue(dhuhr?.isLogged ?? false)
+        XCTAssertFalse(dhuhr?.isOnTime ?? true)
+    }
+
+    // MARK: - Elapsed Opportunities Tests
+
+    func test_elapsedOpportunities_mondayMorning() async {
+        // Monday at 08:00 — only 1 elapsed day = 5 opportunities
+        var components = DateComponents()
+        components.year = 2025
+        components.month = 2
+        components.day = 17 // Monday
+        components.hour = 8
+        let monday = fixedCalendar.date(from: components)!
+        sut = makeViewModel(now: monday)
+
+        await sut.load()
+
+        let trend = sut.consistencyTrend
+        XCTAssertNotNil(trend)
+        XCTAssertEqual(trend?.thisWeekOpportunities, 5, "Monday morning should have 5 opportunities (1 day × 5)")
+    }
+
+    // MARK: - Consistency Trend Tests
+
+    func test_consistencyTrend_improving() async {
+        // Last week: 15/35 logged, this week so far: 12/15 (3 days elapsed)
+        let thisWeekStart = startOfWeek(for: fixedDate)
+        let lastWeekStart = fixedCalendar.date(byAdding: .day, value: -7, to: thisWeekStart)!
+
+        var logs: [PrayerLog] = []
+
+        // Last week: 3 prayers per day × 5 days = 15 total
+        for dayOffset in 0..<5 {
+            let date = fixedCalendar.date(byAdding: .day, value: dayOffset, to: lastWeekStart)!
+            for prayerType in [PrayerType.fajr, .dhuhr, .asr] {
+                logs.append(PrayerLog(prayerType: prayerType, date: date, isOnTime: true))
+            }
+        }
+
+        // This week: 4 prayers per day × 3 days (Mon-Wed) = 12 total
+        for dayOffset in 0..<3 {
+            let date = fixedCalendar.date(byAdding: .day, value: dayOffset, to: thisWeekStart)!
+            for prayerType in [PrayerType.fajr, .dhuhr, .asr, .maghrib] {
+                logs.append(PrayerLog(prayerType: prayerType, date: date, isOnTime: true))
+            }
+        }
+
+        mockPrayerRepo.logsToReturn = logs
+        await sut.load()
+
+        let trend = sut.consistencyTrend
+        XCTAssertNotNil(trend)
+        XCTAssertTrue(trend!.hasBaseline)
+        // This week: 12/15 = 80%, last week: 15/35 ≈ 43%
+        XCTAssertGreaterThan(trend!.delta, 0, "This week should show improvement over last week")
+    }
+
+    func test_consistencyTrend_firstWeek_noBaseline() async {
+        // Only this week's logs, no last-week data
+        let thisWeekStart = startOfWeek(for: fixedDate)
+        let date = fixedCalendar.date(byAdding: .day, value: 1, to: thisWeekStart)!
+        mockPrayerRepo.logsToReturn = [
+            PrayerLog(prayerType: .fajr, date: date, isOnTime: true)
+        ]
+
+        await sut.load()
+
+        let trend = sut.consistencyTrend
+        XCTAssertNotNil(trend)
+        XCTAssertFalse(trend!.hasBaseline, "With no last-week data, hasBaseline should be false")
+    }
+
+    func test_consistencyTrend_onTimeRate_excludesMakeup() async {
+        let thisWeekStart = startOfWeek(for: fixedDate)
+        let day1 = thisWeekStart
+
+        mockPrayerRepo.logsToReturn = [
+            PrayerLog(prayerType: .fajr, date: day1, isOnTime: true, isMakeup: false),
+            PrayerLog(prayerType: .dhuhr, date: day1, isOnTime: true, isMakeup: true), // makeup — should not count as on-time
+            PrayerLog(prayerType: .asr, date: day1, isOnTime: true, isMakeup: false)
+        ]
+
+        await sut.load()
+
+        let trend = sut.consistencyTrend
+        XCTAssertNotNil(trend)
+        // 3 logged on Monday, but only 2 on-time (makeup excluded)
+        // Elapsed days = Mon-Wed = 3 days = 15 opportunities
+        // onTimeRate = 2/15
+        XCTAssertEqual(trend!.onTimeRate, 2.0 / Double(trend!.thisWeekOpportunities), accuracy: 0.01)
+    }
+
+    // MARK: - Weekly Grid Tests
+
+    func test_weeklyGrid_dedupesByPrayerType() async {
+        let thisWeekStart = startOfWeek(for: fixedDate)
+
+        // Two fajr logs for the same day
+        mockPrayerRepo.logsToReturn = [
+            PrayerLog(prayerType: .fajr, date: thisWeekStart, isOnTime: true),
+            PrayerLog(prayerType: .fajr, date: thisWeekStart, isOnTime: false)
+        ]
+
+        await sut.load()
+
+        let firstDay = sut.weeklyPrayerGrid.first
+        XCTAssertNotNil(firstDay)
+        XCTAssertEqual(firstDay!.loggedCount, 1, "Duplicate fajr logs same day should dedup to 1")
+    }
+
+    func test_weeklyGrid_has7Days() async {
+        await sut.load()
+
+        XCTAssertEqual(sut.weeklyPrayerGrid.count, 7)
+    }
+
+    func test_weekBoundary_usesCalendarFirstWeekday() async {
+        // Calendar with Monday start
+        let firstDay = sut.weeklyPrayerGrid.first
+        await sut.load()
+
+        let gridFirstDay = sut.weeklyPrayerGrid.first
+        XCTAssertNotNil(gridFirstDay)
+
+        // The first day of the grid should be a Monday (weekday 2 in gregorian)
+        let weekday = fixedCalendar.component(.weekday, from: gridFirstDay!.date)
+        XCTAssertEqual(weekday, 2, "Grid should start on Monday when calendar.firstWeekday = 2")
+    }
+
+    // MARK: - Midnight Boundary Test
+
+    func test_todayStatus_midnightBoundary() async {
+        // At 00:01 — should attribute to the correct day
+        var components = DateComponents()
+        components.year = 2025
+        components.month = 2
+        components.day = 19
+        components.hour = 0
+        components.minute = 1
+        let midnight = fixedCalendar.date(from: components)!
+
+        let startOfDay = fixedCalendar.startOfDay(for: midnight)
+        mockPrayerRepo.logsToReturn = [
+            PrayerLog(prayerType: .fajr, date: startOfDay, isOnTime: true)
+        ]
+
+        sut = makeViewModel(now: midnight)
+        await sut.load()
+
+        let fajr = sut.todayPrayerStatuses.first { $0.prayerType == .fajr }
+        XCTAssertTrue(fajr?.isLogged ?? false, "Fajr logged at start of day should show as logged")
+    }
+
+    // MARK: - Prayer Streak Tests
+
+    func test_prayerStreak_extractedFromStreaks() async {
+        mockUserRepo.streaksToReturn = [
+            Streak(type: .daily, currentCount: 10, longestCount: 15),
+            Streak(type: .prayer, currentCount: 7, longestCount: 12)
+        ]
+
+        await sut.load()
+
+        XCTAssertNotNil(sut.prayerStreak)
+        XCTAssertEqual(sut.prayerStreak?.currentCount, 7)
+        XCTAssertEqual(sut.prayerStreak?.type, .prayer)
+    }
+
+    // MARK: - Helpers
+
+    private func startOfWeek(for date: Date) -> Date {
+        let components = fixedCalendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return fixedCalendar.date(from: components) ?? fixedCalendar.startOfDay(for: date)
     }
 }
 
@@ -199,8 +435,9 @@ final class ProgressDashboardViewModelTests: XCTestCase {
 
 private final class ConfigurableMockPrayerRepository: PrayerRepositoryProtocol {
     var logsToReturn: [PrayerLog] = []
+    var prayerTimesToReturn: [PrayerTime] = []
 
-    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) async throws -> [PrayerTime] { [] }
+    func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab?) async throws -> [PrayerTime] { prayerTimesToReturn }
     func logPrayer(_ prayer: PrayerType, for date: Date, at time: Date, isOnTime: Bool) async throws {}
     func deletePrayerLog(_ log: PrayerLog) async throws {}
     func getPrayerLogs(for date: Date) async throws -> [PrayerLog] { logsToReturn }

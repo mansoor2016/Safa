@@ -106,19 +106,33 @@ struct UserStats: Codable, Hashable {
         case totalPrayersLogged, totalAyahsRead, totalTasbeehCount, streakFreezes
     }
 
-    /// Calculate level based on total Hasanat
+    static let maxLevel = 20
+
+    /// Calculate level based on total Hasanat.
+    /// Progression: ~6 months to level 10, ~2 years to level 15, ~5 years to level 20.
+    /// Based on ~100 hasanat/day for a consistent user.
     static func calculateLevel(from hasanat: Int) -> Int {
         switch hasanat {
-        case 0..<100: return 1      // Beginner
-        case 100..<300: return 2    // Seeker
-        case 300..<600: return 3    // Learner
-        case 600..<1000: return 4   // Dedicated
-        case 1000..<2000: return 5  // Consistent
-        case 2000..<4000: return 6  // Devoted
-        case 4000..<7000: return 7  // Steadfast
-        case 7000..<12000: return 8 // Committed
-        case 12000..<20000: return 9 // Excellent
-        default: return 10          // Muhsin
+        case 0..<100: return 1          // Beginner
+        case 100..<300: return 2        // Seeker
+        case 300..<600: return 3        // Learner
+        case 600..<1_000: return 4     // Dedicated
+        case 1_000..<2_000: return 5   // Consistent
+        case 2_000..<4_000: return 6   // Devoted
+        case 4_000..<7_000: return 7   // Steadfast
+        case 7_000..<12_000: return 8  // Committed
+        case 12_000..<18_000: return 9 // Excellent
+        case 18_000..<25_000: return 10 // Muhsin
+        case 25_000..<35_000: return 11 // Sabir (Patient)
+        case 35_000..<50_000: return 12 // Shakir (Grateful)
+        case 50_000..<70_000: return 13 // Mukhlis (Sincere)
+        case 70_000..<95_000: return 14 // Muttaqi (Mindful)
+        case 95_000..<120_000: return 15 // Sadiq (Truthful)
+        case 120_000..<145_000: return 16 // Zahid (Detached)
+        case 145_000..<170_000: return 17 // Arif (Knowing)
+        case 170_000..<195_000: return 18 // Qani (Content)
+        case 195_000..<220_000: return 19 // Siddiq (Righteous)
+        default: return 20               // Muhsin al-Kamil
         }
     }
 
@@ -134,6 +148,16 @@ struct UserStats: Codable, Hashable {
         case 8: return "Committed"
         case 9: return "Excellent"
         case 10: return "Muhsin"
+        case 11: return "Sabir"
+        case 12: return "Shakir"
+        case 13: return "Mukhlis"
+        case 14: return "Muttaqi"
+        case 15: return "Sadiq"
+        case 16: return "Zahid"
+        case 17: return "Arif"
+        case 18: return "Qani"
+        case 19: return "Siddiq"
+        case 20: return "Muhsin al-Kamil"
         default: return "Beginner"
         }
     }
@@ -144,12 +168,22 @@ struct UserStats: Codable, Hashable {
         case 2: return 100
         case 3: return 300
         case 4: return 600
-        case 5: return 1000
-        case 6: return 2000
-        case 7: return 4000
-        case 8: return 7000
-        case 9: return 12000
-        case 10: return 20000
+        case 5: return 1_000
+        case 6: return 2_000
+        case 7: return 4_000
+        case 8: return 7_000
+        case 9: return 12_000
+        case 10: return 18_000
+        case 11: return 25_000
+        case 12: return 35_000
+        case 13: return 50_000
+        case 14: return 70_000
+        case 15: return 95_000
+        case 16: return 120_000
+        case 17: return 145_000
+        case 18: return 170_000
+        case 19: return 195_000
+        case 20: return 220_000
         default: return 0
         }
     }

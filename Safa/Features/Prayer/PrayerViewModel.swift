@@ -135,7 +135,7 @@ final class PrayerViewModel {
 
     func logPrayer(_ prayerType: PrayerType) async {
         guard !loggedPrayers.contains(prayerType) else { return }
-        guard let prayer = todayPrayers.first(where: { $0.type == prayerType }) else { return }
+        guard todayPrayers.contains(where: { $0.type == prayerType }) else { return }
 
         // Optimistic: update UI immediately
         loggedPrayers.insert(prayerType)
@@ -149,7 +149,7 @@ final class PrayerViewModel {
 
         // Persist
         do {
-            let isOnTime = abs(Date().timeIntervalSince(prayer.time)) < 30 * 60
+            let isOnTime = isPrayerOnTime(prayerType, at: Date())
             try await prayerRepository.logPrayer(
                 prayerType,
                 for: currentDate,
@@ -165,7 +165,11 @@ final class PrayerViewModel {
                 await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: userState)
             }
 
-            await userState.recordActivity(type: .prayer)
+            // Prayer streak requires at least 3/5 obligatory prayers logged today
+            let obligatoryLoggedCount = PrayerType.obligatoryPrayers.filter { loggedPrayers.contains($0) }.count
+            if obligatoryLoggedCount >= 3 {
+                await userState.recordActivity(type: .prayer)
+            }
 
             // Update Live Activity (next prayer context may have changed)
             updateLiveActivity()
@@ -228,13 +232,56 @@ final class PrayerViewModel {
         Task { [weak self] in
             guard let self else { return }
             do {
-                guard let prayer = todayPrayers.first(where: { $0.type == prayerType }) else { return }
-                let isOnTime = abs(Date().timeIntervalSince(prayer.time)) < 30 * 60
+                guard todayPrayers.contains(where: { $0.type == prayerType }) else { return }
+                let isOnTime = isPrayerOnTime(prayerType, at: Date())
                 try await prayerRepository.logPrayer(prayerType, for: currentDate, at: Date(), isOnTime: isOnTime)
             } catch {
                 // Silent — best-effort undo
             }
         }
+    }
+
+    /// Determines if a prayer is on time based on Islamic prayer windows.
+    /// A prayer is on-time if logged between its start and the next prayer's start:
+    ///   Fajr → until Sunrise, Dhuhr → until Asr, Asr → until Maghrib,
+    ///   Maghrib → until Isha, Isha → until next Fajr (approximated as end of day).
+    func isPrayerOnTime(_ prayerType: PrayerType, at time: Date) -> Bool {
+        Self.isPrayerOnTime(prayerType, at: time, schedule: todayPrayers)
+    }
+
+    /// Testable overload that accepts an explicit schedule.
+    static func isPrayerOnTime(_ prayerType: PrayerType, at time: Date, schedule: [PrayerTime]) -> Bool {
+        guard let prayerStart = schedule.first(where: { $0.type == prayerType })?.time else {
+            return false
+        }
+
+        // Must be at or after the prayer's start time
+        guard time >= prayerStart else { return false }
+
+        // Determine the end of this prayer's window (= start of next prayer)
+        let endTime: Date?
+        switch prayerType {
+        case .fajr:
+            endTime = schedule.first(where: { $0.type == .sunrise })?.time
+        case .dhuhr:
+            endTime = schedule.first(where: { $0.type == .asr })?.time
+        case .asr:
+            endTime = schedule.first(where: { $0.type == .maghrib })?.time
+        case .maghrib:
+            endTime = schedule.first(where: { $0.type == .isha })?.time
+        case .isha:
+            // Isha lasts until Fajr next day; approximate as end of calendar day
+            endTime = nil
+        case .sunrise:
+            // Sunrise is not an obligatory prayer
+            return false
+        }
+
+        if let endTime {
+            return time < endTime
+        }
+        // Isha: on-time for the rest of the day
+        return true
     }
 
     func reloadLoggedPrayers() async {

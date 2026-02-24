@@ -48,9 +48,12 @@ final class ModelIntegrationTests: XCTestCase {
             (7000, 8),
             (11999, 8),
             (12000, 9),
-            (19999, 9),
-            (20000, 10),
-            (100000, 10) // Max level
+            (17999, 9),
+            (18000, 10),
+            (24999, 10),
+            (25000, 11),
+            (220000, 20),
+            (1_000_000, 20) // Max level
         ]
 
         for (hasanat, expectedLevel) in thresholds {

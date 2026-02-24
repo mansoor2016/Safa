@@ -129,18 +129,21 @@ struct LogPrayerIntent: AppIntent {
 
         // Determine if on time by comparing to calculated prayer time
         let prayers = await IntentHelpers.getTodayPrayers()
-        let matchingPrayer = prayers.first(where: { $0.type == prayerType })
-        let isOnTime = matchingPrayer.map { abs(now.timeIntervalSince($0.time)) < 30 * 60 } ?? false
+        let isOnTime = PrayerViewModel.isPrayerOnTime(prayerType, at: now, schedule: prayers)
 
         do {
             try await deps.prayerRepository.logPrayer(prayerType, for: now, at: now, isOnTime: isOnTime)
             await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: deps.userState)
             await deps.userState.incrementPrayersLogged()
-            await deps.userState.recordActivity(type: .prayer)
 
-            // Check if all five obligatory prayers are now logged
+            // Check logged count for streak and all-five bonus
             let logs = try await deps.prayerRepository.getPrayerLogs(for: now)
             let loggedTypes = Set(logs.map { $0.prayerType })
+            let obligatoryLoggedCount = PrayerType.obligatoryPrayers.filter { loggedTypes.contains($0) }.count
+
+            if obligatoryLoggedCount >= 3 {
+                await deps.userState.recordActivity(type: .prayer)
+            }
             if PrayerType.obligatoryPrayers.allSatisfy({ loggedTypes.contains($0) }) {
                 await HasanatTracker.awardOnce(.prayerAllFive, key: "prayerAllFive", via: deps.userState)
             }

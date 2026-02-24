@@ -32,18 +32,38 @@ final class LevelProgressionTests: XCTestCase {
         XCTAssertEqual(UserStats.calculateLevel(from: 7000), 8)
         XCTAssertEqual(UserStats.calculateLevel(from: 11999), 8)
         XCTAssertEqual(UserStats.calculateLevel(from: 12000), 9)
-        XCTAssertEqual(UserStats.calculateLevel(from: 19999), 9)
-        XCTAssertEqual(UserStats.calculateLevel(from: 20000), 10)
+        XCTAssertEqual(UserStats.calculateLevel(from: 17999), 9)
+        XCTAssertEqual(UserStats.calculateLevel(from: 18000), 10)
+        XCTAssertEqual(UserStats.calculateLevel(from: 24999), 10)
+        XCTAssertEqual(UserStats.calculateLevel(from: 25000), 11)
+        XCTAssertEqual(UserStats.calculateLevel(from: 34999), 11)
+        XCTAssertEqual(UserStats.calculateLevel(from: 35000), 12)
+        XCTAssertEqual(UserStats.calculateLevel(from: 49999), 12)
+        XCTAssertEqual(UserStats.calculateLevel(from: 50000), 13)
+        XCTAssertEqual(UserStats.calculateLevel(from: 69999), 13)
+        XCTAssertEqual(UserStats.calculateLevel(from: 70000), 14)
+        XCTAssertEqual(UserStats.calculateLevel(from: 94999), 14)
+        XCTAssertEqual(UserStats.calculateLevel(from: 95000), 15)
+        XCTAssertEqual(UserStats.calculateLevel(from: 119999), 15)
+        XCTAssertEqual(UserStats.calculateLevel(from: 120000), 16)
+        XCTAssertEqual(UserStats.calculateLevel(from: 144999), 16)
+        XCTAssertEqual(UserStats.calculateLevel(from: 145000), 17)
+        XCTAssertEqual(UserStats.calculateLevel(from: 169999), 17)
+        XCTAssertEqual(UserStats.calculateLevel(from: 170000), 18)
+        XCTAssertEqual(UserStats.calculateLevel(from: 194999), 18)
+        XCTAssertEqual(UserStats.calculateLevel(from: 195000), 19)
+        XCTAssertEqual(UserStats.calculateLevel(from: 219999), 19)
+        XCTAssertEqual(UserStats.calculateLevel(from: 220000), 20)
     }
 
     func test_calculateLevel_veryLargeValue_capsAtMax() {
-        // Even with millions of hasanat, level should not exceed 10
-        XCTAssertEqual(UserStats.calculateLevel(from: 1_000_000), 10)
+        // Even with millions of hasanat, level should not exceed 20
+        XCTAssertEqual(UserStats.calculateLevel(from: 1_000_000), 20)
     }
 
     func test_calculateLevel_consistentWithHasanatForLevel() {
         // For each level, the minimum hasanat should produce that level
-        for level in 1...10 {
+        for level in 1...UserStats.maxLevel {
             let minHasanat = UserStats.hasanatForLevel(level)
             XCTAssertEqual(
                 UserStats.calculateLevel(from: minHasanat), level,
@@ -55,7 +75,9 @@ final class LevelProgressionTests: XCTestCase {
     func test_levelTitle_coversAllLevels() {
         // Verify no level returns an empty or "Beginner" fallback unexpectedly
         let expectedTitles = ["Beginner", "Seeker", "Learner", "Dedicated", "Consistent",
-                              "Devoted", "Steadfast", "Committed", "Excellent", "Muhsin"]
+                              "Devoted", "Steadfast", "Committed", "Excellent", "Muhsin",
+                              "Sabir", "Shakir", "Mukhlis", "Muttaqi", "Sadiq",
+                              "Zahid", "Arif", "Qani", "Siddiq", "Muhsin al-Kamil"]
         for (index, expected) in expectedTitles.enumerated() {
             XCTAssertEqual(UserStats.levelTitle(for: index + 1), expected)
         }
