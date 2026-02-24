@@ -162,7 +162,7 @@ struct HomeIntentResolver {
         // Ramadan (month 9)
         if islamicMonth == 9 {
             promotions.append(quran.with(subtitle: "Ramadan reading"))
-            promotions.append(duas.with(subtitle: "Ramadan supplications"))
+            promotions.append(duas.with(subtitle: "Daily supplications"))
         }
 
         // Dhul Hijjah first 10 days (month 12)
