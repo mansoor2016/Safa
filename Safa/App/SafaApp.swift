@@ -222,19 +222,23 @@ struct SafaApp: App {
         // Update widgets
         WidgetDataService.shared.writePrayerTimes(prayers)
 
-        // Update Live Activity with next obligatory prayer + schedule boundary updates
-        let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth)
-        if let next = prayers.first(where: { $0.time > Date() && $0.type.isObligatory }) {
+        // Update Live Activity with next obligatory prayer (grace-aware) + schedule boundary updates
+        let now = Date()
+        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth)
+        let obligatory = prayers.filter { $0.type.isObligatory }
+        let gracePrayer = obligatory.last { isPrayerTimeNow($0.time, at: now) }
+        let futurePrayer = obligatory.first { $0.time > now }
+        if let activePrayer = gracePrayer ?? futurePrayer {
             await PrayerLiveActivityManager.shared.updateActivity(
-                prayerName: next.type.displayName,
-                prayerTime: next.time,
+                prayerName: activePrayer.type.localizedDisplayName,
+                prayerTime: activePrayer.time,
                 hijriDate: hijri,
-                locationName: context.regionName
+                locationName: context.regionName,
+                isGrace: gracePrayer != nil
             )
         }
-        let prayerInfos = prayers
-            .filter { $0.type.isObligatory }
-            .map { PrayerInfo(name: $0.type.displayName, time: $0.time) }
+        let prayerInfos = obligatory
+            .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
         PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(
             prayers: prayerInfos,
             hijriDate: hijri,
