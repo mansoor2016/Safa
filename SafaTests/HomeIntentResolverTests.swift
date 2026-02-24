@@ -41,22 +41,22 @@ final class HomeIntentResolverTests: XCTestCase {
         return Streak(type: type, currentCount: count, longestCount: count, lastActivityDate: twoDaysAgo)
     }
 
-    // MARK: - Always Returns 4 Items
+    // MARK: - Always Returns 2 Items
 
-    func test_resolve_alwaysReturnsFourActions() {
+    func test_resolve_alwaysReturnsTwoActions() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10))
-        XCTAssertEqual(actions.count, 4)
+        XCTAssertEqual(actions.count, 2)
     }
 
-    func test_resolve_withAllInputs_returnsFourActions() {
+    func test_resolve_withAllInputs_returnsTwoActions() {
         let now = neutralDate(hour: 12, minute: 30)
         let actions = HomeIntentResolver.resolve(
             currentDate: now,
             nextPrayer: prayerTime(type: .dhuhr, at: neutralDate(hour: 12, minute: 45)),
             loggedPrayers: [.fajr],
-            streaks: [streakAtRisk(.quran, count: 10)]
+            streaks: [streakAtRisk(.dhikr, count: 10)]
         )
-        XCTAssertEqual(actions.count, 4)
+        XCTAssertEqual(actions.count, 2)
     }
 
     // MARK: - Tab Bar Actions Not in Default Grid
@@ -72,9 +72,10 @@ final class HomeIntentResolverTests: XCTestCase {
         }
     }
 
-    // MARK: - Prayer Proximity
+    // MARK: - Prayer Not in Quick Actions (Tab Bar Item)
 
-    func test_resolve_prayerWithin30Min_prayerIsFirst() {
+    func test_resolve_prayerNeverInGrid() {
+        // Prayer is always accessible via tab bar — never in quick actions, even when imminent
         let now = neutralDate(hour: 10, minute: 0)
         let prayerSoon = prayerTime(type: .dhuhr, at: neutralDate(hour: 10, minute: 20))
 
@@ -83,23 +84,9 @@ final class HomeIntentResolverTests: XCTestCase {
             nextPrayer: prayerSoon
         )
 
-        XCTAssertEqual(actions.first?.id, "prayer", "Prayer should be first when within 30 minutes")
-    }
-
-    func test_resolve_prayerFarAway_prayerNotInGrid() {
-        let now = neutralDate(hour: 7, minute: 0)
-        let prayerFar = prayerTime(type: .dhuhr, at: neutralDate(hour: 12, minute: 0))
-
-        let actions = HomeIntentResolver.resolve(
-            currentDate: now,
-            nextPrayer: prayerFar
-        )
-
-        // Prayer far away and accessible via tab — should not appear
         let ids = actions.map { $0.id }
-        XCTAssertFalse(ids.contains("prayer"))
-        // At 7am (morning), Dhikr should be first by time defaults
-        XCTAssertEqual(actions.first?.id, "dhikr")
+        XCTAssertFalse(ids.contains("prayer"), "Prayer should never appear — it's a tab bar item")
+        XCTAssertEqual(actions.count, 2, "Should return exactly 2 quick actions")
     }
 
     // MARK: - Morning Defaults (Neutral Day)
@@ -112,7 +99,7 @@ final class HomeIntentResolverTests: XCTestCase {
     func test_resolve_morning_defaultOrder() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 6))
         let ids = actions.map { $0.id }
-        XCTAssertEqual(ids, ["dhikr", "hadith", "askSafa", "qibla"])
+        XCTAssertEqual(ids, ["dhikr", "hadith"])
     }
 
     // MARK: - Afternoon Defaults (Neutral Day)
@@ -138,46 +125,83 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertEqual(actions.first?.id, "dhikr")
     }
 
-    // MARK: - Ask Safa in Grid
+    // MARK: - Non-Tab Features in Grid
 
-    func test_resolve_askSafaInDefaultGrid() {
+    func test_resolve_onlyNonTabFeaturesInGrid() {
         let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10))
+        let ids = Set(actions.map { $0.id })
+        let tabBarIds: Set<String> = ["prayer", "quran", "duas"]
+        XCTAssertTrue(ids.isDisjoint(with: tabBarIds), "Grid should only contain non-tab-bar features")
+    }
+
+    // MARK: - Ask Safa Availability
+
+    func test_resolve_aiUnavailable_askSafaExcluded() {
+        let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10), isAIAvailable: false)
         let ids = actions.map { $0.id }
-        XCTAssertTrue(ids.contains("askSafa"), "Ask Safa should appear in default grid")
+        XCTAssertFalse(ids.contains("askSafa"), "Ask Safa should not appear when AI is unavailable")
+    }
+
+    func test_resolve_aiAvailable_askSafaInPool() {
+        // Ask Safa is in the time-based pool when AI is available
+        let allCandidates = HomeIntentResolver.timeBasedDefaults(hour: 10)
+        XCTAssertTrue(allCandidates.contains { $0.id == "askSafa" }, "Ask Safa should be in candidate pool")
+    }
+
+    func test_resolve_aiUnavailable_askSafaFilteredFromDefaults() {
+        // Even though timeBasedDefaults includes askSafa, resolve filters it out
+        // At hour 10 defaults: [hadith, dhikr, askSafa, qibla]
+        // With AI unavailable and no streaks, top 2 = hadith + dhikr (askSafa skipped)
+        let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10), isAIAvailable: false)
+        let ids = actions.map { $0.id }
+        XCTAssertEqual(ids, ["hadith", "dhikr"])
+    }
+
+    func test_resolve_aiAvailable_sameDefaultsWhenHigherPriorityFills() {
+        // With AI available but no streaks at hour 10: hadith + dhikr still win (askSafa is 3rd)
+        let actions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 10), isAIAvailable: true)
+        let ids = actions.map { $0.id }
+        XCTAssertEqual(ids, ["hadith", "dhikr"], "Top 2 unchanged — askSafa is lower priority")
     }
 
     // MARK: - Streak At Risk
 
-    func test_resolve_quranStreakAtRisk_quranPromoted() {
+    func test_resolve_dhikrStreakAtRisk_dhikrPromoted() {
         let now = neutralDate(hour: 15)
-        let quranStreak = streakAtRisk(.quran, count: 7)
+        let dhikrStreak = streakAtRisk(.dhikr, count: 7)
 
         let actions = HomeIntentResolver.resolve(
             currentDate: now,
-            streaks: [quranStreak]
+            streaks: [dhikrStreak]
         )
 
         let ids = actions.map { $0.id }
-        XCTAssertTrue(ids.contains("quran"), "Quran should be promoted when streak is at risk")
-        let quranIndex = ids.firstIndex(of: "quran")!
-        XCTAssertLessThanOrEqual(quranIndex, 1, "At-risk streak action should appear near top")
+        XCTAssertTrue(ids.contains("dhikr"), "Dhikr should be promoted when streak is at risk")
+        let dhikrIndex = ids.firstIndex(of: "dhikr")!
+        XCTAssertLessThanOrEqual(dhikrIndex, 1, "At-risk streak action should appear near top")
     }
 
-    func test_resolve_prayerStreakAtRisk_prayerPromoted() {
+    func test_resolve_tabBarStreakAtRisk_notPromoted() {
+        // Prayer and Quran streaks at risk should NOT promote tab-bar items
         let now = neutralDate(hour: 10)
         let prayerStreak = streakAtRisk(.prayer, count: 5)
+        let quranStreak = streakAtRisk(.quran, count: 7)
 
-        let actions = HomeIntentResolver.resolve(
+        let baseActions = HomeIntentResolver.resolve(currentDate: now)
+        let baseIds = baseActions.map { $0.id }
+
+        let actionsWithStreaks = HomeIntentResolver.resolve(
             currentDate: now,
-            streaks: [prayerStreak]
+            streaks: [prayerStreak, quranStreak]
         )
+        let streakIds = actionsWithStreaks.map { $0.id }
 
-        XCTAssertTrue(actions.contains { $0.id == "prayer" }, "Prayer should be promoted when streak is at risk")
+        XCTAssertEqual(baseIds, streakIds, "Tab-bar streaks should not change the grid")
     }
 
     func test_resolve_lowStreakCount_notPromoted() {
         let twoDaysAgo = Calendar.current.date(byAdding: .day, value: -2, to: Date())!
-        let lowStreak = Streak(type: .quran, currentCount: 2, longestCount: 5, lastActivityDate: twoDaysAgo)
+        let lowStreak = Streak(type: .dhikr, currentCount: 2, longestCount: 5, lastActivityDate: twoDaysAgo)
 
         let baseActions = HomeIntentResolver.resolve(currentDate: neutralDate(hour: 6))
         let baseIds = baseActions.map { $0.id }
@@ -193,19 +217,16 @@ final class HomeIntentResolverTests: XCTestCase {
 
     // MARK: - Combined Scenarios
 
-    func test_resolve_prayerSoon_andStreakAtRisk_bothRepresented() {
+    func test_resolve_streakAtRisk_promoted() {
         let now = neutralDate(hour: 10, minute: 0)
-        let prayerSoon = prayerTime(type: .dhuhr, at: neutralDate(hour: 10, minute: 15))
         let dhikrStreak = streakAtRisk(.dhikr, count: 10)
 
         let actions = HomeIntentResolver.resolve(
             currentDate: now,
-            nextPrayer: prayerSoon,
             streaks: [dhikrStreak]
         )
 
         let ids = actions.map { $0.id }
-        XCTAssertEqual(ids[0], "prayer", "Prayer should be first when imminent")
         XCTAssertTrue(ids.contains("dhikr"), "Dhikr should be included (streak at risk)")
     }
 
@@ -213,13 +234,11 @@ final class HomeIntentResolverTests: XCTestCase {
 
     func test_resolve_noDuplicateActions() {
         let now = neutralDate(hour: 15)
-        let prayerSoon = prayerTime(type: .asr, at: neutralDate(hour: 15, minute: 10))
-        let prayerStreak = streakAtRisk(.prayer, count: 5)
+        let dhikrStreak = streakAtRisk(.dhikr, count: 5)
 
         let actions = HomeIntentResolver.resolve(
             currentDate: now,
-            nextPrayer: prayerSoon,
-            streaks: [prayerStreak]
+            streaks: [dhikrStreak]
         )
 
         let ids = actions.map { $0.id }
@@ -229,9 +248,9 @@ final class HomeIntentResolverTests: XCTestCase {
 
     // MARK: - Time-Based Defaults
 
-    func test_timeBasedDefaults_morningHasFourItems() {
+    func test_timeBasedDefaults_morningHasFullPool() {
         let defaults = HomeIntentResolver.timeBasedDefaults(hour: 7)
-        XCTAssertGreaterThanOrEqual(defaults.count, 4)
+        XCTAssertGreaterThanOrEqual(defaults.count, 2, "Pool should have enough candidates")
     }
 
     func test_timeBasedDefaults_midday_hadithFirst() {
@@ -241,36 +260,25 @@ final class HomeIntentResolverTests: XCTestCase {
 
     // MARK: - Seasonal: Ramadan (March 15, 2025 = Ramadan 15, Saturday)
 
-    func test_seasonal_ramadan_quranPromoted() {
-        // Ramadan midday — Quran should be promoted
+    func test_seasonal_ramadan_dhikrPromoted() {
+        // Ramadan midday — dhikr promoted, but Quran/Duas excluded (tab bar items)
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 10)
         let promotions = HomeIntentResolver.seasonalPromotions(for: ramadanDate)
         let ids = promotions.map { $0.id }
 
-        XCTAssertTrue(ids.contains("quran"), "Ramadan should promote Quran")
-        XCTAssertTrue(ids.contains("duas"), "Ramadan should promote Duas")
+        XCTAssertTrue(ids.contains("dhikr"), "Ramadan should promote Dhikr")
+        XCTAssertFalse(ids.contains("quran"), "Quran is a tab bar item — not in quick actions")
+        XCTAssertFalse(ids.contains("duas"), "Duas is a tab bar item — not in quick actions")
     }
 
-    func test_seasonal_ramadan_quranAppearsInResolvedGrid() {
-        // Ramadan afternoon (when time defaults would put Duas first)
+    func test_seasonal_ramadan_noTabBarItemsInGrid() {
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: ramadanDate)
         let ids = actions.map { $0.id }
 
-        XCTAssertTrue(ids.contains("quran"), "Resolved grid during Ramadan should include Quran")
-        XCTAssertTrue(ids.contains("duas"), "Resolved grid during Ramadan should include Duas")
-    }
-
-    func test_seasonal_ramadan_withPrayerSoon_prayerStillFirst() {
-        let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 14, minute: 50)
-        let prayer = prayerTime(type: .asr, at: dateOn(year: 2025, month: 3, day: 15, hour: 15, minute: 10))
-
-        let actions = HomeIntentResolver.resolve(
-            currentDate: ramadanDate,
-            nextPrayer: prayer
-        )
-
-        XCTAssertEqual(actions.first?.id, "prayer", "Prayer proximity still wins over Ramadan promotions")
+        XCTAssertFalse(ids.contains("quran"), "Quran should not be in grid — accessible via tab bar")
+        XCTAssertFalse(ids.contains("duas"), "Duas should not be in grid — accessible via tab bar")
+        XCTAssertTrue(ids.contains("dhikr"), "Dhikr should be in Ramadan grid")
     }
 
     // MARK: - Seasonal: Dhul Hijjah (June 1, 2025 = Dhul Hijjah 5, Sunday)
@@ -294,44 +302,43 @@ final class HomeIntentResolverTests: XCTestCase {
 
     // MARK: - Seasonal: Day of Arafah (June 5, 2025 = Dhul Hijjah 9, Thursday)
 
-    func test_seasonal_arafah_duasPromoted() {
+    func test_seasonal_arafah_dhikrPromoted() {
         let arafDate = dateOn(year: 2025, month: 6, day: 5, hour: 10)
         let promotions = HomeIntentResolver.seasonalPromotions(for: arafDate)
         let ids = promotions.map { $0.id }
 
-        // Dhul Hijjah → dhikr, Arafah → duas, Thursday → dhikr + duas
-        XCTAssertTrue(ids.contains("dhikr"), "Arafah should promote Dhikr (Dhul Hijjah)")
-        XCTAssertTrue(ids.contains("duas"), "Arafah should promote Duas")
+        XCTAssertTrue(ids.contains("dhikr"), "Arafah should promote Dhikr (Dhul Hijjah + sunnah fasting)")
+        XCTAssertFalse(ids.contains("duas"), "Duas is a tab bar item — not in quick actions")
     }
 
     // MARK: - Seasonal: Friday (Jan 17, 2025 = Rajab 17, Friday)
 
-    func test_seasonal_friday_quranPromoted() {
+    func test_seasonal_friday_hadithPromoted() {
         let friday = dateOn(year: 2025, month: 1, day: 17, hour: 10)
         let promotions = HomeIntentResolver.seasonalPromotions(for: friday)
         let ids = promotions.map { $0.id }
 
-        XCTAssertTrue(ids.contains("quran"), "Friday should promote Quran (Surah Al-Kahf)")
+        XCTAssertTrue(ids.contains("hadith"), "Friday should promote Hadith")
+        XCTAssertFalse(ids.contains("quran"), "Quran is a tab bar item — not in quick actions")
     }
 
-    func test_seasonal_friday_quranInResolvedGrid() {
-        // Friday afternoon
+    func test_seasonal_friday_hadithInResolvedGrid() {
         let friday = dateOn(year: 2025, month: 1, day: 17, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: friday)
         let ids = actions.map { $0.id }
 
-        XCTAssertTrue(ids.contains("quran"), "Friday afternoon should include Quran in grid")
+        XCTAssertTrue(ids.contains("hadith"), "Friday afternoon should include Hadith in grid")
     }
 
     // MARK: - Seasonal: Monday (Jan 13, 2025 = Rajab 13, Monday)
 
-    func test_seasonal_monday_dhikrAndDuasPromoted() {
+    func test_seasonal_monday_dhikrPromoted() {
         let monday = dateOn(year: 2025, month: 1, day: 13, hour: 10)
         let promotions = HomeIntentResolver.seasonalPromotions(for: monday)
         let ids = promotions.map { $0.id }
 
         XCTAssertTrue(ids.contains("dhikr"), "Sunnah fasting day (Monday) should promote Dhikr")
-        XCTAssertTrue(ids.contains("duas"), "Sunnah fasting day (Monday) should promote Duas")
+        XCTAssertFalse(ids.contains("duas"), "Duas is a tab bar item — not in quick actions")
     }
 
     // MARK: - Seasonal: No Promotions on Neutral Day
@@ -344,46 +351,34 @@ final class HomeIntentResolverTests: XCTestCase {
         XCTAssertTrue(promotions.isEmpty, "Neutral day should have no seasonal promotions")
     }
 
-    // MARK: - Contextual Subtitles: Prayer Proximity
-
-    func test_subtitle_prayerSoon_showsCountdown() {
-        let now = neutralDate(hour: 10, minute: 0)
-        let prayerSoon = prayerTime(type: .dhuhr, at: neutralDate(hour: 10, minute: 20))
-
-        let actions = HomeIntentResolver.resolve(currentDate: now, nextPrayer: prayerSoon)
-        let prayerAction = actions.first { $0.id == "prayer" }
-
-        XCTAssertEqual(prayerAction?.subtitle, "Dhuhr in 20 min")
-    }
-
     // MARK: - Contextual Subtitles: Streak At Risk
 
     func test_subtitle_streakAtRisk_showsStreakCount() {
         let now = neutralDate(hour: 15)
-        let quranStreak = streakAtRisk(.quran, count: 7)
+        let dhikrStreak = streakAtRisk(.dhikr, count: 7)
 
-        let actions = HomeIntentResolver.resolve(currentDate: now, streaks: [quranStreak])
-        let quranAction = actions.first { $0.id == "quran" }
+        let actions = HomeIntentResolver.resolve(currentDate: now, streaks: [dhikrStreak])
+        let dhikrAction = actions.first { $0.id == "dhikr" }
 
-        XCTAssertEqual(quranAction?.subtitle, "7-day streak at risk")
+        XCTAssertEqual(dhikrAction?.subtitle, "7-day streak at risk")
     }
 
     // MARK: - Contextual Subtitles: Seasonal
 
-    func test_subtitle_ramadan_quranShowsRamadanReading() {
+    func test_subtitle_ramadan_dhikrShowsRamadanDhikr() {
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: ramadanDate)
-        let quranAction = actions.first { $0.id == "quran" }
+        let dhikrAction = actions.first { $0.id == "dhikr" }
 
-        XCTAssertEqual(quranAction?.subtitle, "Ramadan reading")
+        XCTAssertEqual(dhikrAction?.subtitle, "Ramadan dhikr")
     }
 
-    func test_subtitle_friday_quranShowsSurahAlKahf() {
+    func test_subtitle_friday_hadithShowsJumuah() {
         let friday = dateOn(year: 2025, month: 1, day: 17, hour: 15)
         let actions = HomeIntentResolver.resolve(currentDate: friday)
-        let quranAction = actions.first { $0.id == "quran" }
+        let hadithAction = actions.first { $0.id == "hadith" }
 
-        XCTAssertEqual(quranAction?.subtitle, "Read Surah Al-Kahf")
+        XCTAssertEqual(hadithAction?.subtitle, "Jumu'ah reading")
     }
 
     func test_subtitle_dhulHijjah_dhikrShowsBlessedDays() {
@@ -420,36 +415,36 @@ final class HomeIntentResolverTests: XCTestCase {
     // MARK: - Contextual Subtitles: Priority (higher rule wins)
 
     func test_subtitle_streakBeatsSeasonalForSameAction() {
-        // Ramadan promotes quran with "Ramadan reading"
-        // But quran streak at risk (Rule 2) should override with streak subtitle
+        // Ramadan promotes dhikr with "Ramadan dhikr"
+        // But dhikr streak at risk (Rule 2) should override with streak subtitle
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 15)
-        let quranStreak = streakAtRisk(.quran, count: 12)
+        let dhikrStreak = streakAtRisk(.dhikr, count: 12)
 
         let actions = HomeIntentResolver.resolve(
             currentDate: ramadanDate,
-            streaks: [quranStreak]
+            streaks: [dhikrStreak]
         )
-        let quranAction = actions.first { $0.id == "quran" }
+        let dhikrAction = actions.first { $0.id == "dhikr" }
 
         // Streak at risk (Rule 2) fires before seasonal (Rule 3), so streak subtitle wins
-        XCTAssertEqual(quranAction?.subtitle, "12-day streak at risk")
+        XCTAssertEqual(dhikrAction?.subtitle, "12-day streak at risk")
     }
 
     // MARK: - No Duplicates with Seasonal
 
     func test_resolve_noDuplicates_withSeasonalAndStreaks() {
-        // Ramadan + quran streak at risk — both promote quran, should not duplicate
+        // Ramadan + dhikr streak at risk — both promote dhikr, should not duplicate
         let ramadanDate = dateOn(year: 2025, month: 3, day: 15, hour: 10)
-        let quranStreak = streakAtRisk(.quran, count: 10)
+        let dhikrStreak = streakAtRisk(.dhikr, count: 10)
 
         let actions = HomeIntentResolver.resolve(
             currentDate: ramadanDate,
-            streaks: [quranStreak]
+            streaks: [dhikrStreak]
         )
 
         let ids = actions.map { $0.id }
         let uniqueIds = Set(ids)
         XCTAssertEqual(ids.count, uniqueIds.count, "No duplicates even when seasonal + streak promote same action")
-        XCTAssertEqual(actions.count, 4)
+        XCTAssertEqual(actions.count, 2)
     }
 }

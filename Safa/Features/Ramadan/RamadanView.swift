@@ -1,6 +1,7 @@
 // MARK: - RamadanView.swift
 // PURPOSE: Ramadan mode dashboard — replaces Prayer tab during Ramadan
 // DEPENDENCIES: SwiftUI, PrayerViewModel, RamadanSubviews, shared components
+// NOTE: DailyGoalsCard intentionally removed — goals are tracked on Home tab (Khatm card + fasting tracker)
 
 import SwiftUI
 
@@ -8,20 +9,13 @@ struct RamadanView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
     @State private var prayerViewModel: PrayerViewModel?
-    @State private var todayFasted = false
-    @State private var currentDay = 1
-    @State private var fastingDays: Set<Int> = []
     @State private var showTaraweehTracker = false
     @State private var showSettings = false
     @State private var showingQibla = false
     @State private var showZakat = false
-    @State private var juzCompleted = 0
-    @State private var healthSyncEnabled = false
-    @State private var healthKitService = HealthKitService.shared
     @State private var deferredLogPrayer: PrayerType?
 
     private let hijriConverter = HijriDateConverter.shared
-    private let totalDays = 30
 
     // MARK: - Computed Properties
 
@@ -62,25 +56,17 @@ struct RamadanView: View {
                         }
                     )
 
-                    // 4. Daily goals
-                    DailyGoalsCard(isRamadan: true, loggedPrayers: vm.loggedPrayers, todayPrayers: vm.todayPrayers)
                 }
 
-                // 5. Ramadan quick actions (Quran, Taraweeh, Zakat, Duas)
+                // 4. Ramadan quick actions (Taraweeh, Zakat)
                 quickActionsGrid
 
                 // 6. Adhan + Qibla buttons (same as Prayer page)
                 PrayerQuickActionsBar(onQibla: { showingQibla = true })
-
-                // 7. Fasting tracker (Ramadan-only)
-                fastingTrackerCard
-
-                // 8. Quran Khatm goal
-                quranGoalCard
             }
             .padding(SafaSpacing.md)
         }
-        .navigationTitle("Ramadan")
+        .navigationTitle("Prayer Times")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -89,11 +75,19 @@ struct RamadanView: View {
                 }
             }
         }
-        .sheet(isPresented: $showSettings) {
-            RamadanSettingsSheet(
-                healthSyncEnabled: $healthSyncEnabled,
-                healthKitService: healthKitService
-            )
+        .sheet(isPresented: $showSettings, onDismiss: {
+            prayerViewModel?.reloadSettings()
+            Task { await prayerViewModel?.loadPrayerTimes() }
+        }) {
+            NavigationStack {
+                PrayerSettingsView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showSettings = false }
+                        }
+                    }
+            }
+            .fullSheet()
         }
         .sheet(isPresented: $showTaraweehTracker) {
             TaraweehTrackerSheet()
@@ -115,10 +109,8 @@ struct RamadanView: View {
                 )
             }
             await loadRamadanData()
-            healthSyncEnabled = healthKitService.syncEnabled
         }
         .onAppear {
-            loadJuzCount()
             handlePendingNotificationAction()
         }
         .onChange(of: router.pendingNotificationAction) { _, newValue in
@@ -129,9 +121,6 @@ struct RamadanView: View {
                 deferredLogPrayer = nil
                 Task { await prayerViewModel?.logPrayer(prayerType) }
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-            loadJuzCount() // Refresh when daily goals are toggled
         }
     }
 
@@ -247,108 +236,6 @@ struct RamadanView: View {
         }
     }
 
-    // MARK: - Fasting Tracker Card
-
-    private var fastingTrackerCard: some View {
-        TitledCard(title: "Fasting Tracker", subtitle: "\(fastingDays.count) days completed") {
-            VStack(spacing: SafaSpacing.md) {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: SafaSpacing.xs) {
-                    ForEach(1...totalDays, id: \.self) { day in
-                        FastingDayCell(
-                            day: day,
-                            isFasted: fastingDays.contains(day),
-                            isToday: day == currentDay,
-                            isPast: day < currentDay
-                        ) {
-                            toggleFastingDay(day)
-                        }
-                    }
-                }
-                .dynamicTypeSize(...DynamicTypeSize.accessibility3)
-
-                if currentDay <= totalDays {
-                    Button {
-                        toggleFastingDay(currentDay)
-                    } label: {
-                        HStack {
-                            Image(systemName: fastingDays.contains(currentDay) ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(fastingDays.contains(currentDay) ? .green : SafaColors.Fallback.tertiaryText)
-                            Text(fastingDays.contains(currentDay) ? "Fasted today" : "Mark today as fasted")
-                                .font(SafaTypography.bodyMedium)
-                                .foregroundColor(SafaColors.Fallback.text)
-                            Spacer()
-                        }
-                        .padding()
-                        .background(Color(UIColor.tertiarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: - Quran Goal Card
-
-    private var quranGoalCard: some View {
-        ContentCard {
-            VStack(alignment: .leading, spacing: SafaSpacing.md) {
-                HStack {
-                    VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                        Text("Quran Khatm Goal")
-                            .font(SafaTypography.titleSmall)
-                        Text("Complete the Quran this Ramadan")
-                            .font(SafaTypography.labelSmall)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text("\(juzCompleted)/30")
-                            .font(SafaTypography.titleMedium)
-                            .foregroundColor(.accentColor)
-                            .contentTransition(.numericText())
-                        Text("Juz")
-                            .font(SafaTypography.labelSmall)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                    }
-                }
-
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.gray.opacity(0.2)).frame(height: 8)
-                        Capsule().fill(Color.green)
-                            .frame(width: geometry.size.width * CGFloat(juzCompleted) / 30, height: 8)
-                            .animation(.easeInOut, value: juzCompleted)
-                    }
-                }
-                .frame(height: 8)
-
-                Text("Read 1 Juz per day to complete on time")
-                    .font(SafaTypography.labelSmall)
-                    .foregroundColor(SafaColors.Fallback.tertiaryText)
-            }
-        }
-    }
-
-    // MARK: - Actions
-
-    private func toggleFastingDay(_ day: Int) {
-        if fastingDays.contains(day) {
-            fastingDays.remove(day)
-        } else {
-            fastingDays.insert(day)
-            // Award fasting hasanat (once per day)
-            Task {
-                await HasanatTracker.awardOnce(.fastingDay, key: "fastingDay_\(day)", via: dependencies.userState)
-            }
-            if healthSyncEnabled, let suhoor = suhoorTime, let iftar = iftarTime {
-                Task { try? await healthKitService.logFast(start: suhoor, end: iftar, type: .ramadan) }
-            }
-        }
-        // Persist
-        let year = String(Calendar.current.component(.year, from: Date()))
-        UserDefaults.standard.set(Array(fastingDays), forKey: "ramadan_fasting_days_\(year)")
-    }
-
     // MARK: - Notification Action Handling
 
     private func handlePendingNotificationAction() {
@@ -369,35 +256,7 @@ struct RamadanView: View {
     // MARK: - Load Data
 
     private func loadRamadanData() async {
-        let (_, month, day) = hijriConverter.hijriComponents(from: Date())
-        if month == 9 { currentDay = day }
-
-        // Delegate prayer loading to PrayerViewModel
         await prayerViewModel?.loadPrayerTimes()
-
-        // Load persisted fasting days
-        let year = String(Calendar.current.component(.year, from: Date()))
-        let savedFasting = UserDefaults.standard.array(forKey: "ramadan_fasting_days_\(year)") as? [Int] ?? []
-        fastingDays = Set(savedFasting)
-
-        // Count juz completed from daily goals (how many days had "juz" checked)
-        loadJuzCount()
-    }
-
-    /// Count days where "Read 1 Juz" was completed in daily goals
-    private func loadJuzCount() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let calendar = Calendar.current
-        var count = 0
-        for dayOffset in 0..<totalDays {
-            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) {
-                let key = "dailyGoals_\(formatter.string(from: date))"
-                let goals = UserDefaults.standard.stringArray(forKey: key) ?? []
-                if goals.contains("juz") { count += 1 }
-            }
-        }
-        withAnimation { juzCompleted = count }
     }
 }
 

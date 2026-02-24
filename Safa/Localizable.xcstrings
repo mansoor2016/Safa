@@ -224,6 +224,64 @@
     "%@" : {
 
     },
+    "%@ · %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "%@ %lld AH" : {
       "localizations" : {
         "ar" : {
@@ -1887,6 +1945,7 @@
       }
     },
     "%lld of 5" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2206,7 +2265,56 @@
       }
     },
     "%lld to next" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld للتالي"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পরবর্তীতে %lld"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld تا بعدی"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pour le suivant"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ke berikutnya"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ke seterusnya"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sonrakine %lld"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اگلے تک %lld"
+          }
+        }
+      }
     },
     "%lld." : {
       "localizations" : {
@@ -11185,7 +11293,56 @@
       }
     },
     "Device Default" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الافتراضي للجهاز"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ডিভাইস ডিফল্ট"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پیش‌فرض دستگاه"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par défaut de l’appareil"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default Perangkat"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lalai Peranti"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz Varsayılanı"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ڈیوائس ڈیفالٹ"
+          }
+        }
+      }
     },
     "Dhikr" : {
       "localizations" : {
@@ -14204,7 +14361,56 @@
       }
     },
     "Enable location for full status" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فعّل الموقع للحالة الكاملة"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সম্পূর্ণ স্ট্যাটাসের জন্য লোকেশন চালু করুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موقعیت مکانی را برای وضعیت کامل فعال کنید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez la localisation pour le statut complet"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktifkan lokasi untuk status lengkap"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dayakan lokasi untuk status penuh"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tam durum için konumu etkinleştirin"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مکمل اسٹیٹس کے لیے لوکیشن فعال کریں"
+          }
+        }
+      }
     },
     "Enable Smart Cleanup to automatically remove audio files you haven't listened to in a while." : {
       "localizations" : {
@@ -16032,6 +16238,110 @@
         }
       }
     },
+    "Fasting Tracker" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متتبع الصيام"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "রোজা ট্র্যাকার"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پیگیری روزه"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivi du jeûne"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelacak Puasa"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penjejak Puasa"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oruç Takibi"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "روزے کا ٹریکر"
+          }
+        }
+      }
+    },
+    "Fasting Tracker, %lld of 30 days completed" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متتبع الصيام، %lld من 30 يوماً مكتملاً"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "রোজা ট্র্যাকার, ৩০ দিনের মধ্যে %lld সম্পন্ন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پیگیری روزه، %lld از ۳۰ روز انجام شده"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivi du jeûne, %lld sur 30 jours complétés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelacak Puasa, %lld dari 30 hari selesai"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penjejak Puasa, %lld daripada 30 hari selesai"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oruç Takibi, 30 günün %lld’i tamamlandı"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "روزے کا ٹریکر، 30 میں سے %lld دن مکمل"
+          }
+        }
+      }
+    },
     "Favourites" : {
       "localizations" : {
         "ar" : {
@@ -16137,7 +16447,56 @@
       }
     },
     "First week — keep going!" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأسبوع الأول — استمر!"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "প্রথম সপ্তাহ — চালিয়ে যান!"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هفته اول — ادامه بده!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première semaine — continuez !"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minggu pertama — terus semangat!"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minggu pertama — teruskan!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İlk hafta — devam et!"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پہلا ہفتہ — جاری رکھیں!"
+          }
+        }
+      }
     },
     "Font Settings" : {
       "localizations" : {
@@ -18683,6 +19042,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اسراء اور معراج"
+          }
+        }
+      }
+    },
+    "It's time for %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حان وقت %@"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ এর সময় হয়েছে"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت %@ است"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C’est l’heure de %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waktunya %@"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sudah masuk waktu %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vakti geldi"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ کا وقت ہو گیا ہے"
           }
         }
       }
@@ -21322,7 +21733,56 @@
       }
     },
     "Max Level" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المستوى الأقصى"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সর্বোচ্চ স্তর"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حداکثر سطح"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niveau maximum"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Level Maksimum"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahap Maksimum"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maksimum Seviye"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زیادہ سے زیادہ لیول"
+          }
+        }
+      }
     },
     "May Allah accept from us and from you." : {
       "localizations" : {
@@ -23879,7 +24339,56 @@
       }
     },
     "on time" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الوقت"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময়মতো"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "به موقع"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à l’heure"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tepat waktu"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tepat waktu"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zamanında"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت پر"
+          }
+        }
+      }
     },
     "Open iOS Accessibility Settings" : {
       "localizations" : {
@@ -25234,58 +25743,6 @@
         }
       }
     },
-    "Prayer Time Adjustments" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعديلات أوقات الصلاة"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "নামাজের সময় সমন্বয়"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تنظیمات زمان نماز"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajustements des horaires de prière"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Penyesuaian Waktu Shalat"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pelarasan Waktu Solat"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Namaz Vakti Ayarlamaları"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نماز کے اوقات کی ایڈجسٹمنٹ"
-          }
-        }
-      }
-    },
     "Prayer time" : {
       "localizations" : {
         "ar" : {
@@ -25334,6 +25791,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "نماز کا وقت"
+          }
+        }
+      }
+    },
+    "Prayer Time Adjustments" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعديلات أوقات الصلاة"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নামাজের সময় সমন্বয়"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنظیمات زمان نماز"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustements des horaires de prière"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penyesuaian Waktu Shalat"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelarasan Waktu Solat"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Namaz Vakti Ayarlamaları"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نماز کے اوقات کی ایڈجسٹمنٹ"
           }
         }
       }
@@ -26384,6 +26893,58 @@
         }
       }
     },
+    "Quran Khatm Goal, %lld of 30 juz completed" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف ختم القرآن، %lld من 30 جزءاً مكتملاً"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কুরআন খতম লক্ষ্য, ৩০ পারার মধ্যে %lld সম্পন্ন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف ختم قرآن، %lld از ۳۰ جزء کامل شده"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif Khatm du Coran, %lld sur 30 juz terminés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target Khatam Quran, %lld dari 30 juz selesai"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sasaran Khatam Quran, %lld daripada 30 juzuk selesai"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuran Hatim Hedefi, 30 cüzden %lld tamamlandı"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قرآن ختم کا ہدف، 30 پاروں میں سے %lld مکمل"
+          }
+        }
+      }
+    },
     "Quran Reader" : {
       "localizations" : {
         "ar" : {
@@ -27269,6 +27830,7 @@
       }
     },
     "Read 1 Juz per day to complete on time" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28575,7 +29137,56 @@
       }
     },
     "Restart Recommended" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُوصى بإعادة التشغيل"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পুনরায় চালু করার পরামর্শ দেওয়া হচ্ছে"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "راه‌اندازی مجدد توصیه می‌شود"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redémarrage recommandé"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disarankan untuk Memulai Ulang"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mula Semula Disyorkan"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Başlatma Önerilir"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دوبارہ شروع کرنے کی سفارش"
+          }
+        }
+      }
     },
     "Retention Period" : {
       "localizations" : {
@@ -31126,7 +31737,56 @@
       }
     },
     "Some changes will take full effect after restarting the app." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستسري بعض التغييرات بالكامل بعد إعادة تشغيل التطبيق."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কিছু পরিবর্তন অ্যাপ পুনরায় চালু করার পর সম্পূর্ণ কার্যকর হবে।"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برخی تغییرات پس از راه‌اندازی مجدد برنامه به طور کامل اعمال می‌شوند."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Certains changements prendront pleinement effet après le redémarrage de l’application."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beberapa perubahan akan berlaku sepenuhnya setelah memulai ulang aplikasi."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesetengah perubahan akan berkuat kuasa sepenuhnya selepas memulakan semula aplikasi."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bazı değişiklikler uygulamayı yeniden başlattıktan sonra tam olarak geçerli olacaktır."
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کچھ تبدیلیاں ایپ دوبارہ شروع کرنے کے بعد مکمل طور پر لاگو ہوں گی۔"
+          }
+        }
+      }
     },
     "Sound" : {
       "localizations" : {
@@ -35886,6 +36546,58 @@
         }
       }
     },
+    "Track your prayers and build consistent habits" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تابع صلواتك وابنِ عادات ثابتة"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আপনার নামাজ ট্র্যাক করুন এবং ধারাবাহিক অভ্যাস গড়ুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمازهایت را پیگیری کن و عادت‌های پایدار بساز"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivez vos prières et développez des habitudes régulières"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lacak shalat Anda dan bangun kebiasaan yang konsisten"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jejaki solat anda dan bina tabiat yang konsisten"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Namazlarınızı takip edin ve tutarlı alışkanlıklar geliştirin"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اپنی نمازوں کا ریکارڈ رکھیں اور مستقل عادات بنائیں"
+          }
+        }
+      }
+    },
     "Translation" : {
       "localizations" : {
         "ar" : {
@@ -35991,10 +36703,108 @@
       }
     },
     "Translations are in beta — community-contributed and may be incomplete or contain inaccuracies. English is used where translations are unavailable. Feedback is welcome." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الترجمات تجريبية — من مساهمات المجتمع وقد تكون غير مكتملة أو تحتوي على أخطاء. تُستخدم الإنجليزية عند عدم توفر الترجمة. نرحب بملاحظاتكم."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "অনুবাদগুলো বেটায় আছে — কমিউনিটি অবদান এবং অসম্পূর্ণ বা ভুল থাকতে পারে। অনুবাদ না থাকলে ইংরেজি ব্যবহৃত হয়। প্রতিক্রিয়া স্বাগত।"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترجمه‌ها آزمایشی هستند — توسط جامعه ارائه شده و ممکن است ناقص یا نادقیق باشند. در صورت نبود ترجمه، انگلیسی استفاده می‌شود. بازخورد خوش‌آمد است."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les traductions sont en bêta — contributions communautaires pouvant être incomplètes ou inexactes. L’anglais est utilisé en l’absence de traduction. Vos retours sont les bienvenus."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terjemahan masih beta — kontribusi komunitas dan mungkin tidak lengkap atau mengandung ketidakakuratan. Bahasa Inggris digunakan jika terjemahan tidak tersedia. Masukan Anda diterima."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terjemahan dalam versi beta — sumbangan komuniti dan mungkin tidak lengkap atau mengandungi ketidaktepatan. Bahasa Inggeris digunakan apabila terjemahan tiada. Maklum balas dialu-alukan."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çeviriler beta aşamasındadır — topluluk katkılarıdır ve eksik veya hatalı olabilir. Çeviri bulunmadığında İngilizce kullanılır. Geri bildirimlerinizi bekliyoruz."
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترجمے بیٹا میں ہیں — کمیونٹی کی شراکت سے ہیں اور نامکمل یا غلط ہو سکتے ہیں۔ ترجمہ دستیاب نہ ہونے پر انگریزی استعمال ہوتی ہے۔ آراء کا خیرمقدم ہے۔"
+          }
+        }
+      }
     },
     "Translations are in beta and may be incomplete. English is used where unavailable." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الترجمات تجريبية وقد تكون غير مكتملة. تُستخدم الإنجليزية عند عدم توفر الترجمة."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "অনুবাদগুলো বেটায় আছে এবং অসম্পূর্ণ হতে পারে। অনুবাদ না থাকলে ইংরেজি ব্যবহৃত হয়।"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترجمه‌ها آزمایشی هستند و ممکن است ناقص باشند. در صورت نبود ترجمه، انگلیسی استفاده می‌شود."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les traductions sont en bêta et peuvent être incomplètes. L’anglais est utilisé en l’absence de traduction."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terjemahan masih beta dan mungkin tidak lengkap. Bahasa Inggris digunakan jika tidak tersedia."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terjemahan dalam versi beta dan mungkin tidak lengkap. Bahasa Inggeris digunakan apabila tiada."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çeviriler beta aşamasındadır ve eksik olabilir. Çeviri bulunmadığında İngilizce kullanılır."
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترجمے بیٹا میں ہیں اور نامکمل ہو سکتے ہیں۔ دستیاب نہ ہونے پر انگریزی استعمال ہوتی ہے۔"
+          }
+        }
+      }
     },
     "Transliteration" : {
       "localizations" : {
@@ -37569,7 +38379,56 @@
       }
     },
     "vs last week" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مقارنة بالأسبوع الماضي"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "গত সপ্তাহের তুলনায়"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "در مقایسه با هفته گذشته"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par rapport à la semaine dernière"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dibanding minggu lalu"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "berbanding minggu lepas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "geçen haftaya göre"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "پچھلے ہفتے کے مقابلے"
+          }
+        }
+      }
     },
     "Wake up for Fajr prayer. May Allah accept your worship." : {
       "localizations" : {
@@ -39411,6 +40270,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "عيد مبارك"
+          }
+        }
+      }
+    },
+    "Today's juz complete — long press to undo" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم إكمال جزء اليوم — اضغط مطولاً للتراجع"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা সম্পন্ন — পূর্বাবস্থায় ফেরাতে দীর্ঘ চাপুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء امروز کامل شد — برای لغو طولانی فشار دهید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juz d’aujourd’hui terminé — appui long pour annuler"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juz hari ini selesai — tekan lama untuk membatalkan"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juzuk hari ini selesai — tekan lama untuk buat asal"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüz tamamlandı — geri almak için uzun basın"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ مکمل — واپس کرنے کے لیے دیر تک دبائیں"
+          }
+        }
+      }
+    },
+    "Tap to mark today's juz as read" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انقر لتسجيل قراءة جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করতে ট্যাপ করুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برای ثبت خواندن جزء امروز ضربه بزنید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appuyez pour marquer le juz d’aujourd’hui comme lu"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketuk untuk menandai juz hari ini sudah dibaca"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketik untuk tandakan juzuk hari ini telah dibaca"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü okundu olarak işaretlemek için dokunun"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ پڑھا ہوا نشان لگانے کے لیے ٹیپ کریں"
+          }
+        }
+      }
+    },
+    "Mark today's juz as read" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل قراءة جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء امروز را خوانده شده ثبت کنید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer le juz d’aujourd’hui comme lu"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tandai juz hari ini sudah dibaca"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tandakan juzuk hari ini telah dibaca"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü okundu olarak işaretle"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ پڑھا ہوا نشان لگائیں"
+          }
+        }
+      }
+    },
+    "Undo today's juz" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التراجع عن جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পূর্বাবস্থায় ফেরান"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لغو جزء امروز"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le juz d’aujourd’hui"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Batalkan juz hari ini"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat asal juzuk hari ini"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü geri al"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ واپس کریں"
           }
         }
       }

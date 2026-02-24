@@ -70,4 +70,4 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ---
 
-*Last Updated: February 24, 2026 — Added v2.6 completions (grace window, Progress Dashboard redesign, dua card subtitle).*
+*Last Updated: February 24, 2026 — Audited against feature/next-3 branch; no open tasks completed. Current branch work (interactive Khatm card, DailyGoalsCard removal, localization audit, stale goals fix) is uncommitted feature work not yet mapped to tasks.*

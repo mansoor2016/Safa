@@ -1,6 +1,7 @@
 // MARK: - PrayerView.swift
 // PURPOSE: Main prayer times view displaying daily prayers and Qibla
 // DEPENDENCIES: SwiftUI, PrayerViewModel
+// NOTE: DailyGoalsCard intentionally removed — goals are tracked on Home tab (Khatm card + fasting tracker)
 
 import SwiftUI
 import CoreLocation
@@ -77,10 +78,7 @@ private struct PrayerContentView: View {
                     }
                 )
 
-                // 5. Daily Goals
-                DailyGoalsCard(isRamadan: false, loggedPrayers: viewModel.loggedPrayers, todayPrayers: viewModel.todayPrayers)
-
-                // 6. Quick actions (Qibla + Adhan)
+                // 5. Quick actions (Qibla + Adhan)
                 quickActionsSection
 
                 // 7. Sunnah Times (below quick actions if enabled)

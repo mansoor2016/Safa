@@ -18,18 +18,21 @@ struct HomeView: View {
     @State private var quranProgress: QuranProgress?
     @State private var isRamadan = false
     @State private var showRamadanBanner = true
-    @State private var suhoorTime: Date?
-    @State private var iftarTime: Date?
     @State private var currentRamadanDay: Int = 0
     @State private var daysUntilRamadan: Int?
     @State private var isLastTenNights = false
-    @State private var isRamadanBannerExpanded = false
     @State private var showShareBanner = !ShareBanner.isDismissed
     @State private var loadError: Error?
     @State private var resolvedActions: [HomeAction] = []
     @State private var hideResumeCard = false
     @State private var isResumeCardExpanded = false
     @State private var isDailyVerseExpanded = true
+
+    // Ramadan goals (fasting tracker + Quran khatm)
+    @State private var fastingDays: Set<Int> = []
+    @State private var currentRamadanDayForFasting = 1
+    @State private var juzCompleted = 0
+    @State private var isFastingTrackerExpanded = false
 
     // Timer to advance nextPrayer when grace window expires
     let graceExpiryTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -111,11 +114,18 @@ struct HomeView: View {
                 // Ramadan banner (collapsible, reappears next day)
                 ramadanBannerSection
 
+                // Ramadan goals — immediately below Ramadan banner
+                if isRamadan {
+                    fastingTrackerCard
+                    quranGoalCard
+                }
+
                 // Eid banner (during Eid or 7 days before)
                 eidBannerSection
 
-                // Resume where you left off (dismissable, reappears next day)
-                if let progress = quranProgress,
+                // Resume where you left off (dismissable, reappears next day; hidden during Ramadan)
+                if !isRamadan,
+                   let progress = quranProgress,
                    case .visible = HomeBannerResolver.resolveResumeCard(
                        quran: .init(lastSurah: progress.lastSurah, lastAyah: progress.lastAyah),
                        dismiss: dismissState
@@ -123,13 +133,13 @@ struct HomeView: View {
                     resumeQuranCard(progress)
                 }
 
-                // Quick actions
-                quickActions
-
                 // Daily verse
                 if let verse = dailyVerse {
                     dailyVerseCard(verse)
                 }
+
+                // Quick actions
+                quickActions
 
                 // Progress summary
                 progressCard
@@ -176,6 +186,9 @@ struct HomeView: View {
                 nextPrayer = todayPrayers.first { $0.time > now && $0.type.isObligatory }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            if isRamadan { loadRamadanGoals() }
+        }
         .onAppear {
             Task { await reloadLoggedPrayers() }
             // Recalculate next prayer (may have changed since last appear)
@@ -191,6 +204,8 @@ struct HomeView: View {
                 currentRamadanDay = max(currentRamadanDay, 1)
                 daysUntilRamadan = nil
             }
+            // Reload Ramadan goals AFTER isRamadan is recalculated
+            if isRamadan { loadRamadanGoals() }
             // Re-check banner dismiss state (synced with Settings toggle)
             showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
             // Re-check Eid state (respects Force Eid Mode toggles)
@@ -201,7 +216,8 @@ struct HomeView: View {
                 currentDate: Date(),
                 nextPrayer: nextPrayer,
                 loggedPrayers: loggedPrayers,
-                streaks: dependencies.userState.streaks
+                streaks: dependencies.userState.streaks,
+                isAIAvailable: dependencies.llmService.availability.isAvailable
             )
         }
     }
@@ -215,51 +231,22 @@ struct HomeView: View {
             dismiss: dismissState
         )
 
-        // Hide banner after iftar until next suhoor countdown begins.
-        // Only evaluate when times are loaded — if nil, show the banner (don't hide it).
-        let isPostIftar: Bool = {
-            guard isRamadan, suhoorTime != nil || iftarTime != nil else { return false }
-            let target = RamadanCountdownHelpers.resolveTarget(
-                now: Date(), suhoorTime: suhoorTime, iftarTime: iftarTime
-            )
-            switch target {
-            case .nextSuhoor, .complete: return true
-            case .suhoor, .iftar: return false
-            }
-        }()
-
-        if visibility != .hidden && !isPostIftar {
-            ramadanBannerExpandedContent
-                .onTapGesture {
-                    if isRamadan {
-                        router.selectedTab = "prayer"
-                    } else {
-                        router.navigate(to: .ramadan)
-                    }
-                }
-        }
-    }
-
-    @ViewBuilder
-    private var ramadanBannerExpandedContent: some View {
-        if isRamadan {
-            if isLastTenNights {
+        if visibility != .hidden {
+            // During Ramadan: only show Last Ten Nights banner (days 21-30).
+            // Days 1-20: no banner — Prayer tab has the iftar platter.
+            if case .duringRamadan(_, isLastTenNights: true) = visibility {
                 LastTenNightsBanner(
                     currentNight: currentRamadanDay,
                     onDismiss: dismissBanner
                 )
-            } else {
-                RamadanBanner(
-                    suhoorTime: suhoorTime,
-                    iftarTime: iftarTime,
+                .onTapGesture { router.selectedTab = "prayer" }
+            } else if case .preRamadan = visibility {
+                PreRamadanBanner(
+                    daysUntil: daysUntilRamadan ?? 0,
                     onDismiss: dismissBanner
                 )
+                .onTapGesture { router.navigate(to: .ramadan) }
             }
-        } else if let days = daysUntilRamadan, days <= 30, days > 0 {
-            PreRamadanBanner(
-                daysUntil: days,
-                onDismiss: dismissBanner
-            )
         }
     }
 
@@ -684,6 +671,201 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Fasting Tracker Card
+
+    private var fastingTrackerCard: some View {
+        VStack(spacing: 0) {
+            // Header row (always visible)
+            HStack(spacing: SafaSpacing.sm) {
+                Image(systemName: "fork.knife")
+                    .font(.body)
+                    .foregroundColor(.orange)
+                Text("Fasting Tracker")
+                    .font(SafaTypography.titleSmall)
+                    .foregroundColor(SafaColors.Fallback.text)
+                Spacer()
+                Text("\(fastingDays.count)/30")
+                    .font(SafaTypography.labelSmall)
+                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                Image(systemName: isFastingTrackerExpanded ? "chevron.down" : "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(SafaColors.Fallback.tertiaryText)
+            }
+            .padding(.horizontal, SafaSpacing.md)
+            .padding(.vertical, SafaSpacing.sm)
+            .background(Color(UIColor.secondarySystemBackground))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isFastingTrackerExpanded.toggle()
+                }
+            }
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel("Fasting Tracker, \(fastingDays.count) of 30 days completed")
+            .accessibilityHint(isFastingTrackerExpanded ? "Double tap to collapse" : "Double tap to expand")
+
+            // Expanded: 30-day grid
+            if isFastingTrackerExpanded {
+                VStack(spacing: SafaSpacing.md) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: SafaSpacing.xs) {
+                        ForEach(1...30, id: \.self) { day in
+                            FastingDayCell(
+                                day: day,
+                                isFasted: fastingDays.contains(day),
+                                isToday: day == currentRamadanDayForFasting,
+                                isPast: day < currentRamadanDayForFasting
+                            ) {
+                                toggleFastingDay(day)
+                            }
+                        }
+                    }
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility3)
+                }
+                .padding(.horizontal, SafaSpacing.md)
+                .padding(.vertical, SafaSpacing.sm)
+                .background(Color(UIColor.secondarySystemBackground))
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            // "Mark today" button (always visible when applicable)
+            if currentRamadanDayForFasting <= 30 {
+                Button { toggleFastingDay(currentRamadanDayForFasting) } label: {
+                    HStack {
+                        Image(systemName: fastingDays.contains(currentRamadanDayForFasting)
+                              ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(fastingDays.contains(currentRamadanDayForFasting)
+                                             ? .green : SafaColors.Fallback.tertiaryText)
+                        Text(fastingDays.contains(currentRamadanDayForFasting)
+                             ? "Fasted today" : "Mark today as fasted")
+                            .font(SafaTypography.bodyMedium)
+                            .foregroundColor(SafaColors.Fallback.text)
+                        Spacer()
+                    }
+                    .padding(.horizontal, SafaSpacing.md)
+                    .padding(.vertical, SafaSpacing.sm)
+                    .background(Color(UIColor.secondarySystemBackground))
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.lg))
+    }
+
+    private func toggleFastingDay(_ day: Int) {
+        if fastingDays.contains(day) {
+            fastingDays.remove(day)
+        } else {
+            fastingDays.insert(day)
+            Task {
+                await HasanatTracker.awardOnce(.fastingDay, key: "fastingDay_\(day)", via: dependencies.userState)
+            }
+        }
+        let year = String(Calendar.current.component(.year, from: Date()))
+        UserDefaults.standard.set(Array(fastingDays), forKey: "ramadan_fasting_days_\(year)")
+    }
+
+    // MARK: - Quran Goal Card
+
+    private var dailyGoalsDateKey: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "dailyGoals_\(formatter.string(from: Date()))"
+    }
+
+    private var todayJuzDone: Bool {
+        let saved = UserDefaults.standard.stringArray(forKey: dailyGoalsDateKey) ?? []
+        return saved.contains("juz")
+    }
+
+    private func toggleTodayJuz(markDone: Bool) {
+        var goals = Set(UserDefaults.standard.stringArray(forKey: dailyGoalsDateKey) ?? [])
+        if markDone && !goals.contains("juz") {
+            goals.insert("juz")
+        } else if !markDone && goals.contains("juz") {
+            goals.remove("juz")
+        } else {
+            return
+        }
+        UserDefaults.standard.set(Array(goals), forKey: dailyGoalsDateKey)
+        loadRamadanGoals()
+    }
+
+    private var quranGoalCard: some View {
+        ContentCard {
+            VStack(alignment: .leading, spacing: SafaSpacing.md) {
+                HStack {
+                    VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                        Text("Quran Khatm Goal")
+                            .font(SafaTypography.titleSmall)
+                        Text("Complete the Quran this Ramadan")
+                            .font(SafaTypography.labelSmall)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("\(juzCompleted)/30")
+                            .font(SafaTypography.titleMedium)
+                            .foregroundColor(.accentColor)
+                            .contentTransition(.numericText())
+                        Text("Juz")
+                            .font(SafaTypography.labelSmall)
+                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                    }
+                }
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.gray.opacity(0.2)).frame(height: 8)
+                        Capsule().fill(Color.green)
+                            .frame(width: geometry.size.width * CGFloat(juzCompleted) / 30, height: 8)
+                            .animation(.easeInOut, value: juzCompleted)
+                    }
+                }
+                .frame(height: 8)
+
+                Text(todayJuzDone
+                     ? "Today's juz complete — long press to undo"
+                     : "Tap to mark today's juz as read")
+                    .font(SafaTypography.labelSmall)
+                    .foregroundColor(todayJuzDone ? .green : SafaColors.Fallback.tertiaryText)
+            }
+        }
+        .contentShape(Rectangle())
+        .highPriorityGesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .onEnded { _ in toggleTodayJuz(markDone: false) }
+        )
+        .onTapGesture { toggleTodayJuz(markDone: true) }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Quran Khatm Goal, \(juzCompleted) of 30 juz completed")
+        .accessibilityAction(named: "Mark today's juz as read") { toggleTodayJuz(markDone: true) }
+        .accessibilityAction(named: "Undo today's juz") { toggleTodayJuz(markDone: false) }
+    }
+
+    private func loadRamadanGoals() {
+        let hijriConverter = HijriDateConverter.shared
+        let (_, month, day) = hijriConverter.hijriComponents(from: Date())
+        if month == 9 { currentRamadanDayForFasting = day }
+
+        // Load persisted fasting days
+        let year = String(Calendar.current.component(.year, from: Date()))
+        let savedFasting = UserDefaults.standard.array(forKey: "ramadan_fasting_days_\(year)") as? [Int] ?? []
+        fastingDays = Set(savedFasting)
+
+        // Count juz completed from daily goals
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let calendar = Calendar.current
+        var count = 0
+        for dayOffset in 0..<30 {
+            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) {
+                let key = "dailyGoals_\(formatter.string(from: date))"
+                let goals = UserDefaults.standard.stringArray(forKey: key) ?? []
+                if goals.contains("juz") { count += 1 }
+            }
+        }
+        withAnimation { juzCompleted = count }
+    }
+
     // MARK: - Contextual Reminders
 
     @ViewBuilder
@@ -724,9 +906,6 @@ struct HomeView: View {
         daysUntilRamadan = isRamadan ? nil : ramadanService.daysUntilRamadan
         isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
 
-        // Expanded by default during Ramadan, collapsed otherwise
-        isRamadanBannerExpanded = isRamadan
-
         // Check if banner was dismissed today
         showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
 
@@ -763,10 +942,6 @@ struct HomeView: View {
                 WidgetDataService.shared.writePrayerTimes(todayPrayers)
                 WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
                 WidgetDataService.shared.writeHijriDate(hijriDate)
-
-                // Set Suhoor (Fajr) and Iftar (Maghrib) times for Ramadan banner
-                suhoorTime = todayPrayers.first { $0.type == .fajr }?.time
-                iftarTime = todayPrayers.first { $0.type == .maghrib }?.time
             }
         } catch {
             loadError = error
@@ -789,6 +964,11 @@ struct HomeView: View {
         // Award dailyVerse hasanat (once per day)
         if dailyVerse != nil {
             await HasanatTracker.awardOnce(.dailyVerse, key: "dailyVerse", via: dependencies.userState)
+        }
+
+        // Load Ramadan goals (fasting tracker + Quran khatm)
+        if isRamadan {
+            loadRamadanGoals()
         }
     }
 }
