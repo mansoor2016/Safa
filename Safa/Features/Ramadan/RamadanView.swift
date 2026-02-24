@@ -80,7 +80,7 @@ struct RamadanView: View {
             }
             .padding(SafaSpacing.md)
         }
-        .navigationTitle("Ramadan Mubarak")
+        .navigationTitle("Ramadan")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -238,17 +238,11 @@ struct RamadanView: View {
 
     private var quickActionsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: SafaSpacing.md) {
-            RamadanQuickAction(icon: "book.fill", title: "Quran", subtitle: "Continue reading", color: .green) {
-                router.selectedTab = "quran"
-            }
             RamadanQuickAction(icon: "moon.stars.fill", title: "Taraweeh", subtitle: "Track prayers", color: .purple) {
                 showTaraweehTracker = true
             }
             RamadanQuickAction(icon: "dollarsign.circle.fill", title: "Zakat", subtitle: "Calculator", color: .teal) {
                 showZakat = true
-            }
-            RamadanQuickAction(icon: "hands.sparkles.fill", title: "Duas", subtitle: "Iftar duas", color: .orange) {
-                router.selectedTab = "duas"
             }
         }
     }
