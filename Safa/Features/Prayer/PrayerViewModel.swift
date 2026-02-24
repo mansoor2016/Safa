@@ -56,7 +56,9 @@ final class PrayerViewModel {
 
     var nextPrayer: PrayerTime? {
         let now = Date()
-        return todayPrayers.first { $0.time > now && $0.type.isObligatory }
+        return todayPrayers.first {
+            $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now))
+        }
     }
 
     var prayersCompletedToday: Int {
@@ -381,10 +383,10 @@ final class PrayerViewModel {
 
     func updateNextPrayerIndicator() {
         let now = Date()
+        // Find which prayer the computed `nextPrayer` resolves to (accounts for grace)
+        let nextId = nextPrayer?.id
         for i in 0..<todayPrayers.count {
-            todayPrayers[i].isNext = todayPrayers[i].time > now &&
-                                     todayPrayers[i].type.isObligatory &&
-                                     (i == 0 || todayPrayers[i - 1].time <= now)
+            todayPrayers[i].isNext = todayPrayers[i].id == nextId
         }
     }
 
@@ -395,6 +397,7 @@ final class PrayerViewModel {
             Task { await PrayerLiveActivityManager.shared.endActivity() }
             return
         }
+        let isGrace = isPrayerTimeNow(next.time)
         let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
 
@@ -408,7 +411,8 @@ final class PrayerViewModel {
                 prayerName: next.type.displayName,
                 prayerTime: next.time,
                 hijriDate: hijri,
-                locationName: location
+                locationName: location,
+                isGrace: isGrace
             )
             // Schedule updates at each prayer boundary so the name switches on time
             PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(

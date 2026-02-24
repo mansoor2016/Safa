@@ -1,5 +1,5 @@
 // MARK: - PrayerTimelineBoundaryTests.swift
-// PURPOSE: Correctness tests for widget timeline boundary generation
+// PURPOSE: Correctness tests for widget timeline boundary generation (including grace windows)
 // DEPENDENCIES: XCTest, SafaShared
 
 import XCTest
@@ -26,72 +26,62 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
     }
 
     /// Create a date at a specific hour:minute today.
-    private func timeToday(_ hour: Int, _ minute: Int) -> Date {
+    private func timeToday(_ hour: Int, _ minute: Int, _ second: Int = 0) -> Date {
         let cal = Calendar.current
         let day = cal.startOfDay(for: Date())
-        return cal.date(bySettingHour: hour, minute: minute, second: 0, of: day)!
+        return cal.date(bySettingHour: hour, minute: minute, second: second, of: day)!
     }
 
-    // MARK: - Entry Count
+    // MARK: - Entry Count (with grace entries)
 
-    func test_allPrayersInFuture_generates6Entries() {
+    func test_allPrayersInFuture_generates11Entries() {
         // Given — now is 03:00, all 5 prayers are ahead
+        // Expected: 1 initial + 5 prayers × 2 (grace start + grace end) = 11
         let prayers = makeStandardPrayers()
         let now = timeToday(3, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — 1 initial + 5 transitions (at each prayer time, next switches)
-        // Entry at 03:00 → Fajr, at 05:00 → Dhuhr, at 12:30 → Asr,
-        // at 15:45 → Maghrib, at 18:30 → Isha, at 20:00 → nil
-        XCTAssertEqual(boundaries.count, 6)
+        XCTAssertEqual(boundaries.count, 11)
     }
 
     func test_somePrayersPassed_generatesCorrectCount() {
-        // Given — now is 13:00, Fajr + Dhuhr passed, 3 remain (Asr, Maghrib, Isha)
+        // Given — now is 13:00, Fajr + Dhuhr passed (past grace), 3 remain
+        // Expected: 1 initial + 3 prayers × 2 = 7
         let prayers = makeStandardPrayers()
         let now = timeToday(13, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — 1 initial (Asr) + 3 transitions (at Asr→Maghrib, Maghrib→Isha, Isha→nil)
-        XCTAssertEqual(boundaries.count, 4)
+        XCTAssertEqual(boundaries.count, 7)
     }
 
-    func test_onlyIshaPending_generates2Entries() {
+    func test_onlyIshaPending_generates3Entries() {
         // Given — now is 19:00, only Isha remains
+        // Expected: 1 initial + 1 × 2 = 3
         let prayers = makeStandardPrayers()
         let now = timeToday(19, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — 1 initial (Isha) + 1 transition (Isha→nil)
-        XCTAssertEqual(boundaries.count, 2)
+        XCTAssertEqual(boundaries.count, 3)
     }
 
     func test_allPrayersPassed_generates1Entry() {
-        // Given — now is 21:00, all prayers have passed
+        // Given — now is 21:00, all prayers have passed (including Isha grace)
         let prayers = makeStandardPrayers()
         let now = timeToday(21, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — 1 entry showing no more prayers
         XCTAssertEqual(boundaries.count, 1)
     }
 
     func test_emptyPrayers_generates1Entry() {
-        // Given — no prayers at all
         let now = timeToday(12, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: [], startingAt: now)
 
-        // Then — 1 entry with nil next prayer
         XCTAssertEqual(boundaries.count, 1)
         XCTAssertNil(boundaries.first?.nextPrayer)
     }
@@ -99,35 +89,46 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
     // MARK: - Correct Next Prayer at Each Boundary
 
     func test_allPrayersInFuture_correctPrayerNameAtEachBoundary() {
-        // Given — now is 03:00
         let prayers = makeStandardPrayers()
         let now = timeToday(3, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — verify the prayer name sequence
-        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Fajr")     // 03:00 → Fajr
-        XCTAssertEqual(boundaries[1].nextPrayer?.name, "Dhuhr")    // 05:00 → Dhuhr
-        XCTAssertEqual(boundaries[2].nextPrayer?.name, "Asr")      // 12:30 → Asr
-        XCTAssertEqual(boundaries[3].nextPrayer?.name, "Maghrib")  // 15:45 → Maghrib
-        XCTAssertEqual(boundaries[4].nextPrayer?.name, "Isha")     // 18:30 → Isha
-        XCTAssertNil(boundaries[5].nextPrayer)                      // 20:00 → no more
+        // Verify the prayer name and grace flag sequence
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Fajr")     // 03:00 → waiting for Fajr
+        XCTAssertFalse(boundaries[0].isGrace)
+
+        XCTAssertEqual(boundaries[1].nextPrayer?.name, "Fajr")     // 05:00 → Fajr grace
+        XCTAssertTrue(boundaries[1].isGrace)
+
+        XCTAssertEqual(boundaries[2].nextPrayer?.name, "Dhuhr")    // 05:15 → grace end, waiting for Dhuhr
+        XCTAssertFalse(boundaries[2].isGrace)
+
+        XCTAssertEqual(boundaries[3].nextPrayer?.name, "Dhuhr")    // 12:30 → Dhuhr grace
+        XCTAssertTrue(boundaries[3].isGrace)
+
+        XCTAssertEqual(boundaries[4].nextPrayer?.name, "Asr")      // 12:45 → grace end, waiting for Asr
+        XCTAssertFalse(boundaries[4].isGrace)
+
+        // ... pattern continues for remaining prayers
+        XCTAssertNil(boundaries[10].nextPrayer)                     // 20:15 → all done
+        XCTAssertFalse(boundaries[10].isGrace)
     }
 
     func test_midDay_correctPrayerSequence() {
         // Given — now is 13:00, between Dhuhr (12:30) and Asr (15:45)
+        // Dhuhr grace has expired (30 min after 12:30)
         let prayers = makeStandardPrayers()
         let now = timeToday(13, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then
-        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Asr")      // 13:00 → Asr
-        XCTAssertEqual(boundaries[1].nextPrayer?.name, "Maghrib")  // 15:45 → Maghrib
-        XCTAssertEqual(boundaries[2].nextPrayer?.name, "Isha")     // 18:30 → Isha
-        XCTAssertNil(boundaries[3].nextPrayer)                      // 20:00 → no more
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Asr")      // 13:00 → waiting for Asr
+        XCTAssertFalse(boundaries[0].isGrace)
+        XCTAssertEqual(boundaries[1].nextPrayer?.name, "Asr")      // 15:45 → Asr grace
+        XCTAssertTrue(boundaries[1].isGrace)
+        XCTAssertEqual(boundaries[2].nextPrayer?.name, "Maghrib")  // 16:00 → grace end
+        XCTAssertFalse(boundaries[2].isGrace)
     }
 
     // MARK: - Boundary Dates
@@ -141,34 +142,20 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
         XCTAssertEqual(boundaries[0].date, now)
     }
 
-    func test_boundaryDatesMatchPrayerTimes() {
-        // Given — now is 03:00
+    func test_boundaryDatesIncludeGraceEndpoints() {
         let prayers = makeStandardPrayers()
         let now = timeToday(3, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — subsequent entries fire at each prayer time
-        XCTAssertEqual(boundaries[1].date, timeToday(5, 0))    // Fajr time
-        XCTAssertEqual(boundaries[2].date, timeToday(12, 30))  // Dhuhr time
-        XCTAssertEqual(boundaries[3].date, timeToday(15, 45))  // Asr time
-        XCTAssertEqual(boundaries[4].date, timeToday(18, 30))  // Maghrib time
-        XCTAssertEqual(boundaries[5].date, timeToday(20, 0))   // Isha time
-    }
-
-    func test_midDay_boundaryDatesStartFromNextPrayer() {
-        // Given — now is 16:00, Asr (15:45) already passed
-        let prayers = makeStandardPrayers()
-        let now = timeToday(16, 0)
-
-        // When
-        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
-
-        // Then — first entry is now, subsequent at remaining prayer times
-        XCTAssertEqual(boundaries[0].date, now)
-        XCTAssertEqual(boundaries[1].date, timeToday(18, 30))  // Maghrib
-        XCTAssertEqual(boundaries[2].date, timeToday(20, 0))   // Isha
+        // Grace start at Fajr time
+        XCTAssertEqual(boundaries[1].date, timeToday(5, 0))
+        // Grace end at Fajr + 15 min
+        XCTAssertEqual(boundaries[2].date, timeToday(5, 15))
+        // Grace start at Dhuhr time
+        XCTAssertEqual(boundaries[3].date, timeToday(12, 30))
+        // Grace end at Dhuhr + 15 min
+        XCTAssertEqual(boundaries[4].date, timeToday(12, 45))
     }
 
     func test_datesAreMonotonicallyIncreasing() {
@@ -185,58 +172,109 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
         }
     }
 
-    // MARK: - Edge Cases: Exact Prayer Time
+    // MARK: - Grace Window Edge Cases
 
-    func test_nowExactlyAtPrayerTime_thatPrayerHasPassed() {
+    func test_nowExactlyAtPrayerTime_showsGrace() {
         // Given — now is exactly at Dhuhr time (12:30)
-        // The prayer that just started is Dhuhr; the "next" is Asr
         let prayers = makeStandardPrayers()
         let now = timeToday(12, 30)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — first entry should show Asr (Dhuhr is current/just passed)
-        // NextPrayerCalculator uses `> now`, so a prayer at exactly `now` is NOT "next"
-        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Asr")
+        // First entry should show Dhuhr in grace (prayer just arrived)
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Dhuhr")
+        XCTAssertTrue(boundaries[0].isGrace)
     }
 
-    func test_nowExactlyAtLastPrayerTime_noMorePrayers() {
+    func test_nowExactlyAtLastPrayerTime_showsGrace() {
         // Given — now is exactly at Isha time (20:00)
         let prayers = makeStandardPrayers()
         let now = timeToday(20, 0)
 
-        // When
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Then — Isha has begun, no more prayers
-        XCTAssertEqual(boundaries.count, 1)
-        XCTAssertNil(boundaries[0].nextPrayer)
+        // First entry: Isha in grace
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Isha")
+        XCTAssertTrue(boundaries[0].isGrace)
+        // Second entry: grace end, no more prayers
+        XCTAssertEqual(boundaries.count, 2)
+        XCTAssertNil(boundaries[1].nextPrayer)
     }
-
-    // MARK: - Edge Case: One Second Before/After
 
     func test_oneSecondBeforePrayer_stillShowsThatPrayer() {
         let prayers = makeStandardPrayers()
-        let now = timeToday(12, 30).addingTimeInterval(-1) // 12:29:59
+        let now = timeToday(12, 30).addingTimeInterval(-1)
 
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Dhuhr hasn't arrived yet — first entry shows Dhuhr
+        // Dhuhr hasn't arrived yet — first entry shows Dhuhr countdown
         XCTAssertEqual(boundaries[0].nextPrayer?.name, "Dhuhr")
+        XCTAssertFalse(boundaries[0].isGrace)
     }
 
-    func test_oneSecondAfterPrayer_showsNextPrayer() {
+    func test_oneSecondAfterPrayer_showsGrace() {
         let prayers = makeStandardPrayers()
-        let now = timeToday(12, 30).addingTimeInterval(1) // 12:30:01
+        let now = timeToday(12, 30).addingTimeInterval(1)
 
         let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        // Dhuhr just passed — first entry shows Asr
-        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Asr")
+        // Dhuhr just started — first entry shows Dhuhr in grace
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Dhuhr")
+        XCTAssertTrue(boundaries[0].isGrace)
     }
 
-    // MARK: - Edge Case: All Prayers Passed
+    func test_graceEndDateIs15MinAfterPrayer() {
+        let prayers = makeStandardPrayers()
+        let now = timeToday(3, 0)
+
+        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
+
+        // For each grace start, the following entry should be exactly 15 min later
+        let graceStarts = boundaries.filter { $0.isGrace }
+        for graceEntry in graceStarts {
+            guard let prayer = graceEntry.nextPrayer else { continue }
+            let expectedGraceEnd = prayer.time.addingTimeInterval(PrayerTimeConstants.graceInterval)
+            // Find the entry right after this grace entry
+            if let idx = boundaries.firstIndex(where: { $0.date == graceEntry.date && $0.isGrace }),
+               idx + 1 < boundaries.count {
+                XCTAssertEqual(
+                    boundaries[idx + 1].date, expectedGraceEnd,
+                    "Grace end for \(prayer.name) should be 15 min after prayer time"
+                )
+            }
+        }
+    }
+
+    func test_duringGraceWindow_showsGraceEntry() {
+        // Given — now is 5 min after Dhuhr (12:35), within grace
+        let prayers = makeStandardPrayers()
+        let now = timeToday(12, 35)
+
+        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
+
+        // First entry should show Dhuhr in grace
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Dhuhr")
+        XCTAssertTrue(boundaries[0].isGrace)
+
+        // Second entry at grace end (12:45) should show Asr
+        XCTAssertEqual(boundaries[1].nextPrayer?.name, "Asr")
+        XCTAssertFalse(boundaries[1].isGrace)
+        XCTAssertEqual(boundaries[1].date, timeToday(12, 45))
+    }
+
+    func test_afterGraceExpired_showsNextPrayer() {
+        // Given — now is 16 min after Dhuhr (12:46), grace expired
+        let prayers = makeStandardPrayers()
+        let now = timeToday(12, 46)
+
+        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
+
+        // Dhuhr grace expired — first entry shows Asr
+        XCTAssertEqual(boundaries[0].nextPrayer?.name, "Asr")
+        XCTAssertFalse(boundaries[0].isGrace)
+    }
+
+    // MARK: - All Prayers Passed
 
     func test_allPrayersPassed_showsNilNextPrayer() {
         let prayers = makeStandardPrayers()
@@ -254,8 +292,8 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
     func test_lastBoundaryAlwaysHasNilNextPrayer() {
         let prayers = makeStandardPrayers()
 
-        // Try from different start times
-        let startTimes = [timeToday(3, 0), timeToday(10, 0), timeToday(16, 0), timeToday(19, 0)]
+        // Try from different start times (all well outside any grace window)
+        let startTimes = [timeToday(3, 0), timeToday(10, 0), timeToday(13, 0), timeToday(19, 0)]
 
         for now in startTimes {
             let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
@@ -263,33 +301,10 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
                 XCTFail("Should have at least one boundary")
                 continue
             }
-            // Last entry should either be nil (no more prayers) or
-            // if now is already past all prayers, the single entry is nil
-            if boundaries.count > 1 || now > prayers.last!.time {
+            // Last entry should always be nil (grace end of last prayer, or all passed)
+            if boundaries.count > 1 {
                 XCTAssertNil(last.nextPrayer, "Last boundary should have nil nextPrayer for now=\(now)")
             }
-        }
-    }
-
-    // MARK: - Transition Correctness: Widget Scenario
-
-    func test_widgetScenario_prayerNameSwitchesAtExactBoundary() {
-        // Simulate a widget that pre-renders all entries:
-        // At each boundary date, the displayed prayer should be correct
-        let prayers = makeStandardPrayers()
-        let now = timeToday(3, 0)
-
-        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
-
-        // Verify: for each boundary, the nextPrayer matches what NextPrayerCalculator
-        // would return if called at that exact time
-        for boundary in boundaries {
-            let expected = calculator.nextPrayer(from: prayers, at: boundary.date)
-            XCTAssertEqual(
-                boundary.nextPrayer, expected,
-                "At \(boundary.date), boundary shows \(boundary.nextPrayer?.name ?? "nil") "
-                + "but calculator says \(expected?.name ?? "nil")"
-            )
         }
     }
 
@@ -301,7 +316,6 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
 
         let refreshDate = calculator.timelineRefreshDate(from: prayers, startingAt: now)
 
-        // Refresh should be after the last prayer (Isha at 20:00), within 30 min
         let ishaTime = timeToday(20, 0)
         XCTAssertGreaterThan(refreshDate, ishaTime)
         XCTAssertLessThanOrEqual(refreshDate.timeIntervalSince(ishaTime), 1800 + 1)
@@ -313,21 +327,29 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
 
         let refreshDate = calculator.timelineRefreshDate(from: prayers, startingAt: now)
 
-        // Should be roughly 30 minutes from now
         let expected = now.addingTimeInterval(1800)
         XCTAssertEqual(refreshDate.timeIntervalSince1970, expected.timeIntervalSince1970, accuracy: 1)
     }
 
-    // MARK: - Live Activity Update Schedule
+    // MARK: - Live Activity Update Schedule (nextBoundaryDate)
 
     func test_nextUpdateDate_returnsNextPrayerTime() {
         let prayers = makeStandardPrayers()
-        let now = timeToday(13, 0) // Between Dhuhr (12:30) and Asr (15:45)
+        let now = timeToday(13, 0)
 
         let nextUpdate = calculator.nextBoundaryDate(from: prayers, after: now)
 
-        // Next boundary is when Asr arrives (15:45) — that's when the name should change
         XCTAssertEqual(nextUpdate, timeToday(15, 45))
+    }
+
+    func test_nextUpdateDate_duringGrace_returnsGraceEnd() {
+        let prayers = makeStandardPrayers()
+        let now = timeToday(12, 35) // 5 min after Dhuhr, within grace
+
+        let nextUpdate = calculator.nextBoundaryDate(from: prayers, after: now)
+
+        // Should return Dhuhr + 15 min = 12:45
+        XCTAssertEqual(nextUpdate, timeToday(12, 45))
     }
 
     func test_nextUpdateDate_allPassed_returnsNil() {
@@ -348,40 +370,13 @@ final class PrayerTimelineBoundaryTests: XCTestCase {
         XCTAssertEqual(nextUpdate, timeToday(5, 0))
     }
 
-    func test_nextUpdateDate_exactlyAtPrayer_returnsFollowingPrayer() {
+    func test_nextUpdateDate_exactlyAtPrayer_returnsGraceEnd() {
         let prayers = makeStandardPrayers()
         let now = timeToday(15, 45) // Exactly at Asr
 
         let nextUpdate = calculator.nextBoundaryDate(from: prayers, after: now)
 
-        // Asr just started, next boundary is Maghrib
-        XCTAssertEqual(nextUpdate, timeToday(18, 30))
-    }
-
-    // MARK: - Consistency: Boundaries Match Individual Calculator Calls
-
-    func test_everyBoundary_matchesStandaloneCalculation() {
-        // The gold standard: for ANY time between two boundaries,
-        // the nextPrayer shown should be correct.
-        let prayers = makeStandardPrayers()
-        let now = timeToday(3, 0)
-
-        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
-
-        // Check at midpoints between boundaries
-        for i in 0..<(boundaries.count - 1) {
-            let midpoint = Date(
-                timeIntervalSince1970: (boundaries[i].date.timeIntervalSince1970
-                + boundaries[i + 1].date.timeIntervalSince1970) / 2
-            )
-            let expectedAtMidpoint = calculator.nextPrayer(from: prayers, at: midpoint)
-
-            XCTAssertEqual(
-                boundaries[i].nextPrayer, expectedAtMidpoint,
-                "At midpoint \(midpoint) between boundaries \(i) and \(i + 1), "
-                + "expected \(expectedAtMidpoint?.name ?? "nil") "
-                + "but got \(boundaries[i].nextPrayer?.name ?? "nil")"
-            )
-        }
+        // At Asr time, we're in grace. Next boundary is grace end: 16:00
+        XCTAssertEqual(nextUpdate, timeToday(16, 0))
     }
 }

@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Combine
+import SafaShared
 
 struct HomeView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -29,6 +30,9 @@ struct HomeView: View {
     @State private var hideResumeCard = false
     @State private var isResumeCardExpanded = false
     @State private var isDailyVerseExpanded = true
+
+    // Timer to advance nextPrayer when grace window expires
+    let graceExpiryTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     // Eid state
     @State private var currentEidType: EidType?
@@ -164,10 +168,22 @@ struct HomeView: View {
         .task {
             await loadHomeData()
         }
+        .onReceive(graceExpiryTimer) { _ in
+            let now = Date()
+            // If current nextPrayer's grace window has expired, advance to the truly-next prayer
+            if let current = nextPrayer,
+               now.timeIntervalSince(current.time) >= PrayerTimeConstants.graceInterval {
+                nextPrayer = todayPrayers.first { $0.time > now && $0.type.isObligatory }
+            }
+        }
         .onAppear {
             Task { await reloadLoggedPrayers() }
             // Recalculate next prayer (may have changed since last appear)
-            nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
+            // Include prayers in grace window (0-15 min after prayer time)
+            let now = Date()
+            nextPrayer = todayPrayers.first {
+                $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now))
+            }
             // Re-check Ramadan state (respects Force Ramadan Mode toggle)
             isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
             if isRamadan && !HijriDateConverter.shared.isRamadan() {
@@ -734,7 +750,10 @@ struct HomeView: View {
                 )
             }
             if !todayPrayers.isEmpty {
-                nextPrayer = todayPrayers.first { $0.time > Date() && $0.type.isObligatory }
+                let loadNow = Date()
+                nextPrayer = todayPrayers.first {
+                    $0.type.isObligatory && ($0.time > loadNow || isPrayerTimeNow($0.time, at: loadNow))
+                }
 
                 // Load logged prayers for today
                 let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
@@ -781,13 +800,14 @@ private struct NextPrayerHomeCard: View {
     let action: () -> Void
 
     @State private var countdown = ""
+    @State private var isGrace = false
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         InteractiveCard(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                    Text("Next Prayer")
+                    Text(isGrace ? "Time to pray" : "Next Prayer")
                         .font(SafaTypography.labelMedium)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
 
@@ -803,7 +823,7 @@ private struct NextPrayerHomeCard: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: SafaSpacing.xxs) {
-                    Text("Time until next prayer")
+                    Text(isGrace ? "Time to pray" : "Time until next prayer")
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
 
@@ -827,11 +847,21 @@ private struct NextPrayerHomeCard: View {
     }
 
     private func updateCountdown() {
-        let (hours, minutes, seconds) = prayer.time.countdown()
-        countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
+            // During grace, or grace expired but parent hasn't advanced nextPrayer yet
+            countdown = String(localized: "Prayer time")
+            isGrace = true
+        } else {
+            let (hours, minutes, seconds) = prayer.time.countdown()
+            countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+            isGrace = false
+        }
     }
 
     private var accessibilityText: String {
+        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
+            return String(localized: "It's time for \(prayer.type.displayName)")
+        }
         let (hours, minutes, _) = prayer.time.countdown()
         return formatNextPrayerAccessibilityLabel(
             prayerName: prayer.type.displayName,
@@ -954,6 +984,7 @@ private struct NextPrayerChip: View {
     let action: () -> Void
 
     @State private var countdown = ""
+    @State private var isGrace = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -996,11 +1027,21 @@ private struct NextPrayerChip: View {
     }
 
     private func updateCountdown() {
-        let (hours, minutes, seconds) = prayer.time.countdown()
-        countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
+            // During grace, or grace expired but parent hasn't advanced nextPrayer yet
+            countdown = String(localized: "Prayer time")
+            isGrace = true
+        } else {
+            let (hours, minutes, seconds) = prayer.time.countdown()
+            countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+            isGrace = false
+        }
     }
 
     private var accessibilityText: String {
+        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
+            return String(localized: "It's time for \(prayer.type.displayName)")
+        }
         let (hours, minutes, _) = prayer.time.countdown()
         return formatNextPrayerAccessibilityLabel(
             prayerName: prayer.type.displayName,

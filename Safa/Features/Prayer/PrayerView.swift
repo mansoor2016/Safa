@@ -4,6 +4,8 @@
 
 import SwiftUI
 import CoreLocation
+import Combine
+import SafaShared
 
 struct PrayerView: View {
     @Environment(Dependencies.self) private var dependencies
@@ -38,6 +40,9 @@ private struct PrayerContentView: View {
     @State private var showingQibla = false
     @State private var showingSettings = false
     @State private var deferredLogPrayer: PrayerType?
+
+    // Timer to recompute nextPrayer indicator when grace window expires
+    let prayerRefreshTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ScrollableScreen {
@@ -132,6 +137,9 @@ private struct PrayerContentView: View {
             viewModel.updateNextPrayerIndicator()
             handlePendingNotificationAction()
         }
+        .onReceive(prayerRefreshTimer) { _ in
+            viewModel.updateNextPrayerIndicator()
+        }
         .onChange(of: router.pendingNotificationAction) { _, newValue in
             if newValue != nil { handlePendingNotificationAction() }
         }
@@ -211,15 +219,35 @@ private struct NextPrayerCard: View {
                     .frame(width: 32)
 
                 // Countdown + prayer info
-                HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
-                    Text(prayer.time, style: .timer)
-                        .font(SafaTypography.headlineLarge)
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
+                TimelineView(PeriodicTimelineSchedule(from: .now, by: 1)) { _ in
+                    let inGrace = isPrayerTimeNow(prayer.time)
+                    let inFuture = prayer.time > Date()
+                    HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
+                        if inGrace {
+                            Text("Prayer time")
+                                .font(SafaTypography.headlineLarge)
+                        } else if inFuture {
+                            Text(prayer.time, style: .timer)
+                                .font(SafaTypography.headlineLarge)
+                                .monospacedDigit()
+                                .contentTransition(.numericText())
+                        } else {
+                            // Grace expired but parent hasn't re-rendered yet —
+                            // show "Prayer time" briefly to avoid count-up display
+                            Text("Prayer time")
+                                .font(SafaTypography.headlineLarge)
+                        }
 
-                    Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
+                        if inGrace || !inFuture {
+                            Text("\(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                .font(SafaTypography.labelMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                        } else {
+                            Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                .font(SafaTypography.labelMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                        }
+                    }
                 }
 
                 Spacer()
@@ -231,6 +259,9 @@ private struct NextPrayerCard: View {
     }
 
     private var nextPrayerAccessibilityLabel: String {
+        if isPrayerTimeNow(prayer.time) {
+            return String(localized: "It's time for \(prayer.type.displayName) prayer")
+        }
         let (hours, minutes, _) = prayer.time.countdown()
         let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
         if hours > 0 {

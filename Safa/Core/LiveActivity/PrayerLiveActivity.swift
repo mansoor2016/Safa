@@ -76,25 +76,32 @@ final class PrayerLiveActivityManager {
             madhab: prefs.madhab
         ) else { return }
 
-        // Find next obligatory prayer
+        // Find next obligatory prayer (including those in grace window)
         let now = Date()
-        guard let next = prayers.first(where: { $0.time > now && $0.type.isObligatory }) else {
-            // All prayers passed — end all activities (including orphans from previous sessions)
+        let obligatory = prayers.filter { $0.type.isObligatory }
+
+        // Check for a prayer in its grace window first
+        let gracePrayer = obligatory.last { isPrayerTimeNow($0.time, at: now) }
+        let futurePrayer = obligatory.first { $0.time > now }
+
+        guard let activePrayer = gracePrayer ?? futurePrayer else {
+            // All prayers passed (including grace) — end all activities
             await endAllActivities()
             return
         }
 
+        let isGrace = gracePrayer != nil
         let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .full)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
-        let prayerInfos = prayers
-            .filter { $0.type.isObligatory }
+        let prayerInfos = obligatory
             .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
 
         await updateActivity(
-            prayerName: next.type.localizedDisplayName,
-            prayerTime: next.time,
+            prayerName: activePrayer.type.localizedDisplayName,
+            prayerTime: activePrayer.time,
             hijriDate: hijri,
-            locationName: location
+            locationName: location,
+            isGrace: isGrace
         )
         scheduleBoundaryUpdates(
             prayers: prayerInfos,
@@ -109,7 +116,8 @@ final class PrayerLiveActivityManager {
         prayerName: String,
         prayerTime: Date,
         hijriDate: String,
-        locationName: String
+        locationName: String,
+        isGrace: Bool = false
     ) {
         guard PreferencesManager.loadPreferencesSync().liveActivityEnabled else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
@@ -119,10 +127,11 @@ final class PrayerLiveActivityManager {
             nextPrayerName: prayerName,
             nextPrayerTime: prayerTime,
             hijriDate: hijriDate,
-            locationName: locationName
+            locationName: locationName,
+            isGrace: isGrace
         )
 
-        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime))
+        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime, isGrace: isGrace))
 
         do {
             currentActivity = try Activity.request(
@@ -141,7 +150,8 @@ final class PrayerLiveActivityManager {
         prayerName: String,
         prayerTime: Date,
         hijriDate: String,
-        locationName: String
+        locationName: String,
+        isGrace: Bool = false
     ) async {
         // Reattach to existing system activity if handle was lost (cold launch)
         if currentActivity == nil {
@@ -163,7 +173,8 @@ final class PrayerLiveActivityManager {
                 prayerName: prayerName,
                 prayerTime: prayerTime,
                 hijriDate: hijriDate,
-                locationName: locationName
+                locationName: locationName,
+                isGrace: isGrace
             )
             return
         }
@@ -172,10 +183,11 @@ final class PrayerLiveActivityManager {
             nextPrayerName: prayerName,
             nextPrayerTime: prayerTime,
             hijriDate: hijriDate,
-            locationName: locationName
+            locationName: locationName,
+            isGrace: isGrace
         )
 
-        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime))
+        let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime, isGrace: isGrace))
 
         await activity.update(content)
     }
@@ -185,6 +197,12 @@ final class PrayerLiveActivityManager {
     /// Schedule Live Activity updates at each prayer boundary so the displayed prayer
     /// name switches at the correct time. Uses Task.sleep to wake at each boundary.
     /// Only effective while the app process is alive (foreground or recently backgrounded).
+    /// Schedule Live Activity updates at each prayer boundary so the displayed prayer
+    /// name switches at the correct time. Also handles grace windows (15 min after prayer time).
+    ///
+    /// **Limitation:** When app is suspended (>30s background), Task.sleep is frozen.
+    /// The Live Activity may show stale content until the app is foregrounded or a push
+    /// notification updates it. This is an ActivityKit limitation.
     func scheduleBoundaryUpdates(
         prayers: [PrayerInfo],
         hijriDate: String,
@@ -214,17 +232,32 @@ final class PrayerLiveActivityManager {
                 guard !Task.isCancelled else { return }
 
                 now = Date()
-                let next = self.calculator.nextPrayer(from: prayers, at: now)
-                if let next {
+
+                // Check if a prayer just arrived (entering grace window)
+                if let gracePrayer = prayers.last(where: { isPrayerTimeNow($0.time, at: now) }) {
+                    // Show grace state
                     await self.updateActivity(
-                        prayerName: next.name,
-                        prayerTime: next.time,
+                        prayerName: gracePrayer.name,
+                        prayerTime: gracePrayer.time,
                         hijriDate: hijriDate,
-                        locationName: locationName
+                        locationName: locationName,
+                        isGrace: true
                     )
                 } else {
-                    await self.endActivity()
-                    return
+                    // Grace ended or normal transition — show next prayer
+                    let next = self.calculator.nextPrayer(from: prayers, at: now)
+                    if let next {
+                        await self.updateActivity(
+                            prayerName: next.name,
+                            prayerTime: next.time,
+                            hijriDate: hijriDate,
+                            locationName: locationName,
+                            isGrace: false
+                        )
+                    } else {
+                        await self.endActivity()
+                        return
+                    }
                 }
             }
         }

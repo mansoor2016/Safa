@@ -4,6 +4,7 @@
 
 import XCTest
 @testable import Safa
+import SafaShared
 
 final class DateExtensionTests: XCTestCase {
 
@@ -187,6 +188,50 @@ final class DateExtensionTests: XCTestCase {
 
         // Just verify it returns something
         XCTAssertFalse(result.isEmpty)
+    }
+
+    // MARK: - isPrayerTimeNow Behavior Tests
+    // These verify the grace window behavior contract: "Prayer time" shows
+    // for exactly 15 minutes after a prayer's time arrives, then stops.
+
+    func test_graceInterval_is15Minutes() {
+        XCTAssertEqual(PrayerTimeConstants.graceInterval, 15 * 60,
+            "Grace interval should be exactly 15 minutes (900 seconds)")
+    }
+
+    func test_isPrayerTimeNow_exactlyAtPrayerTime_true() {
+        let prayerTime = Date()
+        XCTAssertTrue(isPrayerTimeNow(prayerTime, at: prayerTime))
+    }
+
+    func test_isPrayerTimeNow_5minAfter_true() {
+        let prayerTime = Date()
+        let fiveMinLater = prayerTime.addingTimeInterval(5 * 60)
+        XCTAssertTrue(isPrayerTimeNow(prayerTime, at: fiveMinLater))
+    }
+
+    func test_isPrayerTimeNow_14min59sAfter_true() {
+        let prayerTime = Date()
+        let almostExpired = prayerTime.addingTimeInterval(14 * 60 + 59)
+        XCTAssertTrue(isPrayerTimeNow(prayerTime, at: almostExpired))
+    }
+
+    func test_isPrayerTimeNow_15minAfter_false() {
+        let prayerTime = Date()
+        let exactlyExpired = prayerTime.addingTimeInterval(15 * 60)
+        XCTAssertFalse(isPrayerTimeNow(prayerTime, at: exactlyExpired))
+    }
+
+    func test_isPrayerTimeNow_beforePrayerTime_false() {
+        let prayerTime = Date()
+        let oneMinBefore = prayerTime.addingTimeInterval(-60)
+        XCTAssertFalse(isPrayerTimeNow(prayerTime, at: oneMinBefore))
+    }
+
+    func test_isPrayerTimeNow_1hourAfter_false() {
+        let prayerTime = Date()
+        let oneHourLater = prayerTime.addingTimeInterval(3600)
+        XCTAssertFalse(isPrayerTimeNow(prayerTime, at: oneHourLater))
     }
 
     // MARK: - Helper Methods

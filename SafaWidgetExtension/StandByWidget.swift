@@ -16,6 +16,8 @@ struct StandByPrayerEntry: TimelineEntry {
     let fajrTime: Date?
     let hijriDate: String
     let configuration: StandByConfigIntent
+    /// Whether the prayer time has just arrived (grace window: 0-15 min after prayer time).
+    let isGrace: Bool
 }
 
 // MARK: - Widget Provider
@@ -28,7 +30,8 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
             nextPrayerTime: Date().addingTimeInterval(3600),
             fajrTime: Date().addingTimeInterval(3600),
             hijriDate: HijriDateHelper().hijriDateString(),
-            configuration: StandByConfigIntent()
+            configuration: StandByConfigIntent(),
+            isGrace: false
         )
     }
 
@@ -39,26 +42,38 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
             nextPrayerTime: Date().addingTimeInterval(18000),
             fajrTime: Date().addingTimeInterval(18000),
             hijriDate: HijriDateHelper().hijriDateString(),
-            configuration: configuration
+            configuration: configuration,
+            isGrace: false
         )
     }
 
     func timeline(for configuration: StandByConfigIntent, in context: Context) async -> Timeline<StandByPrayerEntry> {
         let prayerData = loadPrayerData()
+        let isGrace = isPrayerTimeNow(prayerData.nextPrayerTime)
         let entry = StandByPrayerEntry(
             date: Date(),
             nextPrayer: prayerData.nextPrayer,
             nextPrayerTime: prayerData.nextPrayerTime,
             fajrTime: prayerData.fajrTime,
             hijriDate: prayerData.hijriDate,
-            configuration: configuration
+            configuration: configuration,
+            isGrace: isGrace
         )
 
-        // Refresh at next prayer time or every 30 minutes
-        let nextUpdate = min(
-            prayerData.nextPrayerTime,
-            Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
-        )
+        // Refresh at grace end, next prayer time, or every 30 minutes
+        let fallback = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
+        let nextUpdate: Date
+        if isGrace {
+            // Refresh when grace ends
+            let graceEnd = prayerData.nextPrayerTime.addingTimeInterval(PrayerTimeConstants.graceInterval)
+            nextUpdate = min(graceEnd, fallback)
+        } else if prayerData.nextPrayerTime > Date() {
+            // Refresh at next prayer time
+            nextUpdate = min(prayerData.nextPrayerTime, fallback)
+        } else {
+            // Prayer time is in the past (stale data) — use 30 min fallback
+            nextUpdate = fallback
+        }
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
 
@@ -137,10 +152,16 @@ struct SmallStandByView: View {
                 .foregroundColor(.accentColor)
                 .minimumScaleFactor(0.6)
 
-            // Countdown
-            Text(entry.nextPrayerTime, style: .relative)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(secondaryColor)
+            // Countdown or grace message
+            if entry.isGrace {
+                Text("Prayer time")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(secondaryColor)
+            } else {
+                Text(entry.nextPrayerTime, style: .relative)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(secondaryColor)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -173,7 +194,7 @@ struct MediumStandByView: View {
                         .font(.title2)
                         .foregroundColor(.accentColor)
 
-                    Text("Next Prayer")
+                    Text(entry.isGrace ? "Time to pray" : "Next Prayer")
                         .font(.caption)
                         .foregroundColor(secondaryColor)
                 }
@@ -187,9 +208,15 @@ struct MediumStandByView: View {
                     .foregroundColor(.accentColor)
                     .minimumScaleFactor(0.7)
 
-                Text(entry.nextPrayerTime, style: .relative)
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(secondaryColor)
+                if entry.isGrace {
+                    Text("Prayer time")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(secondaryColor)
+                } else {
+                    Text(entry.nextPrayerTime, style: .relative)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(secondaryColor)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -211,10 +238,17 @@ struct MediumStandByView: View {
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.orange)
 
-                    Text(fajrTime, style: .relative)
-                        .font(.caption)
-                        .foregroundColor(secondaryColor)
-                        .multilineTextAlignment(.center)
+                    if isPrayerTimeNow(fajrTime) {
+                        Text("Prayer time")
+                            .font(.caption)
+                            .foregroundColor(secondaryColor)
+                            .multilineTextAlignment(.center)
+                    } else if fajrTime > Date() {
+                        Text(fajrTime, style: .relative)
+                            .font(.caption)
+                            .foregroundColor(secondaryColor)
+                            .multilineTextAlignment(.center)
+                    }
                 }
                 .frame(maxWidth: .infinity)
             } else {
@@ -285,7 +319,8 @@ struct StandByPrayerWidget: Widget {
         nextPrayerTime: Date().addingTimeInterval(18000),
         fajrTime: Date().addingTimeInterval(18000),
         hijriDate: HijriDateHelper().hijriDateString(),
-        configuration: StandByConfigIntent()
+        configuration: StandByConfigIntent(),
+        isGrace: false
     )
 }
 
@@ -298,7 +333,8 @@ struct StandByPrayerWidget: Widget {
         nextPrayerTime: Date().addingTimeInterval(3600),
         fajrTime: Date().addingTimeInterval(28800),
         hijriDate: HijriDateHelper().hijriDateString(),
-        configuration: StandByConfigIntent()
+        configuration: StandByConfigIntent(),
+        isGrace: false
     )
 }
 
@@ -311,6 +347,7 @@ struct StandByPrayerWidget: Widget {
         nextPrayerTime: Date().addingTimeInterval(14400),
         fajrTime: Date().addingTimeInterval(14400),
         hijriDate: HijriDateHelper().hijriDateString(),
-        configuration: StandByConfigIntent()
+        configuration: StandByConfigIntent(),
+        isGrace: false
     )
 }

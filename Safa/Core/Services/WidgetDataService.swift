@@ -4,6 +4,7 @@
 
 import Foundation
 import WidgetKit
+import SafaShared
 
 final class WidgetDataService {
     // MARK: - Shared Instance
@@ -58,10 +59,15 @@ final class WidgetDataService {
         }
 
         // Compute and write next prayer (localized name for widget display)
+        // Include prayers in grace window (0–15 min after prayer time)
         let now = Date()
-        if let next = prayers.first(where: { $0.time > now && $0.type.isObligatory }) {
+        if let next = prayers.first(where: { $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now)) }) {
             defaults.set(next.type.localizedDisplayName, forKey: Keys.nextPrayerName)
             defaults.set(next.time, forKey: Keys.nextPrayerTime)
+        } else {
+            // All prayers past grace — clear stale keys so widgets don't show old data
+            defaults.removeObject(forKey: Keys.nextPrayerName)
+            defaults.removeObject(forKey: Keys.nextPrayerTime)
         }
 
         defaults.set(Date(), forKey: Keys.lastUpdated)

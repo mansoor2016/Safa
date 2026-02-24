@@ -20,6 +20,8 @@ struct PrayerTimeEntry: TimelineEntry {
     let nextPrayerName: String
     let nextPrayerTime: Date
     let hasNextPrayer: Bool
+    /// Whether the prayer time has just arrived (grace window: 0-15 min after prayer time).
+    let isGrace: Bool
 }
 
 // MARK: - Widget Provider
@@ -69,7 +71,7 @@ struct Provider: AppIntentTimelineProvider {
 
     private let calculator = NextPrayerCalculator()
 
-    private func makeEntry(configuration: ConfigurationAppIntent, at date: Date = Date(), nextPrayer: PrayerInfo? = nil, prayers: [PrayerInfo]? = nil) -> PrayerTimeEntry {
+    private func makeEntry(configuration: ConfigurationAppIntent, at date: Date = Date(), nextPrayer: PrayerInfo? = nil, prayers: [PrayerInfo]? = nil, isGrace: Bool = false) -> PrayerTimeEntry {
         let prayerList = prayers ?? loadPrayers()
         let next = nextPrayer ?? calculator.nextPrayer(from: prayerList, at: date)
         return PrayerTimeEntry(
@@ -79,7 +81,8 @@ struct Provider: AppIntentTimelineProvider {
             configuration: configuration,
             nextPrayerName: next?.name ?? "Isha",
             nextPrayerTime: next?.time ?? date,
-            hasNextPrayer: next != nil
+            hasNextPrayer: next != nil,
+            isGrace: isGrace
         )
     }
 
@@ -93,7 +96,8 @@ struct Provider: AppIntentTimelineProvider {
             configuration: ConfigurationAppIntent(),
             nextPrayerName: next?.name ?? "Isha",
             nextPrayerTime: next?.time ?? Date(),
-            hasNextPrayer: next != nil
+            hasNextPrayer: next != nil,
+            isGrace: false
         )
     }
 
@@ -111,7 +115,8 @@ struct Provider: AppIntentTimelineProvider {
                 configuration: configuration,
                 at: boundary.date,
                 nextPrayer: boundary.nextPrayer,
-                prayers: prayers
+                prayers: prayers,
+                isGrace: boundary.isGrace
             )
         }
 
@@ -171,7 +176,7 @@ struct SmallWidgetView: View {
             Spacer()
 
             if entry.hasNextPrayer {
-                Text("Next Prayer")
+                Text(entry.isGrace ? "Time to pray" : "Next Prayer")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
@@ -180,9 +185,15 @@ struct SmallWidgetView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
 
-                Text(entry.nextPrayerTime, style: .time)
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
+                if entry.isGrace {
+                    Text("Prayer time")
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                } else {
+                    Text(entry.nextPrayerTime, style: .time)
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                }
             } else {
                 Text("No More Prayers Today")
                     .font(.caption2)
@@ -223,7 +234,7 @@ struct MediumWidgetView: View {
                 Spacer()
 
                 if entry.hasNextPrayer {
-                    Text("Next Prayer")
+                    Text(entry.isGrace ? "Time to pray" : "Next Prayer")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -231,13 +242,19 @@ struct MediumWidgetView: View {
                         .font(.title)
                         .fontWeight(.bold)
 
-                    HStack {
-                        Text(entry.nextPrayerTime, style: .time)
-                        Text("·")
-                        Text(entry.nextPrayerTime, style: .relative)
+                    if entry.isGrace {
+                        Text("Prayer time")
+                            .font(.caption)
+                            .foregroundColor(.accentColor)
+                    } else {
+                        HStack {
+                            Text(entry.nextPrayerTime, style: .time)
+                            Text("·")
+                            Text(entry.nextPrayerTime, style: .relative)
+                        }
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
                     }
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
                 } else {
                     Spacer()
 

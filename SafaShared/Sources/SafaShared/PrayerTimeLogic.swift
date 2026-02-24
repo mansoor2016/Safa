@@ -4,6 +4,21 @@
 
 import Foundation
 
+// MARK: - Prayer Time Constants
+
+public enum PrayerTimeConstants {
+    /// Grace window after prayer time arrives (15 minutes).
+    /// During this window, "Prayer time" is shown instead of a countdown.
+    public static let graceInterval: TimeInterval = 15 * 60
+}
+
+/// Whether the given prayer time is in its grace window (0...15 min after prayer time).
+/// Pure function — accepts a reference date for testability.
+public func isPrayerTimeNow(_ prayerTime: Date, at reference: Date = Date()) -> Bool {
+    let elapsed = reference.timeIntervalSince(prayerTime)
+    return elapsed >= 0 && elapsed < PrayerTimeConstants.graceInterval
+}
+
 // MARK: - Prayer Info
 
 public struct PrayerInfo: Equatable, Sendable {
@@ -58,23 +73,41 @@ public struct NextPrayerCalculator {
     ///  maghribTime → Isha, ishaTime → nil]
     /// ```
     public func timelineBoundaries(from prayers: [PrayerInfo], startingAt now: Date) -> [PrayerBoundary] {
-        // Find prayers that haven't passed yet
+        // Find prayers that haven't passed yet (including those in grace window)
         let futurePrayers = prayers.filter { $0.time > now }
 
-        // If no future prayers, single entry with nil
-        guard !futurePrayers.isEmpty else {
+        // Check if any prayer is currently in its grace window
+        let graceActivePrayer = prayers.last { isPrayerTimeNow($0.time, at: now) }
+
+        // If no future prayers and no grace prayer, single entry with nil
+        guard !futurePrayers.isEmpty || graceActivePrayer != nil else {
             return [PrayerBoundary(date: now, nextPrayer: nil)]
         }
 
         var boundaries: [PrayerBoundary] = []
 
-        // First entry: now, showing the next upcoming prayer
-        boundaries.append(PrayerBoundary(date: now, nextPrayer: futurePrayers[0]))
+        if let gracePrayer = graceActivePrayer {
+            // Currently in grace window — show grace entry first
+            boundaries.append(PrayerBoundary(date: now, nextPrayer: gracePrayer, isGrace: true))
+            // At grace end, switch to the next future prayer
+            let graceEnd = gracePrayer.time.addingTimeInterval(PrayerTimeConstants.graceInterval)
+            boundaries.append(PrayerBoundary(date: graceEnd, nextPrayer: futurePrayers.first))
+        } else if let first = futurePrayers.first {
+            // Not in grace — show countdown to next prayer
+            boundaries.append(PrayerBoundary(date: now, nextPrayer: first))
+        }
 
-        // Subsequent entries: at each prayer time, the next prayer switches
+        // For each future prayer: at prayer time → grace, at prayer+15m → next prayer
         for i in 0..<futurePrayers.count {
+            let prayer = futurePrayers[i]
             let nextAfterThis = (i + 1 < futurePrayers.count) ? futurePrayers[i + 1] : nil
-            boundaries.append(PrayerBoundary(date: futurePrayers[i].time, nextPrayer: nextAfterThis))
+
+            // Grace start: prayer time arrives
+            boundaries.append(PrayerBoundary(date: prayer.time, nextPrayer: prayer, isGrace: true))
+
+            // Grace end: 15 min later, advance to next prayer
+            let graceEnd = prayer.time.addingTimeInterval(PrayerTimeConstants.graceInterval)
+            boundaries.append(PrayerBoundary(date: graceEnd, nextPrayer: nextAfterThis))
         }
 
         return boundaries
@@ -90,17 +123,18 @@ public struct NextPrayerCalculator {
     }
 
     /// The next date at which the displayed prayer should change.
-    /// Returns the time of the next future prayer (the boundary where the name switches).
+    /// Returns either:
+    /// - A grace-end date (prayer+15m) if currently in a grace window
+    /// - The time of the next future prayer (when grace starts)
     /// Returns nil if no more prayer transitions remain.
     public func nextBoundaryDate(from prayers: [PrayerInfo], after now: Date) -> Date? {
-        // The "next boundary" is the time of the first future prayer.
-        // When that time arrives, the displayed prayer should switch to the one after it.
-        guard let next = prayers.first(where: { $0.time > now }) else { return nil }
+        // Check if we're in a grace window — next boundary is when grace ends
+        if let gracePrayer = prayers.last(where: { isPrayerTimeNow($0.time, at: now) }) {
+            return gracePrayer.time.addingTimeInterval(PrayerTimeConstants.graceInterval)
+        }
 
-        // If that's the last prayer, the boundary is its time (switches to nil after)
-        // If there's one after, the boundary is still this prayer's time
-        // (because at this moment, "next" changes from this prayer to the following one)
-        return next.time
+        // Otherwise, the next boundary is the time of the next future prayer
+        return prayers.first(where: { $0.time > now })?.time
     }
 }
 
@@ -111,10 +145,13 @@ public struct PrayerBoundary: Equatable, Sendable {
     public let date: Date
     /// The prayer to display as "next". Nil means all prayers for the day have passed.
     public let nextPrayer: PrayerInfo?
+    /// Whether this boundary is a grace window (prayer time just arrived, show "Prayer time").
+    public let isGrace: Bool
 
-    public init(date: Date, nextPrayer: PrayerInfo?) {
+    public init(date: Date, nextPrayer: PrayerInfo?, isGrace: Bool = false) {
         self.date = date
         self.nextPrayer = nextPrayer
+        self.isGrace = isGrace
     }
 }
 
@@ -125,10 +162,13 @@ public enum LiveActivityStaleness {
     public static let buffer: TimeInterval = 90
 
     /// Calculate the staleDate for a Live Activity showing a prayer.
-    /// Adds a buffer after prayerTime so the boundary Task.sleep has time to fire
-    /// and update the content before the system marks the activity stale.
-    public static func staleDate(for prayerTime: Date) -> Date {
-        prayerTime.addingTimeInterval(buffer)
+    /// During grace window, stale date is after grace ends + buffer.
+    /// Otherwise, adds a buffer after prayerTime so the boundary Task.sleep has time to fire.
+    public static func staleDate(for prayerTime: Date, isGrace: Bool = false) -> Date {
+        if isGrace {
+            return prayerTime.addingTimeInterval(PrayerTimeConstants.graceInterval + buffer)
+        }
+        return prayerTime.addingTimeInterval(buffer)
     }
 }
 

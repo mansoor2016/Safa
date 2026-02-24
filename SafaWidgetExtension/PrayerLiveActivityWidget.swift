@@ -15,7 +15,7 @@ struct PrayerLiveActivityView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Next Prayer")
+                Text(context.state.isGrace ? "Time to pray" : "Next Prayer")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -27,6 +27,10 @@ struct PrayerLiveActivityView: View {
                     Text("Open app to refresh")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                } else if context.state.isGrace {
+                    Text("Prayer time")
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
                 } else {
                     Text(context.state.nextPrayerTime, style: .relative)
                         .font(.caption)
@@ -104,7 +108,7 @@ struct PrayerLiveActivityWidget: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading) {
-                        Text("Next Prayer")
+                        Text(context.state.isGrace ? "Time to pray" : "Next Prayer")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                         Text(context.state.nextPrayerName)
@@ -118,6 +122,12 @@ struct PrayerLiveActivityWidget: Widget {
                             Text("Tap to refresh")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
+                        } else if context.state.isGrace {
+                            Text(context.state.nextPrayerTime, style: .time)
+                                .font(.headline)
+                            Text("Prayer time")
+                                .font(.caption2)
+                                .foregroundColor(.accentColor)
                         } else {
                             Text(context.state.nextPrayerTime, style: .time)
                                 .font(.headline)

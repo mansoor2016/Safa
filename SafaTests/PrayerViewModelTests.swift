@@ -597,6 +597,155 @@ final class PrayerViewModelTests: XCTestCase {
         XCTAssertEqual(prayerStreakCalls.count, 0, "Streak should not fire with only 2 prayers logged")
     }
 
+    // MARK: - Grace Window Behavior Tests
+
+    func test_nextPrayer_duringGrace_returnsArrivedPrayer() {
+        // Given — Dhuhr was 5 min ago (within 15 min grace), Asr is 3 hours away
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-300)),   // 5 min ago — in grace
+            PrayerTime(type: .asr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(18000)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(25200))
+        ]
+
+        // When
+        let next = sut.nextPrayer
+
+        // Then — should show Dhuhr (the arrived prayer), not Asr
+        XCTAssertEqual(next?.type, .dhuhr,
+            "During grace window, nextPrayer should return the prayer that just arrived")
+    }
+
+    func test_nextPrayer_afterGraceExpires_skipsToNextPrayer() {
+        // Given — Dhuhr was 20 min ago (past 15 min grace), Asr is 3 hours away
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-1200)),  // 20 min ago — past grace
+            PrayerTime(type: .asr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(18000)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(25200))
+        ]
+
+        // When
+        let next = sut.nextPrayer
+
+        // Then — Dhuhr grace expired, should advance to Asr
+        XCTAssertEqual(next?.type, .asr,
+            "After grace expires, nextPrayer should skip to the truly-next prayer")
+    }
+
+    func test_nextPrayer_neverReturnsNonObligatoryPrayer() {
+        // Given — sunrise is in grace (just passed), but it's non-obligatory
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-300)), // 5 min ago — in grace
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .asr, time: now.addingTimeInterval(21600)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(28800)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(36000))
+        ]
+
+        // When
+        let next = sut.nextPrayer
+
+        // Then — sunrise is not obligatory, should skip to Dhuhr
+        XCTAssertEqual(next?.type, .dhuhr,
+            "Grace window should not apply to non-obligatory prayers")
+    }
+
+    func test_updateNextPrayerIndicator_duringGrace_marksArrivedPrayer() {
+        // Given — Dhuhr was 5 min ago (in grace)
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-300)),   // 5 min ago — in grace
+            PrayerTime(type: .asr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(18000)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(25200))
+        ]
+
+        // When
+        sut.updateNextPrayerIndicator()
+
+        // Then — Dhuhr should be marked as next (it's in grace)
+        let dhuhr = sut.todayPrayers.first { $0.type == .dhuhr }
+        let asr = sut.todayPrayers.first { $0.type == .asr }
+        XCTAssertTrue(dhuhr?.isNext == true,
+            "Prayer in grace window should be marked isNext")
+        XCTAssertFalse(asr?.isNext == true,
+            "Prayer after grace should NOT be marked isNext while grace is active")
+    }
+
+    func test_updateNextPrayerIndicator_afterGrace_marksNextPrayer() {
+        // Given — Dhuhr was 20 min ago (past grace), Asr is next
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-1200)),  // 20 min ago — past grace
+            PrayerTime(type: .asr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(18000)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(25200))
+        ]
+
+        // When
+        sut.updateNextPrayerIndicator()
+
+        // Then — Asr should be marked as next, not Dhuhr
+        let dhuhr = sut.todayPrayers.first { $0.type == .dhuhr }
+        let asr = sut.todayPrayers.first { $0.type == .asr }
+        XCTAssertFalse(dhuhr?.isNext == true,
+            "Prayer past grace should NOT be marked isNext")
+        XCTAssertTrue(asr?.isNext == true,
+            "Next future prayer should be marked isNext after grace expires")
+    }
+
+    func test_nextPrayer_allPrayersPastGrace_returnsNil() {
+        // Given — all prayers are past grace window
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-36000)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-32400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-21600)),
+            PrayerTime(type: .asr, time: now.addingTimeInterval(-14400)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(-3600))    // 1 hour ago — past grace
+        ]
+
+        // When
+        let next = sut.nextPrayer
+
+        // Then — no prayers remaining (all past grace)
+        XCTAssertNil(next, "When all prayers are past grace, nextPrayer should be nil")
+    }
+
+    func test_nextPrayer_exactlyAtGraceBoundary_returnsNextPrayer() {
+        // Given — Dhuhr was exactly 15 min ago (grace just expired at this instant)
+        let now = Date()
+        sut.todayPrayers = [
+            PrayerTime(type: .fajr, time: now.addingTimeInterval(-7200)),
+            PrayerTime(type: .sunrise, time: now.addingTimeInterval(-5400)),
+            PrayerTime(type: .dhuhr, time: now.addingTimeInterval(-900)),   // Exactly 15 min ago
+            PrayerTime(type: .asr, time: now.addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: now.addingTimeInterval(18000)),
+            PrayerTime(type: .isha, time: now.addingTimeInterval(25200))
+        ]
+
+        // When
+        let next = sut.nextPrayer
+
+        // Then — grace is >= 900s so it's expired; should return Asr
+        XCTAssertEqual(next?.type, .asr,
+            "At exactly 15 min (grace boundary), grace has expired — should show next prayer")
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
