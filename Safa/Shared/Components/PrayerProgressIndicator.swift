@@ -22,7 +22,7 @@ struct PrayerProgressIndicator: View {
 
     // MARK: - Prayer State Helper
 
-    private struct PrayerState {
+    struct PrayerState {
         let type: PrayerType
         let isLogged: Bool
         let isNext: Bool
@@ -155,23 +155,20 @@ struct PrayerProgressIndicator: View {
         }
     }
 
-    // MARK: - Expanded View (for prayer page)
+    // MARK: - Expanded View (for prayer/ramadan page — icon-column style)
 
     private var expandedView: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: SafaSpacing.sm) {
             HStack(spacing: 0) {
-                let states = prayerStates
-                ForEach(Array(states.enumerated()), id: \.offset) { index, state in
-                    expandedDot(state: state)
-                    if index < 4 {
-                        expandedLine(from: states[index], to: states[index + 1])
-                    }
+                ForEach(Array(prayerStates.enumerated()), id: \.offset) { _, state in
+                    expandedColumn(state: state)
+                        .frame(maxWidth: .infinity)
                 }
             }
 
             HStack(spacing: 4) {
-                Text("\(completedCount) of 5")
-                    .font(SafaTypography.labelSmall)
+                Text("\(completedCount)/5")
+                    .font(SafaTypography.labelMedium)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
                 if completedCount == 5 {
                     Image(systemName: "checkmark.seal.fill")
@@ -181,57 +178,25 @@ struct PrayerProgressIndicator: View {
             }
             .accessibilityProgress(label: "Prayer progress", current: completedCount, total: 5)
         }
-        .padding(.vertical, 8)
     }
 
-    private func expandedDot(state: PrayerState) -> some View {
+    private func expandedColumn(state: PrayerState) -> some View {
         Button {
             guard state.canTap else { return }
             HapticFeedbackService.shared.play(.commit)
             onLogPrayer?(state.type)
         } label: {
-            VStack(spacing: 6) {
-                ZStack {
-                    if state.isLogged {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: expandedDotSize, height: expandedDotSize)
-                        Image(systemName: "checkmark")
-                            .font(.system(size: expandedDotSize * 0.45, weight: .bold))
-                            .foregroundColor(.white)
-                    } else if state.isNext {
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.1))
-                            .frame(width: expandedDotSize, height: expandedDotSize)
-                        Circle()
-                            .stroke(Color.accentColor, lineWidth: 2.5)
-                            .frame(width: expandedDotSize, height: expandedDotSize)
-                    } else if state.isPastUnlogged {
-                        Circle()
-                            .fill(.orange)
-                            .frame(width: expandedDotSize, height: expandedDotSize)
-                        Image(systemName: "exclamationmark")
-                            .font(.system(size: expandedDotSize * 0.4, weight: .semibold))
-                            .foregroundColor(.white)
-                    } else {
-                        Circle()
-                            .fill(Color(UIColor.systemGray4))
-                            .frame(width: expandedDotSize * 0.4, height: expandedDotSize * 0.4)
-                    }
-                }
-                .frame(width: expandedDotSize, height: expandedDotSize)
+            VStack(spacing: SafaSpacing.xs) {
+                Image(systemName: state.type.iconName)
+                    .font(.system(size: SafaSpacing.IconSize.sm))
+                    .foregroundStyle(state.type.color)
 
-                Text(state.type.displayName)
+                Text(state.type.shortName)
                     .font(SafaTypography.labelSmall)
-                    .fontWeight(state.isNext ? .semibold : .regular)
-                    .foregroundColor(
-                        state.isLogged ? .green :
-                        state.isNext ? .accentColor :
-                        state.isPastUnlogged ? .orange :
-                        SafaColors.Fallback.secondaryText
-                    )
+                    .foregroundStyle(SafaColors.Fallback.secondaryText)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+
+                expandedStatusIcon(for: state)
             }
         }
         .buttonStyle(.plain)
@@ -245,12 +210,24 @@ struct PrayerProgressIndicator: View {
         .accessibilityHint(state.canTap ? (state.isLogged ? "Double tap to unlog" : "Double tap to log") : "")
     }
 
-    private func expandedLine(from: PrayerState, to: PrayerState) -> some View {
-        Capsule()
-            .fill(from.isLogged && to.isLogged ? Color.green.opacity(0.6) : Color(UIColor.systemGray5))
-            .frame(height: 2)
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 24) // Align with circle centers
+    @ViewBuilder
+    private func expandedStatusIcon(for state: PrayerState) -> some View {
+        let (icon, color) = Self.expandedStatusIconInfo(for: state)
+        Image(systemName: icon)
+            .font(.system(size: SafaSpacing.IconSize.md))
+            .foregroundStyle(color)
+    }
+
+    static func expandedStatusIconInfo(for state: PrayerState) -> (icon: String, color: Color) {
+        if state.isLogged {
+            return ("checkmark.circle.fill", SafaColors.success)
+        } else if state.isNext {
+            return ("circle.dotted", .accentColor)
+        } else if state.isPastUnlogged {
+            return ("minus.circle", .orange)
+        } else {
+            return ("circle", Color(.systemGray3))
+        }
     }
 }
 
