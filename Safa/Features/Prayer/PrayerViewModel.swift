@@ -398,7 +398,7 @@ final class PrayerViewModel {
             return
         }
         let isGrace = isPrayerTimeNow(next.time)
-        let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
+        let hijri = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
 
         // Convert PrayerTime → PrayerInfo for boundary scheduling

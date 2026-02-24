@@ -52,6 +52,9 @@ final class HijriDateConverter {
         case .full:
             let monthName = hijriMonthName(month)
             return "\(day) \(monthName) \(year) AH"
+        case .dayMonth:
+            let monthName = hijriMonthName(month)
+            return "\(day) \(monthName)"
         case .short:
             return "\(day)/\(month)/\(year)"
         case .arabic:
@@ -65,6 +68,7 @@ final class HijriDateConverter {
 
     enum HijriDateStyle {
         case full       // "15 Ramadan 1445 AH"
+        case dayMonth   // "15 Ramadan"
         case short      // "15/9/1445"
         case arabic     // "١٥ رمضان ١٤٤٥ هـ"
         case monthYear  // "Ramadan 1445 AH"

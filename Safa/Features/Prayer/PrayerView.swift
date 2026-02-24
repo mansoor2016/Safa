@@ -181,7 +181,7 @@ private struct PrayerContentView: View {
 
                 Spacer()
 
-                Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .full))
+                Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .dayMonth))
                     .font(.subheadline.weight(.medium))
             }
 
@@ -248,6 +248,8 @@ private struct NextPrayerCard: View {
                                 .foregroundColor(SafaColors.Fallback.secondaryText)
                         }
                     }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 }
 
                 Spacer()

@@ -91,7 +91,7 @@ final class PrayerLiveActivityManager {
         }
 
         let isGrace = gracePrayer != nil
-        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .full)
+        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
         let prayerInfos = obligatory
             .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }

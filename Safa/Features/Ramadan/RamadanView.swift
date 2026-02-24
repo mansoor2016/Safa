@@ -138,17 +138,10 @@ struct RamadanView: View {
     // MARK: - Date Subheader
 
     private var dateSubheader: some View {
-        HStack {
-            Text("Day \(currentDay) of \(totalDays)")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.purple)
-
-            Spacer()
-
-            Text(hijriConverter.hijriDateString(from: Date(), style: .full))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        Text(hijriConverter.hijriDateString(from: Date(), style: .dayMonth))
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Iftar Countdown Platter
@@ -201,6 +194,8 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 case .iftar(let time):
                     HStack {
                         Image(systemName: "timer")
@@ -213,6 +208,8 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.secondary)
                     }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 case .nextSuhoor(let time):
                     HStack {
                         Image(systemName: "timer")
@@ -226,6 +223,8 @@ struct RamadanView: View {
                             .font(SafaTypography.labelMedium)
                             .foregroundStyle(.tertiary)
                     }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 case .complete:
                     Label("Fasting complete for today", systemImage: "checkmark.circle.fill")
                         .font(SafaTypography.titleSmall)

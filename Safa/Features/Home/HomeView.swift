@@ -714,7 +714,7 @@ struct HomeView: View {
         loadError = nil
 
         // Load Hijri date
-        hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .full)
+        hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth)
         isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
 
         // Load Ramadan data
