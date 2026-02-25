@@ -91,7 +91,8 @@ final class PrayerLiveActivityManager {
         }
 
         let isGrace = gracePrayer != nil
-        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth)
+        let maghrib = prayers.first(where: { $0.type == .maghrib })?.time
+        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth, maghribTime: maghrib)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
         let prayerInfos = obligatory
             .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
@@ -105,7 +106,7 @@ final class PrayerLiveActivityManager {
         )
         scheduleBoundaryUpdates(
             prayers: prayerInfos,
-            hijriDate: hijri,
+            maghribTime: maghrib,
             locationName: location
         )
     }
@@ -205,7 +206,7 @@ final class PrayerLiveActivityManager {
     /// notification updates it. This is an ActivityKit limitation.
     func scheduleBoundaryUpdates(
         prayers: [PrayerInfo],
-        hijriDate: String,
+        maghribTime: Date?,
         locationName: String
     ) {
         boundaryTask?.cancel()
@@ -233,13 +234,18 @@ final class PrayerLiveActivityManager {
 
                 now = Date()
 
+                // Recompute Hijri at each boundary (rolls over at Maghrib)
+                let hijri = HijriDateConverter.shared.hijriDateString(
+                    from: now, style: .dayMonth, maghribTime: maghribTime
+                )
+
                 // Check if a prayer just arrived (entering grace window)
                 if let gracePrayer = prayers.last(where: { isPrayerTimeNow($0.time, at: now) }) {
                     // Show grace state
                     await self.updateActivity(
                         prayerName: gracePrayer.name,
                         prayerTime: gracePrayer.time,
-                        hijriDate: hijriDate,
+                        hijriDate: hijri,
                         locationName: locationName,
                         isGrace: true
                     )
@@ -250,7 +256,7 @@ final class PrayerLiveActivityManager {
                         await self.updateActivity(
                             prayerName: next.name,
                             prayerTime: next.time,
-                            hijriDate: hijriDate,
+                            hijriDate: hijri,
                             locationName: locationName,
                             isGrace: false
                         )

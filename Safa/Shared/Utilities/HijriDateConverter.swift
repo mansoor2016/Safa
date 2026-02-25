@@ -21,6 +21,24 @@ final class HijriDateConverter {
         gregorianCalendar = Calendar(identifier: .gregorian)
     }
 
+    // MARK: - Maghrib-Aware Islamic Date
+
+    /// Returns the effective Islamic date, advancing at Maghrib instead of midnight.
+    /// Safety: only applies the shift when `maghribTime` falls on the same civil day as `date`.
+    /// When `maghribTime` is nil, falls back to standard midnight-based conversion.
+    func islamicDate(from date: Date = Date(), adjustedFor maghribTime: Date?) -> DateComponents {
+        if let maghrib = maghribTime,
+           gregorianCalendar.isDate(date, inSameDayAs: maghrib),
+           date >= maghrib {
+            let tomorrow = gregorianCalendar.date(
+                byAdding: .day, value: 1,
+                to: gregorianCalendar.startOfDay(for: date)
+            )!
+            return islamicCalendar.dateComponents([.year, .month, .day], from: tomorrow)
+        }
+        return islamicCalendar.dateComponents([.year, .month, .day], from: date)
+    }
+
     // MARK: - Conversion Methods
 
     func hijriDate(from gregorianDate: Date) -> DateComponents {
@@ -39,8 +57,8 @@ final class HijriDateConverter {
 
     // MARK: - Formatting
 
-    func hijriDateString(from date: Date, style: HijriDateStyle = .full) -> String {
-        let components = hijriDate(from: date)
+    func hijriDateString(from date: Date, style: HijriDateStyle = .full, maghribTime: Date? = nil) -> String {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
 
         guard let day = components.day,
               let month = components.month,
@@ -114,39 +132,39 @@ final class HijriDateConverter {
 
     // MARK: - Islamic Dates
 
-    func isRamadan(on date: Date = Date()) -> Bool {
-        let components = hijriDate(from: date)
+    func isRamadan(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         return components.month == 9
     }
 
-    func isEid(on date: Date = Date()) -> Bool {
-        currentEidType(on: date) != nil
+    func isEid(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        currentEidType(on: date, maghribTime: maghribTime) != nil
     }
 
     /// Check if the date falls within Eid al-Fitr (Shawwal 1-3)
-    func isEidAlFitr(on date: Date = Date()) -> Bool {
-        let components = hijriDate(from: date)
+    func isEidAlFitr(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         guard let month = components.month, let day = components.day else { return false }
         return month == 10 && (1...3).contains(day)
     }
 
     /// Check if the date falls within Eid al-Adha (Dhu al-Hijjah 10-13)
-    func isEidAlAdha(on date: Date = Date()) -> Bool {
-        let components = hijriDate(from: date)
+    func isEidAlAdha(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         guard let month = components.month, let day = components.day else { return false }
         return month == 12 && (10...13).contains(day)
     }
 
     /// Returns the current Eid type if the date is during an Eid period, nil otherwise
-    func currentEidType(on date: Date = Date()) -> EidType? {
-        if isEidAlFitr(on: date) { return .fitr }
-        if isEidAlAdha(on: date) { return .adha }
+    func currentEidType(on date: Date = Date(), maghribTime: Date? = nil) -> EidType? {
+        if isEidAlFitr(on: date, maghribTime: maghribTime) { return .fitr }
+        if isEidAlAdha(on: date, maghribTime: maghribTime) { return .adha }
         return nil
     }
 
     /// Returns 1-based day number within the Eid period (e.g. Day 2 of Eid al-Fitr)
-    func eidDayNumber(on date: Date = Date()) -> Int? {
-        let components = hijriDate(from: date)
+    func eidDayNumber(on date: Date = Date(), maghribTime: Date? = nil) -> Int? {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         guard let month = components.month, let day = components.day else { return nil }
 
         if month == 10 && (1...3).contains(day) {
@@ -159,22 +177,22 @@ final class HijriDateConverter {
     }
 
     /// Days until Eid al-Fitr (Shawwal 1) from the given date
-    func daysUntilEidAlFitr(from date: Date = Date()) -> Int? {
-        daysUntilHijriDate(month: 10, day: 1, from: date)
+    func daysUntilEidAlFitr(from date: Date = Date(), maghribTime: Date? = nil) -> Int? {
+        daysUntilHijriDate(month: 10, day: 1, from: date, maghribTime: maghribTime)
     }
 
     /// Days until Eid al-Adha (Dhu al-Hijjah 10) from the given date
-    func daysUntilEidAlAdha(from date: Date = Date()) -> Int? {
-        daysUntilHijriDate(month: 12, day: 10, from: date)
+    func daysUntilEidAlAdha(from date: Date = Date(), maghribTime: Date? = nil) -> Int? {
+        daysUntilHijriDate(month: 12, day: 10, from: date, maghribTime: maghribTime)
     }
 
     /// Returns the nearest upcoming Eid with days until it (nil if currently during an Eid)
-    func nearestUpcomingEid(from date: Date = Date()) -> (type: EidType, daysUntil: Int)? {
+    func nearestUpcomingEid(from date: Date = Date(), maghribTime: Date? = nil) -> (type: EidType, daysUntil: Int)? {
         // If currently during Eid, no "upcoming" Eid
-        if currentEidType(on: date) != nil { return nil }
+        if currentEidType(on: date, maghribTime: maghribTime) != nil { return nil }
 
-        let fitrDays = daysUntilEidAlFitr(from: date)
-        let adhaDays = daysUntilEidAlAdha(from: date)
+        let fitrDays = daysUntilEidAlFitr(from: date, maghribTime: maghribTime)
+        let adhaDays = daysUntilEidAlAdha(from: date, maghribTime: maghribTime)
 
         switch (fitrDays, adhaDays) {
         case let (f?, a?) where f <= 0 && a <= 0:
@@ -192,10 +210,12 @@ final class HijriDateConverter {
         }
     }
 
-    /// Private helper: days from `date` to the next occurrence of a given Hijri month/day
-    private func daysUntilHijriDate(month targetMonth: Int, day targetDay: Int, from date: Date) -> Int? {
-        let current = hijriDate(from: date)
-        guard let currentYear = current.year else { return nil }
+    /// Private helper: days from `date` to the next occurrence of a given Hijri month/day.
+    /// Normalizes both dates to start-of-day to avoid <24h rounding issues.
+    private func daysUntilHijriDate(month targetMonth: Int, day targetDay: Int, from date: Date, maghribTime: Date? = nil) -> Int? {
+        let adjustedComponents = islamicDate(from: date, adjustedFor: maghribTime)
+        guard let currentYear = adjustedComponents.year else { return nil }
+        let sourceDay = gregorianCalendar.startOfDay(for: date)
 
         // Try this Hijri year first, then next year
         for yearOffset in 0...1 {
@@ -205,15 +225,16 @@ final class HijriDateConverter {
             target.day = targetDay
 
             if let targetDate = gregorianDate(from: target) {
-                let days = gregorianCalendar.dateComponents([.day], from: date, to: targetDate).day ?? 0
-                if days > 0 { return days }
+                let targetStartOfDay = gregorianCalendar.startOfDay(for: targetDate)
+                let days = gregorianCalendar.dateComponents([.day], from: sourceDay, to: targetStartOfDay).day ?? 0
+                if days >= 0 { return days }
             }
         }
         return nil
     }
 
-    func isBlessedNight(on date: Date = Date()) -> Bool {
-        let components = hijriDate(from: date)
+    func isBlessedNight(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         guard let month = components.month, let day = components.day else { return false }
 
         // Laylat al-Qadr (likely nights in last 10 days of Ramadan)
@@ -229,8 +250,8 @@ final class HijriDateConverter {
         return false
     }
 
-    func daysUntilRamadan(from date: Date = Date()) -> Int? {
-        let currentComponents = hijriDate(from: date)
+    func daysUntilRamadan(from date: Date = Date(), maghribTime: Date? = nil) -> Int? {
+        let currentComponents = islamicDate(from: date, adjustedFor: maghribTime)
         guard let currentMonth = currentComponents.month,
               let currentYear = currentComponents.year else {
             return nil
@@ -256,7 +277,9 @@ final class HijriDateConverter {
             return nil
         }
 
-        return gregorianCalendar.dateComponents([.day], from: date, to: ramadanStart).day
+        let sourceDay = gregorianCalendar.startOfDay(for: date)
+        let targetDay = gregorianCalendar.startOfDay(for: ramadanStart)
+        return gregorianCalendar.dateComponents([.day], from: sourceDay, to: targetDay).day
     }
 
     // MARK: - Important Dates

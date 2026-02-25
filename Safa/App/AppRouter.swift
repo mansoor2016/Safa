@@ -26,7 +26,13 @@ final class AppRouter {
 
     // MARK: - Injectable State
     var isRamadanActive: () -> Bool = {
-        (HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode))
+        let maghrib: Date? = {
+            guard let t = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+                  Calendar.current.isDate(t, inSameDayAs: Date()) else { return nil }
+            return t
+        }()
+        return (HijriDateConverter.shared.isRamadan(maghribTime: maghrib)
+            || FeatureFlags.shared.isEnabled(.ramadanMode))
             && !FeatureFlags.shared.isEnabled(.forcePrayerPage)
     }
     var onNavigationBlocked: ((Feature) -> Void) = { feature in

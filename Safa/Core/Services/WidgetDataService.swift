@@ -6,6 +6,13 @@ import Foundation
 import WidgetKit
 import SafaShared
 
+// MARK: - Notification Name
+
+extension Notification.Name {
+    /// Posted when prayer times are written and the Islamic day boundary may have shifted (e.g. after Maghrib).
+    static let islamicDayMayHaveChanged = Notification.Name("islamicDayMayHaveChanged")
+}
+
 final class WidgetDataService {
     // MARK: - Shared Instance
     static let shared = WidgetDataService()
@@ -70,8 +77,26 @@ final class WidgetDataService {
             defaults.removeObject(forKey: Keys.nextPrayerTime)
         }
 
+        // Persist Maghrib to standard UserDefaults for Islamic day boundary calculations.
+        // Day-guard: only persist if Maghrib belongs to today (prevents future-day prayer sets from overwriting).
+        var maghribTime: Date?
+        if let maghrib = prayers.first(where: { $0.type == .maghrib }),
+           Calendar.current.isDate(maghrib.time, inSameDayAs: Date()) {
+            maghribTime = maghrib.time
+            UserDefaults.standard.set(maghrib.time, forKey: AppConstants.StorageKeys.todayMaghribTime)
+        }
+
+        // Compute and write Hijri date (Maghrib-aware) so widgets always have it
+        let hijriString = HijriDateConverter.shared.hijriDateString(
+            from: Date(), style: .dayMonth, maghribTime: maghribTime
+        )
+        defaults.set(hijriString, forKey: Keys.hijriDate)
+
         defaults.set(Date(), forKey: Keys.lastUpdated)
         defaults.synchronize()
+
+        // Notify services that the Islamic day may have changed (e.g. after Maghrib)
+        NotificationCenter.default.post(name: .islamicDayMayHaveChanged, object: nil)
 
         reloadWidgets()
     }

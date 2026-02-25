@@ -9,10 +9,28 @@ public struct HijriDateHelper {
     public init() {}
 
     private let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
+    private let gregorianCalendar = Calendar(identifier: .gregorian)
+
+    // MARK: - Maghrib-Aware Islamic Date
+
+    /// Returns the effective Islamic date, advancing at Maghrib instead of midnight.
+    /// Safety: only applies the shift when `maghribTime` falls on the same civil day as `date`.
+    public func islamicDate(from date: Date = Date(), adjustedFor maghribTime: Date?) -> DateComponents {
+        if let maghrib = maghribTime,
+           gregorianCalendar.isDate(date, inSameDayAs: maghrib),
+           date >= maghrib {
+            let tomorrow = gregorianCalendar.date(
+                byAdding: .day, value: 1,
+                to: gregorianCalendar.startOfDay(for: date)
+            )!
+            return hijriCalendar.dateComponents([.year, .month, .day], from: tomorrow)
+        }
+        return hijriCalendar.dateComponents([.year, .month, .day], from: date)
+    }
 
     /// Returns a formatted Hijri date string for the given date.
-    public func hijriDateString(from date: Date = Date()) -> String {
-        let components = hijriCalendar.dateComponents([.year, .month, .day], from: date)
+    public func hijriDateString(from date: Date = Date(), maghribTime: Date? = nil) -> String {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
         guard let day = components.day, let month = components.month, let year = components.year else {
             return ""
         }
@@ -20,13 +38,14 @@ public struct HijriDateHelper {
     }
 
     /// Returns the Hijri month number (1-12) for the given date.
-    public func hijriMonth(from date: Date = Date()) -> Int {
-        hijriCalendar.component(.month, from: date)
+    public func hijriMonth(from date: Date = Date(), maghribTime: Date? = nil) -> Int {
+        let components = islamicDate(from: date, adjustedFor: maghribTime)
+        return components.month ?? 0
     }
 
     /// Returns true if the given date falls in Ramadan (month 9).
-    public func isRamadan(on date: Date = Date()) -> Bool {
-        hijriMonth(from: date) == 9
+    public func isRamadan(on date: Date = Date(), maghribTime: Date? = nil) -> Bool {
+        hijriMonth(from: date, maghribTime: maghribTime) == 9
     }
 
     private func monthName(_ month: Int) -> String {

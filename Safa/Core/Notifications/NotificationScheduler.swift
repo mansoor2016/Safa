@@ -145,9 +145,19 @@ final class NotificationScheduler {
                     // Adhan sound selection:
                     // 1. Global adhan enabled → use selected adhan for all prayers
                     // 2. Iftar adhan enabled + Ramadan + Maghrib → use adhan just for iftar
+                    // Use this day's Maghrib for Ramadan check (not "today's" — we schedule multi-day)
+                    let dayMaghribTime = prayers.first(where: { $0.type == .maghrib })?.time
+                    let isRamadanForAdhan: Bool
+                    if prayer.type == .maghrib {
+                        // Evaluate 1 second before Maghrib — still Ramadan at that point on Ramadan 30
+                        let justBefore = prayer.time.addingTimeInterval(-1)
+                        isRamadanForAdhan = HijriDateConverter.shared.isRamadan(on: justBefore, maghribTime: dayMaghribTime)
+                    } else {
+                        isRamadanForAdhan = HijriDateConverter.shared.isRamadan(on: prayer.time, maghribTime: dayMaghribTime)
+                    }
                     let isRamadanIftarAdhan = prefs.iftarAdhanEnabled
                         && prayer.type == .maghrib
-                        && HijriDateConverter.shared.isRamadan()
+                        && isRamadanForAdhan
 
                     if prefs.adhanEnabled || isRamadanIftarAdhan {
                         let fileName = prayer.type == .fajr ? prefs.selectedFajrAdhan : prefs.selectedAdhan

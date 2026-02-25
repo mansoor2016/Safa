@@ -308,11 +308,14 @@ final class HasanatService {
         hasanatHistory[today, default: 0] += points
     }
 
-    /// Check if currently Ramadan (simplified check)
+    /// Check if currently Ramadan (Maghrib-aware, same-day validated)
     private func isCurrentlyRamadan() -> Bool {
-        let islamicCalendar = Calendar(identifier: .islamicUmmAlQura)
-        let month = islamicCalendar.component(.month, from: Date())
-        return month == 9 // Ramadan is the 9th month
+        let maghrib: Date? = {
+            guard let t = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+                  Calendar.current.isDate(t, inSameDayAs: Date()) else { return nil }
+            return t
+        }()
+        return HijriDateConverter.shared.isRamadan(maghribTime: maghrib)
     }
 
     /// Get points for last N days

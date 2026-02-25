@@ -61,8 +61,13 @@ final class UserStateManager {
         do {
             let previousLevel = userStats.currentLevel
 
-            // Check for Ramadan multiplier
-            let points = HijriDateConverter.shared.isRamadan() ? award.points * 2 : award.points
+            // Check for Ramadan multiplier (Maghrib-aware, same-day validated)
+            let maghrib: Date? = {
+                guard let t = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+                      Calendar.current.isDate(t, inSameDayAs: Date()) else { return nil }
+                return t
+            }()
+            let points = HijriDateConverter.shared.isRamadan(maghribTime: maghrib) ? award.points * 2 : award.points
             let newTotal = try await userRepository.addHasanat(points)
 
             // Update local state

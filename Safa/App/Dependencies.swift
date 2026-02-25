@@ -41,6 +41,16 @@ final class Dependencies {
     // MARK: - Launch Cache (precomputed at app startup for instant home rendering)
     var cachedTodayPrayers: [PrayerTime]?
 
+    /// Persisted Maghrib time for today, validated to be same-day.
+    /// Used for Maghrib-aware Islamic day boundary calculations.
+    var todayMaghribTime: Date? {
+        guard let time = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+              Calendar.current.isDate(time, inSameDayAs: Date()) else {
+            return nil
+        }
+        return time
+    }
+
     // MARK: - Init
     init() {
         // Initialize Core Data stack

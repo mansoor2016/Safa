@@ -25,7 +25,16 @@ enum RamadanQadaReminderService {
         guard hasCompletedOnboarding else { return nil }
 
         let converter = HijriDateConverter.shared
-        let (hijriYear, hijriMonth, hijriDay) = converter.hijriComponents(from: now)
+        // Maghrib-aware: read persisted Maghrib with same-day validation
+        let maghrib: Date? = {
+            guard let t = defaults.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+                  Calendar.current.isDate(t, inSameDayAs: now) else { return nil }
+            return t
+        }()
+        let components = converter.islamicDate(from: now, adjustedFor: maghrib)
+        let hijriYear = components.year ?? 0
+        let hijriMonth = components.month ?? 0
+        let hijriDay = components.day ?? 0
 
         // Must be past Eid al-Fitr day 3 (Shawwal 1-3).
         // Eligible from Shawwal 4 onward.

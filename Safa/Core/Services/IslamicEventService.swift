@@ -3,6 +3,7 @@
 // DEPENDENCIES: Foundation, UserNotifications
 
 import Foundation
+import UIKit
 import UserNotifications
 
 // MARK: - Islamic Event Service
@@ -16,6 +17,7 @@ final class IslamicEventService {
     var todayEvents: [IslamicEvent] = []
 
     private let notificationCenter = UNUserNotificationCenter.current()
+    private var observerTokens: [Any] = []
 
     // MARK: - Storage Keys
 
@@ -53,6 +55,26 @@ final class IslamicEventService {
 
     init() {
         loadEvents()
+
+        // Re-load when Islamic day boundary may have shifted (e.g. after Maghrib)
+        let dayToken = NotificationCenter.default.addObserver(
+            forName: .islamicDayMayHaveChanged, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.loadEvents()
+        }
+        // Re-load at Gregorian midnight rollover
+        let timeToken = NotificationCenter.default.addObserver(
+            forName: UIApplication.significantTimeChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.loadEvents()
+        }
+        observerTokens = [dayToken, timeToken]
+    }
+
+    deinit {
+        for token in observerTokens {
+            NotificationCenter.default.removeObserver(token)
+        }
     }
 
     // MARK: - Event Loading
@@ -61,28 +83,55 @@ final class IslamicEventService {
         let allEvents = IslamicEvent.allEvents
         let now = Date()
         let calendar = Calendar.current
+        let converter = HijriDateConverter.shared
 
-        // Filter upcoming events (next 60 days)
+        // Read persisted Maghrib directly from UserDefaults (safe during init, no Dependencies.shared dependency)
+        let maghribTime: Date? = {
+            guard let time = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+                  calendar.isDate(time, inSameDayAs: now) else { return nil }
+            return time
+        }()
+        let adjustedComponents = converter.islamicDate(from: now, adjustedFor: maghribTime)
+        let adjustedMonth = adjustedComponents.month ?? 0
+        let adjustedDay = adjustedComponents.day ?? 0
+
+        // todayEvents: match against Maghrib-adjusted Islamic date
+        todayEvents = allEvents.filter { event in
+            enabledEventTypes.contains(event.type)
+                && event.hijriMonth == adjustedMonth
+                && event.hijriDay == adjustedDay
+        }
+
+        // For upcoming events, use an effective baseline that excludes "today" (adjusted)
+        let effectiveNow: Date
+        if let maghrib = maghribTime,
+           calendar.isDate(now, inSameDayAs: maghrib),
+           now >= maghrib {
+            // We're effectively in "tomorrow" — use start of tomorrow as baseline
+            effectiveNow = calendar.date(byAdding: .day, value: 1,
+                           to: calendar.startOfDay(for: now))!
+        } else {
+            effectiveNow = now
+        }
+
         let sixtyDaysFromNow = calendar.date(byAdding: .day, value: 60, to: now) ?? now
 
         upcomingEvents = allEvents
             .compactMap { event -> IslamicEvent? in
-                guard let gregorianDate = event.nextOccurrence(from: now) else {
+                guard let gregorianDate = event.nextOccurrence(from: effectiveNow) else {
                     return nil
                 }
                 var updatedEvent = event
                 updatedEvent.gregorianDate = gregorianDate
                 return updatedEvent
             }
-            .filter { $0.gregorianDate ?? now <= sixtyDaysFromNow }
+            .filter { ($0.gregorianDate ?? now) <= sixtyDaysFromNow }
             .filter { enabledEventTypes.contains($0.type) }
+            // Exclude today's events from upcoming
+            .filter { event in
+                !(event.hijriMonth == adjustedMonth && event.hijriDay == adjustedDay)
+            }
             .sorted { ($0.gregorianDate ?? now) < ($1.gregorianDate ?? now) }
-
-        // Filter today's events
-        todayEvents = upcomingEvents.filter { event in
-            guard let date = event.gregorianDate else { return false }
-            return calendar.isDateInToday(date)
-        }
     }
 
     // MARK: - Event Reminders

@@ -70,12 +70,18 @@ final class RamadanService {
 
     // MARK: - Ramadan Status
 
-    func checkRamadanStatus() {
-        let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
-        let now = Date()
+    /// Checks the current Ramadan status using Maghrib-aware Islamic date boundary.
+    /// - Parameter maghribTime: Today's Maghrib time. If nil, reads from persisted UserDefaults.
+    func checkRamadanStatus(maghribTime: Date? = nil) {
+        let converter = HijriDateConverter.shared
+        // Use provided Maghrib, or fall back to persisted value.
+        // Read UserDefaults directly (NOT Dependencies.shared) to avoid recursive singleton init,
+        // since Dependencies creates RamadanService during its own init().
+        let effectiveMaghrib = maghribTime ?? Self.persistedMaghribTime()
+        let components = converter.islamicDate(from: Date(), adjustedFor: effectiveMaghrib)
 
-        let hijriMonth = hijriCalendar.component(.month, from: now)
-        let hijriDay = hijriCalendar.component(.day, from: now)
+        let hijriMonth = components.month ?? 0
+        let hijriDay = components.day ?? 0
 
         // Ramadan is month 9 in Hijri calendar
         isRamadanMonth = hijriMonth == 9
@@ -83,8 +89,17 @@ final class RamadanService {
         if isRamadanMonth {
             currentRamadanDay = hijriDay
 
-            // Get total days in Ramadan this year
-            if let range = hijriCalendar.range(of: .day, in: .month, for: now) {
+            // Get total days in Ramadan this year (use adjusted date for correct month boundary)
+            let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
+            let adjustedDate: Date
+            if let maghrib = effectiveMaghrib,
+               Calendar.current.isDate(Date(), inSameDayAs: maghrib),
+               Date() >= maghrib {
+                adjustedDate = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+            } else {
+                adjustedDate = Date()
+            }
+            if let range = hijriCalendar.range(of: .day, in: .month, for: adjustedDate) {
                 totalRamadanDays = range.count
             }
 
@@ -97,8 +112,8 @@ final class RamadanService {
         } else {
             currentRamadanDay = 0
 
-            // Calculate days until next Ramadan
-            daysUntilRamadan = calculateDaysUntilRamadan()
+            // Calculate days until next Ramadan (Maghrib-aware)
+            daysUntilRamadan = converter.daysUntilRamadan(from: Date(), maghribTime: effectiveMaghrib) ?? calculateDaysUntilRamadanFallback()
 
             // Auto-deactivate if Ramadan ended
             if isRamadanMode && hijriMonth == 10 && hijriDay == 1 {
@@ -107,7 +122,18 @@ final class RamadanService {
         }
     }
 
-    private func calculateDaysUntilRamadan() -> Int {
+    /// Reads persisted Maghrib from UserDefaults with same-day validation.
+    /// Static to avoid Dependencies.shared access (prevents recursive init).
+    private static func persistedMaghribTime() -> Date? {
+        guard let time = UserDefaults.standard.object(forKey: AppConstants.StorageKeys.todayMaghribTime) as? Date,
+              Calendar.current.isDate(time, inSameDayAs: Date()) else {
+            return nil
+        }
+        return time
+    }
+
+    /// Fallback calculation when HijriDateConverter.daysUntilRamadan returns nil.
+    private func calculateDaysUntilRamadanFallback() -> Int {
         let hijriCalendar = Calendar(identifier: .islamicUmmAlQura)
         let gregorianCalendar = Calendar(identifier: .gregorian)
         let now = Date()

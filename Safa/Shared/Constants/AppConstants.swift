@@ -162,6 +162,9 @@ enum AppConstants {
         static let spotlightIndexCount = "com.safa.spotlight.indexCount"
         static let spotlightIndexVersion = "com.safa.spotlight.indexVersion"
 
+        // Islamic Day Boundary
+        static let todayMaghribTime = "com.safa.todayMaghribTime"
+
         // Eid
         static let eidBannerDismissedPrefix = "eid_banner_dismissed_"
 

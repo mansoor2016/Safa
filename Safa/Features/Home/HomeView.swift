@@ -34,8 +34,11 @@ struct HomeView: View {
     @State private var juzCompleted = 0
     @State private var isFastingTrackerExpanded = false
 
-    // Timer to advance nextPrayer when grace window expires
+    // Timer to advance nextPrayer when grace window expires + detect Maghrib crossing
     let graceExpiryTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    /// Tracks which civil date's Maghrib crossing we've already handled (resets on new day).
+    /// Uses "yyyy-MM-dd" format to avoid month-boundary collisions.
+    @State private var maghribCrossingHandledDate: String?
 
     // Eid state
     @State private var currentEidType: EidType?
@@ -185,9 +188,27 @@ struct HomeView: View {
                now.timeIntervalSince(current.time) >= PrayerTimeConstants.graceInterval {
                 nextPrayer = todayPrayers.first { $0.time > now && $0.type.isObligatory }
             }
+            // Detect Maghrib crossing — recompute Hijri/Ramadan/Eid state once per civil day.
+            // Same-day guard: only act if Maghrib belongs to today (prevents stale prayer data from triggering).
+            let todayKey = now.formatted(.iso8601.year().month().day())
+            if maghribCrossingHandledDate != todayKey,
+               let maghrib = todayPrayers.first(where: { $0.type == .maghrib })?.time,
+               Calendar.current.isDate(now, inSameDayAs: maghrib),
+               now >= maghrib {
+                maghribCrossingHandledDate = todayKey
+                hijriDate = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth, maghribTime: maghrib)
+                isRamadan = HijriDateConverter.shared.isRamadan(maghribTime: maghrib) || FeatureFlags.shared.isEnabled(.ramadanMode)
+                let ramadanService = dependencies.ramadanService
+                ramadanService.checkRamadanStatus(maghribTime: maghrib)
+                currentRamadanDay = isRamadan ? max(ramadanService.currentRamadanDay, 1) : 0
+                daysUntilRamadan = isRamadan ? nil : ramadanService.daysUntilRamadan
+                isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
+                updateEidState(maghribTime: maghrib)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
-            if isRamadan { loadRamadanGoals() }
+            // Midnight or timezone change — reload prayer times so todayPrayers is fresh
+            Task { await loadHomeData() }
         }
         .onAppear {
             Task { await reloadLoggedPrayers() }
@@ -197,9 +218,10 @@ struct HomeView: View {
             nextPrayer = todayPrayers.first {
                 $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now))
             }
-            // Re-check Ramadan state (respects Force Ramadan Mode toggle)
-            isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
-            if isRamadan && !HijriDateConverter.shared.isRamadan() {
+            // Re-check Ramadan state (respects Force Ramadan Mode toggle, Maghrib-aware)
+            let appearMaghrib = todayPrayers.first(where: { $0.type == .maghrib })?.time ?? dependencies.todayMaghribTime
+            isRamadan = HijriDateConverter.shared.isRamadan(maghribTime: appearMaghrib) || FeatureFlags.shared.isEnabled(.ramadanMode)
+            if isRamadan && !HijriDateConverter.shared.isRamadan(maghribTime: appearMaghrib) {
                 // Forced mode — set a sensible day
                 currentRamadanDay = max(currentRamadanDay, 1)
                 daysUntilRamadan = nil
@@ -208,16 +230,17 @@ struct HomeView: View {
             if isRamadan { loadRamadanGoals() }
             // Re-check banner dismiss state (synced with Settings toggle)
             showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
-            // Re-check Eid state (respects Force Eid Mode toggles)
-            updateEidState()
+            // Re-check Eid state (respects Force Eid Mode toggles, Maghrib-aware)
+            updateEidState(maghribTime: appearMaghrib)
             showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
-            // Re-resolve quick actions (time/prayer may have changed)
+            // Re-resolve quick actions (time/prayer may have changed, Maghrib-aware)
             resolvedActions = HomeIntentResolver.resolve(
                 currentDate: Date(),
                 nextPrayer: nextPrayer,
                 loggedPrayers: loggedPrayers,
                 streaks: dependencies.userState.streaks,
-                isAIAvailable: dependencies.llmService.availability.isAvailable
+                isAIAvailable: dependencies.llmService.availability.isAvailable,
+                maghribTime: appearMaghrib
             )
         }
     }
@@ -363,7 +386,7 @@ struct HomeView: View {
         shareService.shareEidGreeting(eidType: eidType, message: message, hijriYear: hijriYear)
     }
 
-    private func updateEidState() {
+    private func updateEidState(maghribTime: Date? = nil) {
         // Check for forced Eid mode (developer options)
         if FeatureFlags.shared.isEnabled(.forceEidAlFitr) {
             currentEidType = .fitr
@@ -380,11 +403,11 @@ struct HomeView: View {
             return
         }
 
-        currentEidType = HijriDateConverter.shared.currentEidType()
-        eidDayNumber = HijriDateConverter.shared.eidDayNumber() ?? 0
+        currentEidType = HijriDateConverter.shared.currentEidType(maghribTime: maghribTime)
+        eidDayNumber = HijriDateConverter.shared.eidDayNumber(maghribTime: maghribTime) ?? 0
 
         if currentEidType == nil {
-            if let nearest = HijriDateConverter.shared.nearestUpcomingEid() {
+            if let nearest = HijriDateConverter.shared.nearestUpcomingEid(maghribTime: maghribTime) {
                 nextEidType = nearest.type
                 daysUntilNextEid = nearest.daysUntil
             } else {
@@ -843,7 +866,10 @@ struct HomeView: View {
 
     private func loadRamadanGoals() {
         let hijriConverter = HijriDateConverter.shared
-        let (_, month, day) = hijriConverter.hijriComponents(from: Date())
+        let maghrib = todayPrayers.first(where: { $0.type == .maghrib })?.time ?? dependencies.todayMaghribTime
+        let components = hijriConverter.islamicDate(from: Date(), adjustedFor: maghrib)
+        let month = components.month ?? 0
+        let day = components.day ?? 0
         if month == 9 { currentRamadanDayForFasting = day }
 
         // Load persisted fasting days
@@ -895,13 +921,14 @@ struct HomeView: View {
     private func loadHomeData() async {
         loadError = nil
 
-        // Load Hijri date
-        hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth)
-        isRamadan = HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode)
+        // Load Hijri date (use persisted Maghrib for instant render before prayer times load)
+        let persistedMaghrib = dependencies.todayMaghribTime
+        hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth, maghribTime: persistedMaghrib)
+        isRamadan = HijriDateConverter.shared.isRamadan(maghribTime: persistedMaghrib) || FeatureFlags.shared.isEnabled(.ramadanMode)
 
         // Load Ramadan data
         let ramadanService = dependencies.ramadanService
-        ramadanService.checkRamadanStatus()
+        ramadanService.checkRamadanStatus(maghribTime: persistedMaghrib)
         currentRamadanDay = isRamadan ? max(ramadanService.currentRamadanDay, 1) : 0
         daysUntilRamadan = isRamadan ? nil : ramadanService.daysUntilRamadan
         isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
@@ -910,7 +937,7 @@ struct HomeView: View {
         showRamadanBanner = !UserDefaults.standard.bool(forKey: bannerDismissKey)
 
         // Load Eid state
-        updateEidState()
+        updateEidState(maghribTime: persistedMaghrib)
         showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
         isEidBannerExpanded = currentEidType != nil
 
@@ -938,10 +965,19 @@ struct HomeView: View {
                 let logs = try await dependencies.prayerRepository.getPrayerLogs(for: Date())
                 loggedPrayers = Set(logs.map { $0.prayerType })
 
-                // Sync to widgets via App Group
+                // Sync to widgets via App Group (also persists Maghrib and writes Hijri date)
                 WidgetDataService.shared.writePrayerTimes(todayPrayers)
                 WidgetDataService.shared.writeLoggedPrayers(loggedPrayers, for: Date())
-                WidgetDataService.shared.writeHijriDate(hijriDate)
+
+                // Recompute all Maghrib-dependent state now that we have today's prayer times
+                let maghrib = todayPrayers.first(where: { $0.type == .maghrib })?.time
+                hijriDate = HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth, maghribTime: maghrib)
+                isRamadan = HijriDateConverter.shared.isRamadan(maghribTime: maghrib) || FeatureFlags.shared.isEnabled(.ramadanMode)
+                ramadanService.checkRamadanStatus(maghribTime: maghrib)
+                currentRamadanDay = isRamadan ? max(ramadanService.currentRamadanDay, 1) : 0
+                daysUntilRamadan = isRamadan ? nil : ramadanService.daysUntilRamadan
+                isLastTenNights = currentRamadanDay >= 21 && currentRamadanDay <= 30
+                updateEidState(maghribTime: maghrib)
             }
         } catch {
             loadError = error
@@ -952,7 +988,8 @@ struct HomeView: View {
             currentDate: Date(),
             nextPrayer: nextPrayer,
             loggedPrayers: loggedPrayers,
-            streaks: dependencies.userState.streaks
+            streaks: dependencies.userState.streaks,
+            maghribTime: todayPrayers.first(where: { $0.type == .maghrib })?.time
         )
 
         // Load Quran reading progress for resume card

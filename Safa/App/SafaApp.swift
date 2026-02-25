@@ -224,7 +224,8 @@ struct SafaApp: App {
 
         // Update Live Activity with next obligatory prayer (grace-aware) + schedule boundary updates
         let now = Date()
-        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth)
+        let maghrib = prayers.first(where: { $0.type == .maghrib })?.time
+        let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth, maghribTime: maghrib)
         let obligatory = prayers.filter { $0.type.isObligatory }
         let gracePrayer = obligatory.last { isPrayerTimeNow($0.time, at: now) }
         let futurePrayer = obligatory.first { $0.time > now }
@@ -241,7 +242,7 @@ struct SafaApp: App {
             .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
         PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(
             prayers: prayerInfos,
-            hijriDate: hijri,
+            maghribTime: maghrib,
             locationName: context.regionName
         )
 
@@ -349,8 +350,7 @@ struct MainTabView: View {
 
             // Prayer Tab (swaps to Ramadan view during Ramadan)
             NavigationStack {
-                if (HijriDateConverter.shared.isRamadan() || FeatureFlags.shared.isEnabled(.ramadanMode))
-                    && !FeatureFlags.shared.isEnabled(.forcePrayerPage) {
+                if router.isRamadanActive() {
                     RamadanView()
                 } else {
                     PrayerView()

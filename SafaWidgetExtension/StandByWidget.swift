@@ -48,14 +48,15 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: StandByConfigIntent, in context: Context) async -> Timeline<StandByPrayerEntry> {
+        let now = Date()
         let prayerData = loadPrayerData()
         let isGrace = isPrayerTimeNow(prayerData.nextPrayerTime)
         let entry = StandByPrayerEntry(
-            date: Date(),
+            date: now,
             nextPrayer: prayerData.nextPrayer,
             nextPrayerTime: prayerData.nextPrayerTime,
             fajrTime: prayerData.fajrTime,
-            hijriDate: prayerData.hijriDate,
+            hijriDate: hijriDate(for: now),
             configuration: configuration,
             isGrace: isGrace
         )
@@ -77,19 +78,29 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
 
-    private func loadPrayerData() -> (nextPrayer: String, nextPrayerTime: Date, fajrTime: Date?, hijriDate: String) {
+    private let hijriHelper = HijriDateHelper()
+
+    /// Compute Hijri date for a specific point in time, using Maghrib from App Group.
+    /// Always computes locally so timeline entries that activate after Maghrib show the
+    /// correct advanced Hijri date (not a stale snapshot from before Maghrib).
+    private func hijriDate(for date: Date) -> String {
+        let defaults = UserDefaults(suiteName: "group.com.safa.app")
+        let maghrib = defaults?.object(forKey: "maghribTime") as? Date
+        return hijriHelper.hijriDateString(from: date, maghribTime: maghrib)
+    }
+
+    private func loadPrayerData() -> (nextPrayer: String, nextPrayerTime: Date, fajrTime: Date?) {
         // Load from App Group UserDefaults
         guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
             let defaultTime = Date().addingTimeInterval(18000)
-            return ("Fajr", defaultTime, defaultTime, HijriDateHelper().hijriDateString())
+            return ("Fajr", defaultTime, defaultTime)
         }
 
         let nextPrayer = defaults.string(forKey: "nextPrayerName") ?? "Fajr"
         let nextPrayerTime = defaults.object(forKey: "nextPrayerTime") as? Date ?? Date().addingTimeInterval(18000)
         let fajrTime = defaults.object(forKey: "fajrTime") as? Date
-        let hijriDate = defaults.string(forKey: "hijriDate") ?? HijriDateHelper().hijriDateString()
 
-        return (nextPrayer, nextPrayerTime, fajrTime, hijriDate)
+        return (nextPrayer, nextPrayerTime, fajrTime)
     }
 }
 

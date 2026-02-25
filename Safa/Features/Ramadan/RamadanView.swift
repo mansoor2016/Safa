@@ -127,7 +127,7 @@ struct RamadanView: View {
     // MARK: - Date Subheader
 
     private var dateSubheader: some View {
-        Text(hijriConverter.hijriDateString(from: Date(), style: .dayMonth))
+        Text(hijriConverter.hijriDateString(from: Date(), style: .dayMonth, maghribTime: prayerViewModel?.todayPrayers.first(where: { $0.type == .maghrib })?.time))
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)

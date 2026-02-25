@@ -179,7 +179,7 @@ private struct PrayerContentView: View {
 
                 Spacer()
 
-                Text(HijriDateConverter.shared.hijriDateString(from: viewModel.currentDate, style: .dayMonth))
+                Text(HijriDateConverter.shared.hijriDateString(from: Date(), style: .dayMonth, maghribTime: viewModel.todayPrayers.first(where: { $0.type == .maghrib })?.time))
                     .font(.subheadline.weight(.medium))
             }
 

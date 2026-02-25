@@ -74,7 +74,8 @@ struct HomeIntentResolver {
         nextPrayer: PrayerTime? = nil,
         loggedPrayers: Set<PrayerType> = [],
         streaks: [Streak] = [],
-        isAIAvailable: Bool = false
+        isAIAvailable: Bool = false,
+        maghribTime: Date? = nil
     ) -> [HomeAction] {
         var ranked: [HomeAction] = []
 
@@ -88,7 +89,7 @@ struct HomeIntentResolver {
         }
 
         // Rule 2: Seasonal promotions with contextual subtitles
-        let seasonal = seasonalPromotions(for: currentDate)
+        let seasonal = seasonalPromotions(for: currentDate, maghribTime: maghribTime)
         for action in seasonal where !ranked.contains(action) {
             ranked.append(action)
             if ranked.count >= 2 { break }
@@ -128,14 +129,14 @@ struct HomeIntentResolver {
 
     // MARK: - Seasonal Promotions
 
-    private static let islamicCalendar = Calendar(identifier: .islamicUmmAlQura)
-
     /// Returns actions with context-specific subtitles based on Islamic calendar and weekly cycle.
-    static func seasonalPromotions(for date: Date) -> [HomeAction] {
+    static func seasonalPromotions(for date: Date, maghribTime: Date? = nil) -> [HomeAction] {
         var promotions: [HomeAction] = []
 
-        let islamicMonth = islamicCalendar.component(.month, from: date)
-        let islamicDay = islamicCalendar.component(.day, from: date)
+        let converter = HijriDateConverter.shared
+        let adjustedComponents = converter.islamicDate(from: date, adjustedFor: maghribTime)
+        let islamicMonth = adjustedComponents.month ?? 0
+        let islamicDay = adjustedComponents.day ?? 0
         let weekday = Calendar.current.component(.weekday, from: date)
 
         // Ramadan (month 9)

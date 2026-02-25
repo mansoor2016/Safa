@@ -60,13 +60,13 @@ struct Provider: AppIntentTimelineProvider {
         return prayers
     }
 
-    /// Load hijri date from App Group, fall back to local calculation
-    private func loadHijriDate() -> String {
-        guard let defaults = UserDefaults(suiteName: appGroupId),
-              let hijri = defaults.string(forKey: "hijriDate"), !hijri.isEmpty else {
-            return hijriHelper.hijriDateString()
-        }
-        return hijri
+    /// Compute Hijri date for a specific point in time, using Maghrib from App Group.
+    /// For "now" entries this matches what the main app wrote; for future boundary entries
+    /// (e.g. post-Maghrib) it correctly advances the Hijri date.
+    private func hijriDate(for date: Date) -> String {
+        let defaults = UserDefaults(suiteName: appGroupId)
+        let maghrib = defaults?.object(forKey: "maghribTime") as? Date
+        return hijriHelper.hijriDateString(from: date, maghribTime: maghrib)
     }
 
     private let calculator = NextPrayerCalculator()
@@ -77,7 +77,7 @@ struct Provider: AppIntentTimelineProvider {
         return PrayerTimeEntry(
             date: date,
             prayers: prayerList,
-            hijriDate: loadHijriDate(),
+            hijriDate: hijriDate(for: date),
             configuration: configuration,
             nextPrayerName: next?.name ?? "Isha",
             nextPrayerTime: next?.time ?? date,
