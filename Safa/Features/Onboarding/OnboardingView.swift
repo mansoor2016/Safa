@@ -32,6 +32,12 @@ struct OnboardingView: View {
 
     private let totalPages = 3
 
+    /// Location permission has been resolved (granted, denied, or restricted) — Apple guideline 5.1.1
+    private var locationPermissionResolved: Bool {
+        locationContext != nil || locationStatus == .denied || locationStatus == .restricted
+            || locationStatus == .authorizedWhenInUse || locationStatus == .authorizedAlways
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -553,7 +559,8 @@ struct OnboardingView: View {
             }
 
             // Skip / Back / Next row
-            if currentPage < totalPages - 1 {
+            // Page 0: hidden until location permission resolved (Apple guideline 5.1.1)
+            if currentPage < totalPages - 1, currentPage > 0 || locationPermissionResolved {
                 HStack {
                     if currentPage > 0 {
                         Button {
@@ -562,16 +569,6 @@ struct OnboardingView: View {
                             }
                         } label: {
                             Text("Back")
-                                .font(SafaTypography.bodyMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
-                                .frame(minWidth: 60, minHeight: SafaSpacing.ButtonHeight.md)
-                                .contentShape(Rectangle())
-                        }
-                    } else {
-                        Button {
-                            skipOnboarding()
-                        } label: {
-                            Text("Skip")
                                 .font(SafaTypography.bodyMedium)
                                 .foregroundColor(SafaColors.Fallback.secondaryText)
                                 .frame(minWidth: 60, minHeight: SafaSpacing.ButtonHeight.md)
