@@ -1,5 +1,5 @@
 // MARK: - AppearanceSettingsView.swift
-// PURPOSE: Shared appearance + accessibility settings used by Settings menu
+// PURPOSE: Shared appearance settings used by Settings menu
 // DEPENDENCIES: SwiftUI, PreferencesManager, ThemeManager, HapticFeedbackService
 
 import SwiftUI
@@ -13,11 +13,6 @@ struct AppearanceSettingsView: View {
     @State private var hapticFeedbackEnabled: Bool
     @State private var showRamadanBanner: Bool
     @State private var showEidBanner: Bool
-
-    // Accessibility state
-    @State private var reduceMotionEnabled: Bool
-    @State private var largerTextEnabled: Bool
-    @State private var highContrastEnabled: Bool
 
     private let prefsManager = PreferencesManager.shared
 
@@ -37,9 +32,6 @@ struct AppearanceSettingsView: View {
     init() {
         let prefs = PreferencesManager.loadPreferencesSync()
         _hapticFeedbackEnabled = State(initialValue: prefs.hapticFeedbackEnabled)
-        _reduceMotionEnabled = State(initialValue: prefs.reduceMotionEnabled)
-        _largerTextEnabled = State(initialValue: prefs.largerArabicTextEnabled)
-        _highContrastEnabled = State(initialValue: prefs.highContrastEnabled)
 
         // Appearance requires ThemeManager which isn't available in init, seed as .system
         _selectedAppearance = State(initialValue: .system)
@@ -109,27 +101,6 @@ struct AppearanceSettingsView: View {
                 Text("Appearance")
             }
 
-            // MARK: Accessibility Section
-            Section {
-                Toggle("Reduce Motion", isOn: $reduceMotionEnabled)
-                    .onChange(of: reduceMotionEnabled) { _, newValue in
-                        Task { await prefsManager.saveAccessibility(reduceMotion: newValue) }
-                    }
-
-                Toggle("Larger Arabic Text", isOn: $largerTextEnabled)
-                    .onChange(of: largerTextEnabled) { _, newValue in
-                        Task { await prefsManager.saveAccessibility(largerText: newValue) }
-                    }
-
-                Toggle("High Contrast", isOn: $highContrastEnabled)
-                    .onChange(of: highContrastEnabled) { _, newValue in
-                        Task { await prefsManager.saveAccessibility(highContrast: newValue) }
-                    }
-            } header: {
-                Text("Accessibility")
-            } footer: {
-                Text("Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update.")
-            }
         }
         .navigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
