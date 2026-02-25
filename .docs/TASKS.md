@@ -14,8 +14,6 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 | Effort | Task |
 |--------|------|
-| S | Memory profiling (target < 200MB) *(manual — Instruments)* |
-| S | Battery impact test *(manual — Live Activity running)* |
 | M | Dua audio pronunciations (needs audio files) — defer if unavailable |
 | S | Audio playback verification *(manual device test)* |
 | L | RTL audit (Arabic UI flow, mirrored icons, mixed-script Dynamic Type) (partial — layout direction + VoiceOver done across 9 views, icon mirroring + full Dynamic Type audit remaining) |
@@ -28,7 +26,7 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | L | Mosque timetable integration (Iqamah/Jama'ah support) — let users follow local mosque times alongside calculated times |
 | M | Progressive Learn rollout — ship ready tracks incrementally instead of keeping all Learn content gated |
 | M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss; users who enable prayer notifications want to be alerted. Explore longer/custom notification sounds, repeated alerts, or critical alert style to make non-adhan notifications harder to ignore. relevanceScore=1.0 already added. |
-| L | Monetization strategy — research and implement sustainable revenue model (freemium tiers, Pro subscription, tip jar, or similar). Define free vs paid feature split, StoreKit 2 integration, paywall UI, restore purchases, receipt validation |
+| L | Monetization strategy — research and implement sustainable revenue model (freemium tiers, Pro subscription, tip jar, or similar). Define free vs paid feature split, StoreKit 2 integration, paywall UI, restore purchases, receipt validation (partial — StoreKit 2 voluntary subscriptions implemented: CommunitySupportCard, App Store Connect products, custom app icons as subscriber perk. Remaining: receipt validation, TestFlight sandbox testing, App Review submission) |
 | XL | Learning section — build out the Learn tab with structured Islamic education content (tracks, lessons, quizzes). Content authoring pipeline, progress tracking, offline support. Currently feature-flagged as disabled |
 
 ## P2 — Later
@@ -60,8 +58,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ## Completed
 
-**v1.4–v2.0:** Prayer engine (adhan-swift v1.5.0, notification actions, wudhu reminders, adhan silent mode, grace window), Live Activity + widgets (reliability, staleness fix, boundary entries, Dynamic Island, StandBy), Qibla compass, Quran reader (scroll unification, transliteration for 6,236 ayahs), AI companion (Foundation Models + iOS 26 gate, Dua RAG, citation validation, chat UI, Siri intent, input safety, UX hardening), progress dashboard (real data + calendar + charts), Settings refactor, location intelligence, hasanat dedup fix, in-app review prompt, data deletion gaps, os.Logger + MetricKit. App Store submission + TestFlight release gate passed. **v2.3–v2.5:** Daily verse expansion (600 across 113 surahs), dua content audit (57→120 duas, 21 categories), RTL + VoiceOver accessibility (9 views), in-app language override (9 languages), 44 translation fixes. **v2.6:** 15-minute prayer grace window (all surfaces), Progress Dashboard redesign. **v2.7:** Maghrib-aware Islamic day boundary, Home declutter (interactive Khatm card), unified prayer progress style, Live Activity fixes, rak'ah prayer breakdown (madhab-aware before/after Fard split, long-press toggle, 40 correctness tests), Ramadan tab NextPrayerCard (replaces duplicate Suhoor/Iftar platter). App Store Connect submitted.
+**v1.4–v2.0:** Prayer engine (adhan-swift v1.5.0, notification actions, wudhu reminders, adhan silent mode, grace window), Live Activity + widgets (reliability, staleness fix, boundary entries, Dynamic Island, StandBy), Qibla compass, Quran reader (scroll unification, transliteration for 6,236 ayahs), AI companion (Foundation Models + iOS 26 gate, Dua RAG, citation validation, chat UI, Siri intent, input safety, UX hardening), progress dashboard (real data + calendar + charts), Settings refactor, location intelligence, hasanat dedup fix, in-app review prompt, data deletion gaps, os.Logger + MetricKit. App Store submission + TestFlight release gate passed. Memory profiling + battery impact test (verified across TestFlight devices). **v2.3–v2.5:** Daily verse expansion (600 across 113 surahs), dua content audit (57→120 duas, 21 categories), RTL + VoiceOver accessibility (9 views), in-app language override (9 languages), 44 translation fixes. **v2.6:** 15-minute prayer grace window (all surfaces), Progress Dashboard redesign. **v2.7:** Maghrib-aware Islamic day boundary, Home declutter (interactive Khatm card), unified prayer progress style, Live Activity fixes, rak'ah prayer breakdown (madhab-aware before/after Fard split, long-press toggle, 40 correctness tests), Ramadan tab NextPrayerCard (replaces duplicate Suhoor/Iftar platter). App Store Connect submitted.
 
 ---
 
-*Last Updated: February 25, 2026 — Condensed completed section, removed P0 (App Store submitted), completed rak'ah prayer table (P2→done).*
+*Last Updated: February 25, 2026 — Updated monetization task with StoreKit 2 subscription progress (CommunitySupportCard, App Store Connect products, custom app icons).*

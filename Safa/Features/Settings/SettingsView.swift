@@ -3,6 +3,7 @@
 // DEPENDENCIES: SwiftUI, PreferencesManager
 
 import SwiftUI
+import StoreKit
 import UserNotifications
 
 struct SettingsView: View {
@@ -20,10 +21,12 @@ struct SettingsView: View {
     @State private var showDeleteConfirmation = false
     @State private var showInviteFriendsSheet = false
     @State private var showDeveloperSettings = false
+    @State private var showSubscriptionSheet = false
 
     var body: some View {
         List {
             shareSection
+            subscriberSection
 
             Section {
                 settingsRow(
@@ -171,6 +174,82 @@ struct SettingsView: View {
             }
         } footer: {
             Text("Help others discover Safa")
+        }
+    }
+
+    // MARK: - Subscriber Section
+
+    private var subscriberSection: some View {
+        Section {
+            if dependencies.subscriptionService.hasActiveSubscription {
+                Button {
+                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack(spacing: SafaSpacing.sm) {
+                        Image(systemName: "heart.circle.fill")
+                            .foregroundColor(.pink)
+                            .frame(width: 24)
+
+                        Text("Manage Subscription")
+
+                        Spacer()
+
+                        Text("Active")
+                            .font(SafaTypography.bodySmall)
+                            .foregroundStyle(.green)
+                    }
+                }
+            } else {
+                Button {
+                    showSubscriptionSheet = true
+                } label: {
+                    HStack(spacing: SafaSpacing.sm) {
+                        Image(systemName: "heart.circle.fill")
+                            .foregroundColor(.pink)
+                            .frame(width: 24)
+
+                        Text("Support Safa")
+                    }
+                }
+                .sheet(isPresented: $showSubscriptionSheet) {
+                    SubscriptionStoreView(productIDs: SubscriptionService.productIDs)
+                        .subscriptionStoreControlStyle(.automatic)
+                        .storeButton(.visible, for: .restorePurchases)
+                }
+            }
+
+            settingsRow(
+                icon: "app.badge",
+                iconColor: .purple,
+                title: "App Icon",
+                summary: nil
+            ) {
+                AppIconPickerView(isSubscriber: dependencies.subscriptionService.hasActiveSubscription)
+            }
+
+            if !dependencies.subscriptionService.hasActiveSubscription {
+                Button {
+                    Task { await dependencies.subscriptionService.restorePurchases() }
+                } label: {
+                    HStack(spacing: SafaSpacing.sm) {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.accentColor)
+                            .frame(width: 24)
+
+                        Text("Restore Purchases")
+                    }
+                }
+            }
+        } header: {
+            Text("Subscriber")
+        } footer: {
+            if dependencies.subscriptionService.hasActiveSubscription {
+                Text("Thank you for supporting Safa.")
+            } else {
+                Text("Subscribers get custom app icons and early access to new features.")
+            }
         }
     }
 
@@ -376,6 +455,10 @@ struct SettingsView: View {
 
                 Button("Test Review Prompt") {
                     AppReviewService.triggerDebugPrompt()
+                }
+
+                Button("Test Support Prompt") {
+                    SupportPromptService.triggerDebugPrompt()
                 }
 
                 Button("Reset Onboarding") {

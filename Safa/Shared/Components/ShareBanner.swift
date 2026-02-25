@@ -14,7 +14,7 @@ struct ShareBanner: View {
         UserDefaults.standard.bool(forKey: dismissedKey)
     }
 
-    private static func markDismissed() {
+    static func markDismissed() {
         UserDefaults.standard.set(true, forKey: dismissedKey)
     }
 
@@ -73,7 +73,7 @@ struct ShareBanner: View {
 
 // MARK: - Share Sheet
 
-private struct AppShareSheet: UIViewControllerRepresentable {
+struct AppShareSheet: UIViewControllerRepresentable {
     let onComplete: (Bool) -> Void
 
     func makeUIViewController(context: Context) -> UIActivityViewController {

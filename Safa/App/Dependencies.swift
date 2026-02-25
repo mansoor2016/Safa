@@ -35,6 +35,9 @@ final class Dependencies {
     let citationValidation: CitationValidationServiceProtocol
     let chatOrchestrator: ChatOrchestratorProtocol
 
+    // MARK: - Subscription
+    let subscriptionService = SubscriptionService.shared
+
     // MARK: - Global State
     let userState: UserStateManager
 

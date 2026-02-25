@@ -177,6 +177,13 @@ enum AppConstants {
         static let reviewOptedOut = "com.safa.review.optedOut"
         static let reviewLastPromptDate = "com.safa.review.lastPromptDate"
 
+        // Support Subscription Prompt
+        static let supportFirstEligibleDate = "com.safa.support.firstEligibleDate"
+        static let supportPromptCount = "com.safa.support.promptCount"
+        static let supportOptedOut = "com.safa.support.optedOut"
+        static let supportLastPromptDate = "com.safa.support.lastPromptDate"
+        static let supportSessionCount = "com.safa.support.sessionCount"
+
         // Storage Cleanup
         static let storageAudioMetadata = "com.safa.storage.audioMetadata"
         static let storageAutoCleanup = "com.safa.storage.autoCleanup"

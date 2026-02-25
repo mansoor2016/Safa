@@ -487,4 +487,148 @@ final class HomeBannerResolverTests: XCTestCase {
         XCTAssertEqual(resultDay3, .duringEid(type: .fitr, dayNumber: 3))
         XCTAssertEqual(resultDay4, .hidden)
     }
+
+    // MARK: - Support Card Tests
+
+    private func makeSupport(
+        eligible: Bool = false,
+        dismissed: Bool = false,
+        subscribed: Bool = false,
+        debugForced: Bool = false
+    ) -> HomeBannerResolver.SupportCardState {
+        HomeBannerResolver.SupportCardState(
+            isEligibleThisSession: eligible,
+            isDismissedThisSession: dismissed,
+            hasActiveSubscription: subscribed,
+            isDebugForced: debugForced
+        )
+    }
+
+    func test_support_eligibleNotDismissedNotSubscribed_visible() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: true)
+        )
+        XCTAssertEqual(result, .visible)
+    }
+
+    func test_support_eligibleButDismissed_hidden() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: true, dismissed: true)
+        )
+        XCTAssertEqual(result, .hidden)
+    }
+
+    func test_support_eligibleButSubscribed_hidden() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: true, subscribed: true)
+        )
+        XCTAssertEqual(result, .hidden)
+    }
+
+    func test_support_notEligible_hidden() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: false)
+        )
+        XCTAssertEqual(result, .hidden)
+    }
+
+    func test_support_debugForcedNotDismissed_visible() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: false, debugForced: true)
+        )
+        XCTAssertEqual(result, .visible)
+    }
+
+    func test_support_debugForcedButDismissed_hidden() {
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: false, dismissed: true, debugForced: true)
+        )
+        XCTAssertEqual(result, .hidden)
+    }
+
+    func test_support_debugForcedButSubscribed_visible() {
+        // Debug force overrides subscription check (for developer testing)
+        let result = HomeBannerResolver.resolveSupportCard(
+            support: makeSupport(eligible: false, subscribed: true, debugForced: true)
+        )
+        XCTAssertEqual(result, .visible)
+    }
+
+    // MARK: - Community Card Mode Tests
+
+    func test_communityCard_nonSubscriber_notShared_supportEligible_shareAndSupport() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: true, supportVisible: true, isSubscriber: false
+        )
+        XCTAssertEqual(result, .shareAndSupport)
+    }
+
+    func test_communityCard_nonSubscriber_notShared_supportNotEligible_shareOnly() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: true, supportVisible: false, isSubscriber: false
+        )
+        XCTAssertEqual(result, .shareOnly)
+    }
+
+    func test_communityCard_nonSubscriber_shared_supportEligible_supportOnly() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: true, isSubscriber: false
+        )
+        XCTAssertEqual(result, .supportOnly)
+    }
+
+    func test_communityCard_nonSubscriber_shared_supportNotEligible_hidden() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: false, isSubscriber: false
+        )
+        XCTAssertEqual(result, .hidden)
+    }
+
+    func test_communityCard_subscriber_notShared_thankYouWithShare() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: true, supportVisible: false, isSubscriber: true
+        )
+        XCTAssertEqual(result, .thankYouWithShare)
+    }
+
+    func test_communityCard_subscriber_shared_thankYou() {
+        let result = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: false, isSubscriber: true
+        )
+        XCTAssertEqual(result, .thankYou)
+    }
+
+    func test_communityCard_hiddenOnlyWhenNotSharedNotSupportNotSubscriber() {
+        // Verify .hidden is the only case where card disappears
+        let hidden = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: false, isSubscriber: false
+        )
+        XCTAssertEqual(hidden, .hidden)
+
+        // All other non-subscriber combos are visible
+        XCTAssertNotEqual(
+            HomeBannerResolver.resolveCommunityCard(shareVisible: true, supportVisible: false, isSubscriber: false),
+            .hidden
+        )
+        XCTAssertNotEqual(
+            HomeBannerResolver.resolveCommunityCard(shareVisible: false, supportVisible: true, isSubscriber: false),
+            .hidden
+        )
+        XCTAssertNotEqual(
+            HomeBannerResolver.resolveCommunityCard(shareVisible: true, supportVisible: true, isSubscriber: false),
+            .hidden
+        )
+    }
+
+    func test_communityCard_subscriberIgnoresSupportFlag() {
+        // Subscribers always see thank-you variant, regardless of support eligibility
+        let withSupport = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: true, isSubscriber: true
+        )
+        let withoutSupport = HomeBannerResolver.resolveCommunityCard(
+            shareVisible: false, supportVisible: false, isSubscriber: true
+        )
+        XCTAssertEqual(withSupport, .thankYou)
+        XCTAssertEqual(withoutSupport, .thankYou)
+    }
 }

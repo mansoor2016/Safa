@@ -10,6 +10,11 @@ struct HomeView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
 
+    // MARK: - Support Card Bindings (owned by MainTabView)
+    @Binding var showSupportCardThisSession: Bool
+    @Binding var supportCardDismissed: Bool
+    @Binding var debugForceSupport: Bool
+
     @State private var nextPrayer: PrayerTime?
     @State private var todayPrayers: [PrayerTime] = []
     @State private var loggedPrayers: Set<PrayerType> = []
@@ -151,14 +156,8 @@ struct HomeView: View {
                 // Contextual reminders
                 contextualReminders
 
-                // Share app banner (hidden once user shares)
-                if HomeBannerResolver.resolveShareBanner(dismiss: dismissState) == .visible {
-                    ShareBanner {
-                        withAnimation {
-                            showShareBanner = false
-                        }
-                    }
-                }
+                // Combined community card (share + support + subscriber thank-you)
+                communitySupportSection
             }
             .padding()
             } // end else (skeleton)
@@ -881,6 +880,35 @@ struct HomeView: View {
         withAnimation { juzCompleted = count }
     }
 
+    // MARK: - Community Support Section
+
+    @ViewBuilder
+    private var communitySupportSection: some View {
+        let shareEligible = HomeBannerResolver.resolveShareBanner(dismiss: dismissState) == .visible
+        let supportEligible = HomeBannerResolver.resolveSupportCard(support: .init(
+            isEligibleThisSession: showSupportCardThisSession,
+            isDismissedThisSession: supportCardDismissed,
+            hasActiveSubscription: dependencies.subscriptionService.hasActiveSubscription,
+            isDebugForced: debugForceSupport
+        )) == .visible
+        let isSubscriber = dependencies.subscriptionService.hasActiveSubscription
+
+        if shareEligible || supportEligible || isSubscriber {
+            CommunitySupportCard(
+                showShare: shareEligible,
+                showSupport: supportEligible,
+                isSubscriber: isSubscriber,
+                onShareComplete: { withAnimation { showShareBanner = false } },
+                onSupportDismiss: {
+                    withAnimation {
+                        supportCardDismissed = true
+                        debugForceSupport = false
+                    }
+                }
+            )
+        }
+    }
+
     // MARK: - Contextual Reminders
 
     @ViewBuilder
@@ -1109,7 +1137,11 @@ func formatNextPrayerAccessibilityLabel(prayerName: String, hours: Int, minutes:
 
 #Preview {
     NavigationStack {
-        HomeView()
+        HomeView(
+            showSupportCardThisSession: .constant(false),
+            supportCardDismissed: .constant(false),
+            debugForceSupport: .constant(false)
+        )
             .environment(Dependencies())
             .environment(AppRouter())
     }

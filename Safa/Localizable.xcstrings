@@ -4668,6 +4668,7 @@
       }
     },
     "Accessibility" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4720,6 +4721,7 @@
       }
     },
     "Accessibility features are not yet fully functional. Safa will support Dynamic Type, VoiceOver, and other iOS accessibility features in a future update." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4874,6 +4876,9 @@
           }
         }
       }
+    },
+    "Active" : {
+
     },
     "Activity" : {
       "extractionState" : "stale",
@@ -5707,6 +5712,9 @@
           }
         }
       }
+    },
+    "App Icon" : {
+
     },
     "App Language" : {
       "localizations" : {
@@ -11838,6 +11846,9 @@
         }
       }
     },
+    "Don't show again" : {
+
+    },
     "Done" : {
       "localizations" : {
         "ar" : {
@@ -17933,6 +17944,7 @@
       }
     },
     "High Contrast" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19665,6 +19677,7 @@
       }
     },
     "Larger Arabic Text" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21401,6 +21414,9 @@
           }
         }
       }
+    },
+    "Manage Subscription" : {
+
     },
     "Mark as Prayed" : {
       "localizations" : {
@@ -23637,6 +23653,9 @@
           }
         }
       }
+    },
+    "Not now" : {
+
     },
     "Not set" : {
       "localizations" : {
@@ -28339,6 +28358,7 @@
       }
     },
     "Reduce Motion" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29221,6 +29241,9 @@
           }
         }
       }
+    },
+    "Restore Purchases" : {
+
     },
     "Retention Period" : {
       "localizations" : {
@@ -30105,6 +30128,9 @@
           }
         }
       }
+    },
+    "See Plans" : {
+
     },
     "Select Date" : {
       "localizations" : {
@@ -32812,6 +32838,15 @@
         }
       }
     },
+    "Subscribe to unlock custom app icons." : {
+
+    },
+    "Subscriber" : {
+
+    },
+    "Subscribers get custom app icons and early access to new features." : {
+
+    },
     "Suhoor" : {
       "localizations" : {
         "ar" : {
@@ -33175,6 +33210,9 @@
           }
         }
       }
+    },
+    "Support Safa" : {
+
     },
     "Surah" : {
       "localizations" : {
@@ -34866,6 +34904,12 @@
           }
         }
       }
+    },
+    "Test Support Prompt" : {
+
+    },
+    "Thank you for supporting Safa." : {
+
     },
     "The 10th of Muharram. Fasting this day expiates sins of the previous year." : {
       "localizations" : {

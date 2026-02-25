@@ -58,6 +58,18 @@ struct HomeBannerResolver {
         case visible(lastSurah: Int, lastAyah: Int)
     }
 
+    enum SupportCardVisibility: Equatable {
+        case hidden
+        case visible
+    }
+
+    struct SupportCardState {
+        let isEligibleThisSession: Bool
+        let isDismissedThisSession: Bool
+        let hasActiveSubscription: Bool
+        let isDebugForced: Bool
+    }
+
     // MARK: - Resolve Methods
 
     static func resolveRamadanBanner(
@@ -119,6 +131,43 @@ struct HomeBannerResolver {
         dismiss: DismissState
     ) -> ShareBannerVisibility {
         dismiss.isShareBannerDismissedPermanently ? .hidden : .visible
+    }
+
+    static func resolveSupportCard(
+        support: SupportCardState
+    ) -> SupportCardVisibility {
+        if support.isDebugForced && !support.isDismissedThisSession { return .visible }
+        if support.isDismissedThisSession { return .hidden }
+        if support.hasActiveSubscription { return .hidden }
+        if !support.isEligibleThisSession { return .hidden }
+        return .visible
+    }
+
+    // MARK: - Community Card
+
+    enum CommunityCardMode: Equatable {
+        case hidden
+        case shareOnly
+        case supportOnly
+        case shareAndSupport
+        case thankYouWithShare
+        case thankYou
+    }
+
+    static func resolveCommunityCard(
+        shareVisible: Bool,
+        supportVisible: Bool,
+        isSubscriber: Bool
+    ) -> CommunityCardMode {
+        if isSubscriber {
+            return shareVisible ? .thankYouWithShare : .thankYou
+        }
+        switch (shareVisible, supportVisible) {
+        case (true, true):   return .shareAndSupport
+        case (true, false):  return .shareOnly
+        case (false, true):  return .supportOnly
+        case (false, false): return .hidden
+        }
     }
 
     static func resolveResumeCard(

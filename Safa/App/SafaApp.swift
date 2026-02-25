@@ -136,6 +136,9 @@ struct SafaApp: App {
                 // Record first launch date for review prompt timing
                 AppReviewService.recordFirstLaunchIfNeeded()
 
+                // Record first eligible date for support prompt timing
+                SupportPromptService.recordFirstEligibleIfNeeded()
+
                 // Pre-warm compressed databases in background (non-blocking)
                 await SQLiteService.shared.preWarmDatabases()
 
@@ -279,6 +282,10 @@ struct MainTabView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
     @State private var showReviewPrompt = false
+    @State private var showSupportCardThisSession = false
+    @State private var supportCardDismissed = false
+    @State private var debugForceSupport = false
+    @State private var hasEvaluatedPromptsThisSession = false
     enum Tab: String, CaseIterable {
         case home
         case quran
@@ -331,7 +338,11 @@ struct MainTabView: View {
                 get: { router.path },
                 set: { router.path = $0 }
             )) {
-                HomeView()
+                HomeView(
+                    showSupportCardThisSession: $showSupportCardThisSession,
+                    supportCardDismissed: $supportCardDismissed,
+                    debugForceSupport: $debugForceSupport
+                )
                     .navigationDestination(for: AppRouter.Destination.self) { destination in
                         destinationView(for: destination)
                     }
@@ -387,13 +398,34 @@ struct MainTabView: View {
         }
         .task {
             try? await Task.sleep(for: .seconds(AppReviewService.baseInterval))
+
+            // Guard: evaluate prompts exactly once per session
+            guard !hasEvaluatedPromptsThisSession else { return }
+            hasEvaluatedPromptsThisSession = true
+
+            // Review has priority
             if AppReviewService.shouldShowPrompt() {
                 withAnimation { showReviewPrompt = true }
                 AppReviewService.recordPromptShown()
+                return // Only one prompt per session
+            }
+
+            // Support prompt — only if eligible this session
+            let sub = dependencies.subscriptionService
+            if SupportPromptService.shouldShowPrompt(
+                hasActiveSubscription: sub.hasActiveSubscription,
+                entitlementsInitialized: sub.entitlementsInitialized
+            ) {
+                showSupportCardThisSession = true
+                SupportPromptService.recordPromptShown()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .debugShowReviewPrompt)) { _ in
             withAnimation { showReviewPrompt = true }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .debugShowSupportPrompt)) { _ in
+            debugForceSupport = true
+            supportCardDismissed = false
         }
     }
 

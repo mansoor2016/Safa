@@ -1,0 +1,138 @@
+{
+  "identifier" : "D6E8A2F1-3B4C-4D5E-9F0A-1B2C3D4E5F6A",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6759136442",
+    "_developerTeamID" : "PLACEHOLDER",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "B7F9C3D1-4E5A-6B7C-8D9E-0F1A2B3C4D5E",
+      "localizations" : [
+        {
+          "description" : "Your contribution keeps Safa free and ad-free for everyone.",
+          "displayName" : "Safa Support",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "Safa Support",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A1B2C3D4-5E6F-7A8B-9C0D-1E2F3A4B5C6D",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly contribution to Safa",
+              "displayName" : "Safa Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.safa.support.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Safa Monthly",
+          "subscriptionGroupID" : "B7F9C3D1-4E5A-6B7C-8D9E-0F1A2B3C4D5E",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "29.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "E5F6A7B8-9C0D-1E2F-3A4B-5C6D7E8F9A0B",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Annual contribution to Safa — save over 16%",
+              "displayName" : "Safa Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.safa.support.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Safa Annual",
+          "subscriptionGroupID" : "B7F9C3D1-4E5A-6B7C-8D9E-0F1A2B3C4D5E",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
