@@ -293,6 +293,7 @@ private struct SurahRow: View {
                 }
                 .font(SafaTypography.bodySmall)
                 .foregroundColor(SafaColors.Fallback.secondaryText)
+                .lineLimit(1)
             }
 
             Spacer()
@@ -314,6 +315,8 @@ private struct SurahRow: View {
             Text(surah.nameArabic)
                 .font(SafaTypography.arabicMedium)
                 .foregroundColor(SafaColors.Fallback.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
                 .frame(width: 90, alignment: .trailing)
         }
         .padding(.horizontal, SafaSpacing.md)
