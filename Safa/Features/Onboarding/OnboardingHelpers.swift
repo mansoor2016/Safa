@@ -15,6 +15,18 @@ enum OnboardingHelpers {
         locationStatus == .denied || locationStatus == .restricted
     }
 
+    /// Whether forward navigation from `from` to `to` is allowed.
+    /// Used by both the swipe guard and the footer Next button.
+    static func shouldAllowForwardNavigation(
+        from page: Int,
+        to target: Int,
+        locationPermissionResolved: Bool
+    ) -> Bool {
+        // Block forward past page 1 (location) when location unresolved
+        if page == 1 && target > 1 && !locationPermissionResolved { return false }
+        return true
+    }
+
     /// Builds the preferences to save when the user taps "Skip" on onboarding.
     /// If location was already detected, inferred values are preserved; otherwise AppDefaults are used.
     static func buildSkipPreferences(

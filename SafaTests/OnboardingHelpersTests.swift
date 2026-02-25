@@ -109,4 +109,42 @@ final class OnboardingHelpersTests: XCTestCase {
     func test_shouldShowSettingsLink_authorizedAlways_returnsFalse() {
         XCTAssertFalse(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .authorizedAlways))
     }
+
+    // MARK: - shouldAllowForwardNavigation
+
+    func test_forwardNavigation_page0ToPage1_alwaysAllowed() {
+        // About → Location is always allowed regardless of location state
+        XCTAssertTrue(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 0, to: 1, locationPermissionResolved: false
+        ))
+        XCTAssertTrue(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 0, to: 1, locationPermissionResolved: true
+        ))
+    }
+
+    func test_forwardNavigation_page1ToPage2_blockedWhenLocationUnresolved() {
+        // Location → Notifications blocked until permission resolved
+        XCTAssertFalse(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 1, to: 2, locationPermissionResolved: false
+        ))
+    }
+
+    func test_forwardNavigation_page1ToPage2_allowedWhenLocationResolved() {
+        XCTAssertTrue(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 1, to: 2, locationPermissionResolved: true
+        ))
+    }
+
+    func test_backwardNavigation_page2ToPage1_alwaysAllowed() {
+        // Backward navigation is never blocked
+        XCTAssertTrue(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 2, to: 1, locationPermissionResolved: false
+        ))
+    }
+
+    func test_backwardNavigation_page1ToPage0_alwaysAllowed() {
+        XCTAssertTrue(OnboardingHelpers.shouldAllowForwardNavigation(
+            from: 1, to: 0, locationPermissionResolved: false
+        ))
+    }
 }

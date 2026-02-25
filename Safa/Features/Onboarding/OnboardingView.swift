@@ -1,5 +1,5 @@
 // MARK: - OnboardingView.swift
-// PURPOSE: Streamlined 3-page onboarding flow with location-based recommendations
+// PURPOSE: Streamlined 4-page onboarding flow with location-based recommendations
 // DEPENDENCIES: SwiftUI, CoreLocation, UserNotifications
 
 import SwiftUI
@@ -30,7 +30,7 @@ struct OnboardingView: View {
     @State private var highLatitudeWarning: String?
     @State private var showCustomizeSettings = false
 
-    private let totalPages = 3
+    private let totalPages = 4
 
     /// Location permission has been resolved (granted, denied, or restricted) — Apple guideline 5.1.1
     private var locationPermissionResolved: Bool {
@@ -58,11 +58,21 @@ struct OnboardingView: View {
 
                 // Page content — TabView handles its own height, no GeometryReader
                 TabView(selection: $currentPage) {
-                    welcomeLocationPage.tag(0)
-                    quickSetupPage.tag(1)
-                    readyPage.tag(2)
+                    aboutPage.tag(0)
+                    locationPage.tag(1)
+                    quickSetupPage.tag(2)
+                    readyPage.tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
+                .onChange(of: currentPage) { oldValue, newValue in
+                    if !OnboardingHelpers.shouldAllowForwardNavigation(
+                        from: oldValue,
+                        to: newValue,
+                        locationPermissionResolved: locationPermissionResolved
+                    ) {
+                        currentPage = oldValue
+                    }
+                }
             }
             .safeAreaInset(edge: .bottom) {
                 onboardingFooter
@@ -92,42 +102,82 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 1: Welcome + Location
+    // MARK: - Page 0: About
 
-    private var welcomeLocationPage: some View {
+    private var aboutPage: some View {
         ScrollView {
-            VStack(spacing: SafaSpacing.md) {
-                // App branding
-                ZStack {
-                    Circle()
-                        .fill(Color.accentColor.opacity(0.1))
-                        .frame(width: 100, height: 100)
-
+            VStack(spacing: 32) {
+                // App icon + name
+                VStack(spacing: 12) {
                     Image(systemName: "moon.stars.fill")
-                        .font(.system(size: 48))
-                        .foregroundColor(.accentColor)
+                        .font(.system(size: 56))
+                        .foregroundStyle(Color.accentColor)
+
+                    Text("Safa")
+                        .font(.largeTitle.weight(.bold))
+
+                    Text("صفا")
+                        .font(.system(size: 28, weight: .medium, design: .serif))
+                        .foregroundStyle(.secondary)
+
+                    Text("Purity · Clarity")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
-                .padding(.top, SafaSpacing.xl)
+                .padding(.top)
+
+                // Mission
+                VStack(spacing: 16) {
+                    Text("Safa is a comprehensive Islamic companion app designed with privacy, simplicity, and intelligence at its core.")
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+
+                    Text("No ads. No clutter. No tracking.")
+                        .font(.headline)
+                        .foregroundStyle(Color.accentColor)
+
+                    Text("Just you and your faith.")
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal)
+
+                Divider()
+                    .padding(.horizontal)
+
+                // Closing
+                Text("Bismillah. May Safa be a means of benefit for you in this life and the next.")
+                    .font(.subheadline)
+                    .italic()
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+            }
+            .padding()
+        }
+    }
+
+    // MARK: - Page 1: Location
+
+    private var locationPage: some View {
+        ScrollView {
+            VStack(spacing: SafaSpacing.lg) {
+                Image(systemName: "location.circle.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.accentColor)
+                    .padding(.top, SafaSpacing.xl)
 
                 VStack(spacing: SafaSpacing.xs) {
-                    Text("صفا")
-                        .font(SafaTypography.arabicLarge)
+                    Text("Location")
+                        .font(SafaTypography.headlineMedium)
                         .foregroundColor(SafaColors.Fallback.text)
 
-                    Text("Your Islamic Companion")
-                        .font(SafaTypography.bodyLarge)
+                    Text("Enable location for accurate prayer times")
+                        .font(SafaTypography.bodySmall)
                         .foregroundColor(SafaColors.Fallback.secondaryText)
                 }
 
-                // Quick features list
-                VStack(alignment: .leading, spacing: SafaSpacing.sm) {
-                    featureItem(icon: "nosign", text: "No ads")
-                    featureItem(icon: "hand.tap", text: "Easy to navigate")
-                    featureItem(icon: "sparkles", text: "Islamic AI assistant")
-                }
-                .padding(.vertical, SafaSpacing.sm)
-
-                // Location section
                 locationSection
                     .padding(.horizontal)
             }
@@ -218,22 +268,7 @@ struct OnboardingView: View {
         }
     }
 
-    private func featureItem(icon: String, text: String) -> some View {
-        HStack(spacing: SafaSpacing.sm) {
-            Image(systemName: icon)
-                .foregroundColor(.accentColor)
-                .frame(width: 24)
-
-            Text(text)
-                .font(SafaTypography.bodyMedium)
-                .foregroundColor(SafaColors.Fallback.text)
-
-            Spacer()
-        }
-        .padding(.horizontal, SafaSpacing.lg)
-    }
-
-    // MARK: - Page 2: Quick Setup
+    // MARK: - Page 2: Notifications
 
     private var quickSetupPage: some View {
         ScrollView {
@@ -558,9 +593,8 @@ struct OnboardingView: View {
                 }
             }
 
-            // Skip / Back / Next row
-            // Page 0: hidden until location permission resolved (Apple guideline 5.1.1)
-            if currentPage < totalPages - 1, currentPage > 0 || locationPermissionResolved {
+            // Back / Next row — shown on all non-final pages
+            if currentPage < totalPages - 1 {
                 HStack {
                     if currentPage > 0 {
                         Button {
@@ -578,20 +612,26 @@ struct OnboardingView: View {
 
                     Spacer()
 
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            currentPage += 1
+                    if OnboardingHelpers.shouldAllowForwardNavigation(
+                        from: currentPage,
+                        to: currentPage + 1,
+                        locationPermissionResolved: locationPermissionResolved
+                    ) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                currentPage += 1
+                            }
+                        } label: {
+                            HStack(spacing: SafaSpacing.xxs) {
+                                Text("Next")
+                                Image(systemName: "arrow.right")
+                            }
+                            .font(SafaTypography.bodyMedium)
+                            .fontWeight(.medium)
+                            .foregroundColor(.accentColor)
+                            .frame(minWidth: 80, minHeight: SafaSpacing.ButtonHeight.md)
+                            .contentShape(Rectangle())
                         }
-                    } label: {
-                        HStack(spacing: SafaSpacing.xxs) {
-                            Text("Next")
-                            Image(systemName: "arrow.right")
-                        }
-                        .font(SafaTypography.bodyMedium)
-                        .fontWeight(.medium)
-                        .foregroundColor(.accentColor)
-                        .frame(minWidth: 80, minHeight: SafaSpacing.ButtonHeight.md)
-                        .contentShape(Rectangle())
                     }
                 }
             }
