@@ -95,7 +95,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollableScreen(stickyContent: nextPrayerChip) {
+        ScrollableScreen {
             if todayPrayers.isEmpty && hijriDate.isEmpty {
                 if loadError != nil {
                     ErrorView.loadFailed(retry: { await loadHomeData() })
@@ -107,11 +107,12 @@ struct HomeView: View {
                 // Date subheader (Option 4: visible below large title, scrolls away)
                 dateSubheader
 
-                // Next prayer card
-                if let prayer = nextPrayer {
-                    NextPrayerHomeCard(prayer: prayer) {
-                        router.selectedTab = "prayer"
-                    }
+                // Suhoor/Iftar platter (Ramadan only, once prayers are loaded)
+                if isRamadan, !todayPrayers.isEmpty {
+                    SuhoorIftarPlatter(
+                        suhoorTime: todayPrayers.first { $0.type == .fajr }?.time,
+                        iftarTime: todayPrayers.first { $0.type == .maghrib }?.time
+                    )
                 }
 
                 // Ramadan banner (collapsible, reappears next day)
@@ -417,18 +418,6 @@ struct HomeView: View {
         } else {
             nextEidType = nil
             daysUntilNextEid = nil
-        }
-    }
-
-    // MARK: - Next Prayer Chip (Sticky Toolbar)
-
-    private func nextPrayerChip() -> some View {
-        Group {
-            if let prayer = nextPrayer {
-                NextPrayerChip(prayer: prayer) {
-                    router.selectedTab = "prayer"
-                }
-            }
         }
     }
 
@@ -1010,84 +999,6 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Next Prayer Home Card
-
-private struct NextPrayerHomeCard: View {
-    let prayer: PrayerTime
-    let action: () -> Void
-
-    @State private var countdown = ""
-    @State private var isGrace = false
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    var body: some View {
-        InteractiveCard(action: action) {
-            HStack {
-                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                    Text(isGrace ? "Time to pray" : "Next Prayer")
-                        .font(SafaTypography.labelMedium)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                    Text(prayer.type.displayName)
-                        .font(SafaTypography.headlineMedium)
-                        .foregroundColor(prayer.type.color)
-
-                    Text(prayer.time.formatted(date: .omitted, time: .shortened))
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: SafaSpacing.xxs) {
-                    Text(isGrace ? "Time to pray" : "Time until next prayer")
-                        .font(SafaTypography.labelSmall)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-
-                    Text(countdown)
-                        .font(SafaTypography.counterSmall)
-                        .foregroundColor(SafaColors.Fallback.text)
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
-                }
-            }
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityText)
-        .accessibilityHint("Double tap to view prayer times")
-        .onReceive(timer) { _ in
-            updateCountdown()
-        }
-        .onAppear {
-            updateCountdown()
-        }
-    }
-
-    private func updateCountdown() {
-        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
-            // During grace, or grace expired but parent hasn't advanced nextPrayer yet
-            countdown = String(localized: "Prayer time")
-            isGrace = true
-        } else {
-            let (hours, minutes, seconds) = prayer.time.countdown()
-            countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-            isGrace = false
-        }
-    }
-
-    private var accessibilityText: String {
-        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
-            return String(localized: "It's time for \(prayer.type.displayName)")
-        }
-        let (hours, minutes, _) = prayer.time.countdown()
-        return formatNextPrayerAccessibilityLabel(
-            prayerName: prayer.type.displayName,
-            hours: hours,
-            minutes: minutes
-        ) + " at \(prayer.time.formatted(date: .omitted, time: .shortened))"
-    }
-}
-
 // MARK: - Quick Action Card
 
 private struct QuickActionCard: View {
@@ -1192,80 +1103,6 @@ func formatNextPrayerAccessibilityLabel(prayerName: String, hours: Int, minutes:
     if minutes > 0 { parts.append("\(minutes) minute\(minutes == 1 ? "" : "s")") }
     let timeText = parts.isEmpty ? "now" : "in \(parts.joined(separator: " "))"
     return "Next prayer: \(prayerName) \(timeText)"
-}
-
-// MARK: - Next Prayer Chip (Sticky Toolbar)
-
-private struct NextPrayerChip: View {
-    let prayer: PrayerTime
-    let action: () -> Void
-
-    @State private var countdown = ""
-    @State private var isGrace = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: SafaSpacing.xs) {
-                Circle()
-                    .fill(prayer.type.color)
-                    .frame(width: 8, height: 8)
-
-                Text(prayer.type.displayName)
-                    .font(SafaTypography.labelMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                Text("·")
-                    .foregroundColor(SafaColors.Fallback.tertiaryText)
-
-                Text(countdown)
-                    .font(SafaTypography.labelMedium)
-                    .monospacedDigit()
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .contentTransition(.numericText())
-                    .animation(
-                        reduceMotion ? nil : .default,
-                        value: countdown
-                    )
-            }
-            .padding(.horizontal, SafaSpacing.sm)
-            .padding(.vertical, SafaSpacing.xxs)
-            .background(Color(UIColor.secondarySystemBackground))
-            .clipShape(Capsule())
-        }
-        .accessibilityLabel(accessibilityText)
-        .onReceive(timer) { _ in
-            updateCountdown()
-        }
-        .onAppear {
-            updateCountdown()
-        }
-    }
-
-    private func updateCountdown() {
-        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
-            // During grace, or grace expired but parent hasn't advanced nextPrayer yet
-            countdown = String(localized: "Prayer time")
-            isGrace = true
-        } else {
-            let (hours, minutes, seconds) = prayer.time.countdown()
-            countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-            isGrace = false
-        }
-    }
-
-    private var accessibilityText: String {
-        if isPrayerTimeNow(prayer.time) || prayer.time <= Date() {
-            return String(localized: "It's time for \(prayer.type.displayName)")
-        }
-        let (hours, minutes, _) = prayer.time.countdown()
-        return formatNextPrayerAccessibilityLabel(
-            prayerName: prayer.type.displayName,
-            hours: hours,
-            minutes: minutes
-        )
-    }
 }
 
 // MARK: - Preview
