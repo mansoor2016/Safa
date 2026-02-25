@@ -17,24 +17,16 @@ struct RamadanView: View {
 
     private let hijriConverter = HijriDateConverter.shared
 
-    // MARK: - Computed Properties
-
-    private var suhoorTime: Date? {
-        prayerViewModel?.todayPrayers.first { $0.type == .fajr }?.time
-    }
-
-    private var iftarTime: Date? {
-        prayerViewModel?.todayPrayers.first { $0.type == .maghrib }?.time
-    }
-
     var body: some View {
         ScrollableScreen {
             VStack(spacing: SafaSpacing.lg) {
                 // Date subheader (scrolls away with large title)
                 dateSubheader
 
-                // 1. Iftar/Suhoor countdown platter
-                iftarPlatter
+                // 1. Next Prayer countdown
+                if let vm = prayerViewModel, let nextPrayer = vm.nextPrayer {
+                    NextPrayerCard(prayer: nextPrayer, madhab: vm.madhab)
+                }
 
                 // 2. Today's prayer timetable (with notification toggles)
                 if let vm = prayerViewModel {
@@ -134,12 +126,6 @@ struct RamadanView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: - Iftar Countdown Platter
-
-    private var iftarPlatter: some View {
-        SuhoorIftarPlatter(suhoorTime: suhoorTime, iftarTime: iftarTime)
     }
 
     // MARK: - Quick Actions Grid

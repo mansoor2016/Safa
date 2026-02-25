@@ -207,7 +207,7 @@ private struct PrayerContentView: View {
 
 // MARK: - Next Prayer Card
 
-private struct NextPrayerCard: View {
+struct NextPrayerCard: View {
     let prayer: PrayerTime
     let madhab: Madhab
 
