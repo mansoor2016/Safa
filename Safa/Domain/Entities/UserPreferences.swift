@@ -60,6 +60,7 @@ struct UserPreferences: Codable, Hashable {
 
     // MARK: - Prayer Display Settings
     var showSunnahTimes: Bool
+    var showRakatInfo: Bool
 
     // MARK: - Prayer Time Adjustments (minutes offset per prayer)
     var prayerAdjustments: [String: Int]
@@ -101,6 +102,7 @@ struct UserPreferences: Codable, Hashable {
         highContrastEnabled: Bool = false,
         autoScrollEnabled: Bool = false,
         showSunnahTimes: Bool = false,
+        showRakatInfo: Bool = false,
         prayerAdjustments: [String: Int] = [:]
     ) {
         self.calculationMethod = calculationMethod
@@ -134,6 +136,7 @@ struct UserPreferences: Codable, Hashable {
         self.highContrastEnabled = highContrastEnabled
         self.autoScrollEnabled = autoScrollEnabled
         self.showSunnahTimes = showSunnahTimes
+        self.showRakatInfo = showRakatInfo
         self.prayerAdjustments = prayerAdjustments
     }
 
@@ -151,7 +154,7 @@ struct UserPreferences: Codable, Hashable {
         case savedLocationName, savedLatitude, savedLongitude, savedCountryCode
         case useLocationBasedDefaults, autoUpdateLocationForPrayers
         case reduceMotionEnabled, largerArabicTextEnabled, highContrastEnabled
-        case autoScrollEnabled, showSunnahTimes
+        case autoScrollEnabled, showSunnahTimes, showRakatInfo
         case prayerAdjustments
         case hasCompletedOnboarding
     }
@@ -191,6 +194,7 @@ struct UserPreferences: Codable, Hashable {
         highContrastEnabled = try container.decode(Bool.self, forKey: .highContrastEnabled)
         autoScrollEnabled = try container.decode(Bool.self, forKey: .autoScrollEnabled)
         showSunnahTimes = try container.decodeIfPresent(Bool.self, forKey: .showSunnahTimes) ?? false
+        showRakatInfo = try container.decodeIfPresent(Bool.self, forKey: .showRakatInfo) ?? false
         prayerAdjustments = try container.decode([String: Int].self, forKey: .prayerAdjustments)
         hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
     }

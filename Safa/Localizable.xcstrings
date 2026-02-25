@@ -59,9 +59,6 @@
     "..." : {
 
     },
-    "·" : {
-
-    },
     "\"%@\"" : {
 
     },
@@ -341,6 +338,7 @@
       }
     },
     "%@ at %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -394,6 +392,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%2$@ پر %1$@"
+          }
+        }
+      }
+    },
+    "%@ at %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@%3$@"
           }
         }
       }
@@ -1412,6 +1420,9 @@
         }
       }
     },
+    "%lld Fard" : {
+
+    },
     "%lld hadith" : {
       "localizations" : {
         "ar" : {
@@ -1886,6 +1897,9 @@
         }
       }
     },
+    "%lld Nafl" : {
+
+    },
     "%lld of %lld" : {
       "localizations" : {
         "ar" : {
@@ -2205,6 +2219,9 @@
         }
       }
     },
+    "%lld Sunnah" : {
+
+    },
     "%lld to Level %lld" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2315,6 +2332,9 @@
           }
         }
       }
+    },
+    "%lld Witr" : {
+
     },
     "%lld." : {
       "localizations" : {
@@ -2811,6 +2831,9 @@
           }
         }
       }
+    },
+    "%lld+ Witr" : {
+
     },
     "%lldh %lldm" : {
       "localizations" : {
@@ -7198,6 +7221,9 @@
           }
         }
       }
+    },
+    "Best time for Qiyam al-Layl" : {
+
     },
     "Best!" : {
       "extractionState" : "stale",
@@ -13165,6 +13191,7 @@
       }
     },
     "Double tap to view prayer times" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15509,6 +15536,9 @@
           }
         }
       }
+    },
+    "F Fard · S Sunnah · N Nafl · W Witr" : {
+
     },
     "Failed to create speech recognition request." : {
       "localizations" : {
@@ -19047,6 +19077,7 @@
       }
     },
     "It's time for %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21676,6 +21707,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "آج کو روزہ کے طور پر نشان زد کریں"
+          }
+        }
+      }
+    },
+    "Mark today's juz as read" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل قراءة جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء امروز را خوانده شده ثبت کنید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer le juz d’aujourd’hui comme lu"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tandai juz hari ini sudah dibaca"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tandakan juzuk hari ini telah dibaca"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü okundu olarak işaretle"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ پڑھا ہوا نشان لگائیں"
           }
         }
       }
@@ -33789,6 +33872,12 @@
         }
       }
     },
+    "Tahajjud: 2 to 12 rak'ahs (pairs of 2)" : {
+
+    },
+    "Hold for rak'ah count" : {
+
+    },
     "Tap the heart on any dua to save it here." : {
       "localizations" : {
         "ar" : {
@@ -33941,6 +34030,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "لاگ کرنے کے لیے ٹیپ کریں"
+          }
+        }
+      }
+    },
+    "Tap to mark today's juz as read" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انقر لتسجيل قراءة جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করতে ট্যাপ করুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "برای ثبت خواندن جزء امروز ضربه بزنید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appuyez pour marquer le juz d’aujourd’hui comme lu"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketuk untuk menandai juz hari ini sudah dibaca"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketik untuk tandakan juzuk hari ini telah dibaca"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü okundu olarak işaretlemek için dokunun"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ پڑھا ہوا نشان لگانے کے لیے ٹیپ کریں"
           }
         }
       }
@@ -35974,6 +36115,7 @@
       }
     },
     "Time to pray" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36078,6 +36220,7 @@
       }
     },
     "Time until next prayer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36334,6 +36477,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "آج"
+          }
+        }
+      }
+    },
+    "Today's juz complete — long press to undo" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم إكمال جزء اليوم — اضغط مطولاً للتراجع"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা সম্পন্ন — পূর্বাবস্থায় ফেরাতে দীর্ঘ চাপুন"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء امروز کامل شد — برای لغو طولانی فشار دهید"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juz d’aujourd’hui terminé — appui long pour annuler"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juz hari ini selesai — tekan lama untuk membatalkan"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juzuk hari ini selesai — tekan lama untuk buat asal"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüz tamamlandı — geri almak için uzun basın"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ مکمل — واپس کرنے کے لیے دیر تک دبائیں"
           }
         }
       }
@@ -37270,6 +37465,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "آخری گنتی کالعدم کریں"
+          }
+        }
+      }
+    },
+    "Undo today's juz" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التراجع عن جزء اليوم"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আজকের পারা পূর্বাবস্থায় ফেরান"
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لغو جزء امروز"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le juz d’aujourd’hui"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Batalkan juz hari ini"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat asal juzuk hari ini"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü cüzü geri al"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آج کا پارہ واپس کریں"
           }
         }
       }
@@ -40270,214 +40517,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "عيد مبارك"
-          }
-        }
-      }
-    },
-    "Today's juz complete — long press to undo" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم إكمال جزء اليوم — اضغط مطولاً للتراجع"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "আজকের পারা সম্পন্ন — পূর্বাবস্থায় ফেরাতে দীর্ঘ চাপুন"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جزء امروز کامل شد — برای لغو طولانی فشار دهید"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Juz d’aujourd’hui terminé — appui long pour annuler"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Juz hari ini selesai — tekan lama untuk membatalkan"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Juzuk hari ini selesai — tekan lama untuk buat asal"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bugünkü cüz tamamlandı — geri almak için uzun basın"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آج کا پارہ مکمل — واپس کرنے کے لیے دیر تک دبائیں"
-          }
-        }
-      }
-    },
-    "Tap to mark today's juz as read" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انقر لتسجيل قراءة جزء اليوم"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করতে ট্যাপ করুন"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "برای ثبت خواندن جزء امروز ضربه بزنید"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appuyez pour marquer le juz d’aujourd’hui comme lu"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ketuk untuk menandai juz hari ini sudah dibaca"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ketik untuk tandakan juzuk hari ini telah dibaca"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bugünkü cüzü okundu olarak işaretlemek için dokunun"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آج کا پارہ پڑھا ہوا نشان لگانے کے لیے ٹیپ کریں"
-          }
-        }
-      }
-    },
-    "Mark today's juz as read" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تسجيل قراءة جزء اليوم"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "আজকের পারা পড়া হয়েছে চিহ্নিত করুন"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جزء امروز را خوانده شده ثبت کنید"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marquer le juz d’aujourd’hui comme lu"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tandai juz hari ini sudah dibaca"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tandakan juzuk hari ini telah dibaca"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bugünkü cüzü okundu olarak işaretle"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آج کا پارہ پڑھا ہوا نشان لگائیں"
-          }
-        }
-      }
-    },
-    "Undo today's juz" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التراجع عن جزء اليوم"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "আজকের পারা পূর্বাবস্থায় ফেরান"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لغو جزء امروز"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler le juz d’aujourd’hui"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Batalkan juz hari ini"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buat asal juzuk hari ini"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bugünkü cüzü geri al"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آج کا پارہ واپس کریں"
           }
         }
       }

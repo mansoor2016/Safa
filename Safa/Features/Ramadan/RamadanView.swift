@@ -40,10 +40,13 @@ struct RamadanView: View {
                 if let vm = prayerViewModel {
                     PrayerTimePreviewCard(
                         prayers: vm.todayPrayers,
+                        madhab: vm.madhab,
+                        showRakatInfo: vm.showRakatInfo,
                         notificationEnabledPrayers: vm.notificationEnabledPrayers,
                         onToggleNotification: { prayerType in
                             Task { await vm.toggleNotification(for: prayerType) }
-                        }
+                        },
+                        onToggleRakatInfo: { vm.toggleRakatInfo() }
                     )
 
                     // 3. Prayer progress (full-width, expanded)

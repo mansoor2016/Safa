@@ -56,16 +56,19 @@ private struct PrayerContentView: View {
 
                 // 2. Next Prayer countdown (iftar-platter style)
                 if let nextPrayer = viewModel.nextPrayer {
-                    NextPrayerCard(prayer: nextPrayer)
+                    NextPrayerCard(prayer: nextPrayer, madhab: viewModel.madhab)
                 }
 
                 // 3. Compact prayer times with notification toggles
                 PrayerTimePreviewCard(
                     prayers: viewModel.todayPrayers,
+                    madhab: viewModel.madhab,
+                    showRakatInfo: viewModel.showRakatInfo,
                     notificationEnabledPrayers: viewModel.notificationEnabledPrayers,
                     onToggleNotification: { prayerType in
                         Task { await viewModel.toggleNotification(for: prayerType) }
-                    }
+                    },
+                    onToggleRakatInfo: { viewModel.toggleRakatInfo() }
                 )
 
                 // 4. Prayer progress dots in ContentCard
@@ -206,6 +209,7 @@ private struct PrayerContentView: View {
 
 private struct NextPrayerCard: View {
     let prayer: PrayerTime
+    let madhab: Madhab
 
     var body: some View {
         ContentCard {
@@ -216,38 +220,47 @@ private struct NextPrayerCard: View {
                     .foregroundColor(prayer.type.color)
                     .frame(width: 32)
 
-                // Countdown + prayer info
-                TimelineView(PeriodicTimelineSchedule(from: .now, by: 1)) { _ in
-                    let inGrace = isPrayerTimeNow(prayer.time)
-                    let inFuture = prayer.time > Date()
-                    HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
-                        if inGrace {
-                            Text("Prayer time")
-                                .font(SafaTypography.headlineLarge)
-                        } else if inFuture {
-                            Text(prayer.time, style: .timer)
-                                .font(SafaTypography.headlineLarge)
-                                .monospacedDigit()
-                                .contentTransition(.numericText())
-                        } else {
-                            // Grace expired but parent hasn't re-rendered yet —
-                            // show "Prayer time" briefly to avoid count-up display
-                            Text("Prayer time")
-                                .font(SafaTypography.headlineLarge)
-                        }
+                VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
+                    // Countdown + prayer info
+                    TimelineView(PeriodicTimelineSchedule(from: .now, by: 1)) { _ in
+                        let inGrace = isPrayerTimeNow(prayer.time)
+                        let inFuture = prayer.time > Date()
+                        HStack(alignment: .firstTextBaseline, spacing: SafaSpacing.xs) {
+                            if inGrace {
+                                Text("Prayer time")
+                                    .font(SafaTypography.headlineLarge)
+                            } else if inFuture {
+                                Text(prayer.time, style: .timer)
+                                    .font(SafaTypography.headlineLarge)
+                                    .monospacedDigit()
+                                    .contentTransition(.numericText())
+                            } else {
+                                // Grace expired but parent hasn't re-rendered yet —
+                                // show "Prayer time" briefly to avoid count-up display
+                                Text("Prayer time")
+                                    .font(SafaTypography.headlineLarge)
+                            }
 
-                        if inGrace || !inFuture {
-                            Text("\(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
-                                .font(SafaTypography.labelMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
-                        } else {
-                            Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
-                                .font(SafaTypography.labelMedium)
-                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                            if inGrace || !inFuture {
+                                Text("\(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                    .font(SafaTypography.labelMedium)
+                                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                            } else {
+                                Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                    .font(SafaTypography.labelMedium)
+                                    .foregroundColor(SafaColors.Fallback.secondaryText)
+                            }
                         }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     }
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
+
+                    // Rakat breakdown (always visible for current prayer)
+                    if let rakatInfo = PrayerRakats.info(for: prayer.type, madhab: madhab) {
+                        Text(rakatInfo.detailedSummary)
+                            .font(SafaTypography.labelSmall)
+                            .foregroundColor(SafaColors.Fallback.tertiaryText)
+                    }
                 }
 
                 Spacer()
@@ -259,15 +272,16 @@ private struct NextPrayerCard: View {
     }
 
     private var nextPrayerAccessibilityLabel: String {
+        let rakatSuffix = PrayerRakats.info(for: prayer.type, madhab: madhab).map { ", \($0.detailedSummary)" } ?? ""
         if isPrayerTimeNow(prayer.time) {
-            return String(localized: "It's time for \(prayer.type.displayName) prayer")
+            return String(localized: "It's time for \(prayer.type.displayName) prayer") + rakatSuffix
         }
         let (hours, minutes, _) = prayer.time.countdown()
         let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
         if hours > 0 {
-            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(hours) hours and \(minutes) minutes remaining"
+            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(hours) hours and \(minutes) minutes remaining" + rakatSuffix
         } else {
-            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(minutes) minutes remaining"
+            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(minutes) minutes remaining" + rakatSuffix
         }
     }
 }
@@ -290,24 +304,50 @@ private struct SunnahTimesCard: View {
                 }
 
                 ForEach(sunnahTimes) { sunnah in
-                    HStack {
-                        Image(systemName: sunnah.type.iconName)
-                            .foregroundColor(SafaColors.Fallback.tertiaryText)
-                            .frame(width: 20)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Image(systemName: sunnah.type.iconName)
+                                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                                .frame(width: 20)
 
-                        Text(sunnah.type.displayName)
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
+                            Text(sunnah.type.displayName)
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
 
-                        Spacer()
+                            Spacer()
 
-                        Text(sunnah.time.formatted(date: .omitted, time: .shortened))
-                            .font(SafaTypography.bodyMedium)
-                            .foregroundColor(SafaColors.Fallback.secondaryText)
-                            .monospacedDigit()
+                            Text(sunnah.time.formatted(date: .omitted, time: .shortened))
+                                .font(SafaTypography.bodyMedium)
+                                .foregroundColor(SafaColors.Fallback.secondaryText)
+                                .monospacedDigit()
+                        }
+
+                        if sunnah.type == .middleOfTheNight {
+                            Text("Tahajjud: 2 to 12 rak'ahs (pairs of 2)")
+                                .font(SafaTypography.labelSmall)
+                                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                                .padding(.leading, 24)
+                        } else if sunnah.type == .lastThirdOfTheNight {
+                            Text("Best time for Qiyam al-Layl")
+                                .font(SafaTypography.labelSmall)
+                                .foregroundColor(SafaColors.Fallback.tertiaryText)
+                                .padding(.leading, 24)
+                        }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(sunnahAccessibilityLabel(sunnah))
                 }
             }
+        }
+    }
+
+    private func sunnahAccessibilityLabel(_ sunnah: SunnahTime) -> String {
+        let timeString = sunnah.time.formatted(date: .omitted, time: .shortened)
+        switch sunnah.type {
+        case .middleOfTheNight:
+            return "\(sunnah.type.displayName) at \(timeString), Tahajjud: 2 to 12 rak'ahs in pairs of 2"
+        case .lastThirdOfTheNight:
+            return "\(sunnah.type.displayName) at \(timeString), Best time for Qiyam al-Layl"
         }
     }
 }

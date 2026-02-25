@@ -19,6 +19,7 @@ final class PrayerViewModel {
     var isLoading = false
     var error: Error?
     var showSunnahTimes = false
+    var showRakatInfo = false
     var notificationSchedulingFailed = false
 
     // MARK: - Dependencies
@@ -47,6 +48,7 @@ final class PrayerViewModel {
         self.calculationMethod = prefs.calculationMethod
         self.madhab = prefs.madhab
         self.showSunnahTimes = prefs.showSunnahTimes
+        self.showRakatInfo = prefs.showRakatInfo
 
         // Default notification state (will be overwritten by async load in loadPrayerTimes)
         notificationEnabledPrayers = Set(PrayerType.obligatoryPrayers)
@@ -338,12 +340,18 @@ final class PrayerViewModel {
         await NotificationScheduler.shared.forceReschedule()
     }
 
+    func toggleRakatInfo() {
+        showRakatInfo.toggle()
+        Task { await PreferencesManager.shared.update(\.showRakatInfo, to: showRakatInfo) }
+    }
+
     /// Reload settings from prefs (for sync after Settings page changes)
     func reloadSettings() {
         let prefs = PreferencesManager.loadPreferencesSync()
         calculationMethod = prefs.calculationMethod
         madhab = prefs.madhab
         showSunnahTimes = prefs.showSunnahTimes
+        showRakatInfo = prefs.showRakatInfo
     }
 
     func requestNotificationPermission() async {
