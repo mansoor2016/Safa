@@ -18036,6 +18036,9 @@
         }
       }
     },
+    "Hold for rak'ah count" : {
+
+    },
     "Holiday" : {
       "localizations" : {
         "ar" : {
@@ -21243,106 +21246,54 @@
         }
       }
     },
-    "Madhab (Asr Time)" : {
+    "Madhab" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "المذهب (وقت العصر)"
+            "value" : "المذهب"
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "মাযহাব (আসর সময়)"
+            "value" : "মাযহাব"
           }
         },
         "fa" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "مذهب (وقت عصر)"
+            "value" : "مذهب"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Madhab (heure de l'Asr)"
+            "value" : "Madhab"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mazhab (Waktu Ashar)"
+            "value" : "Mazhab"
           }
         },
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mazhab (Waktu Asar)"
+            "value" : "Mazhab"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mezhep (İkindi Vakti)"
+            "value" : "Mezhep"
           }
         },
         "ur" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "مذہب (عصر کا وقت)"
-          }
-        }
-      }
-    },
-    "Madhab (Asr)" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المذهب (العصر)"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "মাযহাব (আসর)"
-          }
-        },
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مذهب (عصر)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Madhab (Asr)"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mazhab (Ashar)"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mazhab (Asar)"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mezhep (İkindi)"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مذہب (عصر)"
+            "value" : "مذہب"
           }
         }
       }
@@ -31456,6 +31407,7 @@
       }
     },
     "Skip" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33873,9 +33825,6 @@
       }
     },
     "Tahajjud: 2 to 12 rak'ahs (pairs of 2)" : {
-
-    },
-    "Hold for rak'ah count" : {
 
     },
     "Tap the heart on any dua to save it here." : {

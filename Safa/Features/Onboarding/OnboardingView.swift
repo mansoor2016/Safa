@@ -473,7 +473,7 @@ struct OnboardingView: View {
                         }
                     }
 
-                    Picker("Madhab (Asr Time)", selection: $selectedMadhab) {
+                    Picker("Madhab", selection: $selectedMadhab) {
                         ForEach(Madhab.allCases, id: \.self) { madhab in
                             Text(madhab.displayName).tag(madhab)
                         }
