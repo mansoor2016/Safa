@@ -6,6 +6,7 @@ import Foundation
 import CoreLocation
 import SafaShared
 
+@MainActor
 @Observable
 final class PrayerViewModel {
     // MARK: - Published State
@@ -30,6 +31,8 @@ final class PrayerViewModel {
 
     // MARK: - Private State
     private var currentLocation: Coordinates?
+    private var isLoadingPrayers = false
+    private var needsReload = false
 
     // MARK: - Init
     init(
@@ -74,10 +77,21 @@ final class PrayerViewModel {
     // MARK: - Public Methods
 
     func loadPrayerTimes() async {
+        guard !isLoadingPrayers else {
+            needsReload = true
+            return
+        }
+        isLoadingPrayers = true
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            isLoadingPrayers = false
+        }
 
         do {
+            // Clear previous error on new attempt
+            error = nil
+
             // Get location
             let location = try await getCurrentLocation()
             currentLocation = location
@@ -122,6 +136,13 @@ final class PrayerViewModel {
 
         } catch {
             self.error = error
+        }
+
+        // If another caller requested a reload while we were loading, run one more pass
+        if needsReload {
+            needsReload = false
+            isLoadingPrayers = false
+            await loadPrayerTimes()
         }
     }
 
@@ -363,14 +384,14 @@ final class PrayerViewModel {
 
     // MARK: - Private Methods
 
-    private func getCurrentLocation() async throws -> Coordinates {
-        // Return cached if available
-        if let cached = currentLocation {
+    private func getCurrentLocation(forceFresh: Bool = false) async throws -> Coordinates {
+        // Return cached if available (skip when forcing fresh)
+        if !forceFresh, let cached = currentLocation {
             return cached
         }
 
-        // Try saved/cached coordinates first (works without live GPS)
-        if let saved = locationService.coordinates {
+        // Try saved/cached coordinates first (skip when forcing fresh)
+        if !forceFresh, let saved = locationService.coordinates {
             return saved
         }
 
@@ -387,6 +408,20 @@ final class PrayerViewModel {
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude
         )
+    }
+
+    /// Refresh prayer data for foreground resume — advances date, clears location cache,
+    /// and forces fresh GPS coordinates to avoid stale data after returning from background.
+    func refreshForForeground() async {
+        currentDate = Date()
+        currentLocation = nil
+
+        // Force fresh GPS — skips locationService.coordinates cache too
+        if let freshLocation = try? await getCurrentLocation(forceFresh: true) {
+            currentLocation = freshLocation
+        }
+
+        await loadPrayerTimes()
     }
 
     func updateNextPrayerIndicator() {

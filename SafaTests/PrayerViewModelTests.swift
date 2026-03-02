@@ -746,6 +746,95 @@ final class PrayerViewModelTests: XCTestCase {
             "At exactly 15 min (grace boundary), grace has expired — should show next prayer")
     }
 
+    // MARK: - refreshForForeground Tests
+
+    func test_refreshForForeground_advancesCurrentDateToToday() async {
+        // Given — force currentDate to yesterday
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        sut.currentDate = yesterday
+
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+
+        // When
+        await sut.refreshForForeground()
+
+        // Then — currentDate should be today (within 2 seconds tolerance)
+        XCTAssertEqual(
+            sut.currentDate.timeIntervalSinceReferenceDate,
+            Date().timeIntervalSinceReferenceDate,
+            accuracy: 2.0,
+            "refreshForForeground should advance currentDate to today"
+        )
+    }
+
+    func test_refreshForForeground_forcesFreshGPSLocation() async {
+        // Given — stale coordinates cached in locationService
+        mockLocationService.coordinatesToReturn = Coordinates(latitude: 0.0, longitude: 0.0)
+        // Fresh GPS returns different location
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+
+        // When
+        await sut.refreshForForeground()
+
+        // Then — getCurrentLocation was called (bypassed cache)
+        XCTAssertGreaterThan(
+            mockLocationService.getCurrentLocationCallCount, 0,
+            "refreshForForeground should call getCurrentLocation (not just use cached coordinates)"
+        )
+    }
+
+    func test_refreshForForeground_loadsNewPrayerTimes() async {
+        // Given — initial load
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        await sut.loadPrayerTimes()
+        let initialCallCount = mockPrayerRepository.getPrayersCallCount
+
+        // When
+        await sut.refreshForForeground()
+
+        // Then — prayer times were reloaded
+        XCTAssertGreaterThan(
+            mockPrayerRepository.getPrayersCallCount, initialCallCount,
+            "refreshForForeground should trigger loadPrayerTimes"
+        )
+    }
+
+    func test_refreshForForeground_clearsStaleError() async {
+        // Given — trigger an error first
+        mockLocationService.errorToThrow = PrayerTestError.locationFailed
+        await sut.loadPrayerTimes()
+        XCTAssertNotNil(sut.error, "Precondition: error should be set after failed load")
+
+        // When — fix the error condition and refresh
+        mockLocationService.errorToThrow = nil
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        await sut.refreshForForeground()
+
+        // Then — error should be cleared by successful load
+        XCTAssertNil(sut.error,
+            "Successful reload should clear previous error state")
+        XCTAssertEqual(sut.todayPrayers.count, 6,
+            "Prayers should be loaded after recovery")
+    }
+
+    func test_refreshForForeground_gracefulWhenGPSFails() async {
+        // Given — GPS will fail, but cached coordinates exist
+        mockLocationService.errorToThrow = PrayerTestError.locationFailed
+        mockLocationService.coordinatesToReturn = Coordinates(latitude: 51.5074, longitude: -0.1278)
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+
+        // When — should not crash
+        await sut.refreshForForeground()
+
+        // Then — prayer times loaded via fallback coordinates
+        XCTAssertEqual(sut.todayPrayers.count, 6,
+            "Should still load prayers when GPS fails but cached coordinates exist")
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
@@ -837,6 +926,7 @@ final class TestableLocationService: LocationServiceProtocol {
     var locationToReturn: CLLocation?
     var errorToThrow: Error?
     var coordinatesToReturn: Coordinates?
+    var getCurrentLocationCallCount = 0
 
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
 
@@ -853,6 +943,7 @@ final class TestableLocationService: LocationServiceProtocol {
     }
 
     func getCurrentLocation() async throws -> CLLocation {
+        getCurrentLocationCallCount += 1
         if let error = errorToThrow {
             throw error
         }
@@ -919,6 +1010,7 @@ final class PrayerTestMockUserRepository: UserRepositoryProtocol {
 
 /// Tests for PrayerViewModel.isPrayerOnTime — verifies Islamic prayer window logic.
 /// Each prayer is on-time between its start and the next prayer's start.
+@MainActor
 final class IsPrayerOnTimeTests: XCTestCase {
 
     private var schedule: [PrayerTime]!

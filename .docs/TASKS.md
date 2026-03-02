@@ -15,17 +15,15 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | Effort | Task |
 |--------|------|
 | M | Dua audio pronunciations (needs audio files) — defer if unavailable |
-| S | Audio playback verification *(manual device test)* |
 | L | RTL audit (Arabic UI flow, mirrored icons, mixed-script Dynamic Type) (partial — layout direction + VoiceOver done across 9 views, icon mirroring + full Dynamic Type audit remaining) |
 | M | Widget extension String Catalog + shared localized keys (partial — localized prayer names via App Group, full widget String Catalog remaining) |
 | XL | Translation content (ayah/hadith/dua tables, language pack download) |
 | M | Localization validation (pseudo-localization, pluralization rules, screenshot coverage) |
 | L | Background audio adhan playback — AVAudioSession `.playback` bypasses silent switch, fallback when terminated |
-| S | Critical alert entitlement — apply to Apple for `.criticalAlert` permission (process, not code) |
 | L | Women-focused prayer/fasting mode — period-aware prayer logging, optional reminder pause, and fiqh-safe UX copy |
 | L | Mosque timetable integration (Iqamah/Jama'ah support) — let users follow local mosque times alongside calculated times |
 | M | Progressive Learn rollout — ship ready tracks incrementally instead of keeping all Learn content gated |
-| M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss; users who enable prayer notifications want to be alerted. Explore longer/custom notification sounds, repeated alerts, or critical alert style to make non-adhan notifications harder to ignore. relevanceScore=1.0 already added. |
+| M | More prominent non-adhan prayer notifications — current default system sound is too brief and easy to miss. Custom notification sounds (longer/distinctive), time-sensitive interruption level, follow-up reminder before window ends. relevanceScore=1.0 already added. |
 | L | Monetization strategy — research and implement sustainable revenue model (freemium tiers, Pro subscription, tip jar, or similar). Define free vs paid feature split, StoreKit 2 integration, paywall UI, restore purchases, receipt validation (partial — StoreKit 2 voluntary subscriptions implemented: CommunitySupportCard, App Store Connect products, custom app icons as subscriber perk. Remaining: receipt validation, TestFlight sandbox testing, App Review submission) |
 | XL | Learning section — build out the Learn tab with structured Islamic education content (tracks, lessons, quizzes). Content authoring pipeline, progress tracking, offline support. Currently feature-flagged as disabled |
 

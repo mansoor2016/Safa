@@ -37,6 +37,7 @@ struct PrayerView: View {
 private struct PrayerContentView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
+    @Environment(\.scenePhase) private var scenePhase
     @Bindable var viewModel: PrayerViewModel
     @State private var showingQibla = false
     @State private var showingSettings = false
@@ -140,6 +141,12 @@ private struct PrayerContentView: View {
         }
         .onReceive(prayerRefreshTimer) { _ in
             viewModel.updateNextPrayerIndicator()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                viewModel.updateNextPrayerIndicator()
+                Task { await viewModel.refreshForForeground() }
+            }
         }
         .onChange(of: router.pendingNotificationAction) { _, newValue in
             if newValue != nil { handlePendingNotificationAction() }

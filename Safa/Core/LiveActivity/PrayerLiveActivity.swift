@@ -40,7 +40,10 @@ final class PrayerLiveActivityManager {
         let prefs = PreferencesManager.loadPreferencesSync()
 
         // Not onboarded yet → don't show activity with default/London data
-        guard prefs.hasCompletedOnboarding else { return }
+        guard prefs.hasCompletedOnboarding else {
+            await endAllActivities()
+            return
+        }
 
         // Preference off → tear down any running activity
         guard prefs.liveActivityEnabled else {
@@ -49,14 +52,13 @@ final class PrayerLiveActivityManager {
         }
 
         // System-level permission
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-
-        // Reattach to existing system activity after cold launch (prevents duplicates)
-        if currentActivity == nil {
-            currentActivity = Activity<PrayerActivityAttributes>.activities.first {
-                $0.activityState == .active || $0.activityState == .stale
-            }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            await endAllActivities()
+            return
         }
+
+        // Reconcile: reattach to canonical activity, end orphans (always runs to clean extras)
+        currentActivity = await reconcileActivities()
 
         // Detect stale/ended tracked activity
         if let activity = currentActivity {
@@ -119,11 +121,10 @@ final class PrayerLiveActivityManager {
         hijriDate: String,
         locationName: String,
         isGrace: Bool = false
-    ) {
+    ) async {
         guard PreferencesManager.loadPreferencesSync().liveActivityEnabled else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
-        let attributes = PrayerActivityAttributes(prayerType: prayerName)
         let state = PrayerActivityAttributes.ContentState(
             nextPrayerName: prayerName,
             nextPrayerTime: prayerTime,
@@ -134,6 +135,15 @@ final class PrayerLiveActivityManager {
 
         let content = ActivityContent(state: state, staleDate: LiveActivityStaleness.staleDate(for: prayerTime, isGrace: isGrace))
 
+        // Reconcile: if a canonical activity already exists, adopt it instead of creating
+        if let canonical = await reconcileActivities() {
+            currentActivity = canonical
+            await canonical.update(content)
+            return
+        }
+
+        // No existing activity — create new
+        let attributes = PrayerActivityAttributes(prayerType: prayerName)
         do {
             currentActivity = try Activity.request(
                 attributes: attributes,
@@ -154,12 +164,8 @@ final class PrayerLiveActivityManager {
         locationName: String,
         isGrace: Bool = false
     ) async {
-        // Reattach to existing system activity if handle was lost (cold launch)
-        if currentActivity == nil {
-            currentActivity = Activity<PrayerActivityAttributes>.activities.first {
-                $0.activityState == .active || $0.activityState == .stale
-            }
-        }
+        // Reconcile: reattach to canonical activity, end orphans (always runs to clean extras)
+        currentActivity = await reconcileActivities()
 
         // Detect stale/ended tracked activity
         if let activity = currentActivity {
@@ -170,7 +176,7 @@ final class PrayerLiveActivityManager {
         }
 
         guard let activity = currentActivity else {
-            startActivity(
+            await startActivity(
                 prayerName: prayerName,
                 prayerTime: prayerTime,
                 hijriDate: hijriDate,
@@ -222,7 +228,11 @@ final class PrayerLiveActivityManager {
                 }
 
                 let delay = nextDate.timeIntervalSince(now)
-                guard delay > 0 else { break }
+                if delay <= 0 {
+                    // Boundary already passed (app was suspended) — skip to next iteration
+                    now = Date()
+                    continue
+                }
 
                 do {
                     try await Task.sleep(for: .seconds(delay))
@@ -269,19 +279,54 @@ final class PrayerLiveActivityManager {
         }
     }
 
+    // MARK: - Reconcile Activities
+
+    /// Reattach to one existing activity if we lost our handle, and end any extras.
+    /// Returns the canonical activity (or nil if none exist).
+    /// Selection: prefer the activity whose id matches our currentActivity handle (if still alive),
+    /// otherwise fall back to the first active/stale activity in the system list.
+    private func reconcileActivities() async -> Activity<PrayerActivityAttributes>? {
+        let systemActivities = Activity<PrayerActivityAttributes>.activities.filter {
+            $0.activityState == .active || $0.activityState == .stale
+        }
+        guard !systemActivities.isEmpty else { return nil }
+
+        // Prefer the one we're already tracking (deterministic)
+        let canonical: Activity<PrayerActivityAttributes>
+        if let currentId = currentActivity?.id,
+           let tracked = systemActivities.first(where: { $0.id == currentId }) {
+            canonical = tracked
+        } else {
+            canonical = systemActivities[0]
+        }
+
+        // End all others
+        for activity in systemActivities where activity.id != canonical.id {
+            let content = ActivityContent(state: activity.content.state, staleDate: Date())
+            await activity.end(content, dismissalPolicy: .immediate)
+        }
+        return canonical
+    }
+
     // MARK: - End Activity
 
     func endActivity() async {
         boundaryTask?.cancel()
         boundaryTask = nil
 
-        guard let activity = currentActivity else { return }
-
-        let state = activity.content.state
-        let content = ActivityContent(state: state, staleDate: Date())
-
-        await activity.end(content, dismissalPolicy: .immediate)
-        currentActivity = nil
+        if let activity = currentActivity {
+            let state = activity.content.state
+            let content = ActivityContent(state: state, staleDate: Date())
+            await activity.end(content, dismissalPolicy: .immediate)
+            currentActivity = nil
+        } else {
+            // Handle lost: end any orphaned system activities
+            for activity in Activity<PrayerActivityAttributes>.activities where
+                activity.activityState == .active || activity.activityState == .stale {
+                let content = ActivityContent(state: activity.content.state, staleDate: Date())
+                await activity.end(content, dismissalPolicy: .immediate)
+            }
+        }
     }
 
     // MARK: - End All Activities
