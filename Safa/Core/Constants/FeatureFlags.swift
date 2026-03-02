@@ -97,7 +97,6 @@ enum Feature: String, CaseIterable {
 
 // MARK: - Feature Flags Manager
 
-@Observable
 final class FeatureFlags {
     static let shared = FeatureFlags()
 

@@ -55,7 +55,7 @@ final class AppRouter {
     }
 
     // MARK: - Navigation State
-    var path = NavigationPath()
+    var path: [Destination] = []
     var selectedTab: Tab = .home
     var activeSheet: Sheet?
     var activeAlert: AlertType?
@@ -209,7 +209,7 @@ final class AppRouter {
     }
 
     func popToRoot() {
-        path.removeLast(path.count)
+        path.removeAll()
     }
 
     func presentSheet(_ sheet: Sheet) {

@@ -76,11 +76,14 @@ final class AutoScrollViewModelTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        // Reset persisted progress ring mode to avoid cross-test state leaks
+        UserDefaults.standard.removeObject(forKey: "progressRingMode")
         mockRepository = TestableQuranRepository()
         sut = AyahReaderViewModel(surahNumber: 1, repository: mockRepository)
     }
 
     override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: "progressRingMode")
         sut = nil
         mockRepository = nil
         super.tearDown()
