@@ -148,6 +148,9 @@ private struct PrayerContentView: View {
                 Task { await viewModel.refreshForForeground() }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            Task { await viewModel.loadPrayerTimes() }
+        }
         .onChange(of: router.pendingNotificationAction) { _, newValue in
             if newValue != nil { handlePendingNotificationAction() }
         }

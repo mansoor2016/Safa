@@ -835,6 +835,137 @@ final class PrayerViewModelTests: XCTestCase {
             "Should still load prayers when GPS fails but cached coordinates exist")
     }
 
+    // MARK: - Date Staleness Tests
+
+    func test_loadPrayerTimes_fetchesForTodayNotInitDate() async {
+        // Given — force currentDate to yesterday (simulates staying foregrounded past midnight)
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        sut.currentDate = yesterday
+
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+
+        // When
+        await sut.loadPrayerTimes()
+
+        // Then — repository should have been called with today's date, not yesterday
+        let requestedDate = mockPrayerRepository.lastRequestedDate!
+        XCTAssertTrue(
+            Calendar.current.isDateInToday(requestedDate),
+            "loadPrayerTimes should fetch for today (\(Date())), not init date (\(yesterday)). Got: \(requestedDate)"
+        )
+    }
+
+    // MARK: - Throttle Helper Tests (Pure)
+
+    func test_shouldRefresh_withinThrottle_returnsFalse() {
+        let now = Date()
+        let lastRefresh = now.addingTimeInterval(-30) // 30s ago — within 60s window
+        XCTAssertFalse(
+            PrayerViewModel.shouldRefresh(now: now, lastRefresh: lastRefresh, hasError: false, errorRetryUsed: false),
+            "Should be throttled when within 60s window with no error"
+        )
+    }
+
+    func test_shouldRefresh_dayChanged_returnsTrue() {
+        let now = Date()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+        XCTAssertTrue(
+            PrayerViewModel.shouldRefresh(now: now, lastRefresh: yesterday, hasError: false, errorRetryUsed: false),
+            "Day change should bypass throttle"
+        )
+    }
+
+    func test_shouldRefresh_errorRetry_allowsOnce() {
+        let now = Date()
+        let lastRefresh = now.addingTimeInterval(-30) // within throttle window
+
+        // First: error present, retry not used → allowed
+        XCTAssertTrue(
+            PrayerViewModel.shouldRefresh(now: now, lastRefresh: lastRefresh, hasError: true, errorRetryUsed: false),
+            "Should allow one error retry within throttle window"
+        )
+
+        // Second: error present, retry already used → blocked
+        XCTAssertFalse(
+            PrayerViewModel.shouldRefresh(now: now, lastRefresh: lastRefresh, hasError: true, errorRetryUsed: true),
+            "Should block after error retry is used"
+        )
+    }
+
+    func test_shouldRefresh_afterThrottleExpires_returnsTrue() {
+        let now = Date()
+        let lastRefresh = now.addingTimeInterval(-61) // 61s ago — past 60s window
+        XCTAssertTrue(
+            PrayerViewModel.shouldRefresh(now: now, lastRefresh: lastRefresh, hasError: false, errorRetryUsed: false),
+            "Should refresh after throttle interval expires"
+        )
+    }
+
+    // MARK: - VM-Level Integration Tests
+
+    func test_refreshForForeground_errorRetryStateMachine() async {
+        // Given — trigger error (location fails, no fallback)
+        mockLocationService.errorToThrow = PrayerTestError.locationFailed
+        mockLocationService.coordinatesToReturn = nil
+        mockLocationService.locationToReturn = nil
+        await sut.loadPrayerTimes()
+        XCTAssertNotNil(sut.error, "Precondition: error should be set")
+
+        // When — first refreshForForeground (error present, retry not used → runs)
+        // Keep error active so loadPrayerTimes inside also fails → errorRetryUsed stays true
+        await sut.refreshForForeground()
+
+        // Then — should have run (retry allowed), but still errored
+        XCTAssertNotEqual(
+            sut.lastForegroundRefresh, Date.distantPast,
+            "First retry after error should have run"
+        )
+        XCTAssertNotNil(sut.error, "Error should persist since mock still throws")
+
+        // When — second refreshForForeground immediately (retry already used → blocked)
+        let lastRefreshBefore = sut.lastForegroundRefresh
+        await sut.refreshForForeground()
+
+        // Then — should be throttled (lastForegroundRefresh unchanged)
+        XCTAssertEqual(
+            sut.lastForegroundRefresh, lastRefreshBefore,
+            "Second immediate refresh should be throttled (error retry already used)"
+        )
+    }
+
+    func test_loadPrayerTimes_coalescingDrainsWithoutRecursion() async {
+        // Given — enable gate so first load suspends deterministically inside getPrayers
+        mockPrayerRepository.shouldSuspendGetPrayers = true
+        mockPrayerRepository.prayersToReturn = createMockPrayers()
+        mockLocationService.locationToReturn = CLLocation(latitude: 51.5074, longitude: -0.1278)
+
+        // When — launch first load
+        let firstLoad = Task { await sut.loadPrayerTimes() }
+
+        // Wait until first load is suspended at the gate (deterministic — no timing)
+        while mockPrayerRepository.getPrayersGate == nil {
+            await Task.yield()
+        }
+
+        // Second call hits the guard (isLoadingPrayers == true) and sets needsReload
+        await sut.loadPrayerTimes()
+
+        // Disable gate so the coalesced re-run proceeds without suspending
+        mockPrayerRepository.shouldSuspendGetPrayers = false
+
+        // Resume the first load
+        mockPrayerRepository.getPrayersGate?.resume()
+        mockPrayerRepository.getPrayersGate = nil
+        await firstLoad.value
+
+        // Then — getPrayers should have been called twice (original + one coalesced pass)
+        XCTAssertEqual(
+            mockPrayerRepository.getPrayersCallCount, 2,
+            "Loop should drain needsReload with exactly one extra pass (2 total calls)"
+        )
+    }
+
     // MARK: - Helper Methods
 
     private func createMockPrayers() -> [PrayerTime] {
@@ -881,11 +1012,28 @@ final class TestablePrayerRepository: PrayerRepositoryProtocol {
     var getPrayersCallCount = 0
     var logPrayerCallCount = 0
     var logPrayerCalled = false
+    var lastRequestedDate: Date?
+    /// When true, getPrayers will suspend at a gate for test synchronization.
+    var shouldSuspendGetPrayers = false
+    /// Continuation that getPrayers is waiting on. Resume from test to unblock.
+    var getPrayersGate: CheckedContinuation<Void, Never>?
 
     nonisolated func getPrayers(for date: Date, location: Coordinates, method: CalculationMethod, madhab: Madhab? = nil) async throws -> [PrayerTime] {
         let error = await errorToThrow
         if let error { throw error }
-        await MainActor.run { getPrayersCallCount += 1 }
+        await MainActor.run {
+            getPrayersCallCount += 1
+            lastRequestedDate = date
+        }
+        // If gate is enabled, suspend until the test resumes the continuation
+        let shouldSuspend = await MainActor.run { shouldSuspendGetPrayers }
+        if shouldSuspend {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                Task { @MainActor in
+                    self.getPrayersGate = continuation
+                }
+            }
+        }
         return await prayersToReturn
     }
 

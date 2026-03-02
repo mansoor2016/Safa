@@ -33,6 +33,8 @@ final class PrayerViewModel {
     private var currentLocation: Coordinates?
     private var isLoadingPrayers = false
     private var needsReload = false
+    private(set) var lastForegroundRefresh: Date = .distantPast
+    private var errorRetryUsed = false
 
     // MARK: - Init
     init(
@@ -88,62 +90,62 @@ final class PrayerViewModel {
             isLoadingPrayers = false
         }
 
-        do {
-            // Clear previous error on new attempt
-            error = nil
-
-            // Get location
-            let location = try await getCurrentLocation()
-            currentLocation = location
-
-            // Calculate prayer times
-            let prefs = PreferencesManager.loadPreferencesSync()
-            let prayers = try await prayerRepository.getPrayers(
-                for: currentDate,
-                location: location,
-                method: calculationMethod,
-                madhab: prefs.madhab
-            )
-            todayPrayers = prayers
-
-            // Load sunnah times
-            sunnahTimes = prayerRepository.getSunnahTimes(
-                for: currentDate,
-                location: location,
-                method: calculationMethod,
-                madhab: prefs.madhab
-            )
-
-            // Load logged prayers
-            let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
-            loggedPrayers = Set(logs.map { $0.prayerType })
-
-            // Update next prayer indicator
-            updateNextPrayerIndicator()
-
-            // Sync prayer times and logged state to widgets via App Group
-            widgetDataService.writePrayerTimes(prayers)
-            widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
-
-            // Load notification preferences from PreferencesManager
-            await loadNotificationSettings()
-
-            // Ensure notifications are scheduled (skips if already done today)
-            await NotificationScheduler.shared.scheduleIfNeeded()
-
-            // Update Live Activity with next prayer context
-            updateLiveActivity()
-
-        } catch {
-            self.error = error
-        }
-
-        // If another caller requested a reload while we were loading, run one more pass
-        if needsReload {
+        repeat {
             needsReload = false
-            isLoadingPrayers = false
-            await loadPrayerTimes()
-        }
+
+            do {
+                // Clear previous error on new attempt
+                error = nil
+
+                // Advance date so reloads always fetch for today (fixes midnight rollover)
+                currentDate = Date()
+
+                // Get location
+                let location = try await getCurrentLocation()
+                currentLocation = location
+
+                // Calculate prayer times
+                let prefs = PreferencesManager.loadPreferencesSync()
+                let prayers = try await prayerRepository.getPrayers(
+                    for: currentDate,
+                    location: location,
+                    method: calculationMethod,
+                    madhab: prefs.madhab
+                )
+                todayPrayers = prayers
+
+                // Load sunnah times
+                sunnahTimes = prayerRepository.getSunnahTimes(
+                    for: currentDate,
+                    location: location,
+                    method: calculationMethod,
+                    madhab: prefs.madhab
+                )
+
+                // Load logged prayers
+                let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
+                loggedPrayers = Set(logs.map { $0.prayerType })
+
+                // Update next prayer indicator
+                updateNextPrayerIndicator()
+
+                // Sync prayer times and logged state to widgets via App Group
+                widgetDataService.writePrayerTimes(prayers)
+                widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+
+                // Load notification preferences from PreferencesManager
+                await loadNotificationSettings()
+
+                // Ensure notifications are scheduled (skips if already done today)
+                await NotificationScheduler.shared.scheduleIfNeeded()
+
+                // Update Live Activity with next prayer context
+                updateLiveActivity()
+
+            } catch {
+                self.error = error
+            }
+        } while needsReload
     }
 
     func refreshPrayerTimes() async {
@@ -410,10 +412,40 @@ final class PrayerViewModel {
         )
     }
 
+    /// Pure decision helper — testable with any dates, no wall-clock dependency.
+    static func shouldRefresh(
+        now: Date,
+        lastRefresh: Date,
+        hasError: Bool,
+        errorRetryUsed: Bool,
+        throttleInterval: TimeInterval = 60
+    ) -> Bool {
+        // Day changed since last refresh — always refresh (midnight rollover)
+        if !Calendar.current.isDate(now, inSameDayAs: lastRefresh) { return true }
+        // Within throttle window
+        if now.timeIntervalSince(lastRefresh) < throttleInterval {
+            // Allow one error retry, then throttle again
+            return hasError && !errorRetryUsed
+        }
+        return true
+    }
+
     /// Refresh prayer data for foreground resume — advances date, clears location cache,
     /// and forces fresh GPS coordinates to avoid stale data after returning from background.
+    /// Throttled to avoid wasteful GPS hits on quick tab switches and Control Center.
     func refreshForForeground() async {
-        currentDate = Date()
+        let now = Date()
+        guard Self.shouldRefresh(
+            now: now,
+            lastRefresh: lastForegroundRefresh,
+            hasError: error != nil,
+            errorRetryUsed: errorRetryUsed
+        ) else { return }
+
+        lastForegroundRefresh = now
+        if error != nil { errorRetryUsed = true } else { errorRetryUsed = false }
+
+        currentDate = now
         currentLocation = nil
 
         // Force fresh GPS — skips locationService.coordinates cache too
@@ -422,6 +454,9 @@ final class PrayerViewModel {
         }
 
         await loadPrayerTimes()
+
+        // Reset error retry on success
+        if error == nil { errorRetryUsed = false }
     }
 
     func updateNextPrayerIndicator() {
