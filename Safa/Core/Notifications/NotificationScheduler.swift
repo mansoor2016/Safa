@@ -575,7 +575,7 @@ enum NotificationActionHelpers {
     static func routerAction(
         for action: String,
         userInfo: [AnyHashable: Any]
-    ) -> (tab: String, pendingAction: AppRouter.NotificationAction?) {
+    ) -> (tab: AppRouter.Tab, pendingAction: AppRouter.NotificationAction?) {
         switch action {
         case "LOG_PRAYER":
             let pendingAction: AppRouter.NotificationAction?
@@ -584,11 +584,11 @@ enum NotificationActionHelpers {
             } else {
                 pendingAction = nil
             }
-            return ("prayer", pendingAction)
+            return (.prayer, pendingAction)
         case "OPEN_QIBLA":
-            return ("prayer", .openQibla)
+            return (.prayer, .openQibla)
         default:
-            return ("prayer", nil)
+            return (.prayer, nil)
         }
     }
 }

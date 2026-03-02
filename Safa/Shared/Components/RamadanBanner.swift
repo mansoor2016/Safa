@@ -221,11 +221,11 @@ struct RamadanBanner: View {
     private var quickActions: some View {
         HStack(spacing: SafaSpacing.sm) {
             bannerQuickAction(icon: "hands.sparkles", title: "Duas") {
-                router.selectedTab = "duas"
+                router.selectedTab = .duas
             }
 
             bannerQuickAction(icon: "book.fill", title: "Quran") {
-                router.selectedTab = "quran"
+                router.selectedTab = .quran
             }
 
             AdhanPlayButton(style: .banner)

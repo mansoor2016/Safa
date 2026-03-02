@@ -185,9 +185,9 @@ struct SafaApp: App {
     private func handleShortcut(_ type: String) {
         switch type {
         case "com.safa.prayer":
-            router.selectedTab = "prayer"
+            router.selectedTab = .prayer
         case "com.safa.qibla":
-            router.selectedTab = "home"
+            router.selectedTab = .home
             router.popToRoot()
             router.navigate(to: .qibla)
         default:
@@ -286,53 +286,13 @@ struct MainTabView: View {
     @State private var supportCardDismissed = false
     @State private var debugForceSupport = false
     @State private var hasEvaluatedPromptsThisSession = false
-    enum Tab: String, CaseIterable {
-        case home
-        case quran
-        case prayer
-        case duas
-        case more
-
-        var title: String {
-            switch self {
-            case .home: return "Home"
-            case .quran: return "Quran"
-            case .prayer: return "Prayer"
-            case .duas: return "Duas"
-            case .more: return "More"
-            }
-        }
-
-        var icon: String {
-            switch self {
-            case .home: return "house"
-            case .quran: return "book"
-            case .prayer: return "clock"
-            case .duas: return "heart.text.square"
-            case .more: return "ellipsis.circle"
-            }
-        }
-
-        var selectedIcon: String {
-            switch self {
-            case .home: return "house.fill"
-            case .quran: return "book.fill"
-            case .prayer: return "clock.fill"
-            case .duas: return "heart.text.square.fill"
-            case .more: return "ellipsis.circle.fill"
-            }
-        }
-    }
-
-    private var selectedTab: Binding<Tab> {
-        Binding(
-            get: { Tab(rawValue: router.selectedTab) ?? .home },
-            set: { router.selectedTab = $0.rawValue }
-        )
-    }
+    private typealias Tab = AppRouter.Tab
 
     var body: some View {
-        TabView(selection: selectedTab) {
+        TabView(selection: Binding(
+            get: { router.selectedTab },
+            set: { router.selectedTab = $0 }
+        )) {
             // Home Tab
             NavigationStack(path: Binding(
                 get: { router.path },
@@ -348,14 +308,14 @@ struct MainTabView: View {
                     }
             }
             .tabItem {
-                Label(Tab.home.title, systemImage: router.selectedTab == Tab.home.rawValue ? Tab.home.selectedIcon : Tab.home.icon)
+                Label(Tab.home.title, systemImage: router.selectedTab == .home ? Tab.home.selectedIcon : Tab.home.icon)
             }
             .tag(Tab.home)
 
             // Quran Tab
             QuranView()
             .tabItem {
-                Label(Tab.quran.title, systemImage: router.selectedTab == Tab.quran.rawValue ? Tab.quran.selectedIcon : Tab.quran.icon)
+                Label(Tab.quran.title, systemImage: router.selectedTab == .quran ? Tab.quran.selectedIcon : Tab.quran.icon)
             }
             .tag(Tab.quran)
 
@@ -368,7 +328,7 @@ struct MainTabView: View {
                 }
             }
             .tabItem {
-                Label(Tab.prayer.title, systemImage: router.selectedTab == Tab.prayer.rawValue ? Tab.prayer.selectedIcon : Tab.prayer.icon)
+                Label(Tab.prayer.title, systemImage: router.selectedTab == .prayer ? Tab.prayer.selectedIcon : Tab.prayer.icon)
             }
             .tag(Tab.prayer)
 
@@ -377,7 +337,7 @@ struct MainTabView: View {
                 DuaCategoriesView()
             }
             .tabItem {
-                Label(Tab.duas.title, systemImage: router.selectedTab == Tab.duas.rawValue ? Tab.duas.selectedIcon : Tab.duas.icon)
+                Label(Tab.duas.title, systemImage: router.selectedTab == .duas ? Tab.duas.selectedIcon : Tab.duas.icon)
             }
             .tag(Tab.duas)
 
@@ -386,7 +346,7 @@ struct MainTabView: View {
                 MoreView()
             }
             .tabItem {
-                Label(Tab.more.title, systemImage: router.selectedTab == Tab.more.rawValue ? Tab.more.selectedIcon : Tab.more.icon)
+                Label(Tab.more.title, systemImage: router.selectedTab == .more ? Tab.more.selectedIcon : Tab.more.icon)
             }
             .tag(Tab.more)
         }

@@ -262,7 +262,7 @@ struct HomeView: View {
                     currentNight: currentRamadanDay,
                     onDismiss: dismissBanner
                 )
-                .onTapGesture { router.selectedTab = "prayer" }
+                .onTapGesture { router.selectedTab = .prayer }
             } else if case .preRamadan = visibility {
                 PreRamadanBanner(
                     daysUntil: daysUntilRamadan ?? 0,
@@ -486,7 +486,7 @@ struct HomeView: View {
     private func navigate(to destination: HomeAction.HomeActionDestination) {
         switch destination {
         case .tab(let tabId):
-            router.selectedTab = tabId
+            router.selectedTab = AppRouter.Tab(rawValue: tabId) ?? .home
         case .route(let routeName):
             switch routeName {
             case "dhikr": router.navigate(to: .dhikr)
@@ -611,7 +611,7 @@ struct HomeView: View {
                         surahNumber: progress.lastSurah,
                         startAyah: progress.lastAyah
                     )
-                    router.selectedTab = "quran"
+                    router.selectedTab = .quran
                 } label: {
                     HStack(spacing: SafaSpacing.md) {
                         VStack(alignment: .leading, spacing: SafaSpacing.xxs) {

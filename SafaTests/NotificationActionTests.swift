@@ -68,7 +68,7 @@ final class NotificationActionTests: XCTestCase {
             for: "LOG_PRAYER",
             userInfo: ["prayerType": "dhuhr"]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         if case .logPrayer(let type) = result.pendingAction {
             XCTAssertEqual(type, .dhuhr)
         } else {
@@ -81,7 +81,7 @@ final class NotificationActionTests: XCTestCase {
             for: "LOG_PRAYER",
             userInfo: [:]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         XCTAssertNil(result.pendingAction, "Missing userInfo should not produce a pending action")
     }
 
@@ -90,7 +90,7 @@ final class NotificationActionTests: XCTestCase {
             for: "LOG_PRAYER",
             userInfo: ["prayerType": "invalid"]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         XCTAssertNil(result.pendingAction, "Invalid prayer type should not produce a pending action")
     }
 
@@ -99,7 +99,7 @@ final class NotificationActionTests: XCTestCase {
             for: "OPEN_QIBLA",
             userInfo: [:]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         if case .openQibla = result.pendingAction {
             // Pass
         } else {
@@ -112,7 +112,7 @@ final class NotificationActionTests: XCTestCase {
             for: UNNotificationDefaultActionIdentifier,
             userInfo: [:]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         XCTAssertNil(result.pendingAction, "Default tap should not set a pending action")
     }
 
@@ -143,7 +143,7 @@ final class NotificationActionTests: XCTestCase {
             for: UNNotificationDismissActionIdentifier,
             userInfo: ["prayerType": "fajr"]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         XCTAssertNil(result.pendingAction, "Dismiss should not produce a pending action")
     }
 
@@ -165,7 +165,7 @@ final class NotificationActionTests: XCTestCase {
             for: "SOME_FUTURE_ACTION",
             userInfo: ["prayerType": "fajr"]
         )
-        XCTAssertEqual(result.tab, "prayer")
+        XCTAssertEqual(result.tab, .prayer)
         XCTAssertNil(result.pendingAction, "Unknown action should not produce a pending action")
     }
 
@@ -175,7 +175,7 @@ final class NotificationActionTests: XCTestCase {
                        UNNotificationDismissActionIdentifier, "UNKNOWN"]
         for action in actions {
             let result = NotificationActionHelpers.routerAction(for: action, userInfo: [:])
-            XCTAssertEqual(result.tab, "prayer", "Action '\(action)' should route to prayer tab")
+            XCTAssertEqual(result.tab, .prayer, "Action '\(action)' should route to prayer tab")
         }
     }
 

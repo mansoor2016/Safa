@@ -7,9 +7,56 @@ import CoreSpotlight
 
 @Observable
 final class AppRouter {
+    // MARK: - Tab Enum
+    enum Tab: String, CaseIterable {
+        case home
+        case quran
+        case prayer
+        case duas
+        case more
+
+        var title: String {
+            switch self {
+            case .home: return "Home"
+            case .quran: return "Quran"
+            case .prayer: return "Prayer"
+            case .duas: return "Duas"
+            case .more: return "More"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .home: return "house"
+            case .quran: return "book"
+            case .prayer: return "clock"
+            case .duas: return "heart.text.square"
+            case .more: return "ellipsis.circle"
+            }
+        }
+
+        var selectedIcon: String {
+            switch self {
+            case .home: return "house.fill"
+            case .quran: return "book.fill"
+            case .prayer: return "clock.fill"
+            case .duas: return "heart.text.square.fill"
+            case .more: return "ellipsis.circle.fill"
+            }
+        }
+    }
+
+    // MARK: - Routing Action
+    enum RoutingAction: Equatable {
+        case switchTab(Tab)
+        case navigate(Destination)
+        case switchTabAndNavigate(tab: Tab, destination: Destination)
+        case none
+    }
+
     // MARK: - Navigation State
     var path = NavigationPath()
-    var selectedTab: String = "home"
+    var selectedTab: Tab = .home
     var activeSheet: Sheet?
     var activeAlert: AlertType?
     var pendingQuranTarget: QuranNavigationTarget?
@@ -136,22 +183,24 @@ final class AppRouter {
         navigate(to: .chat)
     }
 
-    func navigate(to destination: Destination) {
+    @discardableResult
+    func navigate(to destination: Destination) -> Bool {
         // Gate AI companion behind feature flag
         if case .chat = destination, FeatureFlags.shared.isDisabled(.aiCompanion) {
             pendingChatInput = nil
             pendingChatContext = nil
             pendingChatLaunchMode = .prefillOnly
             onNavigationBlocked(.aiCompanion)
-            return
+            return false
         }
 
         // Chat lives in the Home tab's NavigationStack — switch tab first
         if case .chat = destination {
-            selectedTab = "home"
+            selectedTab = .home
         }
 
         path.append(destination)
+        return true
     }
 
     func pop() {
@@ -181,83 +230,14 @@ final class AppRouter {
 
     // MARK: - Deep Link Handling
 
-    /// Handles incoming deep links in the format: safa://destination/param1/param2
-    /// - Parameter url: The deep link URL to handle
-    /// - Returns: True if the deep link was handled successfully
     @discardableResult
     func handleDeepLink(_ url: URL) -> Bool {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme == "safa" else {
-            return false
-        }
-
-        let pathComponents = url.pathComponents.filter { $0 != "/" }
-
-        switch components.host {
-        case "quran":
-            selectedTab = "quran"
-            // TODO: deep link to specific surah/ayah within Quran tab
-            return true
-
-        case "prayer":
-            selectedTab = "prayer"
-            return true
-
-        case "qibla":
-            // Qibla opens as a sheet, not a tab — navigate is correct here
-            navigate(to: .qibla)
-            return true
-
-        case "learn":
-            selectedTab = "learn"
-            return true
-
-        case "chat":
-            // navigate(to:) checks feature flag and shows toast if disabled
-            navigate(to: .chat)
-            return !FeatureFlags.shared.isDisabled(.aiCompanion)
-
-        case "hadith":
-            let collection = pathComponents.first
-            let hadithId = pathComponents.count > 1 ? pathComponents[1] : nil
-            navigate(to: .hadith(collection: collection, hadithId: hadithId))
-            return true
-
-        case "dhikr":
-            navigate(to: .dhikr)
-            return true
-
-        case "calendar":
-            navigate(to: .calendar)
-            return true
-
-        case "ramadan":
-            if isRamadanActive() {
-                selectedTab = "prayer"
-            } else {
-                selectedTab = "home"
-                navigate(to: .ramadan)
-            }
-            return true
-
-        case "eid":
-            selectedTab = "home"
-            return true
-
-        case "settings":
-            navigate(to: .settings)
-            return true
-
-        default:
-            return false
-        }
+        let action = DeepLinkResolver.resolve(url, isRamadanActive: isRamadanActive())
+        return apply(action)
     }
 
     // MARK: - Spotlight Result Handling
 
-    /// Handles Spotlight search result selection
-    /// - Parameter userActivity: The user activity from Spotlight
-    /// - Returns: True if the result was handled successfully
     @discardableResult
     func handleSpotlightResult(_ userActivity: NSUserActivity) -> Bool {
         guard userActivity.activityType == CSSearchableItemActionType,
@@ -268,73 +248,26 @@ final class AppRouter {
         return handleSpotlightIdentifier(identifier)
     }
 
-    /// Handles a Spotlight item identifier
-    /// - Parameter identifier: The unique identifier from CoreSpotlight
-    /// - Returns: True if the identifier was handled successfully
     @discardableResult
     func handleSpotlightIdentifier(_ identifier: String) -> Bool {
-        let components = identifier.split(separator: "_")
-        guard components.count >= 2 else { return false }
+        let action = SpotlightResolver.resolve(identifier: identifier)
+        return apply(action)
+    }
 
-        let type = String(components[0])
+    // MARK: - Private
 
-        switch type {
-        case "surah":
-            guard let number = Int(components[1]) else { return false }
-            navigate(to: .surah(number: number))
+    @discardableResult
+    private func apply(_ action: RoutingAction) -> Bool {
+        switch action {
+        case .switchTab(let tab):
+            selectedTab = tab
             return true
-
-        case "ayah":
-            guard components.count >= 3,
-                  let surah = Int(components[1]),
-                  let ayah = Int(components[2]) else { return false }
-            navigate(to: .ayah(surah: surah, ayah: ayah))
-            return true
-
-        case "hadith":
-            let collection = String(components[1])
-            let hadithId = components.count > 2 ? String(components[2]) : nil
-            navigate(to: .hadith(collection: collection, hadithId: hadithId))
-            return true
-
-        case "dua":
-            // Navigate to dhikr view for duas
-            navigate(to: .dhikr)
-            return true
-
-        case "name":
-            // Navigate to a names of Allah destination (could be added later)
-            // For now, navigate to dhikr which contains related content
-            navigate(to: .dhikr)
-            return true
-
-        case "prayer":
-            selectedTab = "prayer"
-            return true
-
-        case "feature":
-            let featureId = components.dropFirst().joined(separator: "_")
-            switch featureId {
-            case "prayer_times":
-                selectedTab = "prayer"
-            case "qibla":
-                navigate(to: .qibla)
-            case "quran":
-                selectedTab = "quran"
-            case "hadith":
-                navigate(to: .hadith(collection: nil, hadithId: nil))
-            case "dhikr":
-                navigate(to: .dhikr)
-            case "calendar":
-                navigate(to: .calendar)
-            case "dua":
-                selectedTab = "duas"
-            default:
-                return false
-            }
-            return true
-
-        default:
+        case .navigate(let destination):
+            return navigate(to: destination)
+        case .switchTabAndNavigate(let tab, let destination):
+            selectedTab = tab
+            return navigate(to: destination)
+        case .none:
             return false
         }
     }

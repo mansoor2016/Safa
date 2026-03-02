@@ -1,5 +1,5 @@
 // MARK: - AppRouterTests.swift
-// PURPOSE: Unit tests for AppRouter deep link and navigation handling
+// PURPOSE: Unit tests for AppRouter navigation, sheets, alerts, and routing integration
 // DEPENDENCIES: XCTest, SwiftUI
 
 import XCTest
@@ -88,7 +88,7 @@ final class AppRouterTests: XCTestCase {
         XCTAssertNil(sut.activeAlert)
     }
 
-    // MARK: - Deep Link Tests
+    // MARK: - Deep Link Integration Tests
 
     func testDeepLinkInvalidSchemeReturnsFalse() {
         let url = URL(string: "https://example.com/prayer")!
@@ -98,8 +98,7 @@ final class AppRouterTests: XCTestCase {
     func testDeepLinkPrayer() {
         let url = URL(string: "safa://prayer")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        // Prayer deep link switches to prayer tab, not push navigation
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertEqual(sut.selectedTab, .prayer)
     }
 
     func testDeepLinkQibla() {
@@ -111,33 +110,34 @@ final class AppRouterTests: XCTestCase {
     func testDeepLinkQuran() {
         let url = URL(string: "safa://quran")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.selectedTab, "quran")
+        XCTAssertEqual(sut.selectedTab, .quran)
     }
 
     func testDeepLinkQuranWithSurah() {
         let url = URL(string: "safa://quran/2")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        // Switches to quran tab (deep link to specific surah is TODO)
-        XCTAssertEqual(sut.selectedTab, "quran")
+        XCTAssertEqual(sut.selectedTab, .quran)
     }
 
     func testDeepLinkQuranWithSurahAndAyah() {
         let url = URL(string: "safa://quran/2/255")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.selectedTab, "quran")
+        XCTAssertEqual(sut.selectedTab, .quran)
     }
 
-    func testDeepLinkLearn() {
+    func testDeepLinkLearn_switchesToHomeAndPushesLearn() {
         let url = URL(string: "safa://learn")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.selectedTab, "learn")
+        XCTAssertEqual(sut.selectedTab, .home)
+        XCTAssertEqual(sut.path.count, 1, "Learn should push onto Home's NavigationStack")
     }
 
-    func testDeepLinkLearnWithLesson() {
-        let url = URL(string: "safa://learn/arabic/lesson1")!
+    func testDeepLinkLearn_fromNonHomeTab_switchesToHome() {
+        sut.selectedTab = .prayer
+        let url = URL(string: "safa://learn")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        // Switches to learn tab (deep link to specific lesson is TODO)
-        XCTAssertEqual(sut.selectedTab, "learn")
+        XCTAssertEqual(sut.selectedTab, .home, "Must switch to home since path is Home's NavigationStack")
+        XCTAssertEqual(sut.path.count, 1)
     }
 
     func testDeepLinkChat_whenAIDisabled_returnsFalse() {
@@ -148,7 +148,6 @@ final class AppRouterTests: XCTestCase {
     }
 
     func testDeepLinkChat_whenAIEnabled_returnsTrue() {
-        // Enable AI companion via feature flag override
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
         defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
 
@@ -185,7 +184,7 @@ final class AppRouterTests: XCTestCase {
         sut.isRamadanActive = { false }
         let url = URL(string: "safa://ramadan")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.selectedTab, .home)
         XCTAssertEqual(sut.path.count, 1)
     }
 
@@ -193,7 +192,7 @@ final class AppRouterTests: XCTestCase {
         sut.isRamadanActive = { true }
         let url = URL(string: "safa://ramadan")!
         XCTAssertTrue(sut.handleDeepLink(url))
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertEqual(sut.selectedTab, .prayer)
         XCTAssertTrue(sut.path.isEmpty, "During Ramadan, should switch tab not push")
     }
 
@@ -209,7 +208,15 @@ final class AppRouterTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 
-    // MARK: - Spotlight Identifier Tests
+    func testDeepLinkInvalid_noStateChange() {
+        let url = URL(string: "https://example.com")!
+        let initialTab = sut.selectedTab
+        XCTAssertFalse(sut.handleDeepLink(url))
+        XCTAssertEqual(sut.selectedTab, initialTab)
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    // MARK: - Spotlight Integration Tests
 
     func testSpotlightIdentifierSurah() {
         XCTAssertTrue(sut.handleSpotlightIdentifier("surah_2"))
@@ -248,7 +255,7 @@ final class AppRouterTests: XCTestCase {
 
     func testSpotlightIdentifierPrayer() {
         XCTAssertTrue(sut.handleSpotlightIdentifier("prayer_fajr"))
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertEqual(sut.selectedTab, .prayer)
         XCTAssertTrue(sut.path.isEmpty, "Prayer should switch tab, not push")
     }
 
@@ -259,19 +266,19 @@ final class AppRouterTests: XCTestCase {
 
     func testSpotlightIdentifierFeaturePrayerTimes() {
         XCTAssertTrue(sut.handleSpotlightIdentifier("feature_prayer_times"))
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        XCTAssertEqual(sut.selectedTab, .prayer)
         XCTAssertTrue(sut.path.isEmpty, "Prayer times should switch tab, not push")
     }
 
     func testSpotlightIdentifierFeatureQuran() {
         XCTAssertTrue(sut.handleSpotlightIdentifier("feature_quran"))
-        XCTAssertEqual(sut.selectedTab, "quran")
+        XCTAssertEqual(sut.selectedTab, .quran)
         XCTAssertTrue(sut.path.isEmpty, "Quran should switch tab, not push")
     }
 
     func testSpotlightIdentifierFeatureDua() {
         XCTAssertTrue(sut.handleSpotlightIdentifier("feature_dua"))
-        XCTAssertEqual(sut.selectedTab, "duas")
+        XCTAssertEqual(sut.selectedTab, .duas)
         XCTAssertTrue(sut.path.isEmpty, "Dua should switch tab, not push")
     }
 
@@ -285,58 +292,66 @@ final class AppRouterTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 
-    // MARK: - Blocked Chat Navigation Clears Pending State (Gap 4)
+    // MARK: - Spotlight Result Glue Tests
+
+    func testSpotlightResult_validActivity_routesCorrectly() {
+        let activity = NSUserActivity(activityType: "com.apple.corespotlightitem")
+        activity.userInfo = ["kCSSearchableItemActivityIdentifier": "surah_2"]
+        XCTAssertTrue(sut.handleSpotlightResult(activity))
+        XCTAssertEqual(sut.path.count, 1)
+    }
+
+    func testSpotlightResult_wrongActivityType_returnsFalse() {
+        let activity = NSUserActivity(activityType: "com.apple.wrong")
+        XCTAssertFalse(sut.handleSpotlightResult(activity))
+    }
+
+    func testSpotlightResult_missingIdentifier_returnsFalse() {
+        let activity = NSUserActivity(activityType: "com.apple.corespotlightitem")
+        activity.userInfo = [:]
+        XCTAssertFalse(sut.handleSpotlightResult(activity))
+    }
+
+    // MARK: - Blocked Chat Navigation Clears Pending State
 
     func testNavigateToChat_whenDisabled_clearsPendingInput() {
-        // Given — pending input was set (e.g. Siri intent set it before navigation)
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatInput = "How do I pray Fajr?"
 
-        // When — attempt to navigate to chat
         sut.navigate(to: .chat)
 
-        // Then — pending input cleared, path not appended
         XCTAssertNil(sut.pendingChatInput, "Pending input should be cleared when navigation is blocked")
         XCTAssertTrue(sut.path.isEmpty, "Path should remain empty when AI is disabled")
     }
 
     func testNavigateToChat_whenDisabled_clearsPendingContext() {
-        // Given — pending context was set (e.g. contextual entry point set it)
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 2, ayahNumber: 255)
 
-        // When
         sut.navigate(to: .chat)
 
-        // Then
         XCTAssertNil(sut.pendingChatContext, "Pending context should be cleared when navigation is blocked")
         XCTAssertTrue(sut.path.isEmpty)
     }
 
     func testNavigateToChat_whenDisabled_clearsBothPendingInputAndContext() {
-        // Given — both pending input and context set simultaneously
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatInput = "Explain this ayah"
         sut.pendingChatContext = ChatContext(topic: .hadith, hadithId: "bukhari_1")
 
-        // When
         sut.navigate(to: .chat)
 
-        // Then — both cleared
         XCTAssertNil(sut.pendingChatInput)
         XCTAssertNil(sut.pendingChatContext)
     }
 
     func testNavigateToChat_whenEnabled_preservesPendingState() {
-        // Given — AI enabled, pending state set
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
         sut.pendingChatInput = "How do I pray?"
         sut.pendingChatContext = ChatContext(topic: .quran, surahNumber: 1)
 
-        // When — navigation succeeds
         sut.navigate(to: .chat)
 
-        // Then — pending state preserved for ChatView to consume
         XCTAssertEqual(sut.pendingChatInput, "How do I pray?")
         XCTAssertNotNil(sut.pendingChatContext)
         XCTAssertEqual(sut.path.count, 1)
@@ -345,7 +360,6 @@ final class AppRouterTests: XCTestCase {
     // MARK: - Chat Launch Mode Tests
 
     func test_pendingChatLaunchMode_defaultsToPreFillOnly() {
-        // Then — default value should be prefillOnly
         if case .prefillOnly = sut.pendingChatLaunchMode {
             // Expected
         } else {
@@ -354,14 +368,11 @@ final class AppRouterTests: XCTestCase {
     }
 
     func test_navigateToChat_whenDisabled_resetsLaunchMode() {
-        // Given — launch mode set to autoSend
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
         sut.pendingChatLaunchMode = .autoSend
 
-        // When — navigate to chat (blocked)
         sut.navigate(to: .chat)
 
-        // Then — launch mode reset to prefillOnly
         if case .prefillOnly = sut.pendingChatLaunchMode {
             // Expected
         } else {
@@ -372,30 +383,24 @@ final class AppRouterTests: XCTestCase {
     // MARK: - Cross-Tab Chat Navigation Tests
 
     func test_navigateToChat_switchesToHomeTab() {
-        // Given — AI enabled, on a different tab
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
         defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
-        sut.selectedTab = "prayer"
+        sut.selectedTab = .prayer
 
-        // When
         sut.navigate(to: .chat)
 
-        // Then — tab switches to home
-        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.selectedTab, .home)
         XCTAssertEqual(sut.path.count, 1)
     }
 
     func test_navigateToChat_fromMoreTab_switchesAndPushes() {
-        // Given — AI enabled, on more tab
         FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
         defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
-        sut.selectedTab = "more"
+        sut.selectedTab = .more
 
-        // When
         sut.navigate(to: .chat)
 
-        // Then — switched to home tab with chat pushed
-        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.selectedTab, .home)
         XCTAssertEqual(sut.path.count, 1)
     }
 
@@ -455,27 +460,44 @@ final class AppRouterTests: XCTestCase {
     // MARK: - Tab Selection Tests
 
     func testSelectedTab_defaultsToHome() {
-        XCTAssertEqual(sut.selectedTab, "home")
+        XCTAssertEqual(sut.selectedTab, .home)
     }
 
     func testSelectedTab_canSwitchToPrayer() {
-        sut.selectedTab = "prayer"
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        sut.selectedTab = .prayer
+        XCTAssertEqual(sut.selectedTab, .prayer)
     }
 
     func testSelectedTab_canSwitchToQuran() {
-        sut.selectedTab = "quran"
-        XCTAssertEqual(sut.selectedTab, "quran")
+        sut.selectedTab = .quran
+        XCTAssertEqual(sut.selectedTab, .quran)
     }
 
     func testSelectedTab_canSwitchBetweenTabs() {
-        sut.selectedTab = "prayer"
-        XCTAssertEqual(sut.selectedTab, "prayer")
+        sut.selectedTab = .prayer
+        XCTAssertEqual(sut.selectedTab, .prayer)
 
-        sut.selectedTab = "home"
-        XCTAssertEqual(sut.selectedTab, "home")
+        sut.selectedTab = .home
+        XCTAssertEqual(sut.selectedTab, .home)
 
-        sut.selectedTab = "more"
-        XCTAssertEqual(sut.selectedTab, "more")
+        sut.selectedTab = .more
+        XCTAssertEqual(sut.selectedTab, .more)
+    }
+
+    // MARK: - Navigate Returns Bool
+
+    func test_navigate_returnsTrue_forNonChat() {
+        XCTAssertTrue(sut.navigate(to: .prayer))
+    }
+
+    func test_navigate_returnsFalse_whenChatDisabled() {
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: false)
+        XCTAssertFalse(sut.navigate(to: .chat))
+    }
+
+    func test_navigate_returnsTrue_whenChatEnabled() {
+        FeatureFlags.shared.setOverride(.aiCompanion, enabled: true)
+        defer { FeatureFlags.shared.removeOverride(.aiCompanion) }
+        XCTAssertTrue(sut.navigate(to: .chat))
     }
 }
