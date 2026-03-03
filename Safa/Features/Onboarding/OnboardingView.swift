@@ -29,6 +29,7 @@ struct OnboardingView: View {
     @State private var locationError: String?
     @State private var highLatitudeWarning: String?
     @State private var showCustomizeSettings = false
+    @State private var notificationAuthCoordinator = OnboardingNotificationAuthCoordinator()
 
     private let totalPages = 4
 
@@ -72,6 +73,10 @@ struct OnboardingView: View {
                     ) {
                         currentPage = oldValue
                     }
+                    requestNotificationAuthIfNeeded()
+                }
+                .onChange(of: notificationsEnabled) {
+                    requestNotificationAuthIfNeeded()
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -86,6 +91,14 @@ struct OnboardingView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             Task { await checkNotificationAuth() }
+        }
+        .onReceive(dependencies.locationService.authorizationStatusPublisher) { status in
+            let previous = locationStatus
+            locationStatus = status
+            guard previous != status else { return }
+            if status == .authorizedAlways || status == .authorizedWhenInUse {
+                requestLocationPermission()
+            }
         }
     }
 
@@ -185,87 +198,15 @@ struct OnboardingView: View {
         }
     }
 
-    @ViewBuilder
     private var locationSection: some View {
-        VStack(spacing: SafaSpacing.sm) {
-            if let context = locationContext {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(.green)
-
-                Text(context.regionName)
-                    .font(SafaTypography.titleMedium)
-                    .foregroundColor(SafaColors.Fallback.text)
-
-                if let warning = highLatitudeWarning {
-                    Text(warning)
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.orange)
-                        .multilineTextAlignment(.center)
-                }
-
-                Button {
-                    locationContext = nil
-                    highLatitudeWarning = nil
-                    requestLocationPermission()
-                } label: {
-                    HStack(spacing: SafaSpacing.xs) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                        Text("Update Location")
-                    }
-                    .font(SafaTypography.bodySmall)
-                    .foregroundColor(.accentColor)
-                }
-            } else {
-                Image(systemName: "location.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(.accentColor)
-
-                Text("Enable location for accurate prayer times")
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-                    .multilineTextAlignment(.center)
-
-                if let error = locationError {
-                    Text(error)
-                        .font(SafaTypography.bodySmall)
-                        .foregroundColor(.orange)
-
-                    if OnboardingHelpers.shouldShowSettingsLink(locationStatus: locationStatus) {
-                        Button {
-                            if let url = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(url)
-                            }
-                        } label: {
-                            Text("Open Settings")
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(.accentColor)
-                        }
-                    }
-                }
-
-                Button {
-                    requestLocationPermission()
-                } label: {
-                    HStack {
-                        if isLoadingLocation {
-                            ProgressView()
-                                .tint(.white)
-                                .padding(.trailing, 4)
-                        }
-                        Text(isLoadingLocation ? "Detecting..." : "Enable Location")
-                    }
-                    .font(SafaTypography.bodyMedium)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, SafaSpacing.xl)
-                    .padding(.vertical, SafaSpacing.sm)
-                    .background(Color.accentColor)
-                    .clipShape(Capsule())
-                }
-                .disabled(isLoadingLocation)
-            }
-        }
+        OnboardingLocationSection(
+            locationContext: $locationContext,
+            locationError: $locationError,
+            isLoadingLocation: $isLoadingLocation,
+            highLatitudeWarning: $highLatitudeWarning,
+            locationStatus: locationStatus,
+            onRequestPermission: { requestLocationPermission() }
+        )
     }
 
     // MARK: - Page 2: Notifications
@@ -316,24 +257,7 @@ struct OnboardingView: View {
                     .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
 
                     if notificationsEnabled && notificationAuthStatus == .denied {
-                        HStack(spacing: SafaSpacing.xs) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                                .font(.caption)
-                            Text("Notifications are disabled in Settings")
-                                .font(SafaTypography.bodySmall)
-                                .foregroundColor(.orange)
-                            Spacer()
-                            Button("Open Settings") {
-                                if let url = URL(string: UIApplication.openSettingsURLString) {
-                                    UIApplication.shared.open(url)
-                                }
-                            }
-                            .font(SafaTypography.labelSmall)
-                        }
-                        .padding()
-                        .background(Color.orange.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
+                        NotificationDeniedBanner()
                     }
 
                     // Adhan sound (shown when notifications enabled)
@@ -355,6 +279,7 @@ struct OnboardingView: View {
                                 }
                             }
                         }
+                        .disabled(notificationAuthStatus == .denied)
                         .padding()
                         .background(Color(UIColor.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: SafaSpacing.CornerRadius.md))
@@ -365,6 +290,7 @@ struct OnboardingView: View {
                                     Text(adhan.displayName).tag(adhan)
                                 }
                             }
+                            .disabled(notificationAuthStatus == .denied)
                             .pickerStyle(.menu)
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground))
@@ -654,10 +580,27 @@ struct OnboardingView: View {
         notificationAuthStatus = settings.authorizationStatus
     }
 
+    private func requestNotificationAuthIfNeeded() {
+        Task {
+            let didRequest = await notificationAuthCoordinator.requestIfNeeded(
+                currentPage: currentPage,
+                notificationsEnabled: notificationsEnabled,
+                notificationAuthStatus: notificationAuthStatus
+            )
+            if didRequest {
+                await checkNotificationAuth()
+            }
+        }
+    }
+
     private func requestLocationPermission() {
         if locationStatus == .notDetermined {
             dependencies.locationService.requestPermission()
         }
+
+        // Guard against overlapping fetches — LocationService uses a single
+        // continuation slot, so concurrent getLocationContext() calls race.
+        guard !isLoadingLocation else { return }
 
         isLoadingLocation = true
         locationError = nil
@@ -697,8 +640,11 @@ struct OnboardingView: View {
             )
             try? await dependencies.userRepository.updatePreferences(prefs)
 
-            if prefs.notificationsEnabled {
+            if prefs.notificationsEnabled && notificationAuthStatus == .notDetermined {
                 _ = await NotificationScheduler.shared.requestAuthorization()
+                await checkNotificationAuth()
+            }
+            if prefs.notificationsEnabled {
                 await NotificationScheduler.shared.forceReschedule()
             }
 
@@ -734,8 +680,11 @@ struct OnboardingView: View {
 
             AppLanguageManager.shared.setLanguage(selectedAppLanguage?.rawValue)
 
-            if notificationsEnabled {
+            if notificationsEnabled && notificationAuthStatus == .notDetermined {
                 _ = await NotificationScheduler.shared.requestAuthorization()
+                await checkNotificationAuth()
+            }
+            if notificationsEnabled {
                 await NotificationScheduler.shared.forceReschedule()
             }
 

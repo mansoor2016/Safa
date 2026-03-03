@@ -1,5 +1,6 @@
 import XCTest
 import CoreLocation
+import UserNotifications
 @testable import Safa
 
 final class OnboardingHelpersTests: XCTestCase {
@@ -88,26 +89,160 @@ final class OnboardingHelpersTests: XCTestCase {
         XCTAssertEqual(result.selectedAdhan, "custom_adhan")
     }
 
-    // MARK: - shouldShowSettingsLink
+    // MARK: - resolveLocationPermissionState
 
-    func test_shouldShowSettingsLink_denied_returnsTrue() {
-        XCTAssertTrue(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .denied))
+    // -- Behavior: context always trumps status --
+    // If the user denied but we later obtained location (e.g. retry, or they toggled
+    // in Settings and came back), showing the denied UI would be wrong.
+
+    func test_resolveState_userDeniedButLocationObtained_showsSuccess() {
+        // Real scenario: user denied, went to Settings, enabled, came back → context populated
+        // If the guard is removed, they'd see "Permission Denied" despite having location.
+        let context = makeContext(city: "London", country: "UK", countryCode: "GB")
+        let result = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: context,
+            locationStatus: .denied
+        )
+        XCTAssertEqual(result, .contextDetected,
+            "User who denied but later got location should see success, not denied UI")
     }
 
-    func test_shouldShowSettingsLink_restricted_returnsTrue() {
-        XCTAssertTrue(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .restricted))
+    func test_resolveState_restrictedButLocationObtained_showsSuccess() {
+        // Edge case: device restriction was lifted, context arrived
+        let context = makeContext(city: "Riyadh", country: "Saudi Arabia", countryCode: "SA")
+        let result = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: context,
+            locationStatus: .restricted
+        )
+        XCTAssertEqual(result, .contextDetected)
     }
 
-    func test_shouldShowSettingsLink_notDetermined_returnsFalse() {
-        XCTAssertFalse(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .notDetermined))
+    // -- Behavior: denied ≠ restricted (different UI treatments) --
+    // Denied → "Open Settings" button (user can fix it)
+    // Restricted → no button (Screen Time/MDM, user can't fix it)
+
+    func test_resolveState_deniedAndRestricted_areDistinctStates() {
+        let denied = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .denied
+        )
+        let restricted = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .restricted
+        )
+        XCTAssertEqual(denied, .denied)
+        XCTAssertEqual(restricted, .restricted)
+        XCTAssertNotEqual(denied, restricted,
+            "Denied must differ from restricted — denied shows 'Open Settings', restricted doesn't")
     }
 
-    func test_shouldShowSettingsLink_authorizedWhenInUse_returnsFalse() {
-        XCTAssertFalse(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .authorizedWhenInUse))
+    // -- Behavior: both authorized variants produce identical UX --
+    // Users should never see different UI based on "when in use" vs "always"
+
+    func test_resolveState_authorizedVariants_behaveSame() {
+        let whenInUse = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .authorizedWhenInUse
+        )
+        let always = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .authorizedAlways
+        )
+        XCTAssertEqual(whenInUse, always,
+            "Both authorized variants should show same loading/retry UI")
+        XCTAssertEqual(whenInUse, .authorizedNoContext)
     }
 
-    func test_shouldShowSettingsLink_authorizedAlways_returnsFalse() {
-        XCTAssertFalse(OnboardingHelpers.shouldShowSettingsLink(locationStatus: .authorizedAlways))
+    // -- Behavior: fresh install shows permission CTA --
+
+    func test_resolveState_freshInstall_showsPermissionCTA() {
+        let result = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .notDetermined
+        )
+        XCTAssertEqual(result, .notDetermined,
+            "Fresh install should show 'Enable Location' CTA, not denied/error UI")
+    }
+
+    // -- Behavior: denied without context must NOT show "Enable Location" --
+    // iOS won't re-prompt after denial, so showing "Enable Location" is misleading.
+
+    func test_resolveState_deniedWithoutContext_doesNotShowEnableCTA() {
+        let result = OnboardingHelpers.resolveLocationPermissionState(
+            locationContext: nil, locationStatus: .denied
+        )
+        XCTAssertNotEqual(result, .notDetermined,
+            "Denied must not show 'Enable Location' — iOS won't re-prompt after denial")
+        XCTAssertNotEqual(result, .authorizedNoContext,
+            "Denied must not show retry/loading UI")
+        XCTAssertEqual(result, .denied)
+    }
+
+    // MARK: - Test Helpers
+
+    private func makeContext(
+        city: String, country: String, countryCode: String
+    ) -> LocationContext {
+        LocationContext(
+            coordinates: Coordinates(latitude: 51.5, longitude: -0.1),
+            city: city, country: country, countryCode: countryCode,
+            timezone: .current,
+            recommendedMethod: .muslimWorldLeague,
+            recommendedMadhab: .hanafi,
+            recommendedLanguage: "English",
+            regionName: "\(city), \(country)"
+        )
+    }
+
+    // MARK: - shouldRequestNotificationAuth
+
+    func test_shouldRequestNotificationAuth_allConditionsMet_returnsTrue() {
+        XCTAssertTrue(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 2,
+            notificationsEnabled: true,
+            notificationAuthStatus: .notDetermined,
+            isRequestingAuth: false
+        ))
+    }
+
+    func test_shouldRequestNotificationAuth_alreadyDenied_returnsFalse() {
+        XCTAssertFalse(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 2,
+            notificationsEnabled: true,
+            notificationAuthStatus: .denied,
+            isRequestingAuth: false
+        ), "iOS won't re-prompt after denial — requesting again is pointless")
+    }
+
+    func test_shouldRequestNotificationAuth_alreadyAuthorized_returnsFalse() {
+        XCTAssertFalse(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 2,
+            notificationsEnabled: true,
+            notificationAuthStatus: .authorized,
+            isRequestingAuth: false
+        ), "Already authorized — no need to request again")
+    }
+
+    func test_shouldRequestNotificationAuth_inFlight_returnsFalse() {
+        XCTAssertFalse(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 2,
+            notificationsEnabled: true,
+            notificationAuthStatus: .notDetermined,
+            isRequestingAuth: true
+        ), "Should not fire duplicate requests")
+    }
+
+    func test_shouldRequestNotificationAuth_wrongPage_returnsFalse() {
+        XCTAssertFalse(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 0,
+            notificationsEnabled: true,
+            notificationAuthStatus: .notDetermined,
+            isRequestingAuth: false
+        ), "Should only prompt on the notification page (page 2)")
+    }
+
+    func test_shouldRequestNotificationAuth_toggleOff_returnsFalse() {
+        XCTAssertFalse(OnboardingHelpers.shouldRequestNotificationAuth(
+            currentPage: 2,
+            notificationsEnabled: false,
+            notificationAuthStatus: .notDetermined,
+            isRequestingAuth: false
+        ), "Should not prompt when user has opted out of notifications")
     }
 
     // MARK: - shouldAllowForwardNavigation

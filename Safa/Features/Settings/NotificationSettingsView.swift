@@ -53,24 +53,13 @@ struct NotificationSettingsView: View {
                     }
 
                 if notificationsEnabled && notificationAuthStatus == .denied {
-                    HStack(spacing: SafaSpacing.xs) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
-                        Text("Notifications are disabled in Settings")
-                            .font(SafaTypography.bodySmall)
-                            .foregroundColor(.orange)
-                        Spacer()
-                        Button("Open Settings") {
-                            if let url = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                        .font(SafaTypography.labelSmall)
-                    }
+                    NotificationDeniedBanner()
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
                 if notificationsEnabled {
                     Toggle("Use Adhan Sound", isOn: $adhanEnabled)
+                        .disabled(notificationAuthStatus == .denied)
                         .onChange(of: adhanEnabled) { _, newValue in
                             Task { await prefsManager.update(\.adhanEnabled, to: newValue) }
                             if newValue && notificationAuthStatus == .authorized {
@@ -90,6 +79,7 @@ struct NotificationSettingsView: View {
                                 .tag(sound)
                             }
                         }
+                        .disabled(notificationAuthStatus == .denied)
                         .onChange(of: selectedAdhan) { _, newValue in
                             Task { await prefsManager.update(\.selectedAdhan, to: newValue.rawValue) }
                         }
@@ -98,6 +88,7 @@ struct NotificationSettingsView: View {
                 }
 
                 Toggle("Iftar Adhan (Ramadan Only)", isOn: $iftarAdhanEnabled)
+                    .disabled(notificationAuthStatus == .denied)
                     .onChange(of: iftarAdhanEnabled) { _, newValue in
                         Task { await prefsManager.update(\.iftarAdhanEnabled, to: newValue) }
                         if newValue && notificationsEnabled && notificationAuthStatus == .authorized {
@@ -106,6 +97,7 @@ struct NotificationSettingsView: View {
                     }
 
                 Toggle("Live Activity", isOn: $liveActivityEnabled)
+                    .disabled(notificationAuthStatus == .denied)
                     .onChange(of: liveActivityEnabled) { _, newValue in
                         Task {
                             await prefsManager.saveLiveActivityEnabled(newValue)
@@ -127,6 +119,7 @@ struct NotificationSettingsView: View {
             if notificationsEnabled {
                 Section {
                     Toggle("Wudhu Reminder", isOn: $wudhuReminderEnabled)
+                        .disabled(notificationAuthStatus == .denied)
                         .onChange(of: wudhuReminderEnabled) { _, newValue in
                             Task {
                                 await prefsManager.update(\.wudhuReminderEnabled, to: newValue)
@@ -141,6 +134,7 @@ struct NotificationSettingsView: View {
                             Text("15 minutes").tag(15)
                             Text("20 minutes").tag(20)
                         }
+                        .disabled(notificationAuthStatus == .denied)
                         .onChange(of: wudhuReminderMinutesBefore) { _, newValue in
                             Task {
                                 await prefsManager.update(\.wudhuReminderMinutesBefore, to: newValue)
