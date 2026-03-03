@@ -22,8 +22,6 @@ struct PrivacyPolicyView: View {
 
                 section(title: "Permissions") {
                     bulletPoint("Location: calculates prayer times and Qibla direction")
-                    bulletPoint("Microphone & Speech: optional Arabic pronunciation practice (on-device only)")
-                    bulletPoint("HealthKit: optional Ramadan fasting sync (write-only, never shared)")
                     bulletPoint("Notifications: local prayer reminders (no marketing)")
                 }
 
@@ -50,7 +48,7 @@ struct PrivacyPolicyView: View {
                         .font(.body)
                 }
 
-                Text("Last updated: February 2026")
+                Text("Last updated: March 2026")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top)
@@ -379,14 +377,13 @@ struct AcknowledgementsView: View {
                 Text("Hadith from Sunnah.com")
             }
 
-            Section("Open Source") {
+            Section("Frameworks") {
                 Text("SwiftUI")
                 Text("Core ML")
                 Text("Core Location")
             }
 
             Section("Special Thanks") {
-                Text("The Muslim developer community")
                 Text("Beta testers and early users")
             }
         }
