@@ -2,7 +2,7 @@
 
 **Safa - Islamic Companion App**
 
-*Last Updated: February 2026*
+*Last Updated: March 2026*
 
 ---
 
@@ -43,14 +43,6 @@ Safa requests location access to calculate prayer times and determine Qibla dire
 - Never sent to any server
 - Not required — the app falls back to a default location if you decline
 
-### Microphone and Speech Recognition
-
-Safa requests microphone and speech recognition access for Arabic pronunciation practice. Audio is:
-
-- Processed entirely on-device using Apple's speech recognition framework
-- Never recorded, stored, or transmitted
-- Not required — pronunciation practice is optional
-
 ### Notifications
 
 Safa requests notification permission to send prayer time reminders. Notifications are:
@@ -58,17 +50,6 @@ Safa requests notification permission to send prayer time reminders. Notificatio
 - Scheduled locally on your device
 - Never used for marketing or advertising
 - Not required — all features work without notifications
-
-### HealthKit (Optional)
-
-If you enable HealthKit sync, Safa writes Ramadan fasting sessions to Apple Health. This data is:
-
-- Written only when you explicitly enable the feature
-- Governed by Apple's HealthKit privacy protections
-- Never used for advertising, marketing, or data mining
-- Never shared with third parties
-
-Safa does not read any data from HealthKit.
 
 ---
 
@@ -130,7 +111,7 @@ You have full control over your data:
 - **Delete selectively:** Remove specific categories (prayer logs, Quran progress, streaks, etc.) from Settings > Data Management
 - **Delete everything:** Remove all app data from Settings > Data Management > Delete All Data
 - **Export your data:** Export all data as JSON or prayer logs as CSV from Settings > Export Data
-- **Revoke permissions:** Disable location, microphone, HealthKit, or notifications at any time without losing core functionality
+- **Revoke permissions:** Disable location or notifications at any time without losing core functionality
 - **Delete the app:** Removing Safa deletes all local data
 
 ---
