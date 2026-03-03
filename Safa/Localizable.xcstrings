@@ -10494,6 +10494,9 @@
         }
       }
     },
+    "Default location (London, UK) will be used" : {
+
+    },
     "Delete" : {
       "localizations" : {
         "ar" : {
@@ -14294,6 +14297,9 @@
         }
       }
     },
+    "Enable in iOS Settings to receive prayer reminders" : {
+
+    },
     "Enable Location" : {
       "localizations" : {
         "ar" : {
@@ -16746,6 +16752,9 @@
           }
         }
       }
+    },
+    "Frameworks" : {
+
     },
     "Friday Duas" : {
       "localizations" : {
@@ -19891,6 +19900,9 @@
         }
       }
     },
+    "Last updated: March 2026" : {
+
+    },
     "Laylat al-Qadr" : {
       "localizations" : {
         "ar" : {
@@ -20739,6 +20751,12 @@
         }
       }
     },
+    "Location access is restricted on this device. Safa will use a default location for prayer times." : {
+
+    },
+    "Location Permission Denied" : {
+
+    },
     "Location permission was denied. Please enable in Settings." : {
       "localizations" : {
         "ar" : {
@@ -20842,6 +20860,9 @@
           }
         }
       }
+    },
+    "Location Restricted" : {
+
     },
     "Log" : {
       "localizations" : {
@@ -24074,6 +24095,7 @@
       }
     },
     "Notifications are disabled in Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24124,6 +24146,9 @@
           }
         }
       }
+    },
+    "Notifications Disabled" : {
+
     },
     "Notifications on" : {
       "localizations" : {
@@ -24756,6 +24781,7 @@
       }
     },
     "Open Source" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29764,6 +29790,9 @@
           }
         }
       }
+    },
+    "Safa needs your location for accurate prayer times and Qibla direction. Tap Open Settings and enable Location." : {
+
     },
     "Save" : {
       "localizations" : {
@@ -35328,6 +35357,7 @@
       }
     },
     "The Muslim developer community" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
