@@ -348,13 +348,8 @@ final class MockLearningRepository: LearningRepositoryProtocol {
             totalLessonsCompleted: completedLessons.count,
             totalTracksCompleted: 0,
             totalMinutesLearned: 30,
-            currentStreak: 0,
-            pronunciationAttempts: 0
+            currentStreak: 0
         )
-    }
-
-    func recordPronunciationAttempt(lessonId: String, score: Int) async throws {
-        // Mock implementation
     }
 
     func getNextLesson() async throws -> Lesson? {

@@ -138,7 +138,6 @@ final class HasanatTrackingTests: XCTestCase {
         XCTAssertEqual(HasanatAward.quranJuz.points, 50)
         XCTAssertEqual(HasanatAward.lessonComplete.points, 10)
         XCTAssertEqual(HasanatAward.lessonPerfect.points, 5)
-        XCTAssertEqual(HasanatAward.pronunciationPass.points, 5)
         XCTAssertEqual(HasanatAward.tajweedModule.points, 20)
         XCTAssertEqual(HasanatAward.morningDhikr.points, 15)
         XCTAssertEqual(HasanatAward.eveningDhikr.points, 15)
@@ -576,14 +575,4 @@ final class HasanatIntegrationTests: XCTestCase {
         XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
     }
 
-    // MARK: - Pronunciation Dedup
-
-    func test_pronunciation_awardedOncePerDay() async {
-        let first = await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_l1", via: userState)
-        let second = await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_l1", via: userState)
-
-        XCTAssertTrue(first)
-        XCTAssertFalse(second)
-        XCTAssertEqual(mockRepo.addHasanatCalls.count, 1)
-    }
 }

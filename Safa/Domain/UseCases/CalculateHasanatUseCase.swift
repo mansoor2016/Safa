@@ -24,7 +24,6 @@ enum HasanatAction: Equatable {
     // Learning Actions
     case lessonCompleted
     case trackCompleted
-    case perfectPronunciation
 
     // Dhikr Actions
     case morningDhikrCompleted
@@ -78,7 +77,6 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
         // Learning
         "lessonComplete": 10,
         "trackComplete": 100,
-        "perfectPronunciation": 5,
 
         // Dhikr
         "morningDhikr": 15,
@@ -146,9 +144,6 @@ final class CalculateHasanatUseCase: CalculateHasanatUseCaseProtocol {
 
         case .trackCompleted:
             return basePoints["trackComplete"] ?? 100
-
-        case .perfectPronunciation:
-            return basePoints["perfectPronunciation"] ?? 5
 
         case .morningDhikrCompleted:
             return basePoints["morningDhikr"] ?? 15
@@ -357,8 +352,6 @@ extension HasanatAward {
         case .lessonComplete:
             return .lessonCompleted
         case .lessonPerfect:
-            return .lessonCompleted
-        case .pronunciationPass:
             return .lessonCompleted
         case .tajweedModule:
             return .lessonCompleted

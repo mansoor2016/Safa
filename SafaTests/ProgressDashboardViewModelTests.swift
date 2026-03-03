@@ -97,8 +97,7 @@ final class ProgressDashboardViewModelTests: XCTestCase {
             totalLessonsCompleted: 12,
             totalTracksCompleted: 1,
             totalMinutesLearned: 60,
-            currentStreak: 3,
-            pronunciationAttempts: 5
+            currentStreak: 3
         )
 
         await sut.load()
@@ -475,8 +474,7 @@ private final class ConfigurableMockLearningRepository: LearningRepositoryProtoc
         totalLessonsCompleted: 0,
         totalTracksCompleted: 0,
         totalMinutesLearned: 0,
-        currentStreak: 0,
-        pronunciationAttempts: 0
+        currentStreak: 0
     )
 
     func getTracks() async throws -> [LearningTrack] { [] }
@@ -487,6 +485,5 @@ private final class ConfigurableMockLearningRepository: LearningRepositoryProtoc
     func markLessonComplete(lessonId: String, score: Int) async throws {}
     func getTrackProgress(trackId: String) async throws -> TrackProgress { TrackProgress(trackId: trackId, completedLessons: 0, totalLessons: 0) }
     func getOverallProgress() async throws -> LearningProgress { progressToReturn }
-    func recordPronunciationAttempt(lessonId: String, score: Int) async throws {}
     func getNextLesson() async throws -> Lesson? { nil }
 }

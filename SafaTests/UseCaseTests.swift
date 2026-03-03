@@ -88,11 +88,6 @@ final class CalculateHasanatUseCaseTests: XCTestCase {
         XCTAssertEqual(points, 100)
     }
 
-    func testPerfectPronunciationPoints() {
-        let points = sut.calculatePoints(for: .perfectPronunciation)
-        XCTAssertEqual(points, 5)
-    }
-
     // MARK: - Dhikr Actions
 
     func testMorningDhikrPoints() {

@@ -14,9 +14,7 @@ final class LearnViewModel {
         totalLessonsCompleted: 0,
         totalTracksCompleted: 0,
         totalMinutesLearned: 0,
-        currentStreak: 0,
-        pronunciationAttempts: 0,
-        averagePronunciationScore: nil
+        currentStreak: 0
     )
     var nextLesson: Lesson?
     var selectedTrack: LearningTrack?
@@ -124,15 +122,4 @@ final class LearnViewModel {
         }
     }
 
-    func recordPronunciation(lessonId: String, score: Int) async {
-        do {
-            try await learningRepository.recordPronunciationAttempt(lessonId: lessonId, score: score)
-
-            if score >= 70 {
-                await HasanatTracker.awardOnce(.pronunciationPass, key: "pronunciation_\(lessonId)", via: userState)
-            }
-        } catch {
-            self.error = error
-        }
-    }
 }

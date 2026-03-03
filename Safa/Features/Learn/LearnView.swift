@@ -365,7 +365,6 @@ private struct LessonRow: View {
         switch lesson.type {
         case .reading: return "book"
         case .listening: return "headphones"
-        case .pronunciation: return "waveform"
         case .quiz: return "questionmark.circle"
         case .practice: return "pencil"
         }

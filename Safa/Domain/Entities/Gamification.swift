@@ -200,7 +200,6 @@ enum HasanatAward {
     case quranJuz
     case lessonComplete
     case lessonPerfect
-    case pronunciationPass
     case tajweedModule
     case morningDhikr
     case eveningDhikr
@@ -222,7 +221,6 @@ enum HasanatAward {
         case .quranJuz: return 50
         case .lessonComplete: return 10
         case .lessonPerfect: return 5
-        case .pronunciationPass: return 5
         case .tajweedModule: return 20
         case .morningDhikr: return 15
         case .eveningDhikr: return 15

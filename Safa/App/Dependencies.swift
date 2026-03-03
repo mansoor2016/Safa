@@ -26,7 +26,6 @@ final class Dependencies {
     let audioPlayerService: AudioPlayerService
     let llmService: LLMService
     let ragService: RAGService
-    let pronunciationService: PronunciationService
     let ramadanService: RamadanService
 
     // MARK: - AI Pipeline
@@ -71,7 +70,6 @@ final class Dependencies {
         self.locationService = LocationService()
         self.audioPlayerService = AudioPlayerService()
         self.llmService = LLMService()
-        self.pronunciationService = PronunciationService()
         self.ramadanService = RamadanService()
 
         // Initialize RAG service (depends on repositories)

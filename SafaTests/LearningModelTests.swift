@@ -93,7 +93,7 @@ final class LearningModelTests: XCTestCase {
     func testLessonWithAllParameters() {
         let steps = [
             LessonStep(type: .reading, title: "Step 1"),
-            LessonStep(type: .pronunciation, arabicText: "أ")
+            LessonStep(type: .listening, arabicText: "أ")
         ]
 
         let lesson = Lesson(
@@ -104,7 +104,7 @@ final class LearningModelTests: XCTestCase {
             titleArabic: "حرف الباء",
             description: "Learn the letter Ba",
             durationMinutes: 10,
-            type: .pronunciation,
+            type: .practice,
             isCompleted: true,
             bestScore: 95,
             content: steps
@@ -120,7 +120,6 @@ final class LearningModelTests: XCTestCase {
     func testLessonTypes() {
         XCTAssertEqual(Lesson.LessonType.reading.rawValue, "reading")
         XCTAssertEqual(Lesson.LessonType.listening.rawValue, "listening")
-        XCTAssertEqual(Lesson.LessonType.pronunciation.rawValue, "pronunciation")
         XCTAssertEqual(Lesson.LessonType.quiz.rawValue, "quiz")
         XCTAssertEqual(Lesson.LessonType.practice.rawValue, "practice")
     }
@@ -141,7 +140,7 @@ final class LearningModelTests: XCTestCase {
 
     func testLessonStepWithArabicContent() {
         let step = LessonStep(
-            type: .pronunciation,
+            type: .listening,
             arabicText: "بِسْمِ اللَّهِ",
             transliteration: "Bismillah",
             audioFileName: "bismillah.mp3"
@@ -169,7 +168,6 @@ final class LearningModelTests: XCTestCase {
     func testLessonStepTypes() {
         XCTAssertEqual(LessonStep.StepType.reading.rawValue, "reading")
         XCTAssertEqual(LessonStep.StepType.listening.rawValue, "listening")
-        XCTAssertEqual(LessonStep.StepType.pronunciation.rawValue, "pronunciation")
         XCTAssertEqual(LessonStep.StepType.quiz.rawValue, "quiz")
         XCTAssertEqual(LessonStep.StepType.exercise.rawValue, "exercise")
     }
@@ -254,29 +252,13 @@ final class LearningModelTests: XCTestCase {
             totalLessonsCompleted: 50,
             totalTracksCompleted: 2,
             totalMinutesLearned: 300,
-            currentStreak: 7,
-            pronunciationAttempts: 100
+            currentStreak: 7
         )
 
         XCTAssertEqual(progress.totalLessonsCompleted, 50)
         XCTAssertEqual(progress.totalTracksCompleted, 2)
         XCTAssertEqual(progress.totalMinutesLearned, 300)
         XCTAssertEqual(progress.currentStreak, 7)
-        XCTAssertEqual(progress.pronunciationAttempts, 100)
-        XCTAssertNil(progress.averagePronunciationScore)
-    }
-
-    func testLearningProgressWithAverageScore() {
-        let progress = LearningProgress(
-            totalLessonsCompleted: 20,
-            totalTracksCompleted: 1,
-            totalMinutesLearned: 120,
-            currentStreak: 3,
-            pronunciationAttempts: 50,
-            averagePronunciationScore: 85.5
-        )
-
-        XCTAssertEqual(progress.averagePronunciationScore ?? 0, 85.5, accuracy: 0.001)
     }
 
     // MARK: - Codable Tests

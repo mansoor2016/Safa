@@ -12,7 +12,6 @@ final class LearningRepository: LearningRepositoryProtocol {
     // MARK: - Storage Keys
     private let progressKey = AppConstants.StorageKeys.learningProgress
     private let completedLessonsKey = AppConstants.StorageKeys.learningCompleted
-    private let pronunciationKey = AppConstants.StorageKeys.learningPronunciation
 
     // MARK: - Init
     init(coreData: CoreDataStack) {
@@ -101,29 +100,10 @@ final class LearningRepository: LearningRepositoryProtocol {
                 totalLessonsCompleted: 0,
                 totalTracksCompleted: 0,
                 totalMinutesLearned: 0,
-                currentStreak: 0,
-                pronunciationAttempts: 0,
-                averagePronunciationScore: nil
+                currentStreak: 0
             )
         }
         return progress
-    }
-
-    // MARK: - Pronunciation
-
-    func recordPronunciationAttempt(lessonId: String, score: Int) async throws {
-        var progress = try await getOverallProgress()
-        progress.pronunciationAttempts += 1
-
-        // Update running average
-        if let current = progress.averagePronunciationScore {
-            let total = current * Double(progress.pronunciationAttempts - 1) + Double(score)
-            progress.averagePronunciationScore = total / Double(progress.pronunciationAttempts)
-        } else {
-            progress.averagePronunciationScore = Double(score)
-        }
-
-        try await saveOverallProgress(progress)
     }
 
     func getNextLesson() async throws -> Lesson? {
@@ -152,14 +132,14 @@ final class LearningRepository: LearningRepositoryProtocol {
 
 extension Lesson {
     static let arabicFoundationsLessons: [Lesson] = [
-        Lesson(id: "arabic_1", trackId: "arabic_foundations", order: 1, titleEnglish: "Alif - ا", description: "Learn the first letter of the Arabic alphabet", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_2", trackId: "arabic_foundations", order: 2, titleEnglish: "Ba - ب", description: "Learn the letter Ba and its sounds", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_3", trackId: "arabic_foundations", order: 3, titleEnglish: "Ta - ت", description: "Learn the letter Ta and its sounds", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_4", trackId: "arabic_foundations", order: 4, titleEnglish: "Tha - ث", description: "Learn the letter Tha and its unique sound", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_5", trackId: "arabic_foundations", order: 5, titleEnglish: "Jeem - ج", description: "Learn the letter Jeem", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_6", trackId: "arabic_foundations", order: 6, titleEnglish: "Ha - ح", description: "Learn the letter Ha and its throaty sound", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_7", trackId: "arabic_foundations", order: 7, titleEnglish: "Kha - خ", description: "Learn the letter Kha", durationMinutes: 5, type: .pronunciation),
-        Lesson(id: "arabic_8", trackId: "arabic_foundations", order: 8, titleEnglish: "Dal - د", description: "Learn the letter Dal", durationMinutes: 5, type: .pronunciation),
+        Lesson(id: "arabic_1", trackId: "arabic_foundations", order: 1, titleEnglish: "Alif - ا", description: "Learn the first letter of the Arabic alphabet", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_2", trackId: "arabic_foundations", order: 2, titleEnglish: "Ba - ب", description: "Learn the letter Ba and its sounds", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_3", trackId: "arabic_foundations", order: 3, titleEnglish: "Ta - ت", description: "Learn the letter Ta and its sounds", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_4", trackId: "arabic_foundations", order: 4, titleEnglish: "Tha - ث", description: "Learn the letter Tha and its unique sound", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_5", trackId: "arabic_foundations", order: 5, titleEnglish: "Jeem - ج", description: "Learn the letter Jeem", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_6", trackId: "arabic_foundations", order: 6, titleEnglish: "Ha - ح", description: "Learn the letter Ha and its throaty sound", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_7", trackId: "arabic_foundations", order: 7, titleEnglish: "Kha - خ", description: "Learn the letter Kha", durationMinutes: 5, type: .practice),
+        Lesson(id: "arabic_8", trackId: "arabic_foundations", order: 8, titleEnglish: "Dal - د", description: "Learn the letter Dal", durationMinutes: 5, type: .practice),
         // Abbreviated - full set would have 28 lessons
     ]
 
@@ -184,12 +164,12 @@ extension LessonContent {
                 ),
                 LessonContent.LessonSection(
                     id: "arabic_1_audio",
-                    type: .pronunciation,
-                    content: .pronunciation(LessonContent.PronunciationContent(
+                    type: .audio,
+                    content: .audio(LessonContent.AudioContent(
+                        audioFileName: "alif.mp3",
                         arabicText: "ا",
                         transliteration: "Alif",
-                        audioFileName: "alif.mp3",
-                        acceptableVariations: ["alif", "aa"]
+                        translation: "Alif"
                     ))
                 ),
             ]

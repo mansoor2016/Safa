@@ -242,8 +242,6 @@ private struct LessonStepView: View {
                     readingContent
                 case .listening:
                     listeningContent
-                case .pronunciation:
-                    pronunciationContent
                 case .quiz:
                     quizContent
                 case .exercise:
@@ -317,48 +315,6 @@ private struct LessonStepView: View {
 
             // Audio player
             LessonAudioPlayerView(audioFileName: step.audioFileName ?? "")
-
-            if let body = step.body {
-                Text(body)
-                    .font(SafaTypography.bodyMedium)
-                    .foregroundColor(SafaColors.Fallback.secondaryText)
-            }
-        }
-    }
-
-    // MARK: - Pronunciation Content
-
-    private var pronunciationContent: some View {
-        VStack(spacing: SafaSpacing.lg) {
-            if let title = step.title {
-                Text(title)
-                    .font(SafaTypography.headlineMedium)
-            }
-
-            if let arabic = step.arabicText {
-                Text(arabic)
-                    .font(SafaTypography.arabicLarge)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .environment(\.layoutDirection, .rightToLeft)
-                    .accessibilityArabic()
-                    .padding()
-            }
-
-            // Record button
-            Button {
-                // Start recording
-            } label: {
-                VStack(spacing: SafaSpacing.sm) {
-                    Image(systemName: "mic.circle.fill")
-                        .font(.system(size: 64))
-                        .foregroundColor(.accentColor)
-
-                    Text("Tap to Record")
-                        .font(SafaTypography.bodyMedium)
-                        .foregroundColor(SafaColors.Fallback.secondaryText)
-                }
-            }
-            .padding()
 
             if let body = step.body {
                 Text(body)

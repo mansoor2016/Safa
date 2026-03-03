@@ -45,12 +45,6 @@ protocol LearningRepositoryProtocol {
     /// - Returns: Total lessons completed, tracks completed
     func getOverallProgress() async throws -> LearningProgress
 
-    /// Records a pronunciation attempt
-    /// - Parameters:
-    ///   - lessonId: The lesson identifier
-    ///   - score: The pronunciation score (0-100)
-    func recordPronunciationAttempt(lessonId: String, score: Int) async throws
-
     /// Gets next recommended lesson
     /// - Returns: The next lesson to study
     func getNextLesson() async throws -> Lesson?

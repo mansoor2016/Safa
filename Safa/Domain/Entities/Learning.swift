@@ -78,7 +78,6 @@ struct Lesson: Identifiable, Codable, Hashable {
     enum LessonType: String, Codable {
         case reading
         case listening
-        case pronunciation
         case quiz
         case practice
     }
@@ -127,7 +126,6 @@ struct LessonStep: Identifiable, Codable, Hashable {
     enum StepType: String, Codable {
         case reading
         case listening
-        case pronunciation
         case quiz
         case exercise
     }
@@ -173,7 +171,6 @@ struct LessonContent: Codable, Hashable {
             case text
             case audio
             case image
-            case pronunciation
             case quiz
         }
 
@@ -181,7 +178,6 @@ struct LessonContent: Codable, Hashable {
             case text(String)
             case audio(AudioContent)
             case image(ImageContent)
-            case pronunciation(PronunciationContent)
             case quiz(QuizContent)
         }
     }
@@ -196,13 +192,6 @@ struct LessonContent: Codable, Hashable {
     struct ImageContent: Codable, Hashable {
         let imageName: String
         let caption: String?
-    }
-
-    struct PronunciationContent: Codable, Hashable {
-        let arabicText: String
-        let transliteration: String
-        let audioFileName: String
-        let acceptableVariations: [String]
     }
 
     struct QuizContent: Codable, Hashable {
@@ -238,6 +227,4 @@ struct LearningProgress: Codable, Hashable {
     var totalTracksCompleted: Int
     var totalMinutesLearned: Int
     var currentStreak: Int
-    var pronunciationAttempts: Int
-    var averagePronunciationScore: Double?
 }

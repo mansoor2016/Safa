@@ -94,7 +94,7 @@ enum AppConstants {
         // Learning
         static let learningProgress = "com.safa.learning.progress"
         static let learningCompleted = "com.safa.learning.completed"
-        static let learningPronunciation = "com.safa.learning.pronunciation"
+
 
         // User State
         static let userStats = "com.safa.user.stats"

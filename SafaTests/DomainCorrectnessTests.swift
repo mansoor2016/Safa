@@ -116,7 +116,6 @@ final class HasanatAwardPointTests: XCTestCase {
     func test_learningPoints_matchExpected() {
         XCTAssertEqual(HasanatAward.lessonComplete.points, 10)
         XCTAssertEqual(HasanatAward.lessonPerfect.points, 5)
-        XCTAssertEqual(HasanatAward.pronunciationPass.points, 5)
         XCTAssertEqual(HasanatAward.tajweedModule.points, 20)
     }
 
@@ -152,7 +151,7 @@ final class HasanatAwardPointTests: XCTestCase {
     func test_allPointsArePositive() {
         let allAwards: [HasanatAward] = [
             .prayerLogged, .prayerAllFive, .quranPage, .quranSurah, .quranJuz,
-            .lessonComplete, .lessonPerfect, .pronunciationPass, .tajweedModule,
+            .lessonComplete, .lessonPerfect, .tajweedModule,
             .morningDhikr, .eveningDhikr, .tasbeehSession, .dailyOpen, .dailyVerse,
             .dailyHadith, .share, .inviteAccepted, .fastingDay, .taraweeh
         ]

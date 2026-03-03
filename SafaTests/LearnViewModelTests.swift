@@ -121,9 +121,7 @@ final class LearnViewModelTests: XCTestCase {
             totalLessonsCompleted: 5,
             totalTracksCompleted: 1,
             totalMinutesLearned: 60,
-            currentStreak: 3,
-            pronunciationAttempts: 10,
-            averagePronunciationScore: 85.0
+            currentStreak: 3
         )
 
         // When
@@ -272,9 +270,7 @@ final class LearnViewModelTests: XCTestCase {
             totalLessonsCompleted: 1,
             totalTracksCompleted: 0,
             totalMinutesLearned: 5,
-            currentStreak: 1,
-            pronunciationAttempts: 0,
-            averagePronunciationScore: nil
+            currentStreak: 1
         )
 
         // When
@@ -294,9 +290,7 @@ final class LearnViewModelTests: XCTestCase {
             totalLessonsCompleted: 5,
             totalTracksCompleted: 0,
             totalMinutesLearned: 25,
-            currentStreak: 1,
-            pronunciationAttempts: 0,
-            averagePronunciationScore: nil
+            currentStreak: 1
         )
 
         // When
@@ -318,28 +312,6 @@ final class LearnViewModelTests: XCTestCase {
         XCTAssertNotNil(sut.error)
     }
 
-    // MARK: - Record Pronunciation Tests
-
-    func test_recordPronunciation_callsRepository() async {
-        // Given - no error
-
-        // When
-        await sut.recordPronunciation(lessonId: "l1", score: 75)
-
-        // Then
-        XCTAssertTrue(mockRepository.recordPronunciationCalled)
-    }
-
-    func test_recordPronunciation_failure_setsError() async {
-        // Given
-        mockRepository.errorToThrow = TestError.recordFailed
-
-        // When
-        await sut.recordPronunciation(lessonId: "l1", score: 75)
-
-        // Then
-        XCTAssertNotNil(sut.error)
-    }
 }
 
 // MARK: - Test Error
@@ -347,7 +319,6 @@ final class LearnViewModelTests: XCTestCase {
 private enum TestError: Error {
     case loadFailed
     case completeFailed
-    case recordFailed
 }
 
 // MARK: - Testable Learning Repository
@@ -363,7 +334,6 @@ final class TestableLearningRepository: LearningRepositoryProtocol {
 
     var getTracksCallCount = 0
     var getLessonsCallCount = 0
-    var recordPronunciationCalled = false
 
     nonisolated func getTracks() async throws -> [LearningTrack] {
         let error = await errorToThrow
@@ -413,18 +383,8 @@ final class TestableLearningRepository: LearningRepositoryProtocol {
             totalLessonsCompleted: 0,
             totalTracksCompleted: 0,
             totalMinutesLearned: 0,
-            currentStreak: 0,
-            pronunciationAttempts: 0,
-            averagePronunciationScore: nil
+            currentStreak: 0
         )
-    }
-
-    nonisolated func recordPronunciationAttempt(lessonId: String, score: Int) async throws {
-        let error = await errorToThrow
-        if let error {
-            throw error
-        }
-        await MainActor.run { recordPronunciationCalled = true }
     }
 
     nonisolated func getNextLesson() async throws -> Lesson? {
