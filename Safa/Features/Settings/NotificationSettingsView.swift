@@ -16,6 +16,8 @@ struct NotificationSettingsView: View {
     @State private var wudhuReminderEnabled: Bool
     @State private var wudhuReminderMinutesBefore: Int
     @State private var rescheduleTask: Task<Void, Never>?
+    @State private var prayerEndingSoonToastEnabled: Bool
+    @State private var dailyPrayerSummaryToastEnabled: Bool
 
     private let prefsManager = PreferencesManager.shared
 
@@ -29,6 +31,8 @@ struct NotificationSettingsView: View {
         _liveActivityEnabled = State(initialValue: prefs.liveActivityEnabled)
         _wudhuReminderEnabled = State(initialValue: prefs.wudhuReminderEnabled)
         _wudhuReminderMinutesBefore = State(initialValue: prefs.wudhuReminderMinutesBefore)
+        _prayerEndingSoonToastEnabled = State(initialValue: prefs.prayerEndingSoonToastEnabled)
+        _dailyPrayerSummaryToastEnabled = State(initialValue: prefs.dailyPrayerSummaryToastEnabled)
     }
 
     // MARK: - Body
@@ -147,6 +151,21 @@ struct NotificationSettingsView: View {
                 } footer: {
                     Text("Get a reminder to prepare for prayer before each prayer time.")
                 }
+            }
+
+            Section {
+                Toggle("Prayer Ending Soon", isOn: $prayerEndingSoonToastEnabled)
+                    .onChange(of: prayerEndingSoonToastEnabled) { _, newValue in
+                        Task { await prefsManager.update(\.prayerEndingSoonToastEnabled, to: newValue) }
+                    }
+                Toggle("Daily Prayer Summary", isOn: $dailyPrayerSummaryToastEnabled)
+                    .onChange(of: dailyPrayerSummaryToastEnabled) { _, newValue in
+                        Task { await prefsManager.update(\.dailyPrayerSummaryToastEnabled, to: newValue) }
+                    }
+            } header: {
+                Text("In-App Reminders")
+            } footer: {
+                Text("Gentle reminders shown inside the app. These are not push notifications.")
             }
         }
         .navigationTitle("Notifications")

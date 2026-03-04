@@ -50,6 +50,9 @@ struct SafaApp: App {
     @State private var languageManager = AppLanguageManager.shared
     @State private var launchState: LaunchState = .loading
     @State private var qadaReminderPayload: RamadanQadaReminderService.ReminderPayload?
+    @State private var endingSoonTask: Task<Void, Never>?
+    @State private var dailySummaryTask: Task<Void, Never>?
+    @State private var schedulerGeneration: Int = 0
     @Environment(\.scenePhase) private var scenePhase
 
     // Spotlight service
@@ -133,6 +136,10 @@ struct SafaApp: App {
                 // Prune old hasanat tracker entries (prevents UserDefaults bloat)
                 HasanatTracker.pruneOldEntries()
 
+                // Prune stale toast dedup keys and schedule in-app reminders
+                PrayerToastService.pruneStaleKeys()
+                scheduleToastReminders()
+
                 // Record first launch date for review prompt timing
                 AppReviewService.recordFirstLaunchIfNeeded()
 
@@ -162,6 +169,12 @@ struct SafaApp: App {
                     Task { await checkLocationChange() }
                     // Recover Live Activity on every foreground resume
                     Task { await PrayerLiveActivityManager.shared.ensureActivityIfNeeded() }
+                    // Re-schedule toast reminders on foreground resume
+                    scheduleToastReminders()
+                } else {
+                    // Cancel toast tasks when going inactive/background
+                    endingSoonTask?.cancel()
+                    dailySummaryTask?.cancel()
                 }
             }
             .alert(
@@ -272,6 +285,155 @@ struct SafaApp: App {
             RamadanQadaReminderService.markShown(hijriYear: payload.hijriYear)
         }
         qadaReminderPayload = nil
+    }
+
+    // MARK: - In-App Toast Reminders
+
+    private func scheduleToastReminders() {
+        schedulerGeneration += 1
+        let gen = schedulerGeneration
+
+        endingSoonTask?.cancel()
+        dailySummaryTask?.cancel()
+
+        let prefs = PreferencesManager.loadPreferencesSync()
+        let coordinates = dependencies.locationService.coordinates ?? prefs.savedCoordinates
+        guard PrayerToastService.shouldSchedule(prefs: prefs, coordinates: coordinates) else { return }
+        guard let coordinates else { return }
+
+        // Schedule ending-soon toast
+        if prefs.prayerEndingSoonToastEnabled {
+            endingSoonTask = Task { [gen] in
+                await runEndingSoonToast(gen: gen, coordinates: coordinates, prefs: prefs)
+            }
+        }
+
+        // Schedule daily summary toast
+        if prefs.dailyPrayerSummaryToastEnabled {
+            dailySummaryTask = Task { [gen] in
+                await runDailySummaryToast(gen: gen, coordinates: coordinates, prefs: prefs)
+            }
+        }
+    }
+
+    private func runEndingSoonToast(gen: Int, coordinates: Coordinates, prefs: UserPreferences) async {
+        let now = Date()
+
+        guard let schedule = try? await dependencies.prayerRepository.getPrayers(
+            for: now, location: coordinates, method: prefs.calculationMethod, madhab: prefs.madhab
+        ) else { return }
+        guard gen == schedulerGeneration else { return }
+
+        let logs = (try? await dependencies.prayerRepository.getPrayerLogs(for: now)) ?? []
+        guard gen == schedulerGeneration else { return }
+
+        let loggedTypes = Set(logs.map(\.prayerType))
+
+        guard let fireDate = PrayerToastService.nextEndingSoonFireDate(
+            now: now, schedule: schedule, loggedPrayers: loggedTypes
+        ) else { return }
+
+        // Sleep until fire date
+        let delay = fireDate.timeIntervalSince(Date())
+        if delay > 0 {
+            try? await Task.sleep(for: .seconds(delay))
+        }
+        guard !Task.isCancelled, gen == schedulerGeneration else { return }
+
+        // Revalidate at fire time
+        let freshPrefs = PreferencesManager.loadPreferencesSync()
+        guard freshPrefs.prayerEndingSoonToastEnabled else { return }
+
+        let freshLogs = (try? await dependencies.prayerRepository.getPrayerLogs(for: Date())) ?? []
+        guard gen == schedulerGeneration else { return }
+        let freshLoggedTypes = Set(freshLogs.map(\.prayerType))
+
+        guard let prayer = PrayerToastService.prayerEndingSoon(
+            now: Date(), schedule: schedule, loggedPrayers: freshLoggedTypes
+        ) else {
+            // No toast needed, but re-schedule for next prayer
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
+
+        // Collision guard: wait if another toast is visible
+        await waitForToastSlot()
+        guard gen == schedulerGeneration else { return }
+
+        PrayerToastService.markEndingSoonShown(for: prayer, on: Date())
+
+        let prayerName = prayer.localizedDisplayName
+        ToastService.shared.show(Toast(
+            message: String(localized: "\(prayerName) ending soon"),
+            type: .warning,
+            duration: 4.0,
+            actionTitle: String(localized: "Log"),
+            action: { [router] in
+                router.selectedTab = .prayer
+                router.pendingNotificationAction = .logPrayer(prayerType: prayer)
+            }
+        ))
+
+        // Re-schedule for next prayer
+        Task { @MainActor in scheduleToastReminders() }
+    }
+
+    private func runDailySummaryToast(gen: Int, coordinates: Coordinates, prefs: UserPreferences) async {
+        let now = Date()
+
+        guard let schedule = try? await dependencies.prayerRepository.getPrayers(
+            for: now, location: coordinates, method: prefs.calculationMethod, madhab: prefs.madhab
+        ) else { return }
+        guard gen == schedulerGeneration else { return }
+
+        guard let fireDate = PrayerToastService.nextDailySummaryFireDate(
+            now: now, schedule: schedule
+        ) else { return }
+
+        // Sleep until fire date
+        let delay = fireDate.timeIntervalSince(Date())
+        if delay > 0 {
+            try? await Task.sleep(for: .seconds(delay))
+        }
+        guard !Task.isCancelled, gen == schedulerGeneration else { return }
+
+        // Small delay after Isha for a natural feel
+        try? await Task.sleep(for: .seconds(1.5))
+        guard !Task.isCancelled, gen == schedulerGeneration else { return }
+
+        // Revalidate at fire time
+        let freshPrefs = PreferencesManager.loadPreferencesSync()
+        guard freshPrefs.dailyPrayerSummaryToastEnabled else { return }
+
+        let logs = (try? await dependencies.prayerRepository.getPrayerLogs(for: Date())) ?? []
+        guard gen == schedulerGeneration else { return }
+
+        let obligatorySet = Set(PrayerType.obligatoryPrayers)
+        let obligatoryCount = Set(logs.map(\.prayerType)).intersection(obligatorySet).count
+
+        guard let _ = PrayerToastService.dailySummary(
+            now: Date(), schedule: schedule, loggedCount: obligatoryCount
+        ) else { return }
+
+        // Collision guard
+        await waitForToastSlot()
+        guard gen == schedulerGeneration else { return }
+
+        PrayerToastService.markDailySummaryShown(on: Date())
+
+        ToastService.shared.show(Toast(
+            message: String(localized: "You logged \(obligatoryCount)/5 prayers today"),
+            type: .info,
+            duration: 3.5
+        ))
+    }
+
+    /// Waits for any visible toast to dismiss before showing a new one.
+    private func waitForToastSlot() async {
+        for _ in 0..<3 {
+            if ToastService.shared.currentToast == nil { return }
+            try? await Task.sleep(for: .seconds(2))
+        }
     }
 
 }

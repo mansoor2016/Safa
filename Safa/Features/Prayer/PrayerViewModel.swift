@@ -278,6 +278,8 @@ final class PrayerViewModel {
 
     /// Testable overload that accepts an explicit schedule.
     static func isPrayerOnTime(_ prayerType: PrayerType, at time: Date, schedule: [PrayerTime]) -> Bool {
+        guard prayerType != .sunrise else { return false }
+
         guard let prayerStart = schedule.first(where: { $0.type == prayerType })?.time else {
             return false
         }
@@ -285,26 +287,7 @@ final class PrayerViewModel {
         // Must be at or after the prayer's start time
         guard time >= prayerStart else { return false }
 
-        // Determine the end of this prayer's window (= start of next prayer)
-        let endTime: Date?
-        switch prayerType {
-        case .fajr:
-            endTime = schedule.first(where: { $0.type == .sunrise })?.time
-        case .dhuhr:
-            endTime = schedule.first(where: { $0.type == .asr })?.time
-        case .asr:
-            endTime = schedule.first(where: { $0.type == .maghrib })?.time
-        case .maghrib:
-            endTime = schedule.first(where: { $0.type == .isha })?.time
-        case .isha:
-            // Isha lasts until Fajr next day; approximate as end of calendar day
-            endTime = nil
-        case .sunrise:
-            // Sunrise is not an obligatory prayer
-            return false
-        }
-
-        if let endTime {
+        if let endTime = PrayerWindowHelper.windowEndTime(for: prayerType, schedule: schedule) {
             return time < endTime
         }
         // Isha: on-time for the rest of the day

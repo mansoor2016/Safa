@@ -162,6 +162,10 @@ enum AppConstants {
         static let spotlightIndexCount = "com.safa.spotlight.indexCount"
         static let spotlightIndexVersion = "com.safa.spotlight.indexVersion"
 
+        // In-App Toast Reminders
+        static let prayerEndingSoonPrefix = "com.safa.toast.prayerEndingSoon"
+        static let dailySummaryToastLastShownDate = "com.safa.toast.dailySummary.lastShownDate"
+
         // Islamic Day Boundary
         static let todayMaghribTime = "com.safa.todayMaghribTime"
 
