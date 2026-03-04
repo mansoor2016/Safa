@@ -17,6 +17,7 @@ struct NotificationSettingsView: View {
     @State private var wudhuReminderMinutesBefore: Int
     @State private var rescheduleTask: Task<Void, Never>?
     @State private var prayerEndingSoonToastEnabled: Bool
+    @State private var prayerEndingSoonMinutesBefore: Int
     @State private var dailyPrayerSummaryToastEnabled: Bool
 
     private let prefsManager = PreferencesManager.shared
@@ -32,6 +33,7 @@ struct NotificationSettingsView: View {
         _wudhuReminderEnabled = State(initialValue: prefs.wudhuReminderEnabled)
         _wudhuReminderMinutesBefore = State(initialValue: prefs.wudhuReminderMinutesBefore)
         _prayerEndingSoonToastEnabled = State(initialValue: prefs.prayerEndingSoonToastEnabled)
+        _prayerEndingSoonMinutesBefore = State(initialValue: prefs.prayerEndingSoonMinutesBefore)
         _dailyPrayerSummaryToastEnabled = State(initialValue: prefs.dailyPrayerSummaryToastEnabled)
     }
 
@@ -158,6 +160,19 @@ struct NotificationSettingsView: View {
                     .onChange(of: prayerEndingSoonToastEnabled) { _, newValue in
                         Task { await prefsManager.update(\.prayerEndingSoonToastEnabled, to: newValue) }
                     }
+
+                if prayerEndingSoonToastEnabled {
+                    Picker("Remind Before", selection: $prayerEndingSoonMinutesBefore) {
+                        Text("10 minutes").tag(10)
+                        Text("15 minutes").tag(15)
+                        Text("20 minutes").tag(20)
+                        Text("30 minutes").tag(30)
+                    }
+                    .onChange(of: prayerEndingSoonMinutesBefore) { _, newValue in
+                        Task { await prefsManager.update(\.prayerEndingSoonMinutesBefore, to: newValue) }
+                    }
+                }
+
                 Toggle("Daily Prayer Summary", isOn: $dailyPrayerSummaryToastEnabled)
                     .onChange(of: dailyPrayerSummaryToastEnabled) { _, newValue in
                         Task { await prefsManager.update(\.dailyPrayerSummaryToastEnabled, to: newValue) }

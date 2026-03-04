@@ -329,8 +329,10 @@ struct SafaApp: App {
 
         let loggedTypes = Set(logs.map(\.prayerType))
 
+        let threshold = prefs.prayerEndingSoonMinutesBefore
+
         guard let fireDate = PrayerToastService.nextEndingSoonFireDate(
-            now: now, schedule: schedule, loggedPrayers: loggedTypes
+            now: now, schedule: schedule, loggedPrayers: loggedTypes, thresholdMinutes: threshold
         ) else { return }
 
         // Sleep until fire date
@@ -349,7 +351,8 @@ struct SafaApp: App {
         let freshLoggedTypes = Set(freshLogs.map(\.prayerType))
 
         guard let prayer = PrayerToastService.prayerEndingSoon(
-            now: Date(), schedule: schedule, loggedPrayers: freshLoggedTypes
+            now: Date(), schedule: schedule, loggedPrayers: freshLoggedTypes,
+            thresholdMinutes: freshPrefs.prayerEndingSoonMinutesBefore
         ) else {
             // No toast needed, but re-schedule for next prayer
             Task { @MainActor in scheduleToastReminders() }

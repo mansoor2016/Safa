@@ -64,6 +64,7 @@ struct UserPreferences: Codable, Hashable {
 
     // MARK: - In-App Reminder Settings
     var prayerEndingSoonToastEnabled: Bool
+    var prayerEndingSoonMinutesBefore: Int
     var dailyPrayerSummaryToastEnabled: Bool
 
     // MARK: - Prayer Time Adjustments (minutes offset per prayer)
@@ -108,6 +109,7 @@ struct UserPreferences: Codable, Hashable {
         showSunnahTimes: Bool = false,
         showRakatInfo: Bool = false,
         prayerEndingSoonToastEnabled: Bool = true,
+        prayerEndingSoonMinutesBefore: Int = 20,
         dailyPrayerSummaryToastEnabled: Bool = true,
         prayerAdjustments: [String: Int] = [:]
     ) {
@@ -144,6 +146,7 @@ struct UserPreferences: Codable, Hashable {
         self.showSunnahTimes = showSunnahTimes
         self.showRakatInfo = showRakatInfo
         self.prayerEndingSoonToastEnabled = prayerEndingSoonToastEnabled
+        self.prayerEndingSoonMinutesBefore = prayerEndingSoonMinutesBefore
         self.dailyPrayerSummaryToastEnabled = dailyPrayerSummaryToastEnabled
         self.prayerAdjustments = prayerAdjustments
     }
@@ -163,7 +166,7 @@ struct UserPreferences: Codable, Hashable {
         case useLocationBasedDefaults, autoUpdateLocationForPrayers
         case reduceMotionEnabled, largerArabicTextEnabled, highContrastEnabled
         case autoScrollEnabled, showSunnahTimes, showRakatInfo
-        case prayerEndingSoonToastEnabled, dailyPrayerSummaryToastEnabled
+        case prayerEndingSoonToastEnabled, prayerEndingSoonMinutesBefore, dailyPrayerSummaryToastEnabled
         case prayerAdjustments
         case hasCompletedOnboarding
     }
@@ -205,6 +208,8 @@ struct UserPreferences: Codable, Hashable {
         showSunnahTimes = try container.decodeIfPresent(Bool.self, forKey: .showSunnahTimes) ?? false
         showRakatInfo = try container.decodeIfPresent(Bool.self, forKey: .showRakatInfo) ?? false
         prayerEndingSoonToastEnabled = try container.decodeIfPresent(Bool.self, forKey: .prayerEndingSoonToastEnabled) ?? true
+        let rawEndingSoonMinutes = try container.decodeIfPresent(Int.self, forKey: .prayerEndingSoonMinutesBefore) ?? 20
+        prayerEndingSoonMinutesBefore = [10, 15, 20, 30].contains(rawEndingSoonMinutes) ? rawEndingSoonMinutes : 20
         dailyPrayerSummaryToastEnabled = try container.decodeIfPresent(Bool.self, forKey: .dailyPrayerSummaryToastEnabled) ?? true
         prayerAdjustments = try container.decode([String: Int].self, forKey: .prayerAdjustments)
         hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
