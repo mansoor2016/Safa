@@ -12,7 +12,7 @@ Safa (meaning purity/clarity) is a comprehensive Islamic app designed with priva
 | Aggressive advertisements | No ads, ever |
 | Need 5+ apps for different features | All-in-one: Prayer, Quran, Hadith, Duas, Dhikr, and more |
 | No intelligence | Contextually aware — adapts to time, location, and Islamic calendar |
-| No habit formation | Gamification with Hasanat points, streaks, and daily goals |
+| No habit formation | Gentle encouragement with Hasanat points, streaks, and daily goals |
 
 ## Features
 
@@ -39,8 +39,8 @@ Safa (meaning purity/clarity) is a comprehensive Islamic app designed with priva
 - **Ramadan Mode** — Auto-activates during Ramadan (Maghrib-aware Hijri detection)
 - **Dark Mode** — System/Light/Dark with adaptive prayer colors
 
-### Gamification
-- **Hasanat Points** — Earn rewards for prayers, Quran reading, and dhikr
+### Progress & Encouragement
+- **Hasanat Points** — Track good deeds across prayers, Quran reading, and dhikr
 - **Streaks** — Track daily consistency across prayer, Quran, and dhikr
 - **Levels** — Progress from Beginner to Muhsin (10 levels)
 
@@ -124,6 +124,3 @@ This project is licensed under CC BY-NC-SA 4.0 — see the [LICENSE](LICENSE) fi
 
 - **GitHub**: [@mansoor2016](https://github.com/mansoor2016)
 
----
-
-*Bismillah. May Safa be a means of benefit for you in this life and the next.*
