@@ -79,12 +79,15 @@ final class UserStateManager {
 
             // Congratulate on level-up
             if userStats.currentLevel > previousLevel {
-                let title = UserStats.levelTitle(for: userStats.currentLevel)
-                ToastService.shared.show(Toast(
-                    message: "Level \(userStats.currentLevel) — \(title)!",
-                    type: .success,
-                    duration: 3.5
-                ))
+                let level = userStats.currentLevel
+                let title = UserStats.levelTitle(for: level)
+                Task { @MainActor in
+                    ToastService.shared.show(Toast(
+                        message: "Level \(level) — \(title)!",
+                        type: .success,
+                        duration: 3.5
+                    ))
+                }
             }
 
             return true

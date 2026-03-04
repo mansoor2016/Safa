@@ -83,7 +83,9 @@ final class AppRouter {
             && !FeatureFlags.shared.isEnabled(.forcePrayerPage)
     }
     var onNavigationBlocked: ((Feature) -> Void) = { feature in
-        ToastService.shared.showComingSoon(feature.displayName)
+        Task { @MainActor in
+            ToastService.shared.showComingSoon(feature.displayName)
+        }
     }
 
     // MARK: - Shared Instance (for notification handler access before SwiftUI mounts)

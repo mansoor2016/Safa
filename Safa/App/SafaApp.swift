@@ -179,6 +179,11 @@ struct SafaApp: App {
                     dailySummaryTask?.cancel()
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .toastReminderPrefsChanged)) { _ in
+                Task { @MainActor in
+                    scheduleToastReminders()
+                }
+            }
             .alert(
                 "Gentle reminder",
                 isPresented: Binding(
@@ -272,6 +277,7 @@ struct SafaApp: App {
                 message: "Prayer times updated for \(context.regionName)",
                 type: .success
             ))
+            scheduleToastReminders()
         }
     }
 
@@ -370,22 +376,27 @@ struct SafaApp: App {
         }
 
         // Collision guard: wait if another toast is visible
-        await waitForToastSlot()
+        guard await waitForToastSlot() else {
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
         guard gen == schedulerGeneration else { return }
 
-        PrayerToastService.markEndingSoonShown(for: prayer, on: Date())
+        await MainActor.run {
+            PrayerToastService.markEndingSoonShown(for: prayer, on: Date())
 
-        let prayerName = prayer.localizedDisplayName
-        ToastService.shared.show(Toast(
-            message: String(localized: "\(prayerName) ending soon"),
-            type: .warning,
-            duration: 4.0,
-            actionTitle: String(localized: "Log"),
-            action: { [router] in
-                router.selectedTab = .prayer
-                router.pendingNotificationAction = .logPrayer(prayerType: prayer)
-            }
-        ))
+            let prayerName = prayer.localizedDisplayName
+            ToastService.shared.show(Toast(
+                message: String(localized: "\(prayerName) ending soon"),
+                type: .warning,
+                duration: 4.0,
+                actionTitle: String(localized: "Log"),
+                action: { [router] in
+                    router.selectedTab = .prayer
+                    router.pendingNotificationAction = .logPrayer(prayerType: prayer)
+                }
+            ))
+        }
 
         // Re-schedule for next prayer
         Task { @MainActor in scheduleToastReminders() }
@@ -423,18 +434,23 @@ struct SafaApp: App {
             return
         }
 
-        await waitForToastSlot()
+        guard await waitForToastSlot() else {
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
         guard gen == schedulerGeneration else { return }
 
-        PrayerToastService.markWudhuShown(for: prayer, on: Date())
+        await MainActor.run {
+            PrayerToastService.markWudhuShown(for: prayer, on: Date())
 
-        let prayerName = prayer.localizedDisplayName
-        let minutes = freshPrefs.wudhuReminderMinutesBefore
-        ToastService.shared.show(Toast(
-            message: String(localized: "Time for wudhu — \(prayerName) in \(minutes) min"),
-            type: .info,
-            duration: 3.5
-        ))
+            let prayerName = prayer.localizedDisplayName
+            let minutes = freshPrefs.wudhuReminderMinutesBefore
+            ToastService.shared.show(Toast(
+                message: String(localized: "Time for wudhu — \(prayerName) in \(minutes) min"),
+                type: .info,
+                duration: 3.5
+            ))
+        }
 
         Task { @MainActor in scheduleToastReminders() }
     }
@@ -474,29 +490,49 @@ struct SafaApp: App {
 
         guard let _ = PrayerToastService.dailySummary(
             now: Date(), schedule: schedule, loggedCount: obligatoryCount
-        ) else { return }
+        ) else {
+            // Mark day as handled so re-schedule doesn't loop on same Isha time
+            PrayerToastService.markDailySummaryShown(on: Date())
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
 
         // Collision guard
-        await waitForToastSlot()
+        guard await waitForToastSlot() else {
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
         guard gen == schedulerGeneration else { return }
 
-        PrayerToastService.markDailySummaryShown(on: Date())
+        await MainActor.run {
+            PrayerToastService.markDailySummaryShown(on: Date())
 
-        ToastService.shared.show(Toast(
-            message: String(localized: "You logged \(obligatoryCount)/5 prayers today"),
-            type: .info,
-            duration: 3.5
-        ))
+            ToastService.shared.show(Toast(
+                message: String(localized: "You logged \(obligatoryCount)/5 prayers today"),
+                type: .info,
+                duration: 3.5
+            ))
+        }
+
+        Task { @MainActor in scheduleToastReminders() }
     }
 
     /// Waits for any visible toast to dismiss before showing a new one.
-    private func waitForToastSlot() async {
+    /// Returns `true` if a slot opened, `false` if still occupied after retries.
+    private func waitForToastSlot() async -> Bool {
         for _ in 0..<3 {
-            if ToastService.shared.currentToast == nil { return }
+            if await ToastService.shared.currentToast == nil { return true }
             try? await Task.sleep(for: .seconds(2))
         }
+        return await ToastService.shared.currentToast == nil
     }
 
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let toastReminderPrefsChanged = Notification.Name("com.safa.toastReminderPrefsChanged")
 }
 
 // MARK: - Main Tab View

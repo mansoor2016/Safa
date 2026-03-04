@@ -1,16 +1,32 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%lld to go" : {
-
-    },
-    "%lld/5" : {
+    "·" : {
 
     },
     "/ %lld" : {
 
     },
     "/ 5" : {
+
+    },
+    "%@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld to go" : {
+
+    },
+    "%lld/5" : {
 
     },
     "Active today" : {
@@ -669,6 +685,9 @@
 
     },
     "Shows next prayer time" : {
+
+    },
+    "Shows the next prayer time and daily schedule." : {
 
     },
     "Shows your current prayer streak" : {

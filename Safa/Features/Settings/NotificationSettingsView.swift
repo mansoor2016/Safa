@@ -15,7 +15,6 @@ struct NotificationSettingsView: View {
     @State private var liveActivityEnabled: Bool
     @State private var wudhuReminderEnabled: Bool
     @State private var wudhuReminderMinutesBefore: Int
-    @State private var rescheduleTask: Task<Void, Never>?
     @State private var prayerEndingSoonToastEnabled: Bool
     @State private var prayerEndingSoonMinutesBefore: Int
     @State private var dailyPrayerSummaryToastEnabled: Bool
@@ -125,7 +124,10 @@ struct NotificationSettingsView: View {
             Section {
                 Toggle("Wudhu Reminder", isOn: $wudhuReminderEnabled)
                     .onChange(of: wudhuReminderEnabled) { _, newValue in
-                        Task { await prefsManager.update(\.wudhuReminderEnabled, to: newValue) }
+                        Task {
+                            await prefsManager.update(\.wudhuReminderEnabled, to: newValue)
+                            NotificationCenter.default.post(name: .toastReminderPrefsChanged, object: nil)
+                        }
                     }
 
                 if wudhuReminderEnabled {
@@ -136,13 +138,19 @@ struct NotificationSettingsView: View {
                         Text("20 minutes").tag(20)
                     }
                     .onChange(of: wudhuReminderMinutesBefore) { _, newValue in
-                        Task { await prefsManager.update(\.wudhuReminderMinutesBefore, to: newValue) }
+                        Task {
+                            await prefsManager.update(\.wudhuReminderMinutesBefore, to: newValue)
+                            NotificationCenter.default.post(name: .toastReminderPrefsChanged, object: nil)
+                        }
                     }
                 }
 
                 Toggle("Prayer Ending Soon", isOn: $prayerEndingSoonToastEnabled)
                     .onChange(of: prayerEndingSoonToastEnabled) { _, newValue in
-                        Task { await prefsManager.update(\.prayerEndingSoonToastEnabled, to: newValue) }
+                        Task {
+                            await prefsManager.update(\.prayerEndingSoonToastEnabled, to: newValue)
+                            NotificationCenter.default.post(name: .toastReminderPrefsChanged, object: nil)
+                        }
                     }
 
                 if prayerEndingSoonToastEnabled {
@@ -153,13 +161,19 @@ struct NotificationSettingsView: View {
                         Text("30 minutes").tag(30)
                     }
                     .onChange(of: prayerEndingSoonMinutesBefore) { _, newValue in
-                        Task { await prefsManager.update(\.prayerEndingSoonMinutesBefore, to: newValue) }
+                        Task {
+                            await prefsManager.update(\.prayerEndingSoonMinutesBefore, to: newValue)
+                            NotificationCenter.default.post(name: .toastReminderPrefsChanged, object: nil)
+                        }
                     }
                 }
 
                 Toggle("Daily Prayer Summary", isOn: $dailyPrayerSummaryToastEnabled)
                     .onChange(of: dailyPrayerSummaryToastEnabled) { _, newValue in
-                        Task { await prefsManager.update(\.dailyPrayerSummaryToastEnabled, to: newValue) }
+                        Task {
+                            await prefsManager.update(\.dailyPrayerSummaryToastEnabled, to: newValue)
+                            NotificationCenter.default.post(name: .toastReminderPrefsChanged, object: nil)
+                        }
                     }
             } header: {
                 Text("In-App Reminders")
@@ -182,15 +196,6 @@ struct NotificationSettingsView: View {
     private func checkNotificationAuth() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         notificationAuthStatus = settings.authorizationStatus
-    }
-
-    private func debouncedReschedule() {
-        rescheduleTask?.cancel()
-        rescheduleTask = Task {
-            try? await Task.sleep(for: .milliseconds(500))
-            guard !Task.isCancelled else { return }
-            await NotificationScheduler.shared.forceReschedule()
-        }
     }
 
     private func showSilentModeTipIfNeeded() {

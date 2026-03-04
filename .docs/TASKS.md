@@ -58,4 +58,4 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 
 ---
 
-*Last Updated: March 4, 2026 — Completed in-app prayer toast reminders (ending-soon + daily summary), compacted completed section.*
+*Last Updated: March 4, 2026 — Audited; no new completions (toast scheduling bug fixes in progress, uncommitted).*

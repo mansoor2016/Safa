@@ -69,6 +69,7 @@ struct Toast: Identifiable {
 // MARK: - Toast Service
 
 @Observable
+@MainActor
 final class ToastService {
     static let shared = ToastService()
 
