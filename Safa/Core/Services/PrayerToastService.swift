@@ -86,6 +86,75 @@ struct PrayerToastService {
         return nil
     }
 
+    // MARK: - Wudhu Reminder
+
+    /// Returns the next obligatory prayer whose start is within `thresholdMinutes` of `now`,
+    /// and hasn't already been toasted today.
+    static func wudhuReminder(
+        now: Date,
+        schedule: [PrayerTime],
+        thresholdMinutes: Int = 15,
+        defaults: UserDefaults = .standard
+    ) -> PrayerType? {
+        let dateKey = dayKey(for: now)
+        let threshold = TimeInterval(thresholdMinutes * 60)
+
+        for prayer in PrayerType.obligatoryPrayers {
+            guard let prayerStart = schedule.first(where: { $0.type == prayer })?.time else { continue }
+
+            let timeUntilPrayer = prayerStart.timeIntervalSince(now)
+
+            // Must be within threshold and prayer hasn't started yet
+            guard timeUntilPrayer > 0, timeUntilPrayer <= threshold else { continue }
+
+            // Check dedup
+            let dedupKey = "\(AppConstants.StorageKeys.wudhuReminderToastPrefix)_\(prayer.rawValue)_\(dateKey)"
+            guard !defaults.bool(forKey: dedupKey) else { continue }
+
+            return prayer
+        }
+
+        return nil
+    }
+
+    /// Returns the exact `Date` when the next wudhu toast should fire.
+    /// Finds the first prayer whose `start - threshold` is in the future.
+    static func nextWudhuFireDate(
+        now: Date,
+        schedule: [PrayerTime],
+        thresholdMinutes: Int = 15,
+        defaults: UserDefaults = .standard
+    ) -> Date? {
+        let dateKey = dayKey(for: now)
+        let threshold = TimeInterval(thresholdMinutes * 60)
+
+        for prayer in PrayerType.obligatoryPrayers {
+            guard let prayerStart = schedule.first(where: { $0.type == prayer })?.time else { continue }
+
+            // Check dedup
+            let dedupKey = "\(AppConstants.StorageKeys.wudhuReminderToastPrefix)_\(prayer.rawValue)_\(dateKey)"
+            guard !defaults.bool(forKey: dedupKey) else { continue }
+
+            let fireDate = prayerStart.addingTimeInterval(-threshold)
+
+            if fireDate > now {
+                return fireDate
+            }
+
+            // Already past fire date but prayer hasn't started — fire now
+            if prayerStart > now {
+                return now
+            }
+        }
+
+        return nil
+    }
+
+    static func markWudhuShown(for prayer: PrayerType, on date: Date, defaults: UserDefaults = .standard) {
+        let dedupKey = "\(AppConstants.StorageKeys.wudhuReminderToastPrefix)_\(prayer.rawValue)_\(dayKey(for: date))"
+        defaults.set(true, forKey: dedupKey)
+    }
+
     // MARK: - Daily Summary
 
     /// Returns the logged obligatory count (1–4) if after Isha and not yet shown today.
@@ -155,9 +224,13 @@ struct PrayerToastService {
         let calendar = Calendar.current
         let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: Date()) ?? Date()
         let cutoffKey = dayKey(for: twoDaysAgo)
-        let prefix = AppConstants.StorageKeys.prayerEndingSoonPrefix
+        let prefixes = [
+            AppConstants.StorageKeys.prayerEndingSoonPrefix,
+            AppConstants.StorageKeys.wudhuReminderToastPrefix
+        ]
 
-        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(prefix) {
+        for key in defaults.dictionaryRepresentation().keys {
+            guard prefixes.contains(where: { key.hasPrefix($0) }) else { continue }
             // Extract date portion from key: prefix_prayerName_yyyy-MM-dd
             let components = key.split(separator: "_")
             if let dateString = components.last, String(dateString) < cutoffKey {
@@ -175,7 +248,7 @@ struct PrayerToastService {
         coordinates: Coordinates?
     ) -> Bool {
         guard coordinates != nil else { return false }
-        return prefs.prayerEndingSoonToastEnabled || prefs.dailyPrayerSummaryToastEnabled
+        return prefs.prayerEndingSoonToastEnabled || prefs.dailyPrayerSummaryToastEnabled || prefs.wudhuReminderEnabled
     }
 
     // MARK: - Private

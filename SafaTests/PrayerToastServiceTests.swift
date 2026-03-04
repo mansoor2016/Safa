@@ -299,6 +299,117 @@ final class PrayerToastServiceTests: XCTestCase {
         XCTAssertNil(fireDate)
     }
 
+    // MARK: - Wudhu Reminder Tests
+
+    func test_wudhuReminder_withinThreshold_returnsPrayer() {
+        // Dhuhr at 12:15, now is 12:00 — 15 min before
+        let now = dateAt(hour: 12, minute: 0)
+
+        let result = PrayerToastService.wudhuReminder(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        XCTAssertEqual(result, .dhuhr)
+    }
+
+    func test_wudhuReminder_outsideThreshold_returnsNil() {
+        // Dhuhr at 12:15, now is 11:30 — 45 min before, threshold 15
+        let now = dateAt(hour: 11, minute: 30)
+
+        let result = PrayerToastService.wudhuReminder(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        XCTAssertNil(result)
+    }
+
+    func test_wudhuReminder_alreadyShown_skips() {
+        let now = dateAt(hour: 12, minute: 0)
+        PrayerToastService.markWudhuShown(for: .dhuhr, on: now, defaults: defaults)
+
+        let result = PrayerToastService.wudhuReminder(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        // Dhuhr already shown, next would be Asr but too far away
+        XCTAssertNil(result)
+    }
+
+    func test_wudhuReminder_prayerAlreadyStarted_skips() {
+        // Dhuhr at 12:15, now is 12:20 — prayer already started
+        let now = dateAt(hour: 12, minute: 20)
+
+        let result = PrayerToastService.wudhuReminder(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        // Dhuhr started, Asr at 15:45 is 3+ hours away
+        XCTAssertNil(result)
+    }
+
+    func test_wudhuReminder_earliestPrayerFirst() {
+        // Fajr at 5:30, now is 5:15 — 15 min before
+        let now = dateAt(hour: 5, minute: 15)
+
+        let result = PrayerToastService.wudhuReminder(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 20,
+            defaults: defaults
+        )
+
+        XCTAssertEqual(result, .fajr, "Should return earliest eligible prayer")
+    }
+
+    func test_nextWudhuFireDate_returnsCorrectDate() {
+        // Now is 10:00, next prayer is Dhuhr at 12:15
+        // Fire date = 12:15 - 15min = 12:00
+        let now = dateAt(hour: 10, minute: 0)
+
+        // Mark Fajr as shown (already passed)
+        PrayerToastService.markWudhuShown(for: .fajr, on: now, defaults: defaults)
+
+        let fireDate = PrayerToastService.nextWudhuFireDate(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        let expected = dateAt(hour: 12, minute: 0)
+        XCTAssertNotNil(fireDate)
+        XCTAssertEqual(
+            Int(fireDate!.timeIntervalSince1970),
+            Int(expected.timeIntervalSince1970)
+        )
+    }
+
+    func test_nextWudhuFireDate_allPassed_returnsNil() {
+        // Now is 22:00, all prayers have started
+        let now = dateAt(hour: 22, minute: 0)
+
+        let fireDate = PrayerToastService.nextWudhuFireDate(
+            now: now,
+            schedule: schedule,
+            thresholdMinutes: 15,
+            defaults: defaults
+        )
+
+        XCTAssertNil(fireDate)
+    }
+
     // MARK: - Pruning Tests
 
     func test_pruneStaleKeys_removesOldKeys() {
@@ -309,6 +420,16 @@ final class PrayerToastServiceTests: XCTestCase {
         PrayerToastService.pruneStaleKeys(defaults: defaults)
 
         XCTAssertFalse(defaults.bool(forKey: oldKey), "Old key should be pruned")
+    }
+
+    func test_pruneStaleKeys_removesOldWudhuKeys() {
+        let threeDaysAgo = Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+        let oldKey = "\(AppConstants.StorageKeys.wudhuReminderToastPrefix)_dhuhr_\(PrayerToastService.dayKey(for: threeDaysAgo))"
+        defaults.set(true, forKey: oldKey)
+
+        PrayerToastService.pruneStaleKeys(defaults: defaults)
+
+        XCTAssertFalse(defaults.bool(forKey: oldKey), "Old wudhu key should be pruned")
     }
 
     func test_pruneStaleKeys_preservesTodayKeys() {
@@ -330,8 +451,9 @@ final class PrayerToastServiceTests: XCTestCase {
         XCTAssertFalse(PrayerToastService.shouldSchedule(prefs: prefs, coordinates: nil))
     }
 
-    func test_shouldSchedule_returnsFalseWhenBothDisabled() {
+    func test_shouldSchedule_returnsFalseWhenAllDisabled() {
         let prefs = UserPreferences(
+            wudhuReminderEnabled: false,
             prayerEndingSoonToastEnabled: false,
             dailyPrayerSummaryToastEnabled: false
         )
@@ -341,7 +463,8 @@ final class PrayerToastServiceTests: XCTestCase {
 
     func test_shouldSchedule_returnsTrueWhenEnabledWithCoordinates() {
         let prefs = UserPreferences(
-            prayerEndingSoonToastEnabled: true,
+            wudhuReminderEnabled: true,
+            prayerEndingSoonToastEnabled: false,
             dailyPrayerSummaryToastEnabled: false
         )
         let coords = Coordinates(latitude: 51.5, longitude: -0.1)

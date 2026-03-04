@@ -164,6 +164,7 @@ enum AppConstants {
 
         // In-App Toast Reminders
         static let prayerEndingSoonPrefix = "com.safa.toast.prayerEndingSoon"
+        static let wudhuReminderToastPrefix = "com.safa.toast.wudhuReminder"
         static let dailySummaryToastLastShownDate = "com.safa.toast.dailySummary.lastShownDate"
 
         // Islamic Day Boundary

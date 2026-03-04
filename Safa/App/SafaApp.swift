@@ -51,6 +51,7 @@ struct SafaApp: App {
     @State private var launchState: LaunchState = .loading
     @State private var qadaReminderPayload: RamadanQadaReminderService.ReminderPayload?
     @State private var endingSoonTask: Task<Void, Never>?
+    @State private var wudhuReminderTask: Task<Void, Never>?
     @State private var dailySummaryTask: Task<Void, Never>?
     @State private var schedulerGeneration: Int = 0
     @Environment(\.scenePhase) private var scenePhase
@@ -174,6 +175,7 @@ struct SafaApp: App {
                 } else {
                     // Cancel toast tasks when going inactive/background
                     endingSoonTask?.cancel()
+                    wudhuReminderTask?.cancel()
                     dailySummaryTask?.cancel()
                 }
             }
@@ -294,6 +296,7 @@ struct SafaApp: App {
         let gen = schedulerGeneration
 
         endingSoonTask?.cancel()
+        wudhuReminderTask?.cancel()
         dailySummaryTask?.cancel()
 
         let prefs = PreferencesManager.loadPreferencesSync()
@@ -305,6 +308,13 @@ struct SafaApp: App {
         if prefs.prayerEndingSoonToastEnabled {
             endingSoonTask = Task { [gen] in
                 await runEndingSoonToast(gen: gen, coordinates: coordinates, prefs: prefs)
+            }
+        }
+
+        // Schedule wudhu reminder toast
+        if prefs.wudhuReminderEnabled {
+            wudhuReminderTask = Task { [gen] in
+                await runWudhuReminderToast(gen: gen, coordinates: coordinates, prefs: prefs)
             }
         }
 
@@ -378,6 +388,54 @@ struct SafaApp: App {
         ))
 
         // Re-schedule for next prayer
+        Task { @MainActor in scheduleToastReminders() }
+    }
+
+    private func runWudhuReminderToast(gen: Int, coordinates: Coordinates, prefs: UserPreferences) async {
+        let now = Date()
+
+        guard let schedule = try? await dependencies.prayerRepository.getPrayers(
+            for: now, location: coordinates, method: prefs.calculationMethod, madhab: prefs.madhab
+        ) else { return }
+        guard gen == schedulerGeneration else { return }
+
+        let threshold = prefs.wudhuReminderMinutesBefore
+
+        guard let fireDate = PrayerToastService.nextWudhuFireDate(
+            now: now, schedule: schedule, thresholdMinutes: threshold
+        ) else { return }
+
+        let delay = fireDate.timeIntervalSince(Date())
+        if delay > 0 {
+            try? await Task.sleep(for: .seconds(delay))
+        }
+        guard !Task.isCancelled, gen == schedulerGeneration else { return }
+
+        // Revalidate
+        let freshPrefs = PreferencesManager.loadPreferencesSync()
+        guard freshPrefs.wudhuReminderEnabled else { return }
+
+        guard let prayer = PrayerToastService.wudhuReminder(
+            now: Date(), schedule: schedule,
+            thresholdMinutes: freshPrefs.wudhuReminderMinutesBefore
+        ) else {
+            Task { @MainActor in scheduleToastReminders() }
+            return
+        }
+
+        await waitForToastSlot()
+        guard gen == schedulerGeneration else { return }
+
+        PrayerToastService.markWudhuShown(for: prayer, on: Date())
+
+        let prayerName = prayer.localizedDisplayName
+        let minutes = freshPrefs.wudhuReminderMinutesBefore
+        ToastService.shared.show(Toast(
+            message: String(localized: "Time for wudhu — \(prayerName) in \(minutes) min"),
+            type: .info,
+            duration: 3.5
+        ))
+
         Task { @MainActor in scheduleToastReminders() }
     }
 

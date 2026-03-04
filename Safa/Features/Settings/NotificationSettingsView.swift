@@ -122,40 +122,24 @@ struct NotificationSettingsView: View {
                 }
             }
 
-            if notificationsEnabled {
-                Section {
-                    Toggle("Wudhu Reminder", isOn: $wudhuReminderEnabled)
-                        .disabled(notificationAuthStatus == .denied)
-                        .onChange(of: wudhuReminderEnabled) { _, newValue in
-                            Task {
-                                await prefsManager.update(\.wudhuReminderEnabled, to: newValue)
-                                debouncedReschedule()
-                            }
-                        }
-
-                    if wudhuReminderEnabled {
-                        Picker("Remind Before", selection: $wudhuReminderMinutesBefore) {
-                            Text("5 minutes").tag(5)
-                            Text("10 minutes").tag(10)
-                            Text("15 minutes").tag(15)
-                            Text("20 minutes").tag(20)
-                        }
-                        .disabled(notificationAuthStatus == .denied)
-                        .onChange(of: wudhuReminderMinutesBefore) { _, newValue in
-                            Task {
-                                await prefsManager.update(\.wudhuReminderMinutesBefore, to: newValue)
-                                debouncedReschedule()
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Wudhu Reminder")
-                } footer: {
-                    Text("Get a reminder to prepare for prayer before each prayer time.")
-                }
-            }
-
             Section {
+                Toggle("Wudhu Reminder", isOn: $wudhuReminderEnabled)
+                    .onChange(of: wudhuReminderEnabled) { _, newValue in
+                        Task { await prefsManager.update(\.wudhuReminderEnabled, to: newValue) }
+                    }
+
+                if wudhuReminderEnabled {
+                    Picker("Remind Before", selection: $wudhuReminderMinutesBefore) {
+                        Text("5 minutes").tag(5)
+                        Text("10 minutes").tag(10)
+                        Text("15 minutes").tag(15)
+                        Text("20 minutes").tag(20)
+                    }
+                    .onChange(of: wudhuReminderMinutesBefore) { _, newValue in
+                        Task { await prefsManager.update(\.wudhuReminderMinutesBefore, to: newValue) }
+                    }
+                }
+
                 Toggle("Prayer Ending Soon", isOn: $prayerEndingSoonToastEnabled)
                     .onChange(of: prayerEndingSoonToastEnabled) { _, newValue in
                         Task { await prefsManager.update(\.prayerEndingSoonToastEnabled, to: newValue) }
