@@ -18,6 +18,9 @@ struct StandByPrayerEntry: TimelineEntry {
     let configuration: StandByConfigIntent
     /// Whether the prayer time has just arrived (grace window: 0-15 min after prayer time).
     let isGrace: Bool
+    /// Stable prayer identifier (e.g. "fajr") for logic that must not depend on localized names.
+    /// Nil for stale installs that haven't written the ID yet.
+    let prayerId: String?
 }
 
 // MARK: - Widget Provider
@@ -26,24 +29,26 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> StandByPrayerEntry {
         StandByPrayerEntry(
             date: Date(),
-            nextPrayer: "Fajr",
+            nextPrayer: String(localized: "Fajr"),
             nextPrayerTime: Date().addingTimeInterval(3600),
             fajrTime: Date().addingTimeInterval(3600),
             hijriDate: HijriDateHelper().hijriDateString(),
             configuration: StandByConfigIntent(),
-            isGrace: false
+            isGrace: false,
+            prayerId: "fajr"
         )
     }
 
     func snapshot(for configuration: StandByConfigIntent, in context: Context) async -> StandByPrayerEntry {
         StandByPrayerEntry(
             date: Date(),
-            nextPrayer: "Fajr",
+            nextPrayer: String(localized: "Fajr"),
             nextPrayerTime: Date().addingTimeInterval(18000),
             fajrTime: Date().addingTimeInterval(18000),
             hijriDate: HijriDateHelper().hijriDateString(),
             configuration: configuration,
-            isGrace: false
+            isGrace: false,
+            prayerId: "fajr"
         )
     }
 
@@ -58,7 +63,8 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
             fajrTime: prayerData.fajrTime,
             hijriDate: hijriDate(for: now),
             configuration: configuration,
-            isGrace: isGrace
+            isGrace: isGrace,
+            prayerId: prayerData.prayerId
         )
 
         // Refresh at grace end, next prayer time, or every 30 minutes
@@ -89,18 +95,19 @@ struct StandByPrayerProvider: AppIntentTimelineProvider {
         return hijriHelper.hijriDateString(from: date, maghribTime: maghrib)
     }
 
-    private func loadPrayerData() -> (nextPrayer: String, nextPrayerTime: Date, fajrTime: Date?) {
+    private func loadPrayerData() -> (nextPrayer: String, nextPrayerTime: Date, fajrTime: Date?, prayerId: String?) {
         // Load from App Group UserDefaults
         guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
             let defaultTime = Date().addingTimeInterval(18000)
-            return ("Fajr", defaultTime, defaultTime)
+            return (String(localized: "Fajr"), defaultTime, defaultTime, nil)
         }
 
-        let nextPrayer = defaults.string(forKey: "nextPrayerName") ?? "Fajr"
+        let nextPrayer = defaults.string(forKey: "nextPrayerName") ?? String(localized: "Fajr")
         let nextPrayerTime = defaults.object(forKey: "nextPrayerTime") as? Date ?? Date().addingTimeInterval(18000)
         let fajrTime = defaults.object(forKey: "fajrTime") as? Date
+        let prayerId = defaults.string(forKey: "nextPrayerId")
 
-        return (nextPrayer, nextPrayerTime, fajrTime)
+        return (nextPrayer, nextPrayerTime, fajrTime, prayerId)
     }
 }
 
@@ -193,7 +200,10 @@ struct MediumStandByView: View {
     }
 
     private var isFajrNext: Bool {
-        entry.nextPrayer.lowercased() == "fajr"
+        if let id = entry.prayerId { return id == "fajr" }
+        // Fallback for stale installs without prayerId: compare times
+        guard let fajrTime = entry.fajrTime else { return false }
+        return abs(entry.nextPrayerTime.timeIntervalSince(fajrTime)) < 60
     }
 
     var body: some View {
@@ -286,7 +296,7 @@ struct MediumStandByView: View {
     }
 
     private var prayerIcon: String {
-        switch entry.nextPrayer.lowercased() {
+        switch entry.prayerId ?? "" {
         case "fajr": return "sunrise.fill"
         case "dhuhr": return "sun.max.fill"
         case "asr": return "sun.haze.fill"
@@ -326,12 +336,13 @@ struct StandByPrayerWidget: Widget {
 } timeline: {
     StandByPrayerEntry(
         date: .now,
-        nextPrayer: "Fajr",
+        nextPrayer: String(localized: "Fajr"),
         nextPrayerTime: Date().addingTimeInterval(18000),
         fajrTime: Date().addingTimeInterval(18000),
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
-        isGrace: false
+        isGrace: false,
+        prayerId: "fajr"
     )
 }
 
@@ -340,12 +351,13 @@ struct StandByPrayerWidget: Widget {
 } timeline: {
     StandByPrayerEntry(
         date: .now,
-        nextPrayer: "Isha",
+        nextPrayer: String(localized: "Isha"),
         nextPrayerTime: Date().addingTimeInterval(3600),
         fajrTime: Date().addingTimeInterval(28800),
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
-        isGrace: false
+        isGrace: false,
+        prayerId: "isha"
     )
 }
 
@@ -354,11 +366,12 @@ struct StandByPrayerWidget: Widget {
 } timeline: {
     StandByPrayerEntry(
         date: .now,
-        nextPrayer: "Fajr",
+        nextPrayer: String(localized: "Fajr"),
         nextPrayerTime: Date().addingTimeInterval(14400),
         fajrTime: Date().addingTimeInterval(14400),
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
-        isGrace: false
+        isGrace: false,
+        prayerId: "fajr"
     )
 }

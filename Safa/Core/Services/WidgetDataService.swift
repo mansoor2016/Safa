@@ -26,6 +26,7 @@ final class WidgetDataService {
         static let maghribTime = "maghribTime"
         static let ishaTime = "ishaTime"
         static let nextPrayerName = "nextPrayerName"
+        static let nextPrayerId = "nextPrayerId"
         static let nextPrayerTime = "nextPrayerTime"
         static let hijriDate = "hijriDate"
         static let lastUpdated = "widgetDataLastUpdated"
@@ -70,10 +71,12 @@ final class WidgetDataService {
         let now = Date()
         if let next = prayers.first(where: { $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now)) }) {
             defaults.set(next.type.localizedDisplayName, forKey: Keys.nextPrayerName)
+            defaults.set(next.type.rawValue, forKey: Keys.nextPrayerId)
             defaults.set(next.time, forKey: Keys.nextPrayerTime)
         } else {
             // All prayers past grace — clear stale keys so widgets don't show old data
             defaults.removeObject(forKey: Keys.nextPrayerName)
+            defaults.removeObject(forKey: Keys.nextPrayerId)
             defaults.removeObject(forKey: Keys.nextPrayerTime)
         }
 
@@ -162,6 +165,11 @@ final class WidgetDataService {
     func readLoggedPrayers(for date: Date) -> [String] {
         guard let defaults else { return [] }
         return defaults.stringArray(forKey: Keys.loggedPrayersKey(for: date)) ?? []
+    }
+
+    /// Reads the stable prayer ID (e.g. "fajr") for the next prayer
+    func readNextPrayerId() -> String? {
+        defaults?.string(forKey: Keys.nextPrayerId)
     }
 
     /// Reads the last-updated timestamp

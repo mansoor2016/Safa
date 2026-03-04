@@ -56,12 +56,21 @@ struct InteractivePrayerProvider: AppIntentTimelineProvider {
 
     private static func samplePrayers() -> [PrayerStatus] {
         let now = Date()
+        let names = localizedPrayerNames()
         return [
-            PrayerStatus(id: "fajr", name: "Fajr", time: now.addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "dhuhr", name: "Dhuhr", time: now.addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "asr", name: "Asr", time: now.addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
-            PrayerStatus(id: "maghrib", name: "Maghrib", time: now.addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
-            PrayerStatus(id: "isha", name: "Isha", time: now.addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
+            PrayerStatus(id: "fajr", name: names[0], time: now.addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "dhuhr", name: names[1], time: now.addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "asr", name: names[2], time: now.addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
+            PrayerStatus(id: "maghrib", name: names[3], time: now.addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
+            PrayerStatus(id: "isha", name: names[4], time: now.addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
+        ]
+    }
+
+    private static func localizedPrayerNames() -> [String] {
+        [
+            String(localized: "Fajr"), String(localized: "Dhuhr"),
+            String(localized: "Asr"), String(localized: "Maghrib"),
+            String(localized: "Isha")
         ]
     }
 
@@ -73,33 +82,36 @@ struct InteractivePrayerProvider: AppIntentTimelineProvider {
         let now = Date()
         let loggedPrayers = defaults.stringArray(forKey: "loggedPrayers_\(dateKey())") ?? []
 
-        // Read real prayer times from App Group (written by main app)
-        let prayerKeys: [(String, String, String)] = [
-            ("fajr", "Fajr", "fajrTime"),
-            ("dhuhr", "Dhuhr", "dhuhrTime"),
-            ("asr", "Asr", "asrTime"),
-            ("maghrib", "Maghrib", "maghribTime"),
-            ("isha", "Isha", "ishaTime")
+        // Read localized prayer names from App Group (written by main app on language change)
+        let namesFallback = localizedPrayerNames()
+        let names = defaults.stringArray(forKey: "prayerNames") ?? namesFallback
+        let prayerKeys: [(id: String, timeKey: String)] = [
+            ("fajr", "fajrTime"),
+            ("dhuhr", "dhuhrTime"),
+            ("asr", "asrTime"),
+            ("maghrib", "maghribTime"),
+            ("isha", "ishaTime")
         ]
 
         var prayers: [PrayerStatus] = []
         var foundNextPrayer = false
 
-        for (id, name, key) in prayerKeys {
-            guard let time = defaults.object(forKey: key) as? Date else {
+        for (index, prayer) in prayerKeys.enumerated() {
+            guard let time = defaults.object(forKey: prayer.timeKey) as? Date else {
                 // If any prayer time is missing, fall back to sample data
                 return samplePrayers()
             }
 
+            let name = index < names.count ? names[index] : namesFallback[index]
             let isPast = time <= now
             let isNext = !isPast && !foundNextPrayer
             if isNext { foundNextPrayer = true }
 
             prayers.append(PrayerStatus(
-                id: id,
+                id: prayer.id,
                 name: name,
                 time: time,
-                isLogged: loggedPrayers.contains(id),
+                isLogged: loggedPrayers.contains(prayer.id),
                 isPast: isPast,
                 isNext: isNext
             ))
@@ -389,11 +401,11 @@ struct InteractivePrayerWidget: Widget {
     InteractivePrayerEntry(
         date: .now,
         prayers: [
-            PrayerStatus(id: "fajr", name: "Fajr", time: Date().addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "dhuhr", name: "Dhuhr", time: Date().addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "asr", name: "Asr", time: Date().addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
-            PrayerStatus(id: "maghrib", name: "Maghrib", time: Date().addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
-            PrayerStatus(id: "isha", name: "Isha", time: Date().addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
+            PrayerStatus(id: "fajr", name: String(localized: "Fajr"), time: Date().addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "dhuhr", name: String(localized: "Dhuhr"), time: Date().addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "asr", name: String(localized: "Asr"), time: Date().addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
+            PrayerStatus(id: "maghrib", name: String(localized: "Maghrib"), time: Date().addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
+            PrayerStatus(id: "isha", name: String(localized: "Isha"), time: Date().addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
         ],
         configuration: InteractivePrayerConfigIntent()
     )
@@ -405,11 +417,11 @@ struct InteractivePrayerWidget: Widget {
     InteractivePrayerEntry(
         date: .now,
         prayers: [
-            PrayerStatus(id: "fajr", name: "Fajr", time: Date().addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "dhuhr", name: "Dhuhr", time: Date().addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
-            PrayerStatus(id: "asr", name: "Asr", time: Date().addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
-            PrayerStatus(id: "maghrib", name: "Maghrib", time: Date().addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
-            PrayerStatus(id: "isha", name: "Isha", time: Date().addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
+            PrayerStatus(id: "fajr", name: String(localized: "Fajr"), time: Date().addingTimeInterval(-36000), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "dhuhr", name: String(localized: "Dhuhr"), time: Date().addingTimeInterval(-14400), isLogged: true, isPast: true, isNext: false),
+            PrayerStatus(id: "asr", name: String(localized: "Asr"), time: Date().addingTimeInterval(-3600), isLogged: false, isPast: true, isNext: false),
+            PrayerStatus(id: "maghrib", name: String(localized: "Maghrib"), time: Date().addingTimeInterval(1800), isLogged: false, isPast: false, isNext: true),
+            PrayerStatus(id: "isha", name: String(localized: "Isha"), time: Date().addingTimeInterval(7200), isLogged: false, isPast: false, isNext: false)
         ],
         configuration: InteractivePrayerConfigIntent()
     )

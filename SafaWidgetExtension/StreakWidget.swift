@@ -118,7 +118,7 @@ struct SmallStreakView: View {
                 .foregroundStyle(entry.currentCount > 0 ? .primary : .secondary)
 
             // Label
-            Text(entry.currentCount == 1 ? "day streak" : "day streak")
+            Text("day streak")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
@@ -195,7 +195,7 @@ struct MediumStreakView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var motivationalMessage: String {
+    private var motivationalMessage: LocalizedStringResource {
         if !entry.isActiveToday && entry.currentCount > 0 {
             return "Pray today to keep your streak!"
         } else if entry.currentCount >= 30 {

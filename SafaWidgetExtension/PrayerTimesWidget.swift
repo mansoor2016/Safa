@@ -40,7 +40,11 @@ struct Provider: AppIntentTimelineProvider {
         }
 
         // Read localized prayer names from App Group (written by main app on language change)
-        let namesFallback = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+        let namesFallback = [
+            String(localized: "Fajr"), String(localized: "Dhuhr"),
+            String(localized: "Asr"), String(localized: "Maghrib"),
+            String(localized: "Isha")
+        ]
         let names = defaults.stringArray(forKey: "prayerNames") ?? namesFallback
         let timeKeys = ["fajrTime", "dhuhrTime", "asrTime", "maghribTime", "ishaTime"]
 
@@ -79,7 +83,7 @@ struct Provider: AppIntentTimelineProvider {
             prayers: prayerList,
             hijriDate: hijriDate(for: date),
             configuration: configuration,
-            nextPrayerName: next?.name ?? "Isha",
+            nextPrayerName: next?.name ?? String(localized: "Isha"),
             nextPrayerTime: next?.time ?? date,
             hasNextPrayer: next != nil,
             isGrace: isGrace
@@ -94,7 +98,7 @@ struct Provider: AppIntentTimelineProvider {
             prayers: prayers,
             hijriDate: hijriHelper.hijriDateString(),
             configuration: ConfigurationAppIntent(),
-            nextPrayerName: next?.name ?? "Isha",
+            nextPrayerName: next?.name ?? String(localized: "Isha"),
             nextPrayerTime: next?.time ?? Date(),
             hasNextPrayer: next != nil,
             isGrace: false

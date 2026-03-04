@@ -108,9 +108,12 @@ final class WidgetDataServiceTests: XCTestCase {
 
         let defaults = UserDefaults(suiteName: testSuiteName)
         let nextName = defaults?.string(forKey: "nextPrayerName")
+        let nextId = defaults?.string(forKey: "nextPrayerId")
         let nextTime = defaults?.object(forKey: "nextPrayerTime") as? Date
 
-        XCTAssertEqual(nextName, "Fajr")
+        // Use stable ID (locale-independent) rather than localized display name
+        XCTAssertEqual(nextId, "fajr")
+        XCTAssertNotNil(nextName)
         XCTAssertNotNil(nextTime)
     }
 
@@ -243,6 +246,68 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertEqual(data.currentCount, 0)
         XCTAssertEqual(data.longestCount, 0)
         XCTAssertFalse(data.isActiveToday)
+    }
+
+    // MARK: - Next Prayer ID Tests
+
+    func test_writePrayerTimes_writesNextPrayerId() {
+        let futurePrayers = [
+            PrayerTime(type: .fajr, time: Date().addingTimeInterval(3600)),
+            PrayerTime(type: .dhuhr, time: Date().addingTimeInterval(7200)),
+            PrayerTime(type: .asr, time: Date().addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: Date().addingTimeInterval(14400)),
+            PrayerTime(type: .isha, time: Date().addingTimeInterval(18000))
+        ]
+
+        sut.writePrayerTimes(futurePrayers)
+
+        let prayerId = sut.readNextPrayerId()
+        XCTAssertEqual(prayerId, "fajr")
+    }
+
+    func test_writePrayerTimes_removesNextPrayerIdWhenNoPrayer() {
+        // First write future prayers to set the ID
+        let futurePrayers = [
+            PrayerTime(type: .fajr, time: Date().addingTimeInterval(3600)),
+            PrayerTime(type: .dhuhr, time: Date().addingTimeInterval(7200)),
+            PrayerTime(type: .asr, time: Date().addingTimeInterval(10800)),
+            PrayerTime(type: .maghrib, time: Date().addingTimeInterval(14400)),
+            PrayerTime(type: .isha, time: Date().addingTimeInterval(18000))
+        ]
+        sut.writePrayerTimes(futurePrayers)
+        XCTAssertNotNil(sut.readNextPrayerId())
+
+        // Now write all-past prayers (beyond grace window) to clear the ID
+        let pastPrayers = [
+            PrayerTime(type: .fajr, time: Date().addingTimeInterval(-86400)),
+            PrayerTime(type: .dhuhr, time: Date().addingTimeInterval(-72000)),
+            PrayerTime(type: .asr, time: Date().addingTimeInterval(-57600)),
+            PrayerTime(type: .maghrib, time: Date().addingTimeInterval(-43200)),
+            PrayerTime(type: .isha, time: Date().addingTimeInterval(-28800))
+        ]
+        sut.writePrayerTimes(pastPrayers)
+
+        XCTAssertNil(sut.readNextPrayerId())
+    }
+
+    func test_writePrayerTimes_nextPrayerIdMatchesType() {
+        // Set Fajr in the past, Dhuhr should be next
+        let prayers = [
+            PrayerTime(type: .fajr, time: Date().addingTimeInterval(-3600)),
+            PrayerTime(type: .dhuhr, time: Date().addingTimeInterval(3600)),
+            PrayerTime(type: .asr, time: Date().addingTimeInterval(7200)),
+            PrayerTime(type: .maghrib, time: Date().addingTimeInterval(10800)),
+            PrayerTime(type: .isha, time: Date().addingTimeInterval(14400))
+        ]
+
+        sut.writePrayerTimes(prayers)
+
+        XCTAssertEqual(sut.readNextPrayerId(), "dhuhr")
+    }
+
+    func test_readNextPrayerId_missingKey_returnsNil() {
+        // Fresh defaults with no data written
+        XCTAssertNil(sut.readNextPrayerId())
     }
 
     // MARK: - Helpers
