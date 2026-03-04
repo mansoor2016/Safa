@@ -105,3 +105,4 @@ TestResults/
 
 # Script caches
 scripts/.widget_translation_cache.json
+__pycache__/
