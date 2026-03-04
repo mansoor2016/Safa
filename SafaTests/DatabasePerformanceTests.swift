@@ -83,6 +83,10 @@ final class DatabasePerformanceTests: XCTestCase {
 
     func test_hadithDailyHadith_under50ms() async throws {
         let repo = HadithRepository(coreData: CoreDataStack.shared)
+
+        // Warm up — first call pays SQLite connection init overhead
+        _ = try await repo.getDailyHadith(for: Date())
+
         let start = CFAbsoluteTimeGetCurrent()
         let hadith = try await repo.getDailyHadith(for: Date())
         let elapsed = CFAbsoluteTimeGetCurrent() - start
