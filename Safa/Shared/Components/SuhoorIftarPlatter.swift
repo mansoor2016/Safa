@@ -43,54 +43,67 @@ struct SuhoorIftarPlatter: View {
                 Divider()
 
                 // Live countdown (uses shared helper for Suhoor-first priority)
-                switch RamadanCountdownHelpers.resolveTarget(now: Date(), suhoorTime: suhoorTime, iftarTime: iftarTime) {
-                case .suhoor(let time):
-                    HStack {
-                        Image(systemName: "timer")
+                // TimelineView re-evaluates every second so grace transitions happen automatically
+                TimelineView(PeriodicTimelineSchedule(from: .now, by: 1)) { context in
+                    switch RamadanCountdownHelpers.resolveTarget(
+                        now: context.date, suhoorTime: suhoorTime, iftarTime: iftarTime
+                    ) {
+                    case .suhoor(let time):
+                        HStack {
+                            Image(systemName: "timer")
+                                .foregroundStyle(.orange)
+                            Text(time, style: .timer)
+                                .font(SafaTypography.headlineLarge)
+                                .monospacedDigit()
+                                .contentTransition(.numericText())
+                            Text("until Suhoor ends")
+                                .font(SafaTypography.labelMedium)
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    case .suhoorGrace:
+                        Label("It's Suhoor time!", systemImage: "sunrise.fill")
+                            .font(SafaTypography.titleSmall)
                             .foregroundStyle(.orange)
-                        Text(time, style: .timer)
-                            .font(SafaTypography.headlineLarge)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                        Text("until Suhoor ends")
-                            .font(SafaTypography.labelMedium)
-                            .foregroundStyle(.secondary)
+                    case .iftar(let time):
+                        HStack {
+                            Image(systemName: "timer")
+                                .foregroundStyle(Color.accentColor)
+                            Text(time, style: .timer)
+                                .font(SafaTypography.headlineLarge)
+                                .monospacedDigit()
+                                .contentTransition(.numericText())
+                            Text("until Iftar")
+                                .font(SafaTypography.labelMedium)
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    case .iftarGrace:
+                        Label("It's Iftar time!", systemImage: "moon.fill")
+                            .font(SafaTypography.titleSmall)
+                            .foregroundStyle(.purple)
+                    case .nextSuhoor(let time):
+                        HStack {
+                            Image(systemName: "timer")
+                                .foregroundStyle(.secondary)
+                            Text(time, style: .timer)
+                                .font(SafaTypography.headlineLarge)
+                                .monospacedDigit()
+                                .contentTransition(.numericText())
+                                .foregroundStyle(.secondary)
+                            Text("until Suhoor tomorrow")
+                                .font(SafaTypography.labelMedium)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    case .complete:
+                        Label("Fasting complete for today", systemImage: "checkmark.circle.fill")
+                            .font(SafaTypography.titleSmall)
+                            .foregroundStyle(.green)
                     }
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                case .iftar(let time):
-                    HStack {
-                        Image(systemName: "timer")
-                            .foregroundStyle(Color.accentColor)
-                        Text(time, style: .timer)
-                            .font(SafaTypography.headlineLarge)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                        Text("until Iftar")
-                            .font(SafaTypography.labelMedium)
-                            .foregroundStyle(.secondary)
-                    }
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                case .nextSuhoor(let time):
-                    HStack {
-                        Image(systemName: "timer")
-                            .foregroundStyle(.secondary)
-                        Text(time, style: .timer)
-                            .font(SafaTypography.headlineLarge)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                            .foregroundStyle(.secondary)
-                        Text("until Suhoor tomorrow")
-                            .font(SafaTypography.labelMedium)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                case .complete:
-                    Label("Fasting complete for today", systemImage: "checkmark.circle.fill")
-                        .font(SafaTypography.titleSmall)
-                        .foregroundStyle(.green)
                 }
             }
         }

@@ -13,9 +13,12 @@ struct RamadanBanner: View {
     let iftarTime: Date?
     let onDismiss: () -> Void
 
+    private enum DisplayState {
+        case suhoor, suhoorGrace, iftar, iftarGrace, nextSuhoor, complete
+    }
+
+    @State private var displayState: DisplayState = .iftar
     @State private var countdown = ""
-    @State private var isUntilSuhoor = false
-    @State private var isNextSuhoor = false
     @State private var quranProgress: QuranProgress?
     @State private var showingIftarDuaPrompt = false
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -193,14 +196,19 @@ struct RamadanBanner: View {
         VStack(spacing: SafaSpacing.xxs) {
             Text(countdownLabel)
                 .font(SafaTypography.labelSmall)
-                .foregroundColor(.white.opacity(isNextSuhoor ? 0.5 : 0.7))
+                .foregroundColor(.white.opacity(isSubdued ? 0.5 : 0.7))
 
-            Text(countdown)
-                .font(isNextSuhoor ? SafaTypography.counterSmall : SafaTypography.counterSmall)
-                .foregroundColor(.white.opacity(isNextSuhoor ? 0.6 : 1.0))
-                .monospacedDigit()
+            if isGraceState {
+                // Grace states show no timer digits
+                EmptyView()
+            } else {
+                Text(countdown)
+                    .font(SafaTypography.counterSmall)
+                    .foregroundColor(.white.opacity(isSubdued ? 0.6 : 1.0))
+                    .monospacedDigit()
+            }
 
-            if !isNextSuhoor, let time = isUntilSuhoor ? suhoorTime : iftarTime {
+            if let time = countdownReferenceTime {
                 Text(time.formatted(date: .omitted, time: .shortened))
                     .font(SafaTypography.labelSmall)
                     .foregroundColor(.white.opacity(0.7))
@@ -210,10 +218,30 @@ struct RamadanBanner: View {
     }
 
     private var countdownLabel: String {
-        if isNextSuhoor {
-            return "Suhoor tomorrow in"
+        switch displayState {
+        case .suhoor: return "Suhoor ends in"
+        case .suhoorGrace: return "Suhoor time"
+        case .iftar: return "Iftar in"
+        case .iftarGrace: return "Iftar time"
+        case .nextSuhoor: return "Suhoor tomorrow in"
+        case .complete: return "Fasting complete"
         }
-        return isUntilSuhoor ? "Suhoor ends in" : "Iftar in"
+    }
+
+    private var isSubdued: Bool {
+        displayState == .nextSuhoor || displayState == .complete
+    }
+
+    private var isGraceState: Bool {
+        displayState == .suhoorGrace || displayState == .iftarGrace
+    }
+
+    private var countdownReferenceTime: Date? {
+        switch displayState {
+        case .suhoor: return suhoorTime
+        case .iftar: return iftarTime
+        case .suhoorGrace, .iftarGrace, .nextSuhoor, .complete: return nil
+        }
     }
 
     // MARK: - Quick Actions
@@ -260,22 +288,25 @@ struct RamadanBanner: View {
 
         switch target {
         case .suhoor(let time):
-            isUntilSuhoor = true
-            isNextSuhoor = false
+            displayState = .suhoor
             let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        case .suhoorGrace:
+            displayState = .suhoorGrace
+            countdown = ""
         case .iftar(let time):
-            isUntilSuhoor = false
-            isNextSuhoor = false
+            displayState = .iftar
             let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        case .iftarGrace:
+            displayState = .iftarGrace
+            countdown = ""
         case .nextSuhoor(let time):
-            isUntilSuhoor = true
-            isNextSuhoor = true
+            displayState = .nextSuhoor
             let (hours, minutes, seconds) = time.countdown()
             countdown = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         case .complete:
-            isNextSuhoor = false
+            displayState = .complete
             countdown = "--:--:--"
         }
     }

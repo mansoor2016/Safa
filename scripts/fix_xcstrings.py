@@ -366,14 +366,64 @@ FIX3_TRANSLATIONS = {
     },
 }
 
+# ── Fix 4: Fasting grace-state keys ──────────────────────────────────────────
+
+FIX4_GRACE_TRANSLATIONS = {
+    "It's Suhoor time!": {
+        "ar": "حان وقت السحور!",
+        "bn": "সেহরির সময় হয়েছে!",
+        "fa": "وقت سحری است!",
+        "fr": "C'est l'heure du Suhoor !",
+        "id": "Waktunya Sahur!",
+        "ms": "Waktu Sahur!",
+        "tr": "Sahur vakti!",
+        "ur": "سحری کا وقت ہے!",
+    },
+    "It's Iftar time!": {
+        "ar": "حان وقت الإفطار!",
+        "bn": "ইফতারের সময় হয়েছে!",
+        "fa": "وقت افطار است!",
+        "fr": "C'est l'heure de l'Iftar !",
+        "id": "Waktunya Iftar!",
+        "ms": "Waktu Iftar!",
+        "tr": "İftar vakti!",
+        "ur": "افطار کا وقت ہے!",
+    },
+    "Suhoor time": {
+        "ar": "وقت السحور",
+        "bn": "সেহরির সময়",
+        "fa": "وقت سحری",
+        "fr": "Heure du Suhoor",
+        "id": "Waktu Sahur",
+        "ms": "Waktu Sahur",
+        "tr": "Sahur vakti",
+        "ur": "سحری کا وقت",
+    },
+    "Iftar time": {
+        "ar": "وقت الإفطار",
+        "bn": "ইফতারের সময়",
+        "fa": "وقت افطار",
+        "fr": "Heure de l'Iftar",
+        "id": "Waktu Iftar",
+        "ms": "Waktu Iftar",
+        "tr": "İftar vakti",
+        "ur": "افطار کا وقت",
+    },
+}
+
 ALL_TRANSLATIONS = {}
 ALL_TRANSLATIONS.update(FIX1_TRANSLATIONS)
 ALL_TRANSLATIONS.update(FIX2_TRANSLATIONS)
 ALL_TRANSLATIONS.update(FIX3_TRANSLATIONS)
+ALL_TRANSLATIONS.update(FIX4_GRACE_TRANSLATIONS)
 
 # Keys that are expected to be new (don't already exist in the catalog).
 # "Remember to %@" already exists — excluded from this set so it merges, not adds.
-ALLOWED_NEW_KEYS = (set(FIX2_TRANSLATIONS.keys()) | set(FIX3_TRANSLATIONS.keys())) - {
+ALLOWED_NEW_KEYS = (
+    set(FIX2_TRANSLATIONS.keys())
+    | set(FIX3_TRANSLATIONS.keys())
+    | set(FIX4_GRACE_TRANSLATIONS.keys())
+) - {
     "Remember to %@",
 }
 
