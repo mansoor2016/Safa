@@ -17,6 +17,10 @@ enum EidType: String, CaseIterable, Identifiable {
         }
     }
 
+    var localizedDisplayName: String {
+        String(localized: String.LocalizationValue(displayName))
+    }
+
     var arabicName: String {
         switch self {
         case .fitr: return "\u{0639}\u{064A}\u{062F} \u{0627}\u{0644}\u{0641}\u{0637}\u{0631}"
@@ -31,8 +35,16 @@ enum EidType: String, CaseIterable, Identifiable {
         }
     }
 
+    var localizedSubtitle: String {
+        String(localized: String.LocalizationValue(subtitle))
+    }
+
     var acceptanceDua: String {
         "May Allah accept from us and you"
+    }
+
+    var localizedAcceptanceDua: String {
+        String(localized: String.LocalizationValue(acceptanceDua))
     }
 
     var acceptanceDuaArabic: String {
@@ -111,4 +123,12 @@ struct EidReminder: Identifiable {
     let icon: String
     let title: String
     let subtitle: String
+
+    var localizedTitle: String {
+        String(localized: String.LocalizationValue(title))
+    }
+
+    var localizedSubtitle: String {
+        String(localized: String.LocalizationValue(subtitle))
+    }
 }

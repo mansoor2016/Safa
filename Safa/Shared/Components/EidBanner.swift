@@ -75,7 +75,7 @@ struct EidBanner: View {
                 .environment(\.layoutDirection, .rightToLeft)
                 .accessibilityArabic()
 
-            Text(eidType.acceptanceDua)
+            Text(eidType.localizedAcceptanceDua)
                 .font(SafaTypography.bodySmall)
                 .foregroundColor(.white.opacity(0.8))
         }
@@ -120,7 +120,7 @@ struct EidBanner: View {
                             .font(.caption)
                             .foregroundColor(isCompleted ? .white : .white.opacity(0.8))
 
-                        Text(reminder.subtitle)
+                        Text(reminder.localizedSubtitle)
                             .font(SafaTypography.labelSmall)
                             .foregroundColor(.white.opacity(isCompleted ? 0.5 : 0.9))
                             .strikethrough(isCompleted, color: .white.opacity(0.5))
@@ -130,8 +130,8 @@ struct EidBanner: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(reminder.title), \(isCompleted ? "completed" : "not completed")")
-                .accessibilityHint("Double tap to \(isCompleted ? "unmark" : "mark as done")")
+                .accessibilityLabel("\(reminder.localizedTitle), \(isCompleted ? String(localized: "completed") : String(localized: "not completed"))")
+                .accessibilityHint(isCompleted ? String(localized: "Double tap to unmark") : String(localized: "Double tap to mark as done"))
             }
         }
     }

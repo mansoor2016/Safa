@@ -284,6 +284,10 @@ enum CalculationMethod: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    var localizedDisplayName: String {
+        String(localized: String.LocalizationValue(displayName))
+    }
+
     var shortDisplayName: String {
         switch self {
         case .muslimWorldLeague: return "MWL"
@@ -344,6 +348,10 @@ enum SunnahTimeType: String, Codable, CaseIterable, Identifiable {
         case .middleOfTheNight: return "Middle of the Night"
         case .lastThirdOfTheNight: return "Last Third of the Night"
         }
+    }
+
+    var localizedDisplayName: String {
+        String(localized: String.LocalizationValue(displayName))
     }
 
     var arabicName: String {

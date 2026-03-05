@@ -109,7 +109,7 @@ struct SettingsView: View {
     private func settingsRow<Destination: View>(
         icon: String,
         iconColor: Color,
-        title: String,
+        title: LocalizedStringKey,
         summary: String?,
         @ViewBuilder destination: () -> Destination
     ) -> some View {
@@ -139,14 +139,14 @@ struct SettingsView: View {
 
     private func loadSummary() {
         let prefs = PreferencesManager.loadPreferencesSync()
-        locationName = prefs.savedLocationName ?? "Not set"
-        methodName = prefs.calculationMethod.displayName
-        translationName = prefs.quranTranslation.displayName
+        locationName = prefs.savedLocationName ?? String(localized: "Not set")
+        methodName = prefs.calculationMethod.localizedDisplayName
+        translationName = prefs.quranTranslation.localizedDisplayName
 
         if let scheme = themeManager.colorScheme {
-            appearanceName = scheme == .light ? "Light" : "Dark"
+            appearanceName = scheme == .light ? String(localized: "Light") : String(localized: "Dark")
         } else {
-            appearanceName = "System"
+            appearanceName = String(localized: "System")
         }
     }
 

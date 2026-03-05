@@ -25,6 +25,26 @@ struct DuaCategory: Identifiable, Codable, Hashable {
         self.duaCount = duaCount
     }
 
+    // Uses AppLanguageManager (not @Environment(\.locale)) because:
+    // 1. String(localized:) already uses bundle preferred language, not a passed locale
+    // 2. AppLanguageManager updates in-process when user changes language
+    // 3. DuaCategory is a domain entity, not a View — no access to @Environment
+    // For tests, pass overrideLanguageCode to control fallback behavior.
+    var localizedName: String {
+        localizedName()
+    }
+
+    func localizedName(overrideLanguageCode: String? = nil) -> String {
+        let key = "dua_category_\(id)"
+        let result = String(localized: String.LocalizationValue(key))
+        if result != key { return result }
+        let langCode = overrideLanguageCode
+            ?? AppLanguageManager.shared.appLanguageCode
+            ?? Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
+                .language.languageCode?.identifier
+        return langCode == "ar" ? nameArabic : nameEnglish
+    }
+
     private enum CodingKeys: String, CodingKey {
         case id, nameEnglish, nameArabic, iconName, duaCount
     }

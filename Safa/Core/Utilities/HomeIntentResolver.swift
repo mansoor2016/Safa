@@ -44,26 +44,46 @@ struct HomeIntentResolver {
 
     // MARK: - Catalog (non-tab-bar features only)
 
-    static let dhikr = HomeAction(
-        id: "dhikr", icon: "circle.grid.3x3.fill", title: "Dhikr",
-        subtitle: "Remembrance", colorName: .purple, destination: .route("dhikr")
-    )
-    static let learn = HomeAction(
-        id: "learn", icon: "graduationcap.fill", title: "Learn",
-        subtitle: "Arabic & Tajweed", colorName: .purple, destination: .disabled("learning")
-    )
-    static let hadith = HomeAction(
-        id: "hadith", icon: "text.book.closed.fill", title: "Hadith",
-        subtitle: "Prophetic traditions", colorName: .indigo, destination: .route("hadith")
-    )
-    static let askSafa = HomeAction(
-        id: "askSafa", icon: "sparkles", title: "Ask Safa",
-        subtitle: "AI companion", colorName: .orange, destination: .route("chat")
-    )
-    static let qibla = HomeAction(
-        id: "qibla", icon: "location.north.fill", title: "Qibla",
-        subtitle: "Find direction", colorName: .orange, destination: .route("qibla")
-    )
+    static var dhikr: HomeAction {
+        HomeAction(
+            id: "dhikr", icon: "circle.grid.3x3.fill",
+            title: String(localized: "Dhikr"),
+            subtitle: String(localized: "Remembrance"),
+            colorName: .purple, destination: .route("dhikr")
+        )
+    }
+    static var learn: HomeAction {
+        HomeAction(
+            id: "learn", icon: "graduationcap.fill",
+            title: String(localized: "Learn"),
+            subtitle: String(localized: "Arabic & Tajweed"),
+            colorName: .purple, destination: .disabled("learning")
+        )
+    }
+    static var hadith: HomeAction {
+        HomeAction(
+            id: "hadith", icon: "text.book.closed.fill",
+            title: String(localized: "Hadith"),
+            subtitle: String(localized: "Prophetic traditions"),
+            colorName: .indigo, destination: .route("hadith")
+        )
+    }
+    static var askSafa: HomeAction {
+        HomeAction(
+            id: "askSafa", icon: "sparkles",
+            title: String(localized: "Ask Safa"),
+            subtitle: String(localized: "AI companion"),
+            colorName: .orange, destination: .route("chat")
+        )
+    }
+    static var qibla: HomeAction {
+        HomeAction(
+            id: "qibla", icon: "location.north.fill",
+            title: String(localized: "Qibla"),
+            subtitle: String(localized: "Find direction"),
+            colorName: .orange, destination: .route("qibla")
+        )
+    }
 
     // MARK: - Resolve
 
@@ -84,7 +104,7 @@ struct HomeIntentResolver {
         // Rule 1: Streak at risk → promote with streak context
         for streak in streaks where streak.isAtRisk && streak.currentCount > 3 {
             if let action = actionForStreakType(streak.type), !ranked.contains(action) {
-                ranked.append(action.with(subtitle: "\(streak.currentCount)-day streak at risk"))
+                ranked.append(action.with(subtitle: String(localized: "\(streak.currentCount)-day streak at risk")))
             }
         }
 
@@ -141,22 +161,22 @@ struct HomeIntentResolver {
 
         // Ramadan (month 9)
         if islamicMonth == 9 {
-            promotions.append(dhikr.with(subtitle: "Ramadan dhikr"))
+            promotions.append(dhikr.with(subtitle: String(localized: "Ramadan dhikr")))
         }
 
         // Dhul Hijjah first 10 days (month 12)
         if islamicMonth == 12 && islamicDay <= 10 {
-            promotions.append(dhikr.with(subtitle: "Blessed days of Dhul Hijjah"))
+            promotions.append(dhikr.with(subtitle: String(localized: "Blessed days of Dhul Hijjah")))
         }
 
         // Friday
         if weekday == 6 {
-            promotions.append(hadith.with(subtitle: "Jumu'ah reading"))
+            promotions.append(hadith.with(subtitle: String(localized: "Jumu'ah reading")))
         }
 
         // Monday/Thursday (sunnah fasting)
         if weekday == 2 || weekday == 5 {
-            promotions.append(dhikr.with(subtitle: "Sunnah fasting day"))
+            promotions.append(dhikr.with(subtitle: String(localized: "Sunnah fasting day")))
         }
 
         return promotions
@@ -167,13 +187,13 @@ struct HomeIntentResolver {
     static func timeBasedDefaults(hour: Int) -> [HomeAction] {
         switch hour {
         case 4..<9:
-            return [dhikr.with(subtitle: "Morning adhkar"), hadith, qibla, askSafa]
+            return [dhikr.with(subtitle: String(localized: "Morning adhkar")), hadith, qibla, askSafa]
         case 9..<14:
             return [hadith, dhikr, askSafa, qibla]
         case 14..<17:
             return [hadith, dhikr, askSafa, qibla]
         case 17..<21:
-            return [dhikr.with(subtitle: "Evening adhkar"), hadith, qibla, askSafa]
+            return [dhikr.with(subtitle: String(localized: "Evening adhkar")), hadith, qibla, askSafa]
         default:
             return [dhikr, hadith, askSafa, qibla]
         }

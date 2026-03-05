@@ -138,27 +138,27 @@ struct UserStats: Codable, Hashable {
 
     static func levelTitle(for level: Int) -> String {
         switch level {
-        case 1: return "Beginner"
-        case 2: return "Seeker"
-        case 3: return "Learner"
-        case 4: return "Dedicated"
-        case 5: return "Consistent"
-        case 6: return "Devoted"
-        case 7: return "Steadfast"
-        case 8: return "Committed"
-        case 9: return "Excellent"
-        case 10: return "Muhsin"
-        case 11: return "Sabir"
-        case 12: return "Shakir"
-        case 13: return "Mukhlis"
-        case 14: return "Muttaqi"
-        case 15: return "Sadiq"
-        case 16: return "Zahid"
-        case 17: return "Arif"
-        case 18: return "Qani"
-        case 19: return "Siddiq"
-        case 20: return "Muhsin al-Kamil"
-        default: return "Beginner"
+        case 1: return String(localized: "Beginner")
+        case 2: return String(localized: "Seeker")
+        case 3: return String(localized: "Learner")
+        case 4: return String(localized: "Dedicated")
+        case 5: return String(localized: "Consistent")
+        case 6: return String(localized: "Devoted")
+        case 7: return String(localized: "Steadfast")
+        case 8: return String(localized: "Committed")
+        case 9: return String(localized: "Excellent")
+        case 10: return String(localized: "Muhsin")
+        case 11: return String(localized: "Sabir")
+        case 12: return String(localized: "Shakir")
+        case 13: return String(localized: "Mukhlis")
+        case 14: return String(localized: "Muttaqi")
+        case 15: return String(localized: "Sadiq")
+        case 16: return String(localized: "Zahid")
+        case 17: return String(localized: "Arif")
+        case 18: return String(localized: "Qani")
+        case 19: return String(localized: "Siddiq")
+        case 20: return String(localized: "Muhsin al-Kamil")
+        default: return String(localized: "Beginner")
         }
     }
 

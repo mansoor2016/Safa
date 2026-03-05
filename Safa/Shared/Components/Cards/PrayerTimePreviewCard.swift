@@ -134,12 +134,12 @@ struct PrayerTimePreviewCard: View {
                     rowContent(prayer, textOpacity: textOpacity, showBell: true, isEnabled: notificationEnabledPrayers.contains(prayer.type), rakatInfo: rakatInfo)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(prayer.type.displayName) at \(timeString)\(rakatInfo.map { ", \($0.detailedSummary)" } ?? "")")
+                .accessibilityLabel("\(prayer.type.localizedDisplayName) at \(timeString)\(rakatInfo.map { ", \($0.detailedSummary)" } ?? "")")
                 .accessibilityHint(notificationEnabledPrayers.contains(prayer.type) ? "Notification on, double tap to turn off" : "Notification off, double tap to turn on")
             } else {
                 rowContent(prayer, textOpacity: textOpacity, showBell: false, isEnabled: true, rakatInfo: rakatInfo)
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(prayer.type.displayName) at \(timeString)\(rakatInfo.map { ", \($0.detailedSummary)" } ?? "")")
+                    .accessibilityLabel("\(prayer.type.localizedDisplayName) at \(timeString)\(rakatInfo.map { ", \($0.detailedSummary)" } ?? "")")
             }
         }
     }
@@ -147,7 +147,7 @@ struct PrayerTimePreviewCard: View {
     private func rowContent(_ prayer: PrayerTime, textOpacity: Double, showBell: Bool, isEnabled: Bool, rakatInfo: PrayerRakatInfo?) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: SafaSpacing.xs) {
-                Text(prayer.type.displayName)
+                Text(prayer.type.localizedDisplayName)
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
                     .opacity(textOpacity)

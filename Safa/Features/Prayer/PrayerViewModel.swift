@@ -443,7 +443,6 @@ final class PrayerViewModel {
     }
 
     func updateNextPrayerIndicator() {
-        let now = Date()
         // Find which prayer the computed `nextPrayer` resolves to (accounts for grace)
         let nextId = nextPrayer?.id
         for i in 0..<todayPrayers.count {

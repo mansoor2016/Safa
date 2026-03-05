@@ -9,6 +9,7 @@ import SafaShared
 struct HomeView: View {
     @Environment(Dependencies.self) private var dependencies
     @Environment(AppRouter.self) private var router
+    @Environment(\.locale) private var locale
 
     // MARK: - Support Card Bindings (owned by MainTabView)
     @Binding var showSupportCardThisSession: Bool
@@ -234,14 +235,10 @@ struct HomeView: View {
             updateEidState(maghribTime: appearMaghrib)
             showEidBanner = !UserDefaults.standard.bool(forKey: eidBannerDismissKey)
             // Re-resolve quick actions (time/prayer may have changed, Maghrib-aware)
-            resolvedActions = HomeIntentResolver.resolve(
-                currentDate: Date(),
-                nextPrayer: nextPrayer,
-                loggedPrayers: loggedPrayers,
-                streaks: dependencies.userState.streaks,
-                isAIAvailable: dependencies.llmService.availability.isAvailable,
-                maghribTime: appearMaghrib
-            )
+            refreshResolvedActions()
+        }
+        .onChange(of: locale.identifier) { _, _ in
+            refreshResolvedActions()
         }
     }
 
@@ -362,11 +359,11 @@ struct HomeView: View {
 
     private var eidBannerSummaryText: String {
         if let eidType = currentEidType {
-            return "\(eidType.displayName) - Day \(eidDayNumber)"
+            return String(localized: "\(eidType.localizedDisplayName) - Day \(eidDayNumber)")
         } else if let eidType = nextEidType, let days = daysUntilNextEid, days <= 7, days > 0 {
-            return "\(days) day\(days == 1 ? "" : "s") until \(eidType.displayName)"
+            return String(localized: "\(days) day(s) until \(eidType.localizedDisplayName)")
         }
-        return "Eid"
+        return String(localized: "Eid")
     }
 
     private func dismissEidBanner() {
@@ -659,16 +656,16 @@ struct HomeView: View {
                     HStack(spacing: SafaSpacing.md) {
                         HomeStatItem(
                             value: "\(dependencies.userState.totalHasanat)",
-                            label: "Hasanat"
+                            label: String(localized: "Hasanat")
                         )
 
                         HomeStatItem(
                             value: "\(dependencies.userState.dailyStreak?.currentCount ?? 0)",
-                            label: "Day Streak"
+                            label: String(localized: "Day Streak")
                         )
 
                         HomeStatItem(
-                            value: "Lv.\(dependencies.userState.currentLevel)",
+                            value: String(localized: "Lv.\(dependencies.userState.currentLevel)"),
                             label: dependencies.userState.levelTitle
                         )
                     }
@@ -1001,13 +998,7 @@ struct HomeView: View {
         }
 
         // Resolve context-aware quick actions
-        resolvedActions = HomeIntentResolver.resolve(
-            currentDate: Date(),
-            nextPrayer: nextPrayer,
-            loggedPrayers: loggedPrayers,
-            streaks: dependencies.userState.streaks,
-            maghribTime: todayPrayers.first(where: { $0.type == .maghrib })?.time
-        )
+        refreshResolvedActions()
 
         // Load Quran reading progress for resume card
         quranProgress = try? await dependencies.quranRepository.getReadingProgress()
@@ -1024,6 +1015,17 @@ struct HomeView: View {
         if isRamadan {
             loadRamadanGoals()
         }
+    }
+
+    private func refreshResolvedActions() {
+        resolvedActions = HomeIntentResolver.resolve(
+            currentDate: Date(),
+            nextPrayer: nextPrayer,
+            loggedPrayers: loggedPrayers,
+            streaks: dependencies.userState.streaks,
+            isAIAvailable: dependencies.llmService.availability.isAvailable,
+            maghribTime: todayPrayers.first(where: { $0.type == .maghrib })?.time
+        )
     }
 }
 

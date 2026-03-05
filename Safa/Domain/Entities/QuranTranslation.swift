@@ -15,6 +15,10 @@ enum QuranTranslation: String, CaseIterable, Codable, Hashable, Identifiable {
         }
     }
 
+    var localizedDisplayName: String {
+        String(localized: String.LocalizationValue(displayName))
+    }
+
     var language: String {
         switch self {
         case .sahihInternational: return "English"

@@ -17,11 +17,11 @@ final class AppRouter {
 
         var title: String {
             switch self {
-            case .home: return "Home"
-            case .quran: return "Quran"
-            case .prayer: return "Prayer"
-            case .duas: return "Duas"
-            case .more: return "More"
+            case .home: return String(localized: "Home")
+            case .quran: return String(localized: "Quran")
+            case .prayer: return String(localized: "Prayer")
+            case .duas: return String(localized: "Duas")
+            case .more: return String(localized: "More")
             }
         }
 

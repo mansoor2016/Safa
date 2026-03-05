@@ -18,16 +18,16 @@ struct PreEidBanner: View {
                 .foregroundColor(isUrgent ? .orange : .accentColor)
 
             VStack(alignment: .leading, spacing: SafaSpacing.xxs) {
-                Text("\(eidType.displayName) is coming!")
+                Text("\(eidType.localizedDisplayName) is coming!")
                     .font(SafaTypography.titleSmall)
                     .foregroundColor(SafaColors.Fallback.text)
 
-                Text("\(daysUntil) day\(daysUntil == 1 ? "" : "s") until \(eidType.displayName)")
+                Text("\(daysUntil) day(s) until \(eidType.localizedDisplayName)")
                     .font(SafaTypography.bodySmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
 
                 if let firstReminder = eidType.reminders.first {
-                    Text("Remember to \(firstReminder.title.lowercased())")
+                    Text("Remember to \(firstReminder.localizedTitle.lowercased())")
                         .font(SafaTypography.labelSmall)
                         .foregroundColor(isUrgent ? .orange : SafaColors.Fallback.tertiaryText)
                 }

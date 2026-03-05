@@ -252,11 +252,11 @@ struct NextPrayerCard: View {
                             }
 
                             if inGrace || !inFuture {
-                                Text("\(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                Text("\(prayer.type.localizedDisplayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
                                     .font(SafaTypography.labelMedium)
                                     .foregroundColor(SafaColors.Fallback.secondaryText)
                             } else {
-                                Text("until \(prayer.type.displayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
+                                Text("until \(prayer.type.localizedDisplayName) · \(prayer.time.formatted(date: .omitted, time: .shortened))")
                                     .font(SafaTypography.labelMedium)
                                     .foregroundColor(SafaColors.Fallback.secondaryText)
                             }
@@ -283,15 +283,16 @@ struct NextPrayerCard: View {
 
     private var nextPrayerAccessibilityLabel: String {
         let rakatSuffix = PrayerRakats.info(for: prayer.type, madhab: madhab).map { ", \($0.detailedSummary)" } ?? ""
+        let name = prayer.type.localizedDisplayName
         if isPrayerTimeNow(prayer.time) {
-            return String(localized: "It's time for \(prayer.type.displayName) prayer") + rakatSuffix
+            return String(localized: "It's time for \(name) prayer") + rakatSuffix
         }
         let (hours, minutes, _) = prayer.time.countdown()
         let timeString = prayer.time.formatted(date: .omitted, time: .shortened)
         if hours > 0 {
-            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(hours) hours and \(minutes) minutes remaining" + rakatSuffix
+            return String(localized: "Next prayer is \(name) at \(timeString), \(hours) hours and \(minutes) minutes remaining") + rakatSuffix
         } else {
-            return "Next prayer is \(prayer.type.displayName) at \(timeString), \(minutes) minutes remaining" + rakatSuffix
+            return String(localized: "Next prayer is \(name) at \(timeString), \(minutes) minutes remaining") + rakatSuffix
         }
     }
 }
@@ -320,7 +321,7 @@ private struct SunnahTimesCard: View {
                                 .foregroundColor(SafaColors.Fallback.tertiaryText)
                                 .frame(width: 20)
 
-                            Text(sunnah.type.displayName)
+                            Text(sunnah.type.localizedDisplayName)
                                 .font(SafaTypography.bodyMedium)
                                 .foregroundColor(SafaColors.Fallback.secondaryText)
 
@@ -353,11 +354,12 @@ private struct SunnahTimesCard: View {
 
     private func sunnahAccessibilityLabel(_ sunnah: SunnahTime) -> String {
         let timeString = sunnah.time.formatted(date: .omitted, time: .shortened)
+        let name = sunnah.type.localizedDisplayName
         switch sunnah.type {
         case .middleOfTheNight:
-            return "\(sunnah.type.displayName) at \(timeString), Tahajjud: 2 to 12 rak'ahs in pairs of 2"
+            return String(localized: "\(name) at \(timeString), Tahajjud: 2 to 12 rak'ahs in pairs of 2")
         case .lastThirdOfTheNight:
-            return "\(sunnah.type.displayName) at \(timeString), Best time for Qiyam al-Layl"
+            return String(localized: "\(name) at \(timeString), Best time for Qiyam al-Layl")
         }
     }
 }

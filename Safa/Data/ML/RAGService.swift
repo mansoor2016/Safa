@@ -157,9 +157,10 @@ final class RAGService: RAGServiceProtocol {
             }
         }
 
-        async let quranResults = searchQuran(keywords: keywords, topic: topic)
-        async let hadithResults = searchHadith(keywords: keywords, topic: topic)
-        async let duaResults = searchDuas(keywords: keywords, topic: topic)
+        let resolvedKeywords = keywords
+        async let quranResults = searchQuran(keywords: resolvedKeywords, topic: topic)
+        async let hadithResults = searchHadith(keywords: resolvedKeywords, topic: topic)
+        async let duaResults = searchDuas(keywords: resolvedKeywords, topic: topic)
 
         let quranRefs = await quranResults
         let hadithRefs = await hadithResults

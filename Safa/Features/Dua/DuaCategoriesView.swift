@@ -68,43 +68,43 @@ struct DuaCategoriesView: View {
                         duas: viewModel.favoriteDuas(ids: favoriteIds),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Favourites", arabicTitle: "المفضلة", iconName: "heart.fill", color: .pink)
+                        QuickAccessButton(title: String(localized: "Favourites"), arabicTitle: "المفضلة", iconName: "heart.fill", color: .pink)
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink(destination: DuaListView(
-                        categoryName: "Morning",
+                        categoryName: String(localized: "Morning"),
                         duas: viewModel.duas(forCategory: "morning"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Morning", arabicTitle: "أذكار الصباح", iconName: "sunrise.fill", color: .orange)
+                        QuickAccessButton(title: String(localized: "Morning"), arabicTitle: "أذكار الصباح", iconName: "sunrise.fill", color: .orange)
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink(destination: DuaListView(
-                        categoryName: "Prayer",
+                        categoryName: String(localized: "Prayer"),
                         duas: viewModel.duas(forCategory: "prayer"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Prayer", arabicTitle: "أدعية الصلاة", iconName: "hands.sparkles.fill", color: .teal)
+                        QuickAccessButton(title: String(localized: "Prayer"), arabicTitle: "أدعية الصلاة", iconName: "hands.sparkles.fill", color: .teal)
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink(destination: DuaListView(
-                        categoryName: "Food & Drink",
+                        categoryName: String(localized: "Food & Drink"),
                         duas: viewModel.duas(forCategory: "food"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Eating", arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
+                        QuickAccessButton(title: String(localized: "Eating"), arabicTitle: "أذكار الطعام", iconName: "fork.knife", color: .indigo)
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink(destination: DuaListView(
-                        categoryName: "Sleep",
+                        categoryName: String(localized: "Sleep"),
                         duas: viewModel.duas(forCategory: "sleep"),
                         favoriteIds: $favoriteIds
                     )) {
-                        QuickAccessButton(title: "Sleep", arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .purple)
+                        QuickAccessButton(title: String(localized: "Sleep"), arabicTitle: "أذكار النوم", iconName: "moon.zzz.fill", color: .purple)
                     }
                     .buttonStyle(.plain)
                 }
@@ -123,7 +123,7 @@ struct DuaCategoriesView: View {
 
             ForEach(viewModel.filteredCategories(query: searchText)) { category in
                 NavigationLink(destination: DuaListView(
-                    categoryName: category.nameEnglish,
+                    categoryName: category.localizedName,
                     duas: viewModel.duas(forCategory: category.id),
                     favoriteIds: $favoriteIds
                 )) {
@@ -143,6 +143,7 @@ struct QuickAccessButton: View {
     let arabicTitle: String
     let iconName: String
     let color: Color
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(spacing: 8) {
@@ -162,11 +163,13 @@ struct QuickAccessButton: View {
                     .fontWeight(.medium)
                     .multilineTextAlignment(.center)
 
-                Text(arabicTitle)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .environment(\.layoutDirection, .rightToLeft)
-                    .accessibilityArabic()
+                if locale.language.languageCode?.identifier != "ar" {
+                    Text(arabicTitle)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .environment(\.layoutDirection, .rightToLeft)
+                        .accessibilityArabic()
+                }
             }
             .frame(height: 36, alignment: .top)
         }
@@ -180,6 +183,7 @@ struct QuickAccessButton: View {
 
 struct CategoryRow: View {
     let category: DuaCategory
+    @Environment(\.locale) private var locale
 
     var body: some View {
         HStack(spacing: 16) {
@@ -194,14 +198,16 @@ struct CategoryRow: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(category.nameEnglish)
+                Text(category.localizedName)
                     .font(.headline)
 
-                Text(category.nameArabic)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .environment(\.layoutDirection, .rightToLeft)
-                    .accessibilityArabic()
+                if locale.language.languageCode?.identifier != "ar" {
+                    Text(category.nameArabic)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .environment(\.layoutDirection, .rightToLeft)
+                        .accessibilityArabic()
+                }
             }
 
             Spacer()
@@ -222,7 +228,7 @@ struct CategoryRow: View {
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(category.nameEnglish), \(category.duaCount) duas")
+        .accessibilityLabel("\(category.localizedName), \(category.duaCount) duas")
     }
 }
 

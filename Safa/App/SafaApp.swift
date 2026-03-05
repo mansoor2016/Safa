@@ -521,10 +521,10 @@ struct SafaApp: App {
     /// Returns `true` if a slot opened, `false` if still occupied after retries.
     private func waitForToastSlot() async -> Bool {
         for _ in 0..<3 {
-            if await ToastService.shared.currentToast == nil { return true }
+            if ToastService.shared.currentToast == nil { return true }
             try? await Task.sleep(for: .seconds(2))
         }
-        return await ToastService.shared.currentToast == nil
+        return ToastService.shared.currentToast == nil
     }
 
 }
