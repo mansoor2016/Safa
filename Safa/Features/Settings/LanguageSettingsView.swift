@@ -29,10 +29,11 @@ struct LanguageSettingsView: View {
         }
         .navigationTitle("Language")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Restart Recommended", isPresented: $showRestartAlert) {
-            Button("OK", role: .cancel) {}
+        .alert("Restart Required", isPresented: $showRestartAlert) {
+            Button("Restart Now") { exit(0) }
+            Button("Later", role: .cancel) {}
         } message: {
-            Text("Some changes will take full effect after restarting the app.")
+            Text("The app needs to restart for the new language layout to take effect.")
         }
     }
 
