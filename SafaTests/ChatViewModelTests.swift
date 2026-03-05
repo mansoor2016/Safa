@@ -465,12 +465,12 @@ final class ChatViewModelTests: XCTestCase {
         // When
         await sut.retryLastMessage()
 
-        // Then — generation error cleared, new messages added (original 2 + new user + new assistant)
+        // Then — generation error cleared, fresh conversation with retried Q&A pair
         XCTAssertNil(sut.generationError)
-        XCTAssertTrue(sut.messages.count > 2, "Retry should add new messages, not remove old ones")
-        // New user message should have the same content
+        // Single-turn: fresh conversation clears old messages, retried pair is the only content
         let userMessages = sut.messages.filter { $0.role == .user }
-        XCTAssertEqual(userMessages.last?.content, "What is wudu?")
+        XCTAssertEqual(userMessages.count, 1, "Retry in single-turn mode should have exactly 1 user message")
+        XCTAssertEqual(userMessages.first?.content, "What is wudu?")
     }
 
     func test_retryLastMessage_clearsError() async {

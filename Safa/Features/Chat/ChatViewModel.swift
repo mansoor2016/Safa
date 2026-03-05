@@ -74,15 +74,15 @@ final class ChatViewModel {
         generationError = nil
         cautionMessage = nil
 
-        // Ensure we have a conversation
-        if activeConversation == nil {
-            do {
-                activeConversation = try await chatRepository.createConversation()
-            } catch {
-                self.error = error
-                isGenerating = false
-                return
-            }
+        // Always start a fresh conversation — Foundation Models context is single-turn,
+        // so continuing a conversation would create false continuity in the UI.
+        do {
+            activeConversation = try await chatRepository.createConversation()
+            messages = []
+        } catch {
+            self.error = error
+            isGenerating = false
+            return
         }
 
         let conversationId = activeConversation!.id
