@@ -98,19 +98,19 @@ enum EidType: String, CaseIterable, Identifiable {
         switch self {
         case .fitr:
             return [
-                "Wishing you and your family a joyous Eid al-Fitr! May the blessings of Ramadan continue throughout the year.",
-                "Eid Mubarak! May Allah accept our fasts, prayers, and good deeds. Wishing you a blessed celebration.",
-                "As we celebrate the end of Ramadan, may this Eid bring you peace, happiness, and endless blessings.",
-                "Eid al-Fitr Mubarak! May this day of celebration bring joy to your heart and light to your home.",
-                "Taqabbal Allahu minna wa minkum. Wishing you a wonderful Eid filled with love, laughter, and togetherness.",
+                String(localized: "Wishing you and your family a joyous Eid al-Fitr! May the blessings of Ramadan continue throughout the year."),
+                String(localized: "Eid Mubarak! May Allah accept our fasts, prayers, and good deeds. Wishing you a blessed celebration."),
+                String(localized: "As we celebrate the end of Ramadan, may this Eid bring you peace, happiness, and endless blessings."),
+                String(localized: "Eid al-Fitr Mubarak! May this day of celebration bring joy to your heart and light to your home."),
+                String(localized: "Taqabbal Allahu minna wa minkum. Wishing you a wonderful Eid filled with love, laughter, and togetherness."),
             ]
         case .adha:
             return [
-                "Wishing you a blessed Eid al-Adha! May the spirit of sacrifice bring you closer to Allah.",
-                "Eid Mubarak! May Allah accept your sacrifices and shower you with His mercy and blessings.",
-                "On this blessed day of sacrifice, may Allah grant you and your loved ones peace, joy, and prosperity.",
-                "Eid al-Adha Mubarak! May the lessons of devotion and sacrifice guide us all throughout the year.",
-                "Taqabbal Allahu minna wa minkum. Wishing you and your family a joyful and blessed Eid al-Adha.",
+                String(localized: "Wishing you a blessed Eid al-Adha! May the spirit of sacrifice bring you closer to Allah."),
+                String(localized: "Eid Mubarak! May Allah accept your sacrifices and shower you with His mercy and blessings."),
+                String(localized: "On this blessed day of sacrifice, may Allah grant you and your loved ones peace, joy, and prosperity."),
+                String(localized: "Eid al-Adha Mubarak! May the lessons of devotion and sacrifice guide us all throughout the year."),
+                String(localized: "Taqabbal Allahu minna wa minkum. Wishing you and your family a joyful and blessed Eid al-Adha."),
             ]
         }
     }

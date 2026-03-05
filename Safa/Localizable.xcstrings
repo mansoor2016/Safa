@@ -45940,6 +45940,526 @@
           }
         }
       }
+    },
+    "Wishing you and your family a joyous Eid al-Fitr! May the blessings of Ramadan continue throughout the year.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أتمنى لك ولعائلتك عيد فطر سعيد! أسأل الله أن تستمر بركات رمضان طوال العام."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "আপনাকে ও আপনার পরিবারকে ঈদুল ফিতরের শুভেচ্ছা! রমজানের বরকত সারা বছর অব্যাহত থাকুক।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید فطر مبارک! از خداوند می‌خواهم برکات رمضان در سراسر سال ادامه یابد."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joyeux Aïd al-Fitr à vous et votre famille ! Que les bénédictions du Ramadan continuent toute l'année."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya Idul Fitri untuk Anda dan keluarga! Semoga berkah Ramadan terus sepanjang tahun."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya Aidilfitri untuk anda dan keluarga! Semoga keberkatan Ramadan berterusan sepanjang tahun."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size ve ailenize mutlu bir Ramazan Bayramı diliyorum! Ramazanın bereketi yıl boyunca devam etsin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آپ اور آپ کے خاندان کو عید الفطر مبارک! اللہ کرے رمضان کی برکات سال بھر جاری رہیں۔"
+          }
+        }
+      }
+    },
+    "Eid Mubarak! May Allah accept our fasts, prayers, and good deeds. Wishing you a blessed celebration.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد مبارك! تقبل الله صيامنا وصلاتنا وأعمالنا الصالحة. أتمنى لكم احتفالاً مباركاً."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ঈদ মুবারক! আল্লাহ আমাদের রোজা, নামাজ ও সৎকর্ম কবুল করুন। শুভ উদযাপন কামনা করি।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید مبارک! خداوند روزه‌ها، نمازها و اعمال نیکمان را بپذیرد. جشنی پربرکت آرزومندم."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aïd Moubarak ! Qu'Allah accepte nos jeûnes, nos prières et nos bonnes actions. Bonne fête bénie."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Idul Fitri! Semoga Allah menerima puasa, salat, dan amal baik kita. Selamat merayakan."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya! Semoga Allah menerima puasa, solat, dan amal baik kita. Selamat menyambut."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bayramınız mübarek olsun! Allah oruçlarımızı, namazlarımızı ve hayırlı amellerimizi kabul etsin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید مبارک! اللہ ہمارے روزے، نمازیں اور نیک اعمال قبول فرمائے۔ مبارک جشن کی دعا۔"
+          }
+        }
+      }
+    },
+    "As we celebrate the end of Ramadan, may this Eid bring you peace, happiness, and endless blessings.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مع احتفالنا بنهاية رمضان، أسأل الله أن يمنحكم هذا العيد السلام والسعادة والبركات."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "রমজানের সমাপ্তি উদযাপনে, এই ঈদ আপনার জন্য শান্তি, সুখ এবং অফুরন্ত বরকত নিয়ে আসুক।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "با پایان رمضان، از خداوند می‌خواهم این عید برایتان صلح، شادی و برکات بی‌پایان به ارمغان آورد."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alors que nous célébrons la fin du Ramadan, que cet Aïd vous apporte paix, bonheur et bénédictions infinies."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menyambut akhir Ramadan, semoga Idul Fitri ini membawa kedamaian, kebahagiaan, dan berkah tanpa akhir."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menyambut akhir Ramadan, semoga Hari Raya ini membawa keamanan, kebahagiaan, dan keberkatan tanpa henti."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ramazanın sonunu kutlarken, bu bayram size huzur, mutluluk ve sonsuz bereket getirsin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رمضان کے اختتام کے ساتھ، اللہ کرے یہ عید آپ کو سکون، خوشی اور لامحدود برکات عطا کرے۔"
+          }
+        }
+      }
+    },
+    "Eid al-Fitr Mubarak! May this day of celebration bring joy to your heart and light to your home.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد الفطر مبارك! أسأل الله أن يملأ هذا اليوم قلبكم فرحاً وبيتكم نوراً."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ঈদুল ফিতর মুবারক! এই উদযাপনের দিন আপনার হৃদয়ে আনন্দ এবং ঘরে আলো নিয়ে আসুক।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید فطر مبارک! این روز جشن شادی به قلبتان و نور به خانه‌تان بیاورد."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aïd al-Fitr Moubarak ! Que ce jour de fête apporte la joie à votre cœur et la lumière à votre foyer."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Idul Fitri! Semoga hari perayaan ini membawa kegembiraan di hati dan cahaya di rumah Anda."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya Aidilfitri! Semoga hari perayaan ini membawa kegembiraan di hati dan cahaya di rumah anda."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ramazan Bayramınız mübarek olsun! Bu kutlama günü kalbinize neşe, yuvanıza nur getirsin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید الفطر مبارک! اللہ کرے جشن کا یہ دن آپ کے دل میں خوشی اور گھر میں روشنی لائے۔"
+          }
+        }
+      }
+    },
+    "Taqabbal Allahu minna wa minkum. Wishing you a wonderful Eid filled with love, laughter, and togetherness.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل الله منا ومنكم. أتمنى لكم عيداً رائعاً مليئاً بالمحبة والضحك واللُّمّة."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "তাকাব্বালাল্লাহু মিন্না ওয়া মিনকুম। ভালোবাসা, হাসি ও একতায় ভরা চমৎকার ঈদ কামনা করি।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل الله منا و منکم. عیدی پر از عشق، خنده و صمیمیت آرزومندم."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbal Allahu minna wa minkum. Je vous souhaite un merveilleux Aïd rempli d'amour, de rires et de convivialité."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Semoga Idul Fitri ini penuh cinta, tawa, dan kebersamaan."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Semoga Hari Raya ini dipenuhi kasih sayang, gelak tawa, dan kebersamaan."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Sevgi, neşe ve birliktelikle dolu harika bir bayram diliyorum."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل اللہ منا و منکم۔ محبت، خوشی اور اپنوں کے ساتھ بھرپور عید کی دعا۔"
+          }
+        }
+      }
+    },
+    "Wishing you a blessed Eid al-Adha! May the spirit of sacrifice bring you closer to Allah.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد أضحى مبارك! أسأل الله أن تقربكم روح التضحية من الله."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ঈদুল আযহা মুবারক! কুরবানির চেতনা আপনাকে আল্লাহর নিকটবর্তী করুক।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید قربان مبارک! روح قربانی شما را به خداوند نزدیک‌تر کند."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joyeux Aïd al-Adha ! Que l'esprit du sacrifice vous rapproche d'Allah."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Idul Adha! Semoga semangat berkorban mendekatkan Anda kepada Allah."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya Haji! Semoga semangat berkorban mendekatkan anda kepada Allah."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurban Bayramınız mübarek olsun! Kurban ruhunun sizi Allah'a yakınlaştırması dileğiyle."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید الاضحیٰ مبارک! اللہ کرے قربانی کا جذبہ آپ کو اللہ سے قریب تر کرے۔"
+          }
+        }
+      }
+    },
+    "Eid Mubarak! May Allah accept your sacrifices and shower you with His mercy and blessings.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد مبارك! تقبل الله ضحاياكم وأغدق عليكم رحمته وبركاته."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ঈদ মুবারক! আল্লাহ আপনার কুরবানি কবুল করুন এবং আপনার উপর রহমত ও বরকত বর্ষণ করুন।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید مبارک! خداوند قربانی‌هایتان را بپذیرد و رحمت و برکاتش را بر شما نازل کند."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aïd Moubarak ! Qu'Allah accepte vos sacrifices et vous couvre de Sa miséricorde et de Ses bénédictions."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Idul Adha! Semoga Allah menerima qurban Anda dan melimpahkan rahmat dan berkah-Nya."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya! Semoga Allah menerima korban anda dan melimpahkan rahmat dan berkat-Nya."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bayramınız mübarek olsun! Allah kurbanlarınızı kabul etsin, rahmet ve bereketini üzerinize yağdırsın."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید مبارک! اللہ آپ کی قربانیاں قبول فرمائے اور اپنی رحمت و برکات سے نوازے۔"
+          }
+        }
+      }
+    },
+    "On this blessed day of sacrifice, may Allah grant you and your loved ones peace, joy, and prosperity.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "في يوم التضحية المبارك، أسأل الله أن يمنحكم وأحبائكم السلام والسعادة والرخاء."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "কুরবানির এই মুবারক দিনে, আল্লাহ আপনাকে ও আপনার প্রিয়জনদের শান্তি, আনন্দ ও সমৃদ্ধি দান করুন।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "در این روز مبارک قربانی، خداوند به شما و عزیزانتان صلح، شادی و خوشبختی عطا کند."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En ce jour béni du sacrifice, qu'Allah vous accorde à vous et vos proches paix, joie et prospérité."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Di hari berkurban yang penuh berkah ini, semoga Allah memberikan kedamaian, kebahagiaan, dan kemakmuran."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pada hari berkorban yang diberkati ini, semoga Allah mengurniakan keamanan, kegembiraan, dan kemakmuran."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu mübarek kurban gününde, Allah size ve sevdiklerinize huzur, neşe ve bereket ihsan etsin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قربانی کے اس مبارک دن، اللہ آپ اور آپ کے پیاروں کو سکون، خوشی اور خوشحالی عطا فرمائے۔"
+          }
+        }
+      }
+    },
+    "Eid al-Adha Mubarak! May the lessons of devotion and sacrifice guide us all throughout the year.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد الأضحى مبارك! أسأل الله أن تهدينا دروس الإخلاص والتضحية طوال العام."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ঈদুল আযহা মুবারক! ভক্তি ও কুরবানির শিক্ষা সারা বছর আমাদের পথ দেখাক।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید قربان مبارک! درس‌های فداکاری و قربانی ما را در سراسر سال راهنمایی کند."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aïd al-Adha Moubarak ! Que les leçons de dévotion et de sacrifice nous guident toute l'année."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Idul Adha! Semoga pelajaran keikhlasan dan pengorbanan membimbing kita sepanjang tahun."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selamat Hari Raya Haji! Semoga pengajaran keikhlasan dan pengorbanan membimbing kita sepanjang tahun."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurban Bayramınız mübarek olsun! Bağlılık ve fedakârlık dersleri yıl boyunca bize yol göstersin."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عید الاضحیٰ مبارک! اللہ کرے عقیدت اور قربانی کے اسباق سال بھر ہماری رہنمائی کریں۔"
+          }
+        }
+      }
+    },
+    "Taqabbal Allahu minna wa minkum. Wishing you and your family a joyful and blessed Eid al-Adha.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل الله منا ومنكم. أتمنى لكم ولعائلتكم عيد أضحى سعيد ومبارك."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "তাকাব্বালাল্লাহু মিন্না ওয়া মিনকুম। আপনাকে ও আপনার পরিবারকে আনন্দময় ও বরকতপূর্ণ ঈদুল আযহার শুভেচ্ছা।"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل الله منا و منکم. عید قربان شاد و مبارکی برای شما و خانواده‌تان آرزومندم."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbal Allahu minna wa minkum. Je vous souhaite à vous et votre famille un joyeux et béni Aïd al-Adha."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Semoga Idul Adha ini penuh kebahagiaan dan berkah untuk Anda sekeluarga."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Semoga Hari Raya Haji ini penuh kebahagiaan dan keberkatan untuk anda sekeluarga."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taqabbalallahu minna wa minkum. Size ve ailenize neşeli ve mübarek bir Kurban Bayramı diliyorum."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقبل اللہ منا و منکم۔ آپ اور آپ کے خاندان کو خوشگوار اور مبارک عید الاضحیٰ کی دعا۔"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

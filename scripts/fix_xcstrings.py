@@ -15,6 +15,7 @@ Run from repo root:
 
 import copy
 import json
+import os
 import re
 import sys
 from collections import OrderedDict
@@ -411,11 +412,119 @@ FIX4_GRACE_TRANSLATIONS = {
     },
 }
 
+# ── Fix 5: Eid share-message localization ────────────────────────────────────
+
+FIX5_SHARE_TRANSLATIONS = {
+    # Eid al-Fitr messages
+    "Wishing you and your family a joyous Eid al-Fitr! May the blessings of Ramadan continue throughout the year.": {
+        "ar": "أتمنى لك ولعائلتك عيد فطر سعيد! أسأل الله أن تستمر بركات رمضان طوال العام.",
+        "bn": "আপনাকে ও আপনার পরিবারকে ঈদুল ফিতরের শুভেচ্ছা! রমজানের বরকত সারা বছর অব্যাহত থাকুক।",
+        "fa": "عید فطر مبارک! از خداوند می‌خواهم برکات رمضان در سراسر سال ادامه یابد.",
+        "fr": "Joyeux Aïd al-Fitr à vous et votre famille ! Que les bénédictions du Ramadan continuent toute l'année.",
+        "id": "Selamat Hari Raya Idul Fitri untuk Anda dan keluarga! Semoga berkah Ramadan terus sepanjang tahun.",
+        "ms": "Selamat Hari Raya Aidilfitri untuk anda dan keluarga! Semoga keberkatan Ramadan berterusan sepanjang tahun.",
+        "tr": "Size ve ailenize mutlu bir Ramazan Bayramı diliyorum! Ramazanın bereketi yıl boyunca devam etsin.",
+        "ur": "آپ اور آپ کے خاندان کو عید الفطر مبارک! اللہ کرے رمضان کی برکات سال بھر جاری رہیں۔",
+    },
+    "Eid Mubarak! May Allah accept our fasts, prayers, and good deeds. Wishing you a blessed celebration.": {
+        "ar": "عيد مبارك! تقبل الله صيامنا وصلاتنا وأعمالنا الصالحة. أتمنى لكم احتفالاً مباركاً.",
+        "bn": "ঈদ মুবারক! আল্লাহ আমাদের রোজা, নামাজ ও সৎকর্ম কবুল করুন। শুভ উদযাপন কামনা করি।",
+        "fa": "عید مبارک! خداوند روزه‌ها، نمازها و اعمال نیکمان را بپذیرد. جشنی پربرکت آرزومندم.",
+        "fr": "Aïd Moubarak ! Qu'Allah accepte nos jeûnes, nos prières et nos bonnes actions. Bonne fête bénie.",
+        "id": "Selamat Idul Fitri! Semoga Allah menerima puasa, salat, dan amal baik kita. Selamat merayakan.",
+        "ms": "Selamat Hari Raya! Semoga Allah menerima puasa, solat, dan amal baik kita. Selamat menyambut.",
+        "tr": "Bayramınız mübarek olsun! Allah oruçlarımızı, namazlarımızı ve hayırlı amellerimizi kabul etsin.",
+        "ur": "عید مبارک! اللہ ہمارے روزے، نمازیں اور نیک اعمال قبول فرمائے۔ مبارک جشن کی دعا۔",
+    },
+    "As we celebrate the end of Ramadan, may this Eid bring you peace, happiness, and endless blessings.": {
+        "ar": "مع احتفالنا بنهاية رمضان، أسأل الله أن يمنحكم هذا العيد السلام والسعادة والبركات.",
+        "bn": "রমজানের সমাপ্তি উদযাপনে, এই ঈদ আপনার জন্য শান্তি, সুখ এবং অফুরন্ত বরকত নিয়ে আসুক।",
+        "fa": "با پایان رمضان، از خداوند می‌خواهم این عید برایتان صلح، شادی و برکات بی‌پایان به ارمغان آورد.",
+        "fr": "Alors que nous célébrons la fin du Ramadan, que cet Aïd vous apporte paix, bonheur et bénédictions infinies.",
+        "id": "Menyambut akhir Ramadan, semoga Idul Fitri ini membawa kedamaian, kebahagiaan, dan berkah tanpa akhir.",
+        "ms": "Menyambut akhir Ramadan, semoga Hari Raya ini membawa keamanan, kebahagiaan, dan keberkatan tanpa henti.",
+        "tr": "Ramazanın sonunu kutlarken, bu bayram size huzur, mutluluk ve sonsuz bereket getirsin.",
+        "ur": "رمضان کے اختتام کے ساتھ، اللہ کرے یہ عید آپ کو سکون، خوشی اور لامحدود برکات عطا کرے۔",
+    },
+    "Eid al-Fitr Mubarak! May this day of celebration bring joy to your heart and light to your home.": {
+        "ar": "عيد الفطر مبارك! أسأل الله أن يملأ هذا اليوم قلبكم فرحاً وبيتكم نوراً.",
+        "bn": "ঈদুল ফিতর মুবারক! এই উদযাপনের দিন আপনার হৃদয়ে আনন্দ এবং ঘরে আলো নিয়ে আসুক।",
+        "fa": "عید فطر مبارک! این روز جشن شادی به قلبتان و نور به خانه‌تان بیاورد.",
+        "fr": "Aïd al-Fitr Moubarak ! Que ce jour de fête apporte la joie à votre cœur et la lumière à votre foyer.",
+        "id": "Selamat Idul Fitri! Semoga hari perayaan ini membawa kegembiraan di hati dan cahaya di rumah Anda.",
+        "ms": "Selamat Hari Raya Aidilfitri! Semoga hari perayaan ini membawa kegembiraan di hati dan cahaya di rumah anda.",
+        "tr": "Ramazan Bayramınız mübarek olsun! Bu kutlama günü kalbinize neşe, yuvanıza nur getirsin.",
+        "ur": "عید الفطر مبارک! اللہ کرے جشن کا یہ دن آپ کے دل میں خوشی اور گھر میں روشنی لائے۔",
+    },
+    "Taqabbal Allahu minna wa minkum. Wishing you a wonderful Eid filled with love, laughter, and togetherness.": {
+        "ar": "تقبل الله منا ومنكم. أتمنى لكم عيداً رائعاً مليئاً بالمحبة والضحك واللُّمّة.",
+        "bn": "তাকাব্বালাল্লাহু মিন্না ওয়া মিনকুম। ভালোবাসা, হাসি ও একতায় ভরা চমৎকার ঈদ কামনা করি।",
+        "fa": "تقبل الله منا و منکم. عیدی پر از عشق، خنده و صمیمیت آرزومندم.",
+        "fr": "Taqabbal Allahu minna wa minkum. Je vous souhaite un merveilleux Aïd rempli d'amour, de rires et de convivialité.",
+        "id": "Taqabbalallahu minna wa minkum. Semoga Idul Fitri ini penuh cinta, tawa, dan kebersamaan.",
+        "ms": "Taqabbalallahu minna wa minkum. Semoga Hari Raya ini dipenuhi kasih sayang, gelak tawa, dan kebersamaan.",
+        "tr": "Taqabbalallahu minna wa minkum. Sevgi, neşe ve birliktelikle dolu harika bir bayram diliyorum.",
+        "ur": "تقبل اللہ منا و منکم۔ محبت، خوشی اور اپنوں کے ساتھ بھرپور عید کی دعا۔",
+    },
+    # Eid al-Adha messages
+    "Wishing you a blessed Eid al-Adha! May the spirit of sacrifice bring you closer to Allah.": {
+        "ar": "عيد أضحى مبارك! أسأل الله أن تقربكم روح التضحية من الله.",
+        "bn": "ঈদুল আযহা মুবারক! কুরবানির চেতনা আপনাকে আল্লাহর নিকটবর্তী করুক।",
+        "fa": "عید قربان مبارک! روح قربانی شما را به خداوند نزدیک‌تر کند.",
+        "fr": "Joyeux Aïd al-Adha ! Que l'esprit du sacrifice vous rapproche d'Allah.",
+        "id": "Selamat Idul Adha! Semoga semangat berkorban mendekatkan Anda kepada Allah.",
+        "ms": "Selamat Hari Raya Haji! Semoga semangat berkorban mendekatkan anda kepada Allah.",
+        "tr": "Kurban Bayramınız mübarek olsun! Kurban ruhunun sizi Allah'a yakınlaştırması dileğiyle.",
+        "ur": "عید الاضحیٰ مبارک! اللہ کرے قربانی کا جذبہ آپ کو اللہ سے قریب تر کرے۔",
+    },
+    "Eid Mubarak! May Allah accept your sacrifices and shower you with His mercy and blessings.": {
+        "ar": "عيد مبارك! تقبل الله ضحاياكم وأغدق عليكم رحمته وبركاته.",
+        "bn": "ঈদ মুবারক! আল্লাহ আপনার কুরবানি কবুল করুন এবং আপনার উপর রহমত ও বরকত বর্ষণ করুন।",
+        "fa": "عید مبارک! خداوند قربانی‌هایتان را بپذیرد و رحمت و برکاتش را بر شما نازل کند.",
+        "fr": "Aïd Moubarak ! Qu'Allah accepte vos sacrifices et vous couvre de Sa miséricorde et de Ses bénédictions.",
+        "id": "Selamat Idul Adha! Semoga Allah menerima qurban Anda dan melimpahkan rahmat dan berkah-Nya.",
+        "ms": "Selamat Hari Raya! Semoga Allah menerima korban anda dan melimpahkan rahmat dan berkat-Nya.",
+        "tr": "Bayramınız mübarek olsun! Allah kurbanlarınızı kabul etsin, rahmet ve bereketini üzerinize yağdırsın.",
+        "ur": "عید مبارک! اللہ آپ کی قربانیاں قبول فرمائے اور اپنی رحمت و برکات سے نوازے۔",
+    },
+    "On this blessed day of sacrifice, may Allah grant you and your loved ones peace, joy, and prosperity.": {
+        "ar": "في يوم التضحية المبارك، أسأل الله أن يمنحكم وأحبائكم السلام والسعادة والرخاء.",
+        "bn": "কুরবানির এই মুবারক দিনে, আল্লাহ আপনাকে ও আপনার প্রিয়জনদের শান্তি, আনন্দ ও সমৃদ্ধি দান করুন।",
+        "fa": "در این روز مبارک قربانی، خداوند به شما و عزیزانتان صلح، شادی و خوشبختی عطا کند.",
+        "fr": "En ce jour béni du sacrifice, qu'Allah vous accorde à vous et vos proches paix, joie et prospérité.",
+        "id": "Di hari berkurban yang penuh berkah ini, semoga Allah memberikan kedamaian, kebahagiaan, dan kemakmuran.",
+        "ms": "Pada hari berkorban yang diberkati ini, semoga Allah mengurniakan keamanan, kegembiraan, dan kemakmuran.",
+        "tr": "Bu mübarek kurban gününde, Allah size ve sevdiklerinize huzur, neşe ve bereket ihsan etsin.",
+        "ur": "قربانی کے اس مبارک دن، اللہ آپ اور آپ کے پیاروں کو سکون، خوشی اور خوشحالی عطا فرمائے۔",
+    },
+    "Eid al-Adha Mubarak! May the lessons of devotion and sacrifice guide us all throughout the year.": {
+        "ar": "عيد الأضحى مبارك! أسأل الله أن تهدينا دروس الإخلاص والتضحية طوال العام.",
+        "bn": "ঈদুল আযহা মুবারক! ভক্তি ও কুরবানির শিক্ষা সারা বছর আমাদের পথ দেখাক।",
+        "fa": "عید قربان مبارک! درس‌های فداکاری و قربانی ما را در سراسر سال راهنمایی کند.",
+        "fr": "Aïd al-Adha Moubarak ! Que les leçons de dévotion et de sacrifice nous guident toute l'année.",
+        "id": "Selamat Idul Adha! Semoga pelajaran keikhlasan dan pengorbanan membimbing kita sepanjang tahun.",
+        "ms": "Selamat Hari Raya Haji! Semoga pengajaran keikhlasan dan pengorbanan membimbing kita sepanjang tahun.",
+        "tr": "Kurban Bayramınız mübarek olsun! Bağlılık ve fedakârlık dersleri yıl boyunca bize yol göstersin.",
+        "ur": "عید الاضحیٰ مبارک! اللہ کرے عقیدت اور قربانی کے اسباق سال بھر ہماری رہنمائی کریں۔",
+    },
+    "Taqabbal Allahu minna wa minkum. Wishing you and your family a joyful and blessed Eid al-Adha.": {
+        "ar": "تقبل الله منا ومنكم. أتمنى لكم ولعائلتكم عيد أضحى سعيد ومبارك.",
+        "bn": "তাকাব্বালাল্লাহু মিন্না ওয়া মিনকুম। আপনাকে ও আপনার পরিবারকে আনন্দময় ও বরকতপূর্ণ ঈদুল আযহার শুভেচ্ছা।",
+        "fa": "تقبل الله منا و منکم. عید قربان شاد و مبارکی برای شما و خانواده‌تان آرزومندم.",
+        "fr": "Taqabbal Allahu minna wa minkum. Je vous souhaite à vous et votre famille un joyeux et béni Aïd al-Adha.",
+        "id": "Taqabbalallahu minna wa minkum. Semoga Idul Adha ini penuh kebahagiaan dan berkah untuk Anda sekeluarga.",
+        "ms": "Taqabbalallahu minna wa minkum. Semoga Hari Raya Haji ini penuh kebahagiaan dan keberkatan untuk anda sekeluarga.",
+        "tr": "Taqabbalallahu minna wa minkum. Size ve ailenize neşeli ve mübarek bir Kurban Bayramı diliyorum.",
+        "ur": "تقبل اللہ منا و منکم۔ آپ اور آپ کے خاندان کو خوشگوار اور مبارک عید الاضحیٰ کی دعا۔",
+    },
+}
+
 ALL_TRANSLATIONS = {}
 ALL_TRANSLATIONS.update(FIX1_TRANSLATIONS)
 ALL_TRANSLATIONS.update(FIX2_TRANSLATIONS)
 ALL_TRANSLATIONS.update(FIX3_TRANSLATIONS)
 ALL_TRANSLATIONS.update(FIX4_GRACE_TRANSLATIONS)
+ALL_TRANSLATIONS.update(FIX5_SHARE_TRANSLATIONS)
 
 # Keys that are expected to be new (don't already exist in the catalog).
 # "Remember to %@" already exists — excluded from this set so it merges, not adds.
@@ -423,6 +532,7 @@ ALLOWED_NEW_KEYS = (
     set(FIX2_TRANSLATIONS.keys())
     | set(FIX3_TRANSLATIONS.keys())
     | set(FIX4_GRACE_TRANSLATIONS.keys())
+    | set(FIX5_SHARE_TRANSLATIONS.keys())
 ) - {
     "Remember to %@",
 }
@@ -558,15 +668,17 @@ def main():
     print("Serializing (json.dumps, matching current file format)...")
     output = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
-    print(f"Writing {XCSTRINGS_PATH}...")
-    with open(XCSTRINGS_PATH, "w", encoding="utf-8") as f:
+    # ── Write to temp file first, validate, then atomic replace ──────────
+    temp_path = XCSTRINGS_PATH.with_suffix(".xcstrings.tmp")
+    print(f"Writing temp file {temp_path}...")
+    with open(temp_path, "w", encoding="utf-8") as f:
         f.write(output)
 
-    # ── Post-write validation ─────────────────────────────────────────────
+    # ── Post-write validation (on temp file — original is untouched) ─────
     print("Running post-write validation...")
 
     # 1. Re-parse as valid JSON
-    with open(XCSTRINGS_PATH, "r", encoding="utf-8") as f:
+    with open(temp_path, "r", encoding="utf-8") as f:
         reloaded = json.load(f, object_pairs_hook=OrderedDict)
     post_keys = set(reloaded["strings"].keys())
     print("  Valid JSON: OK")
@@ -626,7 +738,11 @@ def main():
                 )
     print(f"  Coverage: OK — all {len(ALL_TRANSLATIONS)} keys × {len(LANGS)} languages")
 
-    print("\nDone! All validations passed.")
+    # ── All validations passed — atomic replace ──────────────────────────
+    print(f"\nAll validations passed. Replacing {XCSTRINGS_PATH}...")
+    os.replace(temp_path, XCSTRINGS_PATH)
+
+    print("Done!")
     print(f"  Total keys in catalog: {len(post_keys)}")
     print(f"  Keys modified/added: {len(ALL_TRANSLATIONS)}")
 
@@ -635,5 +751,10 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
+        # Clean up temp file on failure
+        temp_path = XCSTRINGS_PATH.with_suffix(".xcstrings.tmp")
+        if temp_path.exists():
+            temp_path.unlink()
+            print(f"  Rolled back: temp file removed, original untouched.", file=sys.stderr)
         print(f"\nERROR: {e}", file=sys.stderr)
         sys.exit(1)
