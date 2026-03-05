@@ -214,7 +214,7 @@ struct CategoryRow: View {
                 .background(Color(.tertiarySystemGroupedBackground))
                 .cornerRadius(8)
 
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

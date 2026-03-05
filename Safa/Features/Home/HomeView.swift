@@ -323,7 +323,7 @@ struct HomeView: View {
 
             Spacer()
 
-            Image(systemName: isEidBannerExpanded ? "chevron.down" : "chevron.right")
+            Image(systemName: isEidBannerExpanded ? "chevron.down" : "chevron.forward")
                 .font(.caption)
                 .foregroundColor(SafaColors.Fallback.tertiaryText)
 
@@ -521,7 +521,7 @@ struct HomeView: View {
 
                 Spacer()
 
-                Image(systemName: isDailyVerseExpanded ? "chevron.down" : "chevron.right")
+                Image(systemName: isDailyVerseExpanded ? "chevron.down" : "chevron.forward")
                     .font(.caption)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }
@@ -578,7 +578,7 @@ struct HomeView: View {
 
                 Spacer()
 
-                Image(systemName: isResumeCardExpanded ? "chevron.down" : "chevron.right")
+                Image(systemName: isResumeCardExpanded ? "chevron.down" : "chevron.forward")
                     .font(.caption)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
 
@@ -626,7 +626,7 @@ struct HomeView: View {
 
                         Spacer()
 
-                        Image(systemName: "arrow.right.circle.fill")
+                        Image(systemName: "arrow.forward.circle.fill")
                             .font(.title3)
                             .foregroundColor(.green)
                     }
@@ -676,7 +676,7 @@ struct HomeView: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }
         }
@@ -698,7 +698,7 @@ struct HomeView: View {
                 Text("\(fastingDays.count)/30")
                     .font(SafaTypography.labelSmall)
                     .foregroundColor(SafaColors.Fallback.secondaryText)
-                Image(systemName: isFastingTrackerExpanded ? "chevron.down" : "chevron.right")
+                Image(systemName: isFastingTrackerExpanded ? "chevron.down" : "chevron.forward")
                     .font(.caption)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }

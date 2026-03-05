@@ -349,7 +349,7 @@ private struct JuzRow: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
                     .accessibilityHidden(true)
             }

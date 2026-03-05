@@ -201,7 +201,7 @@ struct QiblaCompassView: View {
                             .font(.caption)
                         Text(locationSource.message)
                             .font(SafaTypography.labelSmall)
-                            .lineLimit(1)
+                            .lineLimit(2)
                     }
                     .foregroundColor(locationSource.color)
                     .accessibilityLabel(locationSource.message)

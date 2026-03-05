@@ -105,7 +105,7 @@ struct CardButtonStyle: ButtonStyle {
                 HStack {
                     Text("Tap me")
                     Spacer()
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                 }
             }
         }

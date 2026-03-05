@@ -72,7 +72,7 @@ struct CalendarView: View {
                     currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
                 }
             } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.title2)
                     .foregroundColor(.accentColor)
             }
@@ -96,7 +96,7 @@ struct CalendarView: View {
                     currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
                 }
             } label: {
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.title2)
                     .foregroundColor(.accentColor)
             }
@@ -221,7 +221,7 @@ struct CalendarView: View {
 
                                 Spacer()
 
-                                Image(systemName: "chevron.right")
+                                Image(systemName: "chevron.forward")
                                     .font(.caption)
                                     .foregroundColor(SafaColors.Fallback.tertiaryText)
                             }

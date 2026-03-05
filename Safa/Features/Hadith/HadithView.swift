@@ -177,7 +177,7 @@ struct HadithContentView: View {
 
                     Spacer()
 
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                         .font(.caption)
                         .foregroundColor(SafaColors.Fallback.tertiaryText)
                 }

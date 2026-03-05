@@ -32,21 +32,31 @@ struct FlowLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var currentX: CGFloat = bounds.minX
+        let isRTL = subviews.layoutDirection == .rightToLeft
+        var currentX: CGFloat = isRTL ? bounds.maxX : bounds.minX
         var currentY: CGFloat = bounds.minY
         var lineHeight: CGFloat = 0
 
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
 
-            if currentX + size.width > bounds.maxX, currentX > bounds.minX {
-                currentX = bounds.minX
-                currentY += lineHeight + spacing
-                lineHeight = 0
+            if isRTL {
+                if currentX - size.width < bounds.minX, currentX < bounds.maxX {
+                    currentX = bounds.maxX
+                    currentY += lineHeight + spacing
+                    lineHeight = 0
+                }
+                subview.place(at: CGPoint(x: currentX - size.width, y: currentY), proposal: .unspecified)
+                currentX -= size.width + spacing
+            } else {
+                if currentX + size.width > bounds.maxX, currentX > bounds.minX {
+                    currentX = bounds.minX
+                    currentY += lineHeight + spacing
+                    lineHeight = 0
+                }
+                subview.place(at: CGPoint(x: currentX, y: currentY), proposal: .unspecified)
+                currentX += size.width + spacing
             }
-
-            subview.place(at: CGPoint(x: currentX, y: currentY), proposal: .unspecified)
-            currentX += size.width + spacing
             lineHeight = max(lineHeight, size.height)
         }
     }

@@ -267,7 +267,7 @@ struct WindDownView: View {
                         .foregroundStyle(.orange)
                 }
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .foregroundStyle(.secondary)
             }
             .padding()

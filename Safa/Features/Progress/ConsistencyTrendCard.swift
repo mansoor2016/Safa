@@ -58,7 +58,7 @@ struct ConsistencyTrendCard: View {
 
         HStack(spacing: 2) {
             if abs(delta) <= 0.05 {
-                Image(systemName: "arrow.right")
+                Image(systemName: "arrow.forward")
                     .font(.caption)
                     .foregroundStyle(SafaColors.Fallback.secondaryText)
             } else if delta > 0 {

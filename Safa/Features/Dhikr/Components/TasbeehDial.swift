@@ -11,6 +11,7 @@ struct TasbeehDial: View {
     let onTap: () -> Void
 
     @ScaledMetric(relativeTo: .largeTitle) private var ringSize: CGFloat = 250
+    @ScaledMetric(relativeTo: .body) private var plusIconSize: CGFloat = 20
 
     var body: some View {
         Button(action: onTap) {
@@ -42,7 +43,7 @@ struct TasbeehDial: View {
 
                     // Tap affordance
                     Image(systemName: "plus")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: plusIconSize, weight: .medium))
                         .foregroundColor(.accentColor.opacity(0.6))
                         .padding(.top, SafaSpacing.xxs)
                 }

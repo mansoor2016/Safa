@@ -585,7 +585,7 @@ struct LocationRecommendationsSheet: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                 } else {
-                    Image(systemName: "arrow.right.circle")
+                    Image(systemName: "arrow.forward.circle")
                         .foregroundColor(.orange)
                 }
             }

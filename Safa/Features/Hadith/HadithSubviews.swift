@@ -37,7 +37,7 @@ struct HadithCollectionRow: View {
                         .foregroundColor(SafaColors.Fallback.tertiaryText)
                 }
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.caption)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }
@@ -220,7 +220,7 @@ struct CollectionDetailView: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.caption)
                     .foregroundColor(SafaColors.Fallback.tertiaryText)
             }

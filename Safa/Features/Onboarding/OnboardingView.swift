@@ -550,7 +550,7 @@ struct OnboardingView: View {
                         } label: {
                             HStack(spacing: SafaSpacing.xxs) {
                                 Text("Next")
-                                Image(systemName: "arrow.right")
+                                Image(systemName: "arrow.forward")
                             }
                             .font(SafaTypography.bodyMedium)
                             .fontWeight(.medium)

@@ -177,7 +177,7 @@ struct DisabledFeatureRow: View {
                     .padding(.vertical, 2)
                     .background(Capsule().fill(Color(.tertiarySystemBackground)))
             } else {
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tertiary)
             }

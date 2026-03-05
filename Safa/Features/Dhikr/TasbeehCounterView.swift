@@ -77,7 +77,7 @@ struct TasbeehCounterView: View {
                                         HStack(spacing: SafaSpacing.xxs) {
                                             Text("\(targetCount)")
                                                 .font(SafaTypography.titleSmall)
-                                            Image(systemName: "chevron.right")
+                                            Image(systemName: "chevron.forward")
                                                 .font(.caption)
                                         }
                                         .foregroundColor(.accentColor)
