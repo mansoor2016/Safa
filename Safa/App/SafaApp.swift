@@ -262,7 +262,7 @@ struct SafaApp: App {
             )
         }
         let prayerInfos = obligatory
-            .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
+            .map { PrayerInfo(id: $0.type.rawValue, name: $0.type.localizedDisplayName, time: $0.time) }
         PrayerLiveActivityManager.shared.scheduleBoundaryUpdates(
             prayers: prayerInfos,
             maghribTime: maghrib,

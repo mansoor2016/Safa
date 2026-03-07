@@ -97,7 +97,7 @@ final class PrayerLiveActivityManager {
         let hijri = HijriDateConverter.shared.hijriDateString(from: now, style: .dayMonth, maghribTime: maghrib)
         let location = prefs.savedLocationName ?? AppDefaults.defaultLocationName
         let prayerInfos = obligatory
-            .map { PrayerInfo(name: $0.type.localizedDisplayName, time: $0.time) }
+            .map { PrayerInfo(id: $0.type.rawValue, name: $0.type.localizedDisplayName, time: $0.time) }
 
         await updateActivity(
             prayerName: activePrayer.type.localizedDisplayName,

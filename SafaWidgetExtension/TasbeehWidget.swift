@@ -70,24 +70,19 @@ struct TasbeehWidgetData {
     var targetCount: Int
 
     static func load() -> TasbeehWidgetData {
-        guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
-            return TasbeehWidgetData(count: 0, dhikrType: "SubhanAllah", dhikrArabic: "سُبْحَانَ اللهِ", targetCount: 33)
-        }
-
+        let store = WidgetDataStore()
+        let data = store.readTasbeehData()
         return TasbeehWidgetData(
-            count: defaults.integer(forKey: "tasbeeh_widget_count"),
-            dhikrType: defaults.string(forKey: "tasbeeh_widget_dhikr") ?? "SubhanAllah",
-            dhikrArabic: defaults.string(forKey: "tasbeeh_widget_arabic") ?? "سُبْحَانَ اللهِ",
-            targetCount: defaults.integer(forKey: "tasbeeh_widget_target") == 0 ? 33 : defaults.integer(forKey: "tasbeeh_widget_target")
+            count: data.count,
+            dhikrType: data.dhikrType,
+            dhikrArabic: data.dhikrArabic,
+            targetCount: data.targetCount
         )
     }
 
     func save() {
-        guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else { return }
-        defaults.set(count, forKey: "tasbeeh_widget_count")
-        defaults.set(dhikrType, forKey: "tasbeeh_widget_dhikr")
-        defaults.set(dhikrArabic, forKey: "tasbeeh_widget_arabic")
-        defaults.set(targetCount, forKey: "tasbeeh_widget_target")
+        let store = WidgetDataStore()
+        store.writeTasbeehData(count: count, dhikrType: dhikrType, dhikrArabic: dhikrArabic, targetCount: targetCount)
     }
 }
 

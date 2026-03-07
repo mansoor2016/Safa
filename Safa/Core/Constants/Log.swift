@@ -20,4 +20,5 @@ enum Log {
     static let healthKit = Logger(subsystem: subsystem, category: "HealthKit")
     static let focusMode = Logger(subsystem: subsystem, category: "FocusMode")
     static let metrics = Logger(subsystem: subsystem, category: "Metrics")
+    static let prayer = Logger(subsystem: subsystem, category: "Prayer")
 }

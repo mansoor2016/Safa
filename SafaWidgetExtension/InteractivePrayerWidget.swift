@@ -5,6 +5,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import SafaShared
 
 // MARK: - Widget Entry
 
@@ -75,55 +76,33 @@ struct InteractivePrayerProvider: AppIntentTimelineProvider {
     }
 
     private static func loadPrayers() -> [PrayerStatus] {
-        guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
+        let store = WidgetDataStore()
+        guard let prayerInfos = store.loadPrayers() else {
             return samplePrayers()
         }
 
         let now = Date()
-        let loggedPrayers = defaults.stringArray(forKey: "loggedPrayers_\(dateKey())") ?? []
-
-        // Read localized prayer names from App Group (written by main app on language change)
-        let namesFallback = localizedPrayerNames()
-        let names = defaults.stringArray(forKey: "prayerNames") ?? namesFallback
-        let prayerKeys: [(id: String, timeKey: String)] = [
-            ("fajr", "fajrTime"),
-            ("dhuhr", "dhuhrTime"),
-            ("asr", "asrTime"),
-            ("maghrib", "maghribTime"),
-            ("isha", "ishaTime")
-        ]
+        let loggedIds = store.readLoggedPrayerIds()
 
         var prayers: [PrayerStatus] = []
         var foundNextPrayer = false
 
-        for (index, prayer) in prayerKeys.enumerated() {
-            guard let time = defaults.object(forKey: prayer.timeKey) as? Date else {
-                // If any prayer time is missing, fall back to sample data
-                return samplePrayers()
-            }
-
-            let name = index < names.count ? names[index] : namesFallback[index]
-            let isPast = time <= now
+        for prayer in prayerInfos {
+            let isPast = prayer.time <= now
             let isNext = !isPast && !foundNextPrayer
             if isNext { foundNextPrayer = true }
 
             prayers.append(PrayerStatus(
                 id: prayer.id,
-                name: name,
-                time: time,
-                isLogged: loggedPrayers.contains(prayer.id),
+                name: prayer.name,
+                time: prayer.time,
+                isLogged: loggedIds.contains(prayer.id),
                 isPast: isPast,
                 isNext: isNext
             ))
         }
 
         return prayers
-    }
-
-    private static func dateKey() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: Date())
     }
 }
 
@@ -135,9 +114,6 @@ struct InteractivePrayerConfigIntent: WidgetConfigurationIntent {
 
     @Parameter(title: "Show Time", default: true)
     var showTime: Bool
-
-    @Parameter(title: "Compact Mode", default: false)
-    var compactMode: Bool
 }
 
 // MARK: - Log Prayer Widget Intent
@@ -158,27 +134,14 @@ struct WidgetLogPrayerIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        // Save to App Group UserDefaults
-        if let defaults = UserDefaults(suiteName: "group.com.safa.app") {
-            let dateKey = Self.dateKey()
-            var loggedPrayers = defaults.stringArray(forKey: "loggedPrayers_\(dateKey)") ?? []
+        let store = WidgetDataStore()
+        store.writeLoggedPrayer(prayerId)
+        store.writePostPrayerSnippet(for: prayerId)
 
-            if !loggedPrayers.contains(prayerId) {
-                loggedPrayers.append(prayerId)
-                defaults.set(loggedPrayers, forKey: "loggedPrayers_\(dateKey)")
-            }
-        }
-
-        // Reload widget timeline
-        WidgetCenter.shared.reloadTimelines(ofKind: "InteractivePrayerWidget")
+        // Reload all widget timelines so lock screen widgets pick up the new state
+        WidgetCenter.shared.reloadAllTimelines()
 
         return .result()
-    }
-
-    private static func dateKey() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: Date())
     }
 }
 
@@ -282,7 +245,7 @@ struct MediumInteractivePrayerView: View {
                         .foregroundColor(.secondary)
                 }
 
-                Text(loggedCount == 5 ? "All prayers logged!" : "prayers completed")
+                Text(loggedCount == 5 ? "All prayers complete" : "prayers completed")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

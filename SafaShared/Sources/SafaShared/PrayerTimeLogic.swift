@@ -22,12 +22,52 @@ public func isPrayerTimeNow(_ prayerTime: Date, at reference: Date = Date()) -> 
 // MARK: - Prayer Info
 
 public struct PrayerInfo: Equatable, Sendable {
+    /// Stable identifier (e.g. "fajr", "dhuhr") — not localized.
+    public let id: String
     public let name: String
     public let time: Date
 
-    public init(name: String, time: Date) {
+    public init(id: String = "", name: String, time: Date) {
+        self.id = id
         self.name = name
         self.time = time
+    }
+}
+
+// MARK: - Prayer ID Constants
+
+/// Stable prayer identifiers used across app, widgets, and App Group storage.
+/// Always reference these constants instead of hardcoding string literals.
+public enum PrayerID {
+    public static let fajr = "fajr"
+    public static let dhuhr = "dhuhr"
+    public static let asr = "asr"
+    public static let maghrib = "maghrib"
+    public static let isha = "isha"
+
+    /// All 5 obligatory prayer IDs in order.
+    public static let allObligatory = [fajr, dhuhr, asr, maghrib, isha]
+
+    /// Maps prayer ID to snippet context tag for post-prayer content selection.
+    public static func snippetContext(for prayerId: String) -> String {
+        switch prayerId {
+        case fajr: return "morning"
+        case maghrib: return "evening"
+        case isha: return "night"
+        default: return "general"
+        }
+    }
+
+    /// Maps prayer ID to its index (0-based) for deterministic snippet rotation.
+    public static func index(for prayerId: String) -> Int {
+        switch prayerId {
+        case fajr: return 0
+        case dhuhr: return 1
+        case asr: return 2
+        case maghrib: return 3
+        case isha: return 4
+        default: return 0
+        }
     }
 }
 
@@ -193,11 +233,11 @@ public struct DefaultPrayerTimes {
         let (ishaH, ishaM) = ishaTime(month: month)
 
         return [
-            PrayerInfo(name: "Fajr", time: cal.date(bySettingHour: fajrH, minute: fajrM, second: 0, of: today)!),
-            PrayerInfo(name: "Dhuhr", time: cal.date(bySettingHour: dhuhrH, minute: dhuhrM, second: 0, of: today)!),
-            PrayerInfo(name: "Asr", time: cal.date(bySettingHour: asrH, minute: asrM, second: 0, of: today)!),
-            PrayerInfo(name: "Maghrib", time: cal.date(bySettingHour: maghribH, minute: maghribM, second: 0, of: today)!),
-            PrayerInfo(name: "Isha", time: cal.date(bySettingHour: ishaH, minute: ishaM, second: 0, of: today)!)
+            PrayerInfo(id: "fajr", name: "Fajr", time: cal.date(bySettingHour: fajrH, minute: fajrM, second: 0, of: today)!),
+            PrayerInfo(id: "dhuhr", name: "Dhuhr", time: cal.date(bySettingHour: dhuhrH, minute: dhuhrM, second: 0, of: today)!),
+            PrayerInfo(id: "asr", name: "Asr", time: cal.date(bySettingHour: asrH, minute: asrM, second: 0, of: today)!),
+            PrayerInfo(id: "maghrib", name: "Maghrib", time: cal.date(bySettingHour: maghribH, minute: maghribM, second: 0, of: today)!),
+            PrayerInfo(id: "isha", name: "Isha", time: cal.date(bySettingHour: ishaH, minute: ishaM, second: 0, of: today)!)
         ]
     }
 

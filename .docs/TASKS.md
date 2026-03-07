@@ -20,6 +20,8 @@ Effort: **S** (<2h) · **M** (half day) · **L** (1-2 days) · **XL** (3+ days)
 | L | Women-focused prayer/fasting mode — period-aware prayer logging, optional reminder pause, and fiqh-safe UX copy |
 | L | Mosque timetable integration (Iqamah/Jama'ah support) — let users follow local mosque times alongside calculated times |
 | M | Progressive Learn rollout — ship ready tracks incrementally instead of keeping all Learn content gated |
+| M | Dhikr counter ergonomics — move the counter card to the lower part of the screen, move reset higher, enlarge the tap target significantly, and make the full card tappable for easier one-handed use |
+| M | Quran bookmarking UX — replace the unclear circled-number bookmark affordance with a clearer bookmark action, and add press-and-hold on an ayah to bookmark with the existing toast feedback (similar to the prayer card long-press pattern) |
 | L | Monetization remaining — receipt validation, TestFlight sandbox testing, App Review submission (StoreKit 2 voluntary subscriptions, CommunitySupportCard, custom app icons already shipped) |
 | XL | Learning section — build out the Learn tab with structured Islamic education content (tracks, lessons, quizzes). Content authoring pipeline, progress tracking, offline support. Currently feature-flagged as disabled |
 

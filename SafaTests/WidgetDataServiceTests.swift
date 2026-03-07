@@ -3,6 +3,7 @@
 // DEPENDENCIES: XCTest, Safa
 
 import XCTest
+import SafaShared
 @testable import Safa
 
 final class WidgetDataServiceTests: XCTestCase {
@@ -139,14 +140,17 @@ final class WidgetDataServiceTests: XCTestCase {
         XCTAssertTrue(stored.contains("dhuhr"))
     }
 
-    func test_writeLoggedPrayers_emptySetClearsValues() {
+    func test_writeLoggedPrayers_emptySetClearsExisting() {
         // First write some logged prayers
         sut.writeLoggedPrayers([.fajr, .dhuhr], for: Date())
         XCTAssertEqual(sut.readLoggedPrayers(for: Date()).count, 2)
 
-        // Then write empty set
+        // Writing empty set should clear existing (overwrite semantics — enables unlog).
+        // Widget-only logs are safe: reconcileWidgetLoggedPrayers() merges them into
+        // loggedPrayers before writeLoggedPrayers is called.
         sut.writeLoggedPrayers([], for: Date())
-        XCTAssertTrue(sut.readLoggedPrayers(for: Date()).isEmpty)
+        XCTAssertEqual(sut.readLoggedPrayers(for: Date()).count, 0,
+                       "Overwrite semantics: empty write should clear widget key for unlog support")
     }
 
     func test_writeLoggedPrayers_separatesByDate() {
@@ -308,6 +312,157 @@ final class WidgetDataServiceTests: XCTestCase {
     func test_readNextPrayerId_missingKey_returnsNil() {
         // Fresh defaults with no data written
         XCTAssertNil(sut.readNextPrayerId())
+    }
+
+    // MARK: - Snippet Tests
+
+    func test_readSnippet_returnsNilWhenNoData() {
+        XCTAssertNil(sut.readSnippet())
+    }
+
+    func test_readSnippet_returnsWrittenData() {
+        guard let defaults = UserDefaults(suiteName: testSuiteName) else {
+            XCTFail("Could not create test defaults")
+            return
+        }
+
+        defaults.set("بِسْمِ اللَّهِ", forKey: WidgetAppGroupKeys.snippetArabic)
+        defaults.set("In the name of Allah", forKey: WidgetAppGroupKeys.snippetTranslation)
+        defaults.set("Quran 1:1", forKey: WidgetAppGroupKeys.snippetReference)
+        defaults.set("fajr", forKey: WidgetAppGroupKeys.snippetPrayerId)
+        defaults.set("safa://quran", forKey: WidgetAppGroupKeys.snippetDeepLink)
+
+        let snippet = sut.readSnippet()
+        XCTAssertNotNil(snippet)
+        XCTAssertEqual(snippet?.arabic, "بِسْمِ اللَّهِ")
+        XCTAssertEqual(snippet?.translation, "In the name of Allah")
+        XCTAssertEqual(snippet?.reference, "Quran 1:1")
+        XCTAssertEqual(snippet?.prayerId, "fajr")
+        XCTAssertEqual(snippet?.deepLink, "safa://quran")
+    }
+
+    func test_readSnippet_returnsNilWhenPartialData() {
+        guard let defaults = UserDefaults(suiteName: testSuiteName) else {
+            XCTFail("Could not create test defaults")
+            return
+        }
+
+        // Only write arabic — missing translation, reference, prayerId
+        defaults.set("بِسْمِ اللَّهِ", forKey: WidgetAppGroupKeys.snippetArabic)
+
+        XCTAssertNil(sut.readSnippet())
+    }
+
+    func test_readSnippet_defaultsDeepLinkToQuran() {
+        guard let defaults = UserDefaults(suiteName: testSuiteName) else {
+            XCTFail("Could not create test defaults")
+            return
+        }
+
+        defaults.set("text", forKey: WidgetAppGroupKeys.snippetArabic)
+        defaults.set("text", forKey: WidgetAppGroupKeys.snippetTranslation)
+        defaults.set("ref", forKey: WidgetAppGroupKeys.snippetReference)
+        defaults.set("dhuhr", forKey: WidgetAppGroupKeys.snippetPrayerId)
+        // No deep link key set
+
+        let snippet = sut.readSnippet()
+        XCTAssertEqual(snippet?.deepLink, "safa://quran")
+    }
+
+    // MARK: - Write Post-Prayer Content Tests
+
+    func test_writePostPrayerContent_writesAllSnippetKeys() {
+        sut.writePostPrayerContent(for: "dhuhr")
+
+        let defaults = UserDefaults(suiteName: testSuiteName)
+        XCTAssertNotNil(defaults?.string(forKey: WidgetAppGroupKeys.snippetArabic))
+        XCTAssertNotNil(defaults?.string(forKey: WidgetAppGroupKeys.snippetTranslation))
+        XCTAssertNotNil(defaults?.string(forKey: WidgetAppGroupKeys.snippetReference))
+        XCTAssertEqual(defaults?.string(forKey: WidgetAppGroupKeys.snippetPrayerId), "dhuhr")
+        XCTAssertNotNil(defaults?.string(forKey: WidgetAppGroupKeys.snippetDeepLink))
+    }
+
+    func test_writePostPrayerContent_fajrSelectsMorningContext() {
+        sut.writePostPrayerContent(for: "fajr")
+
+        let reference = sut.readSnippet()?.reference ?? ""
+        let morningRefs = WidgetSnippetCatalog.snippets
+            .filter { $0.context == "morning" }
+            .map { $0.reference }
+        XCTAssertTrue(morningRefs.contains(reference),
+                       "Fajr should select a morning snippet, got: \(reference)")
+    }
+
+    func test_writePostPrayerContent_ishaSelectsNightContext() {
+        sut.writePostPrayerContent(for: "isha")
+
+        let reference = sut.readSnippet()?.reference ?? ""
+        let nightRefs = WidgetSnippetCatalog.snippets
+            .filter { $0.context == "night" }
+            .map { $0.reference }
+        XCTAssertTrue(nightRefs.contains(reference),
+                       "Isha should select a night snippet, got: \(reference)")
+    }
+
+    func test_writePostPrayerContent_isDeterministic() {
+        sut.writePostPrayerContent(for: "dhuhr")
+        let first = sut.readSnippet()?.translation
+
+        sut.writePostPrayerContent(for: "dhuhr")
+        let second = sut.readSnippet()?.translation
+
+        XCTAssertEqual(first, second, "Same prayer on same day should produce same snippet")
+    }
+
+    // MARK: - Pruning Tests
+
+    func test_pruneStaleKeys_removesOldDateKeys() {
+        guard let defaults = UserDefaults(suiteName: testSuiteName) else {
+            XCTFail("Could not create test defaults")
+            return
+        }
+
+        let calendar = Calendar.current
+        let today = Date()
+        let tenDaysAgo = calendar.date(byAdding: .day, value: -10, to: today)!
+
+        // Write old and recent logged-prayer keys
+        let oldKey = WidgetAppGroupKeys.loggedPrayersKey(for: tenDaysAgo)
+        let recentKey = WidgetAppGroupKeys.loggedPrayersKey(for: today)
+        defaults.set(["fajr"], forKey: oldKey)
+        defaults.set(["dhuhr"], forKey: recentKey)
+
+        // Write old and recent timestamp keys
+        let oldTimestamp = WidgetAppGroupKeys.widgetLogTimestampKey(for: "fajr", date: tenDaysAgo)
+        let recentTimestamp = WidgetAppGroupKeys.widgetLogTimestampKey(for: "dhuhr", date: today)
+        defaults.set(tenDaysAgo, forKey: oldTimestamp)
+        defaults.set(today, forKey: recentTimestamp)
+
+        sut.pruneStaleKeys(daysToKeep: 7)
+
+        XCTAssertNil(defaults.object(forKey: oldKey),
+                     "Keys older than 7 days should be pruned")
+        XCTAssertNil(defaults.object(forKey: oldTimestamp),
+                     "Timestamp keys older than 7 days should be pruned")
+        XCTAssertNotNil(defaults.object(forKey: recentKey),
+                        "Recent keys should be preserved")
+        XCTAssertNotNil(defaults.object(forKey: recentTimestamp),
+                        "Recent timestamp keys should be preserved")
+    }
+
+    func test_pruneStaleKeys_doesNotRemoveNonDateKeys() {
+        guard let defaults = UserDefaults(suiteName: testSuiteName) else {
+            XCTFail("Could not create test defaults")
+            return
+        }
+
+        defaults.set("value", forKey: WidgetAppGroupKeys.hijriDate)
+        defaults.set(42, forKey: WidgetAppGroupKeys.streakCurrentCount)
+
+        sut.pruneStaleKeys(daysToKeep: 0)
+
+        XCTAssertEqual(defaults.string(forKey: WidgetAppGroupKeys.hijriDate), "value")
+        XCTAssertEqual(defaults.integer(forKey: WidgetAppGroupKeys.streakCurrentCount), 42)
     }
 
     // MARK: - Helpers

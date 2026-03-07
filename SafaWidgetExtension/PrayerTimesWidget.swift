@@ -1,6 +1,6 @@
-// MARK: - SafaWidget.swift
-// PURPOSE: Widget extension for Safa app
-// DEPENDENCIES: WidgetKit, SwiftUI
+// MARK: - PrayerTimesWidget.swift
+// PURPOSE: Contextual widget showing prayer state — countdown, prayer window, log prompt, spiritual content
+// DEPENDENCIES: WidgetKit, SwiftUI, SafaShared
 
 import WidgetKit
 import SwiftUI
@@ -16,77 +16,70 @@ struct PrayerTimeEntry: TimelineEntry {
     let configuration: ConfigurationAppIntent
 
     /// Stored next prayer info — set at entry creation, not computed from Date().
-    /// This ensures WidgetKit pre-rendered entries show the correct prayer for their time window.
     let nextPrayerName: String
     let nextPrayerTime: Date
     let hasNextPrayer: Bool
     /// Whether the prayer time has just arrived (grace window: 0-15 min after prayer time).
     let isGrace: Bool
+
+    // MARK: - Contextual State
+
+    /// Resolved widget state for lock screen contextual display.
+    let widgetState: WidgetPrayerState
+    /// Post-prayer snippet content (may be nil if no snippet available).
+    let snippetArabic: String?
+    let snippetTranslation: String?
+    let snippetReference: String?
+    /// Dynamic deep link URL based on current state.
+    let deepLinkURL: String
 }
 
 // MARK: - Widget Provider
 
 struct Provider: AppIntentTimelineProvider {
 
-    // Shared logic from SafaShared (single source of truth)
     private let defaultPrayers = DefaultPrayerTimes()
-    private let hijriHelper = HijriDateHelper()
-    private let appGroupId = "group.com.safa.app"
-
-    /// Load prayer times from App Group (written by main app), fall back to London defaults
-    private func loadPrayers() -> [PrayerInfo] {
-        guard let defaults = UserDefaults(suiteName: appGroupId) else {
-            return defaultPrayers.forToday()
-        }
-
-        // Read localized prayer names from App Group (written by main app on language change)
-        let namesFallback = [
-            String(localized: "Fajr"), String(localized: "Dhuhr"),
-            String(localized: "Asr"), String(localized: "Maghrib"),
-            String(localized: "Isha")
-        ]
-        let names = defaults.stringArray(forKey: "prayerNames") ?? namesFallback
-        let timeKeys = ["fajrTime", "dhuhrTime", "asrTime", "maghribTime", "ishaTime"]
-
-        var prayers: [PrayerInfo] = []
-        for (index, key) in timeKeys.enumerated() {
-            if let time = defaults.object(forKey: key) as? Date {
-                let name = index < names.count ? names[index] : namesFallback[index]
-                prayers.append(PrayerInfo(name: name, time: time))
-            }
-        }
-
-        // If we got all 5 prayer times from App Group, use them; otherwise fall back
-        guard prayers.count == 5 else {
-            return defaultPrayers.forToday()
-        }
-
-        return prayers
-    }
-
-    /// Compute Hijri date for a specific point in time, using Maghrib from App Group.
-    /// For "now" entries this matches what the main app wrote; for future boundary entries
-    /// (e.g. post-Maghrib) it correctly advances the Hijri date.
-    private func hijriDate(for date: Date) -> String {
-        let defaults = UserDefaults(suiteName: appGroupId)
-        let maghrib = defaults?.object(forKey: "maghribTime") as? Date
-        return hijriHelper.hijriDateString(from: date, maghribTime: maghrib)
-    }
-
+    private let store = WidgetDataStore()
     private let calculator = NextPrayerCalculator()
 
-    private func makeEntry(configuration: ConfigurationAppIntent, at date: Date = Date(), nextPrayer: PrayerInfo? = nil, prayers: [PrayerInfo]? = nil, isGrace: Bool = false) -> PrayerTimeEntry {
+    private func loadPrayers() -> [PrayerInfo] {
+        store.loadPrayers() ?? defaultPrayers.forToday()
+    }
+
+    private func makeEntry(
+        configuration: ConfigurationAppIntent,
+        at date: Date = Date(),
+        nextPrayer: PrayerInfo? = nil,
+        prayers: [PrayerInfo]? = nil,
+        isGrace: Bool = false
+    ) -> PrayerTimeEntry {
         let prayerList = prayers ?? loadPrayers()
         let next = nextPrayer ?? calculator.nextPrayer(from: prayerList, at: date)
+
+        let state = WidgetPrayerStateResolver.resolve(
+            prayers: prayerList,
+            loggedPrayerIds: store.readLoggedPrayerIds(at: date),
+            streakCount: store.readStreakData().current,
+            at: date
+        )
+
+        let (snippetArabic, snippetTranslation, snippetReference, deepLink) =
+            WidgetSnippetResolver.resolve(state: state, snippet: store.readSnippet())
+
         return PrayerTimeEntry(
             date: date,
             prayers: prayerList,
-            hijriDate: hijriDate(for: date),
+            hijriDate: store.readHijriDate(for: date),
             configuration: configuration,
             nextPrayerName: next?.name ?? String(localized: "Isha"),
             nextPrayerTime: next?.time ?? date,
             hasNextPrayer: next != nil,
-            isGrace: isGrace
+            isGrace: isGrace,
+            widgetState: state,
+            snippetArabic: snippetArabic,
+            snippetTranslation: snippetTranslation,
+            snippetReference: snippetReference,
+            deepLinkURL: deepLink
         )
     }
 
@@ -96,12 +89,17 @@ struct Provider: AppIntentTimelineProvider {
         return PrayerTimeEntry(
             date: Date(),
             prayers: prayers,
-            hijriDate: hijriHelper.hijriDateString(),
+            hijriDate: store.readHijriDate(),
             configuration: ConfigurationAppIntent(),
             nextPrayerName: next?.name ?? String(localized: "Isha"),
             nextPrayerTime: next?.time ?? Date(),
             hasNextPrayer: next != nil,
-            isGrace: false
+            isGrace: false,
+            widgetState: .preAdhan(prayerName: next?.name ?? "Isha", prayerTime: next?.time ?? Date(), prayerId: next?.id ?? "isha"),
+            snippetArabic: nil,
+            snippetTranslation: nil,
+            snippetReference: nil,
+            deepLinkURL: "safa://prayer"
         )
     }
 
@@ -112,15 +110,22 @@ struct Provider: AppIntentTimelineProvider {
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<PrayerTimeEntry> {
         let now = Date()
         let prayers = loadPrayers()
-        let boundaries = calculator.timelineBoundaries(from: prayers, startingAt: now)
 
-        let entries = boundaries.map { boundary in
-            makeEntry(
+        // Use contextual boundaries that include post-prayer expiry times
+        let boundaryDates = calculator.contextualTimelineBoundaries(from: prayers, startingAt: now)
+
+        let entries = boundaryDates.map { boundaryDate in
+            // For each boundary, compute the state at that moment
+            let isGrace = prayers.contains { isPrayerTimeNow($0.time, at: boundaryDate) }
+            let next = calculator.nextPrayer(from: prayers, at: boundaryDate)
+                ?? prayers.last(where: { isPrayerTimeNow($0.time, at: boundaryDate) })
+
+            return makeEntry(
                 configuration: configuration,
-                at: boundary.date,
-                nextPrayer: boundary.nextPrayer,
+                at: boundaryDate,
+                nextPrayer: next,
                 prayers: prayers,
-                isGrace: boundary.isGrace
+                isGrace: isGrace
             )
         }
 
@@ -171,7 +176,7 @@ struct SmallWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: "moon.stars.fill")
+                Image(systemName: smallIcon)
                     .font(.caption)
                     .foregroundColor(.accentColor)
                 Spacer()
@@ -179,27 +184,83 @@ struct SmallWidgetView: View {
 
             Spacer()
 
-            if entry.hasNextPrayer {
-                Text(entry.isGrace ? "Time to pray" : "Next Prayer")
+            switch entry.widgetState {
+            case .preAdhan(let name, let time, _):
+                Text("Next Prayer")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
-                Text(entry.nextPrayerName)
+                Text(name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
 
-                if entry.isGrace {
-                    Text("Prayer time")
+                Text(time, style: .time)
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
+            case .prayerWindow(let name, _, _):
+                Text("Time to pray")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Text(name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+
+                Text("Prayer time")
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
+            case .gracePrompt(let name, _):
+                Text(name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+
+                Text("Pray when ready")
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
+            case .postPrayer:
+                if let translation = entry.snippetTranslation,
+                   let reference = entry.snippetReference {
+                    Text("\"\(translation)\"")
                         .font(.caption)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+
+                    Text("— \(reference)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
                 } else {
-                    Text(entry.nextPrayerTime, style: .time)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.green)
+
+                    Text("Alhamdulillah")
                         .font(.caption)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.primary)
                 }
-            } else {
-                Text("No More Prayers Today")
+
+            case .allComplete(let streak):
+                Image(systemName: "moon.stars.fill")
+                    .font(.title2)
+                    .foregroundColor(.purple)
+
+                Text("All prayers complete")
+                    .font(.caption2)
+                    .foregroundColor(.primary)
+
+                if streak > 0 {
+                    Text("\(streak)-day streak")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+            case .dayEnded:
+                Text("Rest well")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
@@ -216,6 +277,21 @@ struct SmallWidgetView: View {
         }
         .padding()
     }
+
+    private var smallIcon: String {
+        switch entry.widgetState {
+        case .prayerWindow:
+            return prayerIcon(for: entry.widgetState, filled: true)
+        case .preAdhan, .gracePrompt:
+            return prayerIcon(for: entry.widgetState)
+        case .postPrayer:
+            return "book.fill"
+        case .allComplete:
+            return "checkmark.circle.fill"
+        case .dayEnded:
+            return "moon.zzz.fill"
+        }
+    }
 }
 
 // MARK: - Medium Widget
@@ -225,9 +301,10 @@ struct MediumWidgetView: View {
 
     var body: some View {
         HStack {
+            // Left side — contextual state
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Image(systemName: "moon.stars.fill")
+                    Image(systemName: mediumIcon)
                         .font(.title3)
                         .foregroundColor(.accentColor)
 
@@ -237,32 +314,86 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                if entry.hasNextPrayer {
-                    Text(entry.isGrace ? "Time to pray" : "Next Prayer")
+                switch entry.widgetState {
+                case .preAdhan(let name, let time, _):
+                    Text("Next Prayer")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Text(entry.nextPrayerName)
+                    Text(name)
                         .font(.title)
                         .fontWeight(.bold)
 
-                    if entry.isGrace {
+                    HStack {
+                        Text(time, style: .time)
+                        Text("·")
+                        Text(time, style: .relative)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
+                case .prayerWindow(let name, let time, _):
+                    Text("Time to pray")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Text(name)
+                        .font(.title)
+                        .fontWeight(.bold)
+
+                    HStack {
+                        Text(time, style: .time)
+                        Text("·")
                         Text("Prayer time")
-                            .font(.caption)
-                            .foregroundColor(.accentColor)
-                    } else {
-                        HStack {
-                            Text(entry.nextPrayerTime, style: .time)
-                            Text("·")
-                            Text(entry.nextPrayerTime, style: .relative)
-                        }
+                    }
+                    .font(.caption)
+                    .foregroundColor(.accentColor)
+
+                case .gracePrompt(let name, _):
+                    Text(name)
+                        .font(.title)
+                        .fontWeight(.bold)
+
+                    Text("Pray when ready")
                         .font(.caption)
                         .foregroundColor(.accentColor)
+
+                case .postPrayer:
+                    if let translation = entry.snippetTranslation,
+                       let reference = entry.snippetReference {
+                        Text("\"\(translation)\"")
+                            .font(.callout)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+
+                        Text("— \(reference)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.green)
+
+                        Text("Alhamdulillah")
+                            .font(.caption)
+                            .foregroundColor(.primary)
                     }
-                } else {
+
+                case .allComplete(let streak):
+                    Text("All prayers complete")
+                        .font(.callout)
+                        .fontWeight(.bold)
+
+                    if streak > 0 {
+                        Text("\(streak)-day streak")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                case .dayEnded:
                     Spacer()
 
-                    Text("No More Prayers Today")
+                    Text("Rest well")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -274,9 +405,9 @@ struct MediumWidgetView: View {
 
             Spacer()
 
-            // Prayer times column
+            // Right side — prayer list
             VStack(alignment: .trailing, spacing: 4) {
-                ForEach(entry.prayers, id: \.name) { prayer in
+                ForEach(entry.prayers, id: \.id) { prayer in
                     PrayerRow(
                         name: prayer.name,
                         time: prayer.time.formatted(date: .omitted, time: .shortened),
@@ -286,6 +417,21 @@ struct MediumWidgetView: View {
             }
         }
         .padding()
+    }
+
+    private var mediumIcon: String {
+        switch entry.widgetState {
+        case .prayerWindow:
+            return prayerIcon(for: entry.widgetState, filled: true)
+        case .preAdhan, .gracePrompt:
+            return prayerIcon(for: entry.widgetState)
+        case .postPrayer:
+            return "book.fill"
+        case .allComplete:
+            return "moon.stars.fill"
+        case .dayEnded:
+            return "moon.zzz.fill"
+        }
     }
 }
 
@@ -308,8 +454,6 @@ struct PrayerRow: View {
     }
 }
 
-// MARK: - Large Widget
-
 // MARK: - Lock Screen Widgets
 
 struct AccessoryCircularView: View {
@@ -319,13 +463,44 @@ struct AccessoryCircularView: View {
         ZStack {
             AccessoryWidgetBackground()
 
-            VStack(spacing: 2) {
-                Text(entry.nextPrayerName.prefix(3))
-                    .font(.caption2)
-                    .fontWeight(.bold)
+            switch entry.widgetState {
+            case .preAdhan(let name, let time, _):
+                VStack(spacing: 2) {
+                    Text(name.prefix(3))
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                    Text(time, style: .time)
+                        .font(.caption2)
+                }
 
-                Text(entry.nextPrayerTime, style: .time)
-                    .font(.caption2)
+            case .prayerWindow(let name, _, _):
+                VStack(spacing: 2) {
+                    Image(systemName: prayerIcon(for: entry.widgetState, filled: true))
+                        .font(.caption)
+                    Text(name.prefix(3))
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                }
+
+            case .gracePrompt:
+                Image(systemName: "circle")
+                    .font(.title3)
+
+            case .postPrayer:
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+
+            case .allComplete:
+                VStack(spacing: 2) {
+                    Image(systemName: "moon.stars.fill")
+                        .font(.caption)
+                    Image(systemName: "checkmark")
+                        .font(.caption2)
+                }
+
+            case .dayEnded:
+                Image(systemName: "moon.zzz.fill")
+                    .font(.title3)
             }
         }
     }
@@ -335,18 +510,104 @@ struct AccessoryRectangularView: View {
     let entry: PrayerTimeEntry
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text("Next: \(entry.nextPrayerName)")
-                    .font(.headline)
-
-                Text(entry.nextPrayerTime, style: .time)
+        switch entry.widgetState {
+        case .preAdhan(let name, let time, _):
+            HStack {
+                Image(systemName: prayerIcon(for: entry.widgetState))
+                VStack(alignment: .leading) {
+                    Text(name)
+                        .font(.headline)
+                    HStack(spacing: 4) {
+                        Text(time, style: .time)
+                        Text("·")
+                        Text(time, style: .relative)
+                    }
                     .font(.caption)
+                }
+                Spacer()
             }
 
-            Spacer()
+        case .prayerWindow(let name, let time, _):
+            HStack {
+                Image(systemName: prayerIcon(for: entry.widgetState, filled: true))
+                VStack(alignment: .leading) {
+                    Text("Time to pray")
+                        .font(.headline)
+                    HStack(spacing: 4) {
+                        Text(name)
+                        Text("·")
+                        Text(time, style: .time)
+                    }
+                    .font(.caption)
+                }
+                Spacer()
+            }
 
-            Image(systemName: "moon.stars")
+        case .gracePrompt(let name, _):
+            HStack {
+                Image(systemName: "checkmark.circle")
+                VStack(alignment: .leading) {
+                    Text("\(name)")
+                        .font(.headline)
+                    Text("Pray when ready")
+                        .font(.caption)
+                }
+                Spacer()
+            }
+
+        case .postPrayer:
+            if let translation = entry.snippetTranslation,
+               let reference = entry.snippetReference {
+                HStack {
+                    Image(systemName: "book.fill")
+                    VStack(alignment: .leading) {
+                        Text("\"\(translation)\"")
+                            .font(.caption)
+                            .lineLimit(2)
+                        Text("— \(reference)")
+                            .font(.caption2)
+                    }
+                    Spacer()
+                }
+            } else {
+                // Fallback if no snippet available
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                    VStack(alignment: .leading) {
+                        Text("Prayer logged")
+                            .font(.headline)
+                        Text("Alhamdulillah")
+                            .font(.caption)
+                    }
+                    Spacer()
+                }
+            }
+
+        case .allComplete(let streak):
+            HStack {
+                Image(systemName: "moon.stars.fill")
+                VStack(alignment: .leading) {
+                    Text("All prayers complete")
+                        .font(.headline)
+                    if streak > 0 {
+                        Text("\(streak) day streak")
+                            .font(.caption)
+                    }
+                }
+                Spacer()
+            }
+
+        case .dayEnded:
+            HStack {
+                Image(systemName: "moon.zzz")
+                VStack(alignment: .leading) {
+                    Text("Rest well")
+                        .font(.headline)
+                    Text(entry.hijriDate)
+                        .font(.caption)
+                }
+                Spacer()
+            }
         }
     }
 }
@@ -355,8 +616,55 @@ struct AccessoryInlineView: View {
     let entry: PrayerTimeEntry
 
     var body: some View {
-        Text("\(entry.nextPrayerName) at \(entry.nextPrayerTime, style: .time)")
+        switch entry.widgetState {
+        case .preAdhan(let name, let time, _):
+            Text("\(name) at \(time, style: .time)")
+
+        case .prayerWindow(let name, _, _):
+            Text("Time to pray \(name)")
+
+        case .gracePrompt(let name, _):
+            Text("\(name) · pray when ready")
+
+        case .postPrayer:
+            if let reference = entry.snippetReference {
+                Text(reference)
+            } else {
+                Text("Alhamdulillah ✓")
+            }
+
+        case .allComplete:
+            Text("All prayers complete")
+
+        case .dayEnded:
+            Text("Rest well")
+        }
     }
+}
+
+// MARK: - Helpers
+
+/// Returns an SF Symbol name for the prayer associated with a widget state.
+private func prayerIcon(for state: WidgetPrayerState, filled: Bool = false) -> String {
+    let prayerId: String
+    switch state {
+    case .preAdhan(_, _, let id), .prayerWindow(_, _, let id), .gracePrompt(_, let id), .postPrayer(let id):
+        prayerId = id
+    case .allComplete, .dayEnded:
+        prayerId = ""
+    }
+
+    let base: String
+    switch prayerId {
+    case "fajr": base = "sunrise"
+    case "dhuhr": base = "sun.max"
+    case "asr": base = "sun.haze"
+    case "maghrib": base = "sunset"
+    case "isha": base = "moon.stars"
+    default: base = "clock"
+    }
+
+    return filled ? "\(base).fill" : base
 }
 
 // MARK: - Widget Definition
@@ -367,7 +675,7 @@ struct PrayerTimesWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             SafaWidgetEntryView(entry: entry)
-                .widgetURL(URL(string: "safa://prayer"))
+                .widgetURL(URL(string: entry.deepLinkURL))
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Prayer Times")

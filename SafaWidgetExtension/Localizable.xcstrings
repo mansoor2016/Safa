@@ -1,17 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "·" : {},
-    "/ %lld" : {},
-    "/ 5" : {},
+    "— %@" : {
+
+    },
+    "·" : {
+
+    },
+    "\"%@\"" : {
+
+    },
+    "/ %lld" : {
+
+    },
+    "/ 5" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ · pray when ready" : {
+
+    },
     "%@ at %@" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ at %2$@"
-          }
-        },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22,6 +34,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%2$@ এ %1$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@"
           }
         },
         "fa" : {
@@ -62,7 +80,12 @@
         }
       }
     },
-    "%lld" : {},
+    "%lld" : {
+
+    },
+    "%lld day streak" : {
+
+    },
     "%lld to go" : {
       "localizations" : {
         "ar" : {
@@ -115,7 +138,12 @@
         }
       }
     },
-    "%lld/5" : {},
+    "%lld-day streak" : {
+
+    },
+    "%lld/5" : {
+
+    },
     "Active today" : {
       "localizations" : {
         "ar" : {
@@ -220,7 +248,17 @@
         }
       }
     },
+    "Alhamdulillah" : {
+
+    },
+    "Alhamdulillah ✓" : {
+
+    },
+    "All prayers complete" : {
+
+    },
     "All prayers logged!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -481,6 +519,7 @@
       }
     },
     "Compact Mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1781,6 +1820,7 @@
       }
     },
     "Next: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1833,6 +1873,7 @@
       }
     },
     "No More Prayers Today" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2040,6 +2081,9 @@
         }
       }
     },
+    "Pray when ready" : {
+
+    },
     "Prayer ID" : {
       "localizations" : {
         "ar" : {
@@ -2143,6 +2187,9 @@
           }
         }
       }
+    },
+    "Prayer logged" : {
+
     },
     "Prayer StandBy" : {
       "localizations" : {
@@ -2663,6 +2710,9 @@
           }
         }
       }
+    },
+    "Rest well" : {
+
     },
     "Safa" : {
       "localizations" : {
@@ -3495,6 +3545,9 @@
           }
         }
       }
+    },
+    "Time to pray %@" : {
+
     },
     "Track your daily prayer streak." : {
       "localizations" : {

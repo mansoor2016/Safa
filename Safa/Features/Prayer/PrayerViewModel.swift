@@ -4,6 +4,7 @@
 
 import Foundation
 import CoreLocation
+import OSLog
 import SafaShared
 
 @MainActor
@@ -126,12 +127,32 @@ final class PrayerViewModel {
                 let logs = try await prayerRepository.getPrayerLogs(for: currentDate)
                 loggedPrayers = Set(logs.map { $0.prayerType })
 
+                // Reconcile any prayers logged from the widget that haven't reached the repo yet.
+                // Also check the previous day — a widget tap just before midnight would be under
+                // yesterday's key and missed if we only reconcile currentDate.
+                let failedWidgetIds = await reconcileWidgetLoggedPrayers()
+                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: currentDate) ?? currentDate
+                let yesterdayFailed = await reconcileWidgetLoggedPrayers(for: yesterday)
+                // Clean up yesterday's widget key if all IDs were successfully reconciled.
+                // Prevents redundant idempotent logPrayer calls on every subsequent app open.
+                // Failed IDs are left in place for retry.
+                if yesterdayFailed.isEmpty {
+                    widgetDataService.clearLoggedPrayers(for: yesterday)
+                }
+
                 // Update next prayer indicator
                 updateNextPrayerIndicator()
 
-                // Sync prayer times and logged state to widgets via App Group
+                // Sync prayer times and logged state to widgets via App Group.
+                // Overwrite semantics (not merge) so unlogs propagate to the widget key.
+                // Include failed widget IDs in the write so they (a) still show as logged in the
+                // widget, and (b) survive for retry on next load.
+                var widgetKeyPrayers = loggedPrayers
+                for id in failedWidgetIds {
+                    if let pt = PrayerType(rawValue: id) { widgetKeyPrayers.insert(pt) }
+                }
                 widgetDataService.writePrayerTimes(prayers)
-                widgetDataService.writeLoggedPrayers(loggedPrayers, for: currentDate)
+                widgetDataService.writeLoggedPrayers(widgetKeyPrayers, for: currentDate)
 
                 // Load notification preferences from PreferencesManager
                 await loadNotificationSettings()
@@ -185,6 +206,7 @@ final class PrayerViewModel {
             )
 
             // Side effects (after persist succeeds)
+            widgetDataService.writePostPrayerContent(for: prayerType.rawValue)
             await HasanatTracker.awardOnce(.prayerLogged, key: "prayer_\(prayerType.rawValue)", via: userState)
             await userState.incrementPrayersLogged()
 
@@ -369,6 +391,38 @@ final class PrayerViewModel {
 
     // MARK: - Private Methods
 
+    /// Reconciles prayers logged from the interactive widget into PrayerRepository.
+    /// Widget logs to date-keyed App Group key; this syncs them into the repository so they persist
+    /// across app launches. Persistence-only — does NOT trigger gamification, snippets, or Live Activity
+    /// (widget intent already handles snippets; replaying awards would double-count).
+    /// Returns IDs that failed to persist — caller includes these in the widget key write
+    /// so they (a) keep showing as logged in the widget, and (b) retry on next load.
+    @discardableResult
+    private func reconcileWidgetLoggedPrayers(for date: Date? = nil) async -> Set<String> {
+        let reconcileDate = date ?? currentDate
+        let widgetLoggedIds = widgetDataService.readLoggedPrayers(for: reconcileDate)
+        var failedIds: Set<String> = []
+        for idString in widgetLoggedIds {
+            guard let prayerType = PrayerType(rawValue: idString),
+                  !loggedPrayers.contains(prayerType) else { continue }
+            // Use widget tap timestamp if available, otherwise fall back to now
+            let tapTime = widgetDataService.readWidgetLogTimestamp(for: idString, date: reconcileDate) ?? Date()
+            let isOnTime = isPrayerOnTime(prayerType, at: tapTime)
+            do {
+                try await prayerRepository.logPrayer(prayerType, for: reconcileDate, at: tapTime, isOnTime: isOnTime)
+                // Only add to in-memory loggedPrayers if reconciling today's prayers
+                if Calendar.current.isDate(reconcileDate, inSameDayAs: currentDate) {
+                    loggedPrayers.insert(prayerType)
+                }
+            } catch {
+                // Repository failure — do NOT insert into loggedPrayers.
+                failedIds.insert(idString)
+                Log.prayer.warning("Widget reconciliation failed for \(idString): \(error.localizedDescription)")
+            }
+        }
+        return failedIds
+    }
+
     private func getCurrentLocation(forceFresh: Bool = false) async throws -> Coordinates {
         // Return cached if available (skip when forcing fresh)
         if !forceFresh, let cached = currentLocation {
@@ -465,7 +519,7 @@ final class PrayerViewModel {
         // Convert PrayerTime → PrayerInfo for boundary scheduling
         let prayerInfos = todayPrayers
             .filter { $0.type.isObligatory }
-            .map { PrayerInfo(name: $0.type.displayName, time: $0.time) }
+            .map { PrayerInfo(id: $0.type.rawValue, name: $0.type.displayName, time: $0.time) }
 
         Task {
             await PrayerLiveActivityManager.shared.updateActivity(

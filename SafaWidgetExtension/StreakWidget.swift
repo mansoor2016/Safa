@@ -19,7 +19,7 @@ struct StreakEntry: TimelineEntry {
 // MARK: - Widget Provider
 
 struct StreakProvider: AppIntentTimelineProvider {
-    private let appGroupId = "group.com.safa.app"
+    private let store = WidgetDataStore()
 
     func placeholder(in context: Context) -> StreakEntry {
         StreakEntry(
@@ -60,14 +60,7 @@ struct StreakProvider: AppIntentTimelineProvider {
     }
 
     private func loadStreakData() -> (current: Int, longest: Int, activeToday: Bool) {
-        guard let defaults = UserDefaults(suiteName: appGroupId) else {
-            return (0, 0, false)
-        }
-        return (
-            defaults.integer(forKey: "streakCurrentCount"),
-            defaults.integer(forKey: "streakLongestCount"),
-            defaults.bool(forKey: "streakIsActiveToday")
-        )
+        store.readStreakData()
     }
 }
 

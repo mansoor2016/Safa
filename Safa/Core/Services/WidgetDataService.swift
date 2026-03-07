@@ -1,6 +1,6 @@
 // MARK: - WidgetDataService.swift
 // PURPOSE: Writes prayer times and logged prayers to App Group UserDefaults for widget access
-// DEPENDENCIES: Foundation, WidgetKit
+// DEPENDENCIES: Foundation, WidgetKit, SafaShared
 
 import Foundation
 import WidgetKit
@@ -16,30 +16,6 @@ extension Notification.Name {
 final class WidgetDataService {
     // MARK: - Shared Instance
     static let shared = WidgetDataService()
-
-    // MARK: - App Group UserDefaults Keys
-    private enum Keys {
-        static let fajrTime = "fajrTime"
-        static let sunriseTime = "sunriseTime"
-        static let dhuhrTime = "dhuhrTime"
-        static let asrTime = "asrTime"
-        static let maghribTime = "maghribTime"
-        static let ishaTime = "ishaTime"
-        static let nextPrayerName = "nextPrayerName"
-        static let nextPrayerId = "nextPrayerId"
-        static let nextPrayerTime = "nextPrayerTime"
-        static let hijriDate = "hijriDate"
-        static let lastUpdated = "widgetDataLastUpdated"
-        static let streakCurrentCount = "streakCurrentCount"
-        static let streakLongestCount = "streakLongestCount"
-        static let streakIsActiveToday = "streakIsActiveToday"
-
-        static func loggedPrayersKey(for date: Date) -> String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            return "loggedPrayers_\(formatter.string(from: date))"
-        }
-    }
 
     // MARK: - Dependencies
     private let defaults: UserDefaults?
@@ -57,12 +33,12 @@ final class WidgetDataService {
 
         for prayer in prayers {
             switch prayer.type {
-            case .fajr: defaults.set(prayer.time, forKey: Keys.fajrTime)
-            case .sunrise: defaults.set(prayer.time, forKey: Keys.sunriseTime)
-            case .dhuhr: defaults.set(prayer.time, forKey: Keys.dhuhrTime)
-            case .asr: defaults.set(prayer.time, forKey: Keys.asrTime)
-            case .maghrib: defaults.set(prayer.time, forKey: Keys.maghribTime)
-            case .isha: defaults.set(prayer.time, forKey: Keys.ishaTime)
+            case .fajr: defaults.set(prayer.time, forKey: WidgetAppGroupKeys.fajrTime)
+            case .sunrise: break // Sunrise not used by widgets
+            case .dhuhr: defaults.set(prayer.time, forKey: WidgetAppGroupKeys.dhuhrTime)
+            case .asr: defaults.set(prayer.time, forKey: WidgetAppGroupKeys.asrTime)
+            case .maghrib: defaults.set(prayer.time, forKey: WidgetAppGroupKeys.maghribTime)
+            case .isha: defaults.set(prayer.time, forKey: WidgetAppGroupKeys.ishaTime)
             }
         }
 
@@ -70,14 +46,14 @@ final class WidgetDataService {
         // Include prayers in grace window (0–15 min after prayer time)
         let now = Date()
         if let next = prayers.first(where: { $0.type.isObligatory && ($0.time > now || isPrayerTimeNow($0.time, at: now)) }) {
-            defaults.set(next.type.localizedDisplayName, forKey: Keys.nextPrayerName)
-            defaults.set(next.type.rawValue, forKey: Keys.nextPrayerId)
-            defaults.set(next.time, forKey: Keys.nextPrayerTime)
+            defaults.set(next.type.localizedDisplayName, forKey: WidgetAppGroupKeys.nextPrayerName)
+            defaults.set(next.type.rawValue, forKey: WidgetAppGroupKeys.nextPrayerId)
+            defaults.set(next.time, forKey: WidgetAppGroupKeys.nextPrayerTime)
         } else {
             // All prayers past grace — clear stale keys so widgets don't show old data
-            defaults.removeObject(forKey: Keys.nextPrayerName)
-            defaults.removeObject(forKey: Keys.nextPrayerId)
-            defaults.removeObject(forKey: Keys.nextPrayerTime)
+            defaults.removeObject(forKey: WidgetAppGroupKeys.nextPrayerName)
+            defaults.removeObject(forKey: WidgetAppGroupKeys.nextPrayerId)
+            defaults.removeObject(forKey: WidgetAppGroupKeys.nextPrayerTime)
         }
 
         // Persist Maghrib to standard UserDefaults for Islamic day boundary calculations.
@@ -93,13 +69,16 @@ final class WidgetDataService {
         let hijriString = HijriDateConverter.shared.hijriDateString(
             from: Date(), style: .dayMonth, maghribTime: maghribTime
         )
-        defaults.set(hijriString, forKey: Keys.hijriDate)
+        defaults.set(hijriString, forKey: WidgetAppGroupKeys.hijriDate)
 
-        defaults.set(Date(), forKey: Keys.lastUpdated)
+        defaults.set(Date(), forKey: WidgetAppGroupKeys.lastUpdated)
         defaults.synchronize()
 
         // Notify services that the Islamic day may have changed (e.g. after Maghrib)
         NotificationCenter.default.post(name: .islamicDayMayHaveChanged, object: nil)
+
+        // Clean up date-keyed keys older than 7 days
+        pruneStaleKeys()
 
         reloadWidgets()
     }
@@ -107,20 +86,31 @@ final class WidgetDataService {
     /// Writes the Hijri date string for widget display
     func writeHijriDate(_ hijriDate: String) {
         guard let defaults else { return }
-        defaults.set(hijriDate, forKey: Keys.hijriDate)
+        defaults.set(hijriDate, forKey: WidgetAppGroupKeys.hijriDate)
     }
 
     // MARK: - Write Logged Prayers
 
-    /// Writes logged prayer IDs for a specific date so widgets can show check marks
+    /// Writes logged prayer IDs for a specific date so widgets can show check marks.
+    /// Overwrites the widget key with the authoritative set from the app.
+    /// Widget-only logs are safe: `reconcileWidgetLoggedPrayers()` in PrayerViewModel merges them
+    /// into `loggedPrayers` before this write-back runs, so they are included in the set.
+    /// Overwrite (not merge) is required so that unlogs actually remove prayers from the widget key.
     func writeLoggedPrayers(_ loggedPrayers: Set<PrayerType>, for date: Date) {
         guard let defaults else { return }
-        let key = Keys.loggedPrayersKey(for: date)
-        let values = loggedPrayers.map { $0.rawValue }
-        defaults.set(values, forKey: key)
+        let key = WidgetAppGroupKeys.loggedPrayersKey(for: date)
+        defaults.set(loggedPrayers.map { $0.rawValue }, forKey: key)
         defaults.synchronize()
 
         reloadWidgets()
+    }
+
+    /// Removes the logged-prayers key for a date.
+    /// Used to clean up previous-day keys after successful reconciliation,
+    /// preventing redundant idempotent logPrayer calls on subsequent loads.
+    func clearLoggedPrayers(for date: Date) {
+        guard let defaults else { return }
+        defaults.removeObject(forKey: WidgetAppGroupKeys.loggedPrayersKey(for: date))
     }
 
     // MARK: - Write Streak Data
@@ -128,9 +118,9 @@ final class WidgetDataService {
     /// Writes streak data to App Group so the streak widget can display it
     func writeStreakData(currentCount: Int, longestCount: Int, isActiveToday: Bool) {
         guard let defaults else { return }
-        defaults.set(currentCount, forKey: Keys.streakCurrentCount)
-        defaults.set(longestCount, forKey: Keys.streakLongestCount)
-        defaults.set(isActiveToday, forKey: Keys.streakIsActiveToday)
+        defaults.set(currentCount, forKey: WidgetAppGroupKeys.streakCurrentCount)
+        defaults.set(longestCount, forKey: WidgetAppGroupKeys.streakLongestCount)
+        defaults.set(isActiveToday, forKey: WidgetAppGroupKeys.streakIsActiveToday)
         defaults.synchronize()
 
         reloadWidgets()
@@ -140,9 +130,9 @@ final class WidgetDataService {
     func readStreakData() -> (currentCount: Int, longestCount: Int, isActiveToday: Bool) {
         guard let defaults else { return (0, 0, false) }
         return (
-            defaults.integer(forKey: Keys.streakCurrentCount),
-            defaults.integer(forKey: Keys.streakLongestCount),
-            defaults.bool(forKey: Keys.streakIsActiveToday)
+            defaults.integer(forKey: WidgetAppGroupKeys.streakCurrentCount),
+            defaults.integer(forKey: WidgetAppGroupKeys.streakLongestCount),
+            defaults.bool(forKey: WidgetAppGroupKeys.streakIsActiveToday)
         )
     }
 
@@ -153,28 +143,57 @@ final class WidgetDataService {
         guard let defaults else { return [:] }
 
         var times: [String: Date] = [:]
-        if let fajr = defaults.object(forKey: Keys.fajrTime) as? Date { times["Fajr"] = fajr }
-        if let dhuhr = defaults.object(forKey: Keys.dhuhrTime) as? Date { times["Dhuhr"] = dhuhr }
-        if let asr = defaults.object(forKey: Keys.asrTime) as? Date { times["Asr"] = asr }
-        if let maghrib = defaults.object(forKey: Keys.maghribTime) as? Date { times["Maghrib"] = maghrib }
-        if let isha = defaults.object(forKey: Keys.ishaTime) as? Date { times["Isha"] = isha }
+        if let fajr = defaults.object(forKey: WidgetAppGroupKeys.fajrTime) as? Date { times["Fajr"] = fajr }
+        if let dhuhr = defaults.object(forKey: WidgetAppGroupKeys.dhuhrTime) as? Date { times["Dhuhr"] = dhuhr }
+        if let asr = defaults.object(forKey: WidgetAppGroupKeys.asrTime) as? Date { times["Asr"] = asr }
+        if let maghrib = defaults.object(forKey: WidgetAppGroupKeys.maghribTime) as? Date { times["Maghrib"] = maghrib }
+        if let isha = defaults.object(forKey: WidgetAppGroupKeys.ishaTime) as? Date { times["Isha"] = isha }
         return times
     }
 
     /// Reads logged prayers for a date (used by widgets)
     func readLoggedPrayers(for date: Date) -> [String] {
         guard let defaults else { return [] }
-        return defaults.stringArray(forKey: Keys.loggedPrayersKey(for: date)) ?? []
+        return defaults.stringArray(forKey: WidgetAppGroupKeys.loggedPrayersKey(for: date)) ?? []
+    }
+
+    /// Reads the widget tap timestamp for a specific prayer on a date.
+    /// Returns nil if the prayer wasn't logged from the widget or the timestamp was pruned.
+    func readWidgetLogTimestamp(for prayerId: String, date: Date) -> Date? {
+        defaults?.object(forKey: WidgetAppGroupKeys.widgetLogTimestampKey(for: prayerId, date: date)) as? Date
     }
 
     /// Reads the stable prayer ID (e.g. "fajr") for the next prayer
     func readNextPrayerId() -> String? {
-        defaults?.string(forKey: Keys.nextPrayerId)
+        defaults?.string(forKey: WidgetAppGroupKeys.nextPrayerId)
+    }
+
+    /// Reads post-prayer snippet data for widget display
+    func readSnippet() -> (arabic: String, translation: String, reference: String, prayerId: String, deepLink: String)? {
+        guard let defaults,
+              let arabic = defaults.string(forKey: WidgetAppGroupKeys.snippetArabic),
+              let translation = defaults.string(forKey: WidgetAppGroupKeys.snippetTranslation),
+              let reference = defaults.string(forKey: WidgetAppGroupKeys.snippetReference),
+              let prayerId = defaults.string(forKey: WidgetAppGroupKeys.snippetPrayerId) else {
+            return nil
+        }
+        let deepLink = defaults.string(forKey: WidgetAppGroupKeys.snippetDeepLink) ?? "safa://quran"
+        return (arabic, translation, reference, prayerId, deepLink)
     }
 
     /// Reads the last-updated timestamp
     func lastUpdated() -> Date? {
-        defaults?.object(forKey: Keys.lastUpdated) as? Date
+        defaults?.object(forKey: WidgetAppGroupKeys.lastUpdated) as? Date
+    }
+
+    // MARK: - Write Post-Prayer Content
+
+    /// Writes a post-prayer snippet to App Group for widget display.
+    /// Uses `WidgetSnippetCatalog.writeSnippet` — the same logic used by the widget extension.
+    func writePostPrayerContent(for prayerId: String) {
+        guard let defaults else { return }
+        WidgetSnippetCatalog.writeSnippet(for: prayerId, to: defaults)
+        reloadWidgets()
     }
 
     // MARK: - Write Localized Prayer Names
@@ -184,7 +203,35 @@ final class WidgetDataService {
         guard let defaults else { return }
         let names = prayers.filter { $0.type.isObligatory }
             .map { $0.type.localizedDisplayName }
-        defaults.set(names, forKey: "prayerNames")
+        defaults.set(names, forKey: WidgetAppGroupKeys.prayerNames)
+    }
+
+    // MARK: - Pruning
+
+    /// Removes date-keyed widget keys older than `daysToKeep` days.
+    /// Cleans up `loggedPrayers_YYYY-MM-DD` and `widgetLogTime_{prayerId}_YYYY-MM-DD` keys
+    /// that accumulate over time.
+    func pruneStaleKeys(daysToKeep: Int = 7) {
+        guard let defaults else { return }
+        let allKeys = defaults.dictionaryRepresentation().keys
+        let calendar = Calendar.current
+        let cutoff = calendar.date(byAdding: .day, value: -daysToKeep, to: calendar.startOfDay(for: Date()))!
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.calendar = Calendar(identifier: .gregorian)
+
+        for key in allKeys {
+            // Match loggedPrayers_YYYY-MM-DD and widgetLogTime_{id}_YYYY-MM-DD
+            guard key.hasPrefix("loggedPrayers_") || key.hasPrefix("widgetLogTime_") else { continue }
+            // Extract the date suffix (last 10 characters: YYYY-MM-DD)
+            let suffix = String(key.suffix(10))
+            guard let keyDate = dateFormatter.date(from: suffix) else { continue }
+            if keyDate < cutoff {
+                defaults.removeObject(forKey: key)
+            }
+        }
     }
 
     // MARK: - Widget Reload

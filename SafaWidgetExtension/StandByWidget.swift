@@ -1,6 +1,6 @@
 // MARK: - StandByWidget.swift
 // PURPOSE: StandBy mode widget optimized for bedside visibility (iOS 17+)
-// DEPENDENCIES: WidgetKit, SwiftUI
+// DEPENDENCIES: WidgetKit, SwiftUI, SafaShared
 
 import WidgetKit
 import SwiftUI
@@ -19,95 +19,95 @@ struct StandByPrayerEntry: TimelineEntry {
     /// Whether the prayer time has just arrived (grace window: 0-15 min after prayer time).
     let isGrace: Bool
     /// Stable prayer identifier (e.g. "fajr") for logic that must not depend on localized names.
-    /// Nil for stale installs that haven't written the ID yet.
     let prayerId: String?
+    /// Resolved contextual state for matching lock screen behavior.
+    let widgetState: WidgetPrayerState
+    /// Post-prayer snippet fields (nil when not in postPrayer state or no snippet available).
+    let snippetTranslation: String?
+    let snippetReference: String?
 }
 
 // MARK: - Widget Provider
 
 struct StandByPrayerProvider: AppIntentTimelineProvider {
+
+    private let store = WidgetDataStore()
+    private let defaultPrayers = DefaultPrayerTimes()
+    private let calculator = NextPrayerCalculator()
+
     func placeholder(in context: Context) -> StandByPrayerEntry {
-        StandByPrayerEntry(
-            date: Date(),
-            nextPrayer: String(localized: "Fajr"),
-            nextPrayerTime: Date().addingTimeInterval(3600),
-            fajrTime: Date().addingTimeInterval(3600),
-            hijriDate: HijriDateHelper().hijriDateString(),
-            configuration: StandByConfigIntent(),
-            isGrace: false,
-            prayerId: "fajr"
-        )
+        makeEntry(configuration: StandByConfigIntent())
     }
 
     func snapshot(for configuration: StandByConfigIntent, in context: Context) async -> StandByPrayerEntry {
-        StandByPrayerEntry(
-            date: Date(),
-            nextPrayer: String(localized: "Fajr"),
-            nextPrayerTime: Date().addingTimeInterval(18000),
-            fajrTime: Date().addingTimeInterval(18000),
-            hijriDate: HijriDateHelper().hijriDateString(),
-            configuration: configuration,
-            isGrace: false,
-            prayerId: "fajr"
-        )
+        makeEntry(configuration: configuration)
     }
 
     func timeline(for configuration: StandByConfigIntent, in context: Context) async -> Timeline<StandByPrayerEntry> {
         let now = Date()
-        let prayerData = loadPrayerData()
-        let isGrace = isPrayerTimeNow(prayerData.nextPrayerTime)
-        let entry = StandByPrayerEntry(
-            date: now,
-            nextPrayer: prayerData.nextPrayer,
-            nextPrayerTime: prayerData.nextPrayerTime,
-            fajrTime: prayerData.fajrTime,
-            hijriDate: hijriDate(for: now),
-            configuration: configuration,
-            isGrace: isGrace,
-            prayerId: prayerData.prayerId
+        let prayers = store.loadPrayers() ?? defaultPrayers.forToday()
+
+        // Use contextual boundaries that include post-prayer expiry
+        let boundaryDates = calculator.contextualTimelineBoundaries(from: prayers, startingAt: now)
+
+        let entries = boundaryDates.map { boundaryDate in
+            makeEntry(configuration: configuration, at: boundaryDate, prayers: prayers)
+        }
+
+        let refreshDate = calculator.timelineRefreshDate(from: prayers, startingAt: now)
+        return Timeline(entries: entries, policy: .after(refreshDate))
+    }
+
+    private func makeEntry(
+        configuration: StandByConfigIntent,
+        at date: Date = Date(),
+        prayers: [PrayerInfo]? = nil
+    ) -> StandByPrayerEntry {
+        let prayerList = prayers ?? store.loadPrayers() ?? defaultPrayers.forToday()
+        let next = calculator.nextPrayer(from: prayerList, at: date)
+
+        let state = WidgetPrayerStateResolver.resolve(
+            prayers: prayerList,
+            loggedPrayerIds: store.readLoggedPrayerIds(at: date),
+            streakCount: store.readStreakData().current,
+            at: date
         )
 
-        // Refresh at grace end, next prayer time, or every 30 minutes
-        let fallback = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
-        let nextUpdate: Date
-        if isGrace {
-            // Refresh when grace ends
-            let graceEnd = prayerData.nextPrayerTime.addingTimeInterval(PrayerTimeConstants.graceInterval)
-            nextUpdate = min(graceEnd, fallback)
-        } else if prayerData.nextPrayerTime > Date() {
-            // Refresh at next prayer time
-            nextUpdate = min(prayerData.nextPrayerTime, fallback)
+        // Read snippet for post-prayer, validating prayerId
+        let snippet = store.readSnippet()
+        let snippetTranslation: String?
+        let snippetReference: String?
+        if case .postPrayer(let id) = state, snippet?.prayerId == id {
+            snippetTranslation = snippet?.translation
+            snippetReference = snippet?.reference
         } else {
-            // Prayer time is in the past (stale data) — use 30 min fallback
-            nextUpdate = fallback
-        }
-        return Timeline(entries: [entry], policy: .after(nextUpdate))
-    }
-
-    private let hijriHelper = HijriDateHelper()
-
-    /// Compute Hijri date for a specific point in time, using Maghrib from App Group.
-    /// Always computes locally so timeline entries that activate after Maghrib show the
-    /// correct advanced Hijri date (not a stale snapshot from before Maghrib).
-    private func hijriDate(for date: Date) -> String {
-        let defaults = UserDefaults(suiteName: "group.com.safa.app")
-        let maghrib = defaults?.object(forKey: "maghribTime") as? Date
-        return hijriHelper.hijriDateString(from: date, maghribTime: maghrib)
-    }
-
-    private func loadPrayerData() -> (nextPrayer: String, nextPrayerTime: Date, fajrTime: Date?, prayerId: String?) {
-        // Load from App Group UserDefaults
-        guard let defaults = UserDefaults(suiteName: "group.com.safa.app") else {
-            let defaultTime = Date().addingTimeInterval(18000)
-            return (String(localized: "Fajr"), defaultTime, defaultTime, nil)
+            snippetTranslation = nil
+            snippetReference = nil
         }
 
-        let nextPrayer = defaults.string(forKey: "nextPrayerName") ?? String(localized: "Fajr")
-        let nextPrayerTime = defaults.object(forKey: "nextPrayerTime") as? Date ?? Date().addingTimeInterval(18000)
-        let fajrTime = defaults.object(forKey: "fajrTime") as? Date
-        let prayerId = defaults.string(forKey: "nextPrayerId")
+        let isGrace = prayerList.contains { isPrayerTimeNow($0.time, at: date) }
+        let prayerId: String?
+        switch state {
+        case .preAdhan(_, _, let id), .prayerWindow(_, _, let id),
+             .gracePrompt(_, let id), .postPrayer(let id):
+            prayerId = id
+        case .allComplete, .dayEnded:
+            prayerId = next?.id
+        }
 
-        return (nextPrayer, nextPrayerTime, fajrTime, prayerId)
+        return StandByPrayerEntry(
+            date: date,
+            nextPrayer: next?.name ?? String(localized: "Isha"),
+            nextPrayerTime: next?.time ?? date,
+            fajrTime: store.readFajrTime(),
+            hijriDate: store.readHijriDate(for: date),
+            configuration: configuration,
+            isGrace: isGrace,
+            prayerId: prayerId,
+            widgetState: state,
+            snippetTranslation: snippetTranslation,
+            snippetReference: snippetReference
+        )
     }
 }
 
@@ -122,6 +122,34 @@ struct StandByConfigIntent: WidgetConfigurationIntent {
 
     @Parameter(title: "High Contrast", default: true)
     var highContrast: Bool
+}
+
+// MARK: - Prayer-Specific Background Gradient
+
+/// Near-black gradients with barely perceptible prayer-specific tinting.
+/// These should be felt subconsciously rather than noticed visually.
+private func prayerGradient(for prayerId: String?) -> LinearGradient {
+    let colors: [Color]
+    switch prayerId ?? "" {
+    case "fajr":
+        // Cool pre-dawn blue
+        colors = [Color(red: 0.05, green: 0.11, blue: 0.16), Color(red: 0.11, green: 0.16, blue: 0.22)]
+    case "dhuhr":
+        // Warm midday
+        colors = [Color(red: 0.10, green: 0.10, blue: 0.06), Color(red: 0.16, green: 0.16, blue: 0.10)]
+    case "asr":
+        // Amber afternoon
+        colors = [Color(red: 0.10, green: 0.08, blue: 0.06), Color(red: 0.16, green: 0.15, blue: 0.09)]
+    case "maghrib":
+        // Sunset ember
+        colors = [Color(red: 0.10, green: 0.05, blue: 0.04), Color(red: 0.16, green: 0.08, blue: 0.06)]
+    case "isha":
+        // Night sky indigo
+        colors = [Color(red: 0.04, green: 0.04, blue: 0.10), Color(red: 0.08, green: 0.08, blue: 0.16)]
+    default:
+        colors = [.black, .black]
+    }
+    return LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom)
 }
 
 // MARK: - Widget Views
@@ -158,31 +186,124 @@ struct SmallStandByView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            // Prayer name - extra large
-            Text(entry.nextPrayer)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(textColor)
-                .minimumScaleFactor(0.7)
+            switch entry.widgetState {
+            case .preAdhan(let name, let time, _):
+                Text(name)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+                    .minimumScaleFactor(0.7)
 
-            // Time - very large for visibility
-            Text(entry.nextPrayerTime, style: .time)
-                .font(.system(size: 42, weight: .heavy, design: .rounded))
-                .foregroundColor(.accentColor)
-                .minimumScaleFactor(0.6)
+                Text(time, style: .time)
+                    .font(.system(size: 42, weight: .heavy, design: .rounded))
+                    .foregroundColor(.accentColor)
+                    .minimumScaleFactor(0.6)
+                    .contentTransition(.numericText())
 
-            // Countdown or grace message
-            if entry.isGrace {
-                Text("Prayer time")
+                Text(time, style: .relative)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(secondaryColor)
-            } else {
-                Text(entry.nextPrayerTime, style: .relative)
+                    .contentTransition(.numericText())
+
+            case .prayerWindow(let name, _, _):
+                Text(name)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+                    .minimumScaleFactor(0.7)
+
+                Image(systemName: standByPrayerIcon(filled: true))
+                    .font(.system(size: 42))
+                    .foregroundColor(.accentColor)
+
+                Text("Time to pray")
                     .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(secondaryColor)
+
+            case .gracePrompt(let name, _):
+                Text(name)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+                    .minimumScaleFactor(0.7)
+
+                Image(systemName: "checkmark.circle")
+                    .font(.system(size: 42))
+                    .foregroundColor(.accentColor.opacity(0.7))
+
+                Text("Pray when ready")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(secondaryColor)
+
+            case .postPrayer:
+                if let translation = entry.snippetTranslation,
+                   let reference = entry.snippetReference {
+                    Image(systemName: "book.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.accentColor.opacity(0.8))
+
+                    Text("\"\(translation)\"")
+                        .font(.system(size: 16, weight: .medium, design: .serif))
+                        .foregroundColor(textColor)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(3)
+
+                    Text("— \(reference)")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(secondaryColor)
+                } else {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundColor(.green.opacity(0.8))
+
+                    Text("Alhamdulillah")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundColor(textColor)
+                }
+
+            case .allComplete(let streak):
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.purple.opacity(0.8))
+
+                Text("All prayers complete")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(textColor)
+                    .multilineTextAlignment(.center)
+
+                if streak > 0 {
+                    Text("\(streak)-day streak")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(secondaryColor)
+                }
+
+            case .dayEnded:
+                Image(systemName: "moon.zzz.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.purple.opacity(0.6))
+
+                Text("Rest well")
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .foregroundColor(textColor)
+
+                Text(entry.hijriDate)
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(secondaryColor)
             }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func standByPrayerIcon(filled: Bool = false) -> String {
+        let base: String
+        switch entry.prayerId ?? "" {
+        case "fajr": base = "sunrise"
+        case "dhuhr": base = "sun.max"
+        case "asr": base = "sun.haze"
+        case "maghrib": base = "sunset"
+        case "isha": base = "moon.stars"
+        default: base = "clock"
+        }
+        return filled ? "\(base).fill" : base
     }
 }
 
@@ -201,50 +322,170 @@ struct MediumStandByView: View {
 
     private var isFajrNext: Bool {
         if let id = entry.prayerId { return id == "fajr" }
-        // Fallback for stale installs without prayerId: compare times
         guard let fajrTime = entry.fajrTime else { return false }
         return abs(entry.nextPrayerTime.timeIntervalSince(fajrTime)) < 60
     }
 
     var body: some View {
         HStack(spacing: 20) {
-            // Left side - Next Prayer
+            // Left side — contextual primary content
+            leftColumn
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Divider()
+                .background(secondaryColor)
+
+            // Right side — secondary content
+            rightColumn
+                .frame(maxWidth: .infinity)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var leftColumn: some View {
+        switch entry.widgetState {
+        case .preAdhan(let name, let time, _):
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Image(systemName: prayerIcon)
                         .font(.title2)
                         .foregroundColor(.accentColor)
-
-                    Text(entry.isGrace ? "Time to pray" : "Next Prayer")
+                    Text("Next Prayer")
                         .font(.caption)
                         .foregroundColor(secondaryColor)
                 }
 
-                Text(entry.nextPrayer)
+                Text(name)
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(textColor)
 
-                Text(entry.nextPrayerTime, style: .time)
+                Text(time, style: .time)
                     .font(.system(size: 48, weight: .heavy, design: .rounded))
                     .foregroundColor(.accentColor)
                     .minimumScaleFactor(0.7)
+                    .contentTransition(.numericText())
 
-                if entry.isGrace {
-                    Text("Prayer time")
-                        .font(.system(size: 18, weight: .medium))
+                Text(time, style: .relative)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(secondaryColor)
+                    .contentTransition(.numericText())
+            }
+
+        case .prayerWindow(let name, let time, _):
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Image(systemName: prayerIcon)
+                        .font(.title2)
+                        .foregroundColor(.accentColor)
+                    Text("Time to pray")
+                        .font(.caption)
+                        .foregroundColor(secondaryColor)
+                }
+
+                Text(name)
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+
+                Text(time, style: .time)
+                    .font(.system(size: 48, weight: .heavy, design: .rounded))
+                    .foregroundColor(.accentColor)
+                    .minimumScaleFactor(0.7)
+                    .contentTransition(.numericText())
+
+                Text("Prayer time")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(secondaryColor)
+            }
+
+        case .gracePrompt(let name, _):
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Image(systemName: "checkmark.circle")
+                        .font(.title2)
+                        .foregroundColor(.accentColor.opacity(0.7))
+                    Text("Pray when ready")
+                        .font(.caption)
+                        .foregroundColor(secondaryColor)
+                }
+
+                Text(name)
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+
+                Text("Pray when ready")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(secondaryColor)
+            }
+
+        case .postPrayer:
+            VStack(alignment: .leading, spacing: 8) {
+                if let translation = entry.snippetTranslation,
+                   let reference = entry.snippetReference {
+                    Image(systemName: "book.fill")
+                        .font(.title2)
+                        .foregroundColor(.accentColor.opacity(0.8))
+
+                    Text("\"\(translation)\"")
+                        .font(.system(size: 24, weight: .medium, design: .serif))
+                        .foregroundColor(textColor)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.6)
+
+                    Text("— \(reference)")
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(secondaryColor)
                 } else {
-                    Text(entry.nextPrayerTime, style: .relative)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundColor(.green.opacity(0.8))
+
+                    Text("Alhamdulillah")
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
+                        .foregroundColor(textColor)
+                }
+            }
+
+        case .allComplete(let streak):
+            VStack(alignment: .leading, spacing: 8) {
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.purple.opacity(0.8))
+
+                Text("All prayers complete")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+
+                if streak > 0 {
+                    Text("\(streak)-day streak")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(secondaryColor)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Divider()
-                .background(secondaryColor)
+        case .dayEnded:
+            VStack(alignment: .leading, spacing: 8) {
+                Image(systemName: "moon.zzz.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.purple.opacity(0.6))
 
-            // Right side - Fajr info (for bedside use)
+                Text("Rest well")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(textColor)
+
+                Text(entry.hijriDate)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(secondaryColor)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rightColumn: some View {
+        switch entry.widgetState {
+        case .preAdhan, .prayerWindow, .gracePrompt:
+            // Show Fajr countdown or hijri date (preserves original bedside behavior)
             if entry.configuration.showFajrCountdown, let fajrTime = entry.fajrTime, !isFajrNext {
                 VStack(spacing: 8) {
                     Image(systemName: "sunrise.fill")
@@ -258,51 +499,59 @@ struct MediumStandByView: View {
                     Text(fajrTime, style: .time)
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.orange)
+                        .contentTransition(.numericText())
 
-                    if isPrayerTimeNow(fajrTime) {
+                    if isPrayerTimeNow(fajrTime, at: entry.date) {
                         Text("Prayer time")
                             .font(.caption)
                             .foregroundColor(secondaryColor)
                             .multilineTextAlignment(.center)
-                    } else if fajrTime > Date() {
+                    } else if fajrTime > entry.date {
                         Text(fajrTime, style: .relative)
                             .font(.caption)
                             .foregroundColor(secondaryColor)
                             .multilineTextAlignment(.center)
                     }
                 }
-                .frame(maxWidth: .infinity)
             } else {
-                // Show Hijri date when Fajr is next
-                VStack(spacing: 8) {
-                    Image(systemName: "moon.stars.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.purple)
-
-                    Text(entry.hijriDate)
-                        .font(.headline)
-                        .foregroundColor(textColor)
-                        .multilineTextAlignment(.center)
-
-                    Text(Date(), style: .date)
-                        .font(.caption)
-                        .foregroundColor(secondaryColor)
-                }
-                .frame(maxWidth: .infinity)
+                hijriPanel
             }
+
+        case .postPrayer, .allComplete, .dayEnded:
+            hijriPanel
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var hijriPanel: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "moon.stars.fill")
+                .font(.system(size: 32))
+                .foregroundColor(.purple)
+
+            Text(entry.hijriDate)
+                .font(.headline)
+                .foregroundColor(textColor)
+                .multilineTextAlignment(.center)
+
+            Text(entry.date, style: .date)
+                .font(.caption)
+                .foregroundColor(secondaryColor)
+        }
     }
 
     private var prayerIcon: String {
+        let base: String
         switch entry.prayerId ?? "" {
-        case "fajr": return "sunrise.fill"
-        case "dhuhr": return "sun.max.fill"
-        case "asr": return "sun.haze.fill"
-        case "maghrib": return "sunset.fill"
-        case "isha": return "moon.stars.fill"
-        default: return "clock.fill"
+        case "fajr": base = "sunrise"
+        case "dhuhr": base = "sun.max"
+        case "asr": base = "sun.haze"
+        case "maghrib": base = "sunset"
+        case "isha": base = "moon.stars"
+        default: return "clock"
+        }
+        switch entry.widgetState {
+        case .prayerWindow: return "\(base).fill"
+        default: return base
         }
     }
 }
@@ -319,13 +568,17 @@ struct StandByPrayerWidget: Widget {
             provider: StandByPrayerProvider()
         ) { entry in
             StandByPrayerWidgetView(entry: entry)
-                .containerBackground(.black, for: .widget)
+                .containerBackground(for: .widget) {
+                    if entry.configuration.highContrast {
+                        Color.black
+                    } else {
+                        prayerGradient(for: entry.prayerId)
+                    }
+                }
         }
         .configurationDisplayName("Prayer StandBy")
         .description("Large, readable prayer times for bedside StandBy mode. Perfect for Fajr alarms.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        // Note: For proper StandBy support, add to Info.plist:
-        // NSSupportsStandByMode = YES
     }
 }
 
@@ -342,7 +595,10 @@ struct StandByPrayerWidget: Widget {
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
         isGrace: false,
-        prayerId: "fajr"
+        prayerId: "fajr",
+        widgetState: .preAdhan(prayerName: "Fajr", prayerTime: Date().addingTimeInterval(18000), prayerId: "fajr"),
+        snippetTranslation: nil,
+        snippetReference: nil
     )
 }
 
@@ -357,21 +613,45 @@ struct StandByPrayerWidget: Widget {
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
         isGrace: false,
-        prayerId: "isha"
+        prayerId: "isha",
+        widgetState: .preAdhan(prayerName: "Isha", prayerTime: Date().addingTimeInterval(3600), prayerId: "isha"),
+        snippetTranslation: nil,
+        snippetReference: nil
     )
 }
 
-#Preview("Fajr Next", as: .systemMedium) {
+#Preview("Post-Prayer", as: .systemSmall) {
     StandByPrayerWidget()
 } timeline: {
     StandByPrayerEntry(
         date: .now,
-        nextPrayer: String(localized: "Fajr"),
-        nextPrayerTime: Date().addingTimeInterval(14400),
-        fajrTime: Date().addingTimeInterval(14400),
+        nextPrayer: String(localized: "Dhuhr"),
+        nextPrayerTime: Date().addingTimeInterval(7200),
+        fajrTime: nil,
         hijriDate: HijriDateHelper().hijriDateString(),
         configuration: StandByConfigIntent(),
         isGrace: false,
-        prayerId: "fajr"
+        prayerId: "fajr",
+        widgetState: .postPrayer(prayerId: "fajr"),
+        snippetTranslation: "Indeed, with hardship comes ease.",
+        snippetReference: "Quran 94:6"
+    )
+}
+
+#Preview("All Complete", as: .systemMedium) {
+    StandByPrayerWidget()
+} timeline: {
+    StandByPrayerEntry(
+        date: .now,
+        nextPrayer: String(localized: "Isha"),
+        nextPrayerTime: Date(),
+        fajrTime: nil,
+        hijriDate: HijriDateHelper().hijriDateString(),
+        configuration: StandByConfigIntent(),
+        isGrace: false,
+        prayerId: nil,
+        widgetState: .allComplete(streakCount: 7),
+        snippetTranslation: nil,
+        snippetReference: nil
     )
 }
